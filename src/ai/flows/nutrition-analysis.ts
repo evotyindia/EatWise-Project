@@ -104,6 +104,8 @@ const prompt = ai.definePrompt({
 
   Be specific and provide actionable insights. If data is insufficient for a particular aspect, state that.
   Present information clearly, using bullet points (e.g. starting with * or -) where specified in the output schema descriptions.
+
+  IMPORTANT: Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
 `,
 });
 
@@ -115,6 +117,18 @@ const analyzeNutritionFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+        console.error('analyzeNutritionFlow: LLM output was null or did not match schema for input:', JSON.stringify(input));
+        return {
+            overallAnalysis: "An error occurred during nutrition analysis. The AI could not generate a valid report. Please check your input or try again.",
+            macronutrientBalance: "N/A due to error.",
+            micronutrientHighlights: "N/A due to error.",
+            dietarySuitability: "Unable to determine dietary suitability due to an analysis error.",
+            nutritionDensityRating: 1,
+            processingLevelAssessment: "N/A due to error.",
+            servingSizeContext: "N/A due to error."
+        };
+    }
+    return output;
   }
 );
