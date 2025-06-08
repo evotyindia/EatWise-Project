@@ -7,7 +7,7 @@ import type { ContextAwareAIChatInput, ContextAwareAIChatOutput, ChatMessage } f
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadCloud, Sparkles, MessageCircle, Send, Download, Zap, HeartPulse, Wheat } from "lucide-react";
+import { UploadCloud, Sparkles, MessageCircle, Send, Download, Zap, HeartPulse, Wheat, Info } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react"; // Added useEffect
 import { createRoot } from 'react-dom/client';
@@ -100,8 +100,6 @@ export function AnalyzerForm() {
 
   const onManualSubmit: SubmitHandler<ManualInputFormValues> = async (data) => {
     if (imageFile) {
-        // Clear image if manual submission is chosen to avoid confusion
-        // Or inform user image is ignored
         setImageFile(null);
         setUploadedImage(null);
         toast({ title: "Manual Submission", description: "Analyzing manually entered data. Uploaded image was cleared." });
@@ -118,7 +116,7 @@ export function AnalyzerForm() {
       toast({ title: "No Image", description: "Please upload an image first.", variant: "destructive" });
       return;
     }
-    manualForm.reset(); // Clear manual form fields/errors if image is submitted
+    manualForm.reset(); 
     const photoDataUri = await fileToDataUri(imageFile);
     await generateReportSharedLogic({ photoDataUri });
   };
@@ -184,7 +182,7 @@ export function AnalyzerForm() {
     setIsPdfDownloading(true);
 
     const tempDiv = document.createElement('div');
-    tempDiv.id = 'pdf-render-source-analyzer-form'; 
+    tempDiv.id = 'pdf-render-source-analyzer-form-' + Date.now(); 
     tempDiv.style.position = 'absolute'; tempDiv.style.left = '-9999px'; tempDiv.style.top = '0px';
     tempDiv.style.width = '210mm'; tempDiv.style.backgroundColor = 'white'; tempDiv.style.padding = '0'; tempDiv.style.margin = '0';
     document.body.appendChild(tempDiv);
@@ -235,33 +233,39 @@ export function AnalyzerForm() {
       console.error("Error generating PDF:", error);
       toast({ title: "PDF Error", description: "Could not generate PDF report. " + (error as Error).message, variant: "destructive" });
     } finally {
-      root.unmount(); document.body.removeChild(tempDiv); setIsPdfDownloading(false);
+      root.unmount(); 
+      if (document.body.contains(tempDiv)) {
+        document.body.removeChild(tempDiv);
+      }
+      setIsPdfDownloading(false);
     }
   };
 
   const renderFormattedText = (text?: string): JSX.Element | null => {
-    if (!text || text.trim() === "") return null;
-    const lines = text.split('\n').filter(s => s.trim() !== "");
-    const hasBullets = lines.some(line => line.trim().match(/^(\*|-)\s/));
+    if (!text || text.trim() === "" || text.trim().toLowerCase() === "n/a") return null;
+
+    const lines = text.split('\n').map(line => line.trim()).filter(line => line !== "");
+    if (lines.length === 0) return null;
+
+    const hasBullets = lines.some(line => line.startsWith('* ') || line.startsWith('- '));
 
     if (hasBullets) {
-        return (
-            <ul className="list-disc list-inside space-y-1 text-sm leading-relaxed">
-                {lines.map((line, index) => (
-                    <li key={index}>{line.replace(/^(\*|-)\s*/, '').trim()}</li>
-                ))}
-            </ul>
-        );
-    } else if (lines.length > 0) {
-        return (
-            <div className="text-sm leading-relaxed space-y-1">
-                {lines.map((paragraph, index) => (
-                    <p key={index}>{paragraph.trim()}</p>
-                ))}
-            </div>
-        );
+      return (
+        <ul className="list-disc list-inside space-y-1 text-sm leading-relaxed">
+          {lines.map((line, index) => (
+            <li key={index}>{line.replace(/^(\*|-)\s*/, '')}</li>
+          ))}
+        </ul>
+      );
+    } else {
+      return (
+        <div className="text-sm leading-relaxed space-y-1">
+          {lines.map((paragraph, index) => (
+            <p key={index}>{paragraph}</p>
+          ))}
+        </div>
+      );
     }
-    return null;
   };
 
 
@@ -329,17 +333,62 @@ export function AnalyzerForm() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Alert variant="default" className="bg-muted/60"><HeartPulse className="h-5 w-5 text-red-500" /><AlertTitle className="font-semibold">Overall Health Rating</AlertTitle><AlertDescription className="flex items-center gap-2"><StarRating rating={report.healthRating} /> ({report.healthRating}/5)</AlertDescription></Alert>
-               {report.processingLevelRating?.rating && (<Alert variant="default" className="bg-muted/60"><Zap className="h-5 w-5 text-purple-500" /><AlertTitle className="font-semibold">Processing Level</AlertTitle><AlertDescription className="flex items-center gap-2"><StarRating rating={report.processingLevelRating.rating} /> ({report.processingLevelRating.rating}/5)</AlertDescription>{report.processingLevelRating.justification && <p className="text-xs text-muted-foreground mt-1">{report.processingLevelRating.justification}</p>}</Alert>)}
-               {report.sugarContentRating?.rating && (<Alert variant="default" className="bg-muted/60"><Wheat className="h-5 w-5 text-amber-600" /> <AlertTitle className="font-semibold">Sugar Content</AlertTitle><AlertDescription className="flex items-center gap-2"><StarRating rating={report.sugarContentRating.rating} /> ({report.sugarContentRating.rating}/5)</AlertDescription>{report.sugarContentRating.justification && <p className="text-xs text-muted-foreground mt-1">{report.sugarContentRating.justification}</p>}</Alert>)}
-               {report.nutrientDensityRating?.rating && (<Alert variant="default" className="bg-muted/60"><Sparkles className="h-5 w-5 text-green-500" /><AlertTitle className="font-semibold">Nutrient Density</AlertTitle><AlertDescription className="flex items-center gap-2"><StarRating rating={report.nutrientDensityRating.rating} /> ({report.nutrientDensityRating.rating}/5)</AlertDescription>{report.nutrientDensityRating.justification && <p className="text-xs text-muted-foreground mt-1">{report.nutrientDensityRating.justification}</p>}</Alert>)}
+              <Alert variant="default" className="bg-muted/60">
+                <HeartPulse className="h-5 w-5 text-red-500" />
+                <AlertTitle className="font-semibold">Overall Health Rating</AlertTitle>
+                <AlertDescription className="flex items-center gap-1 flex-wrap">
+                    <StarRating rating={report.healthRating} /> 
+                    <span>({report.healthRating}/5)</span>
+                    <span className="text-xs text-muted-foreground ml-1">(Higher stars = better health)</span>
+                </AlertDescription>
+              </Alert>
+               {report.processingLevelRating?.rating !== undefined && (
+                <Alert variant="default" className="bg-muted/60">
+                    <Zap className="h-5 w-5 text-purple-500" />
+                    <AlertTitle className="font-semibold">Processing Level</AlertTitle>
+                    <AlertDescription className="flex items-center gap-1 flex-wrap">
+                        <StarRating rating={report.processingLevelRating.rating} /> 
+                        <span>({report.processingLevelRating.rating}/5)</span> 
+                        <span className="text-xs text-muted-foreground ml-1">(5 stars = highly processed)</span>
+                    </AlertDescription>
+                    {report.processingLevelRating.justification && <p className="text-xs text-muted-foreground mt-1 pl-7">{report.processingLevelRating.justification}</p>}
+                </Alert>
+               )}
+               {report.sugarContentRating?.rating !== undefined && (
+                <Alert variant="default" className="bg-muted/60">
+                    <Wheat className="h-5 w-5 text-amber-600" /> 
+                    <AlertTitle className="font-semibold">Sugar Content</AlertTitle>
+                    <AlertDescription className="flex items-center gap-1 flex-wrap">
+                        <StarRating rating={report.sugarContentRating.rating} /> 
+                        <span>({report.sugarContentRating.rating}/5)</span>
+                        <span className="text-xs text-muted-foreground ml-1">(5 stars = high sugar)</span>
+                    </AlertDescription>
+                    {report.sugarContentRating.justification && <p className="text-xs text-muted-foreground mt-1 pl-7">{report.sugarContentRating.justification}</p>}
+                </Alert>
+               )}
+               {report.nutrientDensityRating?.rating !== undefined && (
+                <Alert variant="default" className="bg-muted/60">
+                    <Sparkles className="h-5 w-5 text-green-500" />
+                    <AlertTitle className="font-semibold">Nutrient Density</AlertTitle>
+                    <AlertDescription className="flex items-center gap-1 flex-wrap">
+                        <StarRating rating={report.nutrientDensityRating.rating} /> 
+                        <span>({report.nutrientDensityRating.rating}/5)</span>
+                        <span className="text-xs text-muted-foreground ml-1">(Higher stars = more nutrient dense)</span>
+                    </AlertDescription>
+                    {report.nutrientDensityRating.justification && <p className="text-xs text-muted-foreground mt-1 pl-7">{report.nutrientDensityRating.justification}</p>}
+                </Alert>
+               )}
             </div>
             <Separator />
-            <div><h3 className="font-semibold text-lg mb-1">Summary:</h3><Alert variant="default" className="bg-background"><Sparkles className="h-4 w-4 text-primary" /><AlertDescription>{renderFormattedText(report.detailedAnalysis.summary)}</AlertDescription></Alert></div>
-            {report.detailedAnalysis.positiveAspects && (<div><h3 className="font-semibold text-lg mb-1">Positive Aspects:</h3><Alert variant="default" className="bg-background"><Sparkles className="h-4 w-4 text-primary" /><AlertDescription>{renderFormattedText(report.detailedAnalysis.positiveAspects)}</AlertDescription></Alert></div>)}
-            {report.detailedAnalysis.potentialConcerns && (<div><h3 className="font-semibold text-lg mb-1">Potential Concerns:</h3><Alert variant="destructive" className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"><Sparkles className="h-4 w-4 text-red-500 dark:text-red-400" /><AlertDescription className="text-red-700 dark:text-red-300">{renderFormattedText(report.detailedAnalysis.potentialConcerns)}</AlertDescription></Alert></div>)}
-            {report.detailedAnalysis.keyNutrientsBreakdown && (<div><h3 className="font-semibold text-lg mb-1">Key Nutrients Breakdown:</h3><Alert variant="default" className="bg-background"><Sparkles className="h-4 w-4 text-primary" /><AlertDescription>{renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown)}</AlertDescription></Alert></div>)}
-            {report.alternatives && (<div><h3 className="font-semibold text-lg mb-1">Healthier Indian Alternatives:</h3><Alert variant="default" className="bg-background"><Sparkles className="h-4 w-4 text-primary" /><AlertDescription>{renderFormattedText(report.alternatives)}</AlertDescription></Alert></div>)}
+            <div><h3 className="font-semibold text-lg mb-1">Summary:</h3><Alert variant="default" className="bg-background"><Info className="h-4 w-4 text-primary" /><AlertTitle>Report Summary</AlertTitle><AlertDescription>{renderFormattedText(report.detailedAnalysis.summary)}</AlertDescription></Alert></div>
+            
+            {renderFormattedText(report.detailedAnalysis.positiveAspects) && (<div><h3 className="font-semibold text-lg mb-1">Positive Aspects:</h3><Alert variant="default" className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"><Info className="h-4 w-4 text-green-600 dark:text-green-400" /><AlertTitle>Positives</AlertTitle><AlertDescription className="text-green-700 dark:text-green-300">{renderFormattedText(report.detailedAnalysis.positiveAspects)}</AlertDescription></Alert></div>)}
+            
+            {renderFormattedText(report.detailedAnalysis.potentialConcerns) && (<div><h3 className="font-semibold text-lg mb-1">Potential Concerns:</h3><Alert variant="destructive" className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"><Info className="h-4 w-4 text-red-500 dark:text-red-400" /><AlertTitle>Concerns</AlertTitle><AlertDescription className="text-red-700 dark:text-red-300">{renderFormattedText(report.detailedAnalysis.potentialConcerns)}</AlertDescription></Alert></div>)}
+            
+            {renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown) && (<div><h3 className="font-semibold text-lg mb-1">Key Nutrients Breakdown:</h3><Alert variant="default" className="bg-background"><Info className="h-4 w-4 text-primary" /><AlertTitle>Nutrients</AlertTitle><AlertDescription>{renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown)}</AlertDescription></Alert></div>)}
+
+            {renderFormattedText(report.alternatives) && (<div><h3 className="font-semibold text-lg mb-1">Healthier Indian Alternatives:</h3><Alert variant="default" className="bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-700"><Info className="h-4 w-4 text-sky-600 dark:text-sky-400" /><AlertTitle>Alternatives</AlertTitle><AlertDescription className="text-sky-700 dark:text-sky-300">{renderFormattedText(report.alternatives)}</AlertDescription></Alert></div>)}
           </CardContent>
           <CardFooter className="flex flex-col items-start pt-4 border-t">
             <Separator className="my-4"/>
