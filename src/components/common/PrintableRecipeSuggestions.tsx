@@ -9,20 +9,32 @@ interface PrintableRecipeSuggestionsProps {
 
 export const PrintableRecipeSuggestions: React.FC<PrintableRecipeSuggestionsProps> = ({ suggestions, ingredientsProvided }) => {
   const styles: { [key: string]: React.CSSProperties } = {
-    page: { padding: '20mm', fontFamily: 'Arial, sans-serif', fontSize: '10pt', lineHeight: '1.4', color: '#333333', width: '210mm', boxSizing: 'border-box', minHeight: '297mm', display: 'flex', flexDirection: 'column' },
+    page: { padding: '15mm', fontFamily: 'Arial, sans-serif', fontSize: '10pt', lineHeight: '1.5', color: '#333333', width: '210mm', boxSizing: 'border-box', minHeight: '297mm', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' },
     pageContent: { flexGrow: 1 },
-    companyHeader: { textAlign: 'right', fontSize: '9pt', color: '#777777', marginBottom: '15mm' },
-    reportTitle: { textAlign: 'center', fontSize: '18pt', fontWeight: 'bold', color: '#005a87', marginBottom: '15mm', textTransform: 'uppercase' },
-    section: { marginBottom: '10mm' },
-    sectionTitle: { fontSize: '12pt', fontWeight: 'bold', color: '#005a87', marginTop: '0', marginBottom: '5mm', borderBottom: '1px solid #cccccc', paddingBottom: '2mm' },
-    subSectionTitle: { fontSize: '11pt', fontWeight: 'bold', color: '#333333', marginTop: '5mm', marginBottom: '3mm' },
-    paragraph: { marginBottom: '4mm', textAlign: 'justify' as 'justify', whiteSpace: 'pre-wrap' as 'pre-wrap' },
-    list: { listStyleType: 'disc', paddingLeft: '5mm', margin: '0 0 5mm 0' },
-    listItem: { marginBottom: '2mm' },
-    recipeIdea: { border: '1px solid #dddddd', padding: '4mm', borderRadius: '4px', marginBottom: '4mm', backgroundColor: '#f9f9f9' },
-    recipeTitle: { fontSize: '10pt', fontWeight: 'bold', color: '#333333', marginBottom: '2mm'},
-    footer: { marginTop: 'auto', paddingTop: '5mm', borderTop: '1px solid #cccccc', fontSize: '8pt', textAlign: 'center', color: '#777777', width: '100%' }
+    companyHeader: { textAlign: 'right', fontSize: '10pt', color: '#555555', marginBottom: '10mm', borderBottom: '1px solid #eeeeee', paddingBottom: '5mm' },
+    reportTitle: { textAlign: 'center', fontSize: '20pt', fontWeight: 'bold', color: '#004466', marginBottom: '12mm' },
+    section: { marginBottom: '8mm', padding: '5mm', border: '1px solid #e0e0e0', borderRadius: '5px', backgroundColor: '#fdfdfd' },
+    sectionTitle: { fontSize: '13pt', fontWeight: 'bold', color: '#004466', marginTop: '0', marginBottom: '6mm', borderBottom: '2px solid #005a87', paddingBottom: '3mm' },
+    paragraph: { marginBottom: '4mm', textAlign: 'left' as 'left', whiteSpace: 'pre-wrap' as 'pre-wrap', paddingLeft: '2mm', paddingRight: '2mm' },
+    list: { listStyleType: 'disc', paddingLeft: '8mm', margin: '0 0 5mm 0' },
+    listItem: { marginBottom: '3mm', paddingLeft: '2mm' },
+    recipeIdeaContainer: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '5mm'},
+    recipeIdea: { border: '1px solid #dddddd', padding: '4mm', borderRadius: '4px', backgroundColor: '#f9f9f9', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' },
+    recipeTitle: { fontSize: '10pt', fontWeight: 'bold', color: '#333333', marginBottom: '2mm', textAlign: 'center' as 'center'},
+    footer: { marginTop: 'auto', paddingTop: '8mm', borderTop: '1px solid #cccccc', fontSize: '9pt', textAlign: 'center', color: '#777777', width: 'calc(100% - 30mm)', marginLeft: '15mm', marginRight: '15mm', boxSizing: 'border-box' }
   };
+  
+  const renderMealPlan = (text?: string) => {
+    if (!text) return null;
+    // Basic formatting for meal plan: preserve newlines and attempt to make bullet points look like list items
+    return text.split('\n').map((line, index) => {
+      if (line.trim().match(/^(\*|-)\s/)) {
+        return <li key={index} style={{...styles.listItem, listStyleType: 'none', paddingLeft: '0', marginLeft: '5mm', textIndent: '-5mm' }}>{line.trim()}</li>;
+      }
+      return <p key={index} style={{...styles.paragraph, marginBottom: '2mm'}}>{line.trim()}</p>;
+    });
+  };
+
 
   return (
     <div style={styles.page}>
@@ -38,18 +50,20 @@ export const PrintableRecipeSuggestions: React.FC<PrintableRecipeSuggestionsProp
         {suggestions.suggestions && suggestions.suggestions.length > 0 && (
           <div style={styles.section}>
             <div style={styles.sectionTitle}>Meal Ideas</div>
-            {suggestions.suggestions.map((idea, index) => (
-              <div key={index} style={styles.recipeIdea}>
-                <div style={styles.recipeTitle}>{index + 1}. {idea}</div>
-              </div>
-            ))}
+            <div style={styles.recipeIdeaContainer}>
+              {suggestions.suggestions.map((idea, index) => (
+                <div key={index} style={styles.recipeIdea}>
+                  <div style={styles.recipeTitle}>{index + 1}. {idea}</div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
         {suggestions.mealPlan && (
           <div style={styles.section}>
-            <div style={styles.sectionTitle}>Quick Meal Plan</div>
-            <p style={styles.paragraph}>{suggestions.mealPlan}</p>
+            <div style={styles.sectionTitle}>Quick Meal Plan Suggestion</div>
+            <div style={{paddingLeft: '2mm', paddingRight: '2mm'}}>{renderMealPlan(suggestions.mealPlan)}</div>
           </div>
         )}
 
@@ -58,7 +72,7 @@ export const PrintableRecipeSuggestions: React.FC<PrintableRecipeSuggestionsProp
         )}
       </div>
       <div style={styles.footer}>
-        Generated on {new Date().toLocaleDateString()} by Swasth Bharat Advisor. <br/>
+        Generated on {new Date().toLocaleDateString('en-GB')} by Swasth Bharat Advisor. <br/>
         Disclaimer: These are AI-generated suggestions. Adjust recipes to your taste and dietary needs.
       </div>
     </div>

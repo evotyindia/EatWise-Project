@@ -11,41 +11,46 @@ interface PrintableHealthReportProps {
 
 export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ report, chatHistory, productNameContext }) => {
   const styles: { [key: string]: React.CSSProperties } = {
-    page: { padding: '20mm', fontFamily: 'Arial, sans-serif', fontSize: '10pt', lineHeight: '1.4', color: '#333333', width: '210mm', boxSizing: 'border-box', minHeight: '297mm', display: 'flex', flexDirection: 'column' },
+    page: { padding: '15mm', fontFamily: 'Arial, sans-serif', fontSize: '10pt', lineHeight: '1.5', color: '#333333', width: '210mm', boxSizing: 'border-box', minHeight: '297mm', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' },
     pageContent: { flexGrow: 1 },
-    companyHeader: { textAlign: 'right', fontSize: '9pt', color: '#777777', marginBottom: '15mm' },
-    reportTitle: { textAlign: 'center', fontSize: '18pt', fontWeight: 'bold', color: '#005a87', marginBottom: '10mm', textTransform: 'uppercase' },
-    productName: { textAlign: 'center', fontSize: '14pt', fontWeight: 'bold', marginBottom: '15mm', color: '#333333' },
-    section: { marginBottom: '10mm' },
-    sectionTitle: { fontSize: '12pt', fontWeight: 'bold', color: '#005a87', marginTop: '0', marginBottom: '5mm', borderBottom: '1px solid #cccccc', paddingBottom: '2mm' },
-    subSectionTitle: { fontSize: '11pt', fontWeight: 'bold', color: '#333333', marginTop: '5mm', marginBottom: '3mm' },
-    ratingBlockContainer: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5mm', marginBottom: '10mm' },
-    ratingBlock: { border: '1px solid #dddddd', padding: '4mm', borderRadius: '4px', backgroundColor: '#f9f9f9' },
-    ratingTitle: { fontWeight: 'bold', marginBottom: '2mm', fontSize: '10pt', color: '#333333' },
-    ratingValue: { fontSize: '10pt', color: '#333333' },
-    list: { listStyleType: 'disc', paddingLeft: '5mm', margin: '0 0 5mm 0' },
-    listItem: { marginBottom: '2mm' },
-    chatMessage: { marginBottom: '3mm', padding: '3mm', borderRadius: '4px', border: '1px solid #eeeeee' },
-    chatUser: { fontWeight: 'bold', color: '#005a87' },
-    chatAssistant: { fontStyle: 'italic', color: '#555555', marginTop: '1mm' },
-    footer: { marginTop: 'auto', paddingTop: '5mm', borderTop: '1px solid #cccccc', fontSize: '8pt', textAlign: 'center', color: '#777777', width: '100%' }
+    companyHeader: { textAlign: 'right', fontSize: '10pt', color: '#555555', marginBottom: '10mm', borderBottom: '1px solid #eeeeee', paddingBottom: '5mm' },
+    reportTitle: { textAlign: 'center', fontSize: '20pt', fontWeight: 'bold', color: '#004466', marginBottom: '8mm' },
+    productName: { textAlign: 'center', fontSize: '14pt', fontWeight: 'bold', marginBottom: '12mm', color: '#222222' },
+    section: { marginBottom: '8mm', padding: '5mm', border: '1px solid #e0e0e0', borderRadius: '5px', backgroundColor: '#fdfdfd' },
+    sectionTitle: { fontSize: '13pt', fontWeight: 'bold', color: '#004466', marginTop: '0', marginBottom: '6mm', borderBottom: '2px solid #005a87', paddingBottom: '3mm' },
+    subSectionTitle: { fontSize: '11pt', fontWeight: 'bold', color: '#333333', marginTop: '6mm', marginBottom: '4mm' },
+    ratingBlockContainer: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6mm', marginBottom: '8mm' },
+    ratingBlock: { border: '1px solid #cccccc', padding: '5mm', borderRadius: '4px', backgroundColor: '#f9f9f9', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' },
+    ratingTitle: { fontWeight: 'bold', marginBottom: '3mm', fontSize: '10pt', color: '#333333' },
+    ratingValue: { fontSize: '10pt', color: '#111111' },
+    list: { listStyleType: 'disc', paddingLeft: '6mm', margin: '0 0 4mm 0' },
+    listItem: { marginBottom: '2.5mm', paddingLeft: '2mm' },
+    concernsListItem: { marginBottom: '2.5mm', paddingLeft: '2mm', color: '#c0392b' },
+    chatContainer: { marginTop: '8mm', borderTop: '1px solid #dddddd', paddingTop: '5mm' },
+    chatMessage: { marginBottom: '4mm', padding: '4mm', borderRadius: '4px', border: '1px solid #f0f0f0', backgroundColor: '#f9f9f9' },
+    chatUser: { fontWeight: 'bold', color: '#005a87', display: 'block', marginBottom: '1mm' },
+    chatAssistant: { color: '#444444', display: 'block' },
+    footer: { marginTop: 'auto', paddingTop: '8mm', borderTop: '1px solid #cccccc', fontSize: '9pt', textAlign: 'center', color: '#777777', width: 'calc(100% - 30mm)', marginLeft: '15mm', marginRight: '15mm', boxSizing: 'border-box' }
   };
 
-  const renderListItems = (text?: string): JSX.Element[] | JSX.Element => {
-    if (!text) return <li style={styles.listItem}>N/A</li>;
+  const renderListItems = (text?: string, isConcern?: boolean): JSX.Element[] | JSX.Element => {
+    if (!text || text.trim().toLowerCase() === 'n/a' || text.trim() === '') {
+      return <li style={styles.listItem}>Not specified / Applicable.</li>;
+    }
     return text.split(/\s*[-\*]\s*/g).filter(s => s.trim()).map((item, index) => (
-      <li key={index} style={styles.listItem}>{item.trim()}</li>
+      <li key={index} style={isConcern ? styles.concernsListItem : styles.listItem}>{item.trim()}</li>
     ));
   };
   
-  const getRatingText = (rating?: number, justification?: string) => {
-    if (rating === undefined) return 'N/A';
-    let text = `${rating} / 5 stars`;
-    if (justification && justification.trim() !== '-' && justification.trim().toLowerCase() !== 'n/a') {
-      text += ` - ${justification.trim()}`;
+  const getRatingDisplay = (ratingInfo?: { rating: number; justification?: string | null }, title?: string) => {
+    if (!ratingInfo || ratingInfo.rating === undefined) return <div style={styles.ratingValue}>N/A</div>;
+    let text = `${ratingInfo.rating} / 5 stars`;
+    if (ratingInfo.justification && ratingInfo.justification.trim() && ratingInfo.justification.trim().toLowerCase() !== 'n/a') {
+        text += ` - ${ratingInfo.justification.trim()}`;
     }
-    return text;
+    return <div style={styles.ratingValue}>{text}</div>;
   };
+
 
   return (
     <div style={styles.page}>
@@ -53,7 +58,7 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
         <div style={styles.companyHeader}>Swasth Bharat Advisor</div>
         <div style={styles.reportTitle}>AI Health Report</div>
         { (report.productType || productNameContext) && 
-          <div style={styles.productName}>Product: {report.productType || productNameContext}</div>
+          <div style={styles.productName}>Product: {report.productType || productNameContext || "Not Specified"}</div>
         }
 
         <div style={styles.section}>
@@ -63,22 +68,22 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
               <div style={styles.ratingTitle}>Health Rating:</div>
               <div style={styles.ratingValue}>{report.healthRating} / 5 stars</div>
             </div>
-            {report.processingLevelRating !== undefined && (
+            {report.processingLevelRating && (
               <div style={styles.ratingBlock}>
                 <div style={styles.ratingTitle}>Processing Level:</div>
-                <div style={styles.ratingValue}>{getRatingText(report.processingLevelRating, report.detailedAnalysis.summary?.split('Processing Level Rating:')[1]?.split('Sugar Content Rating:')[0]?.trim().replace(/^-/, '').trim())}</div>
+                {getRatingDisplay(report.processingLevelRating)}
               </div>
             )}
-            {report.sugarContentRating !== undefined && (
+            {report.sugarContentRating && (
               <div style={styles.ratingBlock}>
                 <div style={styles.ratingTitle}>Sugar Content:</div>
-                <div style={styles.ratingValue}>{getRatingText(report.sugarContentRating, report.detailedAnalysis.summary?.split('Sugar Content Rating:')[1]?.split('Nutrient Density Rating:')[0]?.trim().replace(/^-/, '').trim())}</div>
+                {getRatingDisplay(report.sugarContentRating)}
               </div>
             )}
-            {report.nutrientDensityRating !== undefined && (
+            {report.nutrientDensityRating && (
                <div style={styles.ratingBlock}>
                 <div style={styles.ratingTitle}>Nutrient Density:</div>
-                <div style={styles.ratingValue}>{getRatingText(report.nutrientDensityRating, report.detailedAnalysis.summary?.split('Nutrient Density Rating:')[1]?.trim().replace(/^-/, '').trim())}</div>
+                {getRatingDisplay(report.nutrientDensityRating)}
               </div>
             )}
           </div>
@@ -98,7 +103,7 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
           {report.detailedAnalysis.potentialConcerns && (
             <>
               <div style={{...styles.subSectionTitle, color: '#c0392b'}}>Potential Concerns:</div>
-              <ul style={{...styles.list, color: '#c0392b'}}>{renderListItems(report.detailedAnalysis.potentialConcerns)}</ul>
+              <ul style={styles.list}>{renderListItems(report.detailedAnalysis.potentialConcerns, true)}</ul>
             </>
           )}
           {report.detailedAnalysis.keyNutrientsBreakdown && (
@@ -117,19 +122,19 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
         )}
 
         {chatHistory && chatHistory.length > 0 && (
-          <div style={styles.section}>
+          <div style={{...styles.section, ...styles.chatContainer}}>
             <div style={styles.sectionTitle}>Chat History</div>
             {chatHistory.map((msg, index) => (
               <div key={index} style={styles.chatMessage}>
-                <div style={styles.chatUser}>{msg.role === 'user' ? 'You:' : 'AI Advisor:'}</div>
-                <div style={msg.role === 'user' ? {color: '#555555', marginTop: '1mm'} : styles.chatAssistant }>{msg.content}</div>
+                <span style={styles.chatUser}>{msg.role === 'user' ? 'Your Question:' : 'AI Advisor Response:'}</span>
+                <span style={msg.role === 'user' ? {color: '#555555'} : styles.chatAssistant }>{msg.content}</span>
               </div>
             ))}
           </div>
         )}
       </div>
       <div style={styles.footer}>
-        Generated on {new Date().toLocaleDateString()} by Swasth Bharat Advisor. This report is AI-generated and for informational purposes only.
+        Generated on {new Date().toLocaleDateString('en-GB')} by Swasth Bharat Advisor. This report is AI-generated and for informational purposes only.
       </div>
     </div>
   );

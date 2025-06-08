@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -27,6 +28,11 @@ const GenerateHealthReportInputSchema = z.object({
 });
 export type GenerateHealthReportInput = z.infer<typeof GenerateHealthReportInputSchema>;
 
+const RatingObjectSchema = z.object({
+  rating: z.number().min(1).max(5).describe('The numerical rating from 1 to 5 stars.'),
+  justification: z.string().optional().describe('A short justification for the rating.'),
+});
+
 const GenerateHealthReportOutputSchema = z.object({
   healthRating: z
     .number()
@@ -41,9 +47,9 @@ const GenerateHealthReportOutputSchema = z.object({
   }).describe("A more detailed breakdown of the health report."),
   alternatives: z.string().describe('A list of 2-3 healthier Indian alternatives, with brief reasons why they are better. Use bullet points.'),
   productType: z.string().optional().describe('The product type (e.g., Snack, Beverage, Ready-to-eat meal).'),
-  processingLevelRating: z.number().min(1).max(5).optional().describe('Rating from 1-5 for food processing level (1=unprocessed, 5=ultra-processed), with a short justification.'),
-  sugarContentRating: z.number().min(1).max(5).optional().describe('Rating from 1-5 for sugar content (1=low, 5=high), with a short justification.'),
-  nutrientDensityRating: z.number().min(1).max(5).optional().describe('Rating from 1-5 for nutrient density (1=low, 5=high), with a short justification.')
+  processingLevelRating: RatingObjectSchema.optional().describe('Rating (1-5) and justification for food processing level (1=unprocessed, 5=ultra-processed).'),
+  sugarContentRating: RatingObjectSchema.optional().describe('Rating (1-5) and justification for sugar content (1=low, 5=high).'),
+  nutrientDensityRating: RatingObjectSchema.optional().describe('Rating (1-5) and justification for nutrient density (1=low, 5=high).')
 });
 export type GenerateHealthReportOutput = z.infer<typeof GenerateHealthReportOutputSchema>;
 
@@ -81,22 +87,22 @@ const prompt = ai.definePrompt({
   Photo: {{media url=photoDataUri}}
   {{/if}}
 
-  Generate a detailed health report:
+  Generate a detailed health report. Ensure all output fields are addressed:
   1.  **Product Type**: Identify the type of product (e.g., Snack, Beverage, Breakfast Cereal).
-  2.  **Overall Health Rating**: Assign an overall health rating from 1 (least healthy) to 5 (most healthy) stars.
-  3.  **Detailed Analysis** (use bullet points for each sub-section):
+  2.  **Overall Health Rating**: Assign an overall health rating (number) from 1 (least healthy) to 5 (most healthy) stars.
+  3.  **Detailed Analysis** (use bullet points for each sub-section of detailedAnalysis):
       *   **Summary**: Provide a concise overall summary of the product's healthiness.
       *   **Positive Aspects**: List any key positive aspects (e.g., "Good source of whole grains", "Low in saturated fat"). If none, state that.
       *   **Potential Concerns**: List potential health concerns or ingredients to watch out for (e.g., "High sodium content", "Contains palm oil", "Added sugars are high"). If none, state that.
       *   **Key Nutrients Breakdown**: Briefly comment on key nutrients if identifiable and noteworthy (e.g., "Provides Xg of protein per serving", "Mainly refined carbohydrates").
   4.  **Healthier Indian Alternatives** (use bullet points): Suggest 2-3 healthier Indian alternatives, explaining briefly why they are better choices.
-  5.  **Additional Ratings** (1-5 stars for each, with a short justification):
-      *   **Processing Level Rating**: (1=unprocessed to 5=ultra-processed).
-      *   **Sugar Content Rating**: (1=low to 5=high).
-      *   **Nutrient Density Rating**: (1=low to 5=high).
+  5.  **Additional Ratings**: For each of the following, provide an object with a 'rating' (number 1-5) and a 'justification' (string):
+      *   **Processing Level Rating**: (1=unprocessed to 5=ultra-processed). Justification should be short.
+      *   **Sugar Content Rating**: (1=low to 5=high). Justification should be short.
+      *   **Nutrient Density Rating**: (1=low to 5=high). Justification should be short.
 
-  If you are unsure about the product due to lack of clear information (e.g., blurry photo, missing ingredients), respond gently, for example: 'Sorry, I’m not sure about this product. Please upload a clearer label or check another item.' Ensure all fields in the output schema are addressed. Provide justifications for all ratings.
-  Present lists (summary, positive aspects, potential concerns, key nutrients breakdown, alternatives) as bullet points.
+  If you are unsure about the product due to lack of clear information (e.g., blurry photo, missing ingredients), respond gently, for example: 'Sorry, I’m not sure about this product. Please upload a clearer label or check another item.'
+  Present lists (summary, positive aspects, potential concerns, key nutrients breakdown, alternatives) as bullet points using '*' or '-' as prefixes.
 `,
 });
 
@@ -111,4 +117,3 @@ const generateHealthReportFlow = ai.defineFlow(
     return output!;
   }
 );
-
