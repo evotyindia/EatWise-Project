@@ -38,7 +38,7 @@ const manualInputSchema = z.object({
 
 type ManualInputFormValues = z.infer<typeof manualInputSchema>;
 
-export interface ChatMessage { // Exporting for PrintableReport
+export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
 }
@@ -144,7 +144,7 @@ export function AnalyzerForm() {
       const chatContext: ContextAwareAIChatInput = {
         productName: report.productType || manualForm.getValues("productName") || "N/A",
         ingredients: manualForm.getValues("ingredients") || "Ingredients extracted from image scan.",
-        healthReport: `Overall Rating: ${report.healthRating}/5. Summary: ${report.detailedAnalysis.summary}. Positive Aspects: ${report.detailedAnalysis.positiveAspects || 'N/A'}. Potential Concerns: ${report.detailedAnalysis.potentialConcerns || 'N/A'}. Key Nutrients: ${report.detailedAnalysis.keyNutrientsBreakdown || 'N/A'}. Processing: ${report.processingLevelRating || 'N/A'}/5. Sugar: ${report.sugarContentRating || 'N/A'}/5. Nutrient Density: ${report.nutrientDensityRating || 'N/A'}/5.`,
+        healthReport: `Overall Rating: ${report.healthRating}/5. Summary: ${report.detailedAnalysis.summary}. Positive Aspects: ${report.detailedAnalysis.positiveAspects || 'N/A'}. Potential Concerns: ${report.detailedAnalysis.potentialConcerns || 'N/A'}. Key Nutrients: ${report.detailedAnalysis.keyNutrientsBreakdown || 'N/A'}. Processing: ${report.processingLevelRating?.rating || 'N/A'}/5. Sugar: ${report.sugarContentRating?.rating || 'N/A'}/5. Nutrient Density: ${report.nutrientDensityRating?.rating || 'N/A'}/5.`,
         userQuestion: userMessage.content,
       };
       const aiResponse = await contextAwareAIChat(chatContext);
@@ -166,8 +166,8 @@ export function AnalyzerForm() {
     tempDiv.style.position = 'absolute';
     tempDiv.style.left = '-9999px';
     tempDiv.style.top = '0px';
-    tempDiv.style.width = '210mm'; // Standard A4 width for layout consistency
-    tempDiv.style.backgroundColor = 'white'; // Ensure background for canvas capture
+    tempDiv.style.width = '210mm'; 
+    tempDiv.style.backgroundColor = 'white'; 
     document.body.appendChild(tempDiv);
 
     const root = createRoot(tempDiv);
@@ -179,11 +179,11 @@ export function AnalyzerForm() {
       />
     );
 
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for rendering
+    await new Promise(resolve => setTimeout(resolve, 1000)); 
 
     try {
       const canvas = await html2canvas(tempDiv, {
-        scale: 2, // Higher scale for better quality
+        scale: 2, 
         useCORS: true,
         logging: false,
         width: tempDiv.scrollWidth,
@@ -202,21 +202,28 @@ export function AnalyzerForm() {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
 
-      const canvasWidthMM = (canvas.width / 2) * 0.264583; // Convert px (at scale 2) to mm
+      const canvasWidthMM = (canvas.width / 2) * 0.264583; 
       const canvasHeightMM = (canvas.height / 2) * 0.264583;
 
       const ratio = canvasWidthMM / canvasHeightMM;
       let imgActualHeight = pdfWidth / ratio;
       let imgActualWidth = pdfWidth;
 
-      if (imgActualHeight < pdfHeight) { // Content fits on one page (scaled to width)
-         imgActualHeight = canvasHeightMM < pdfHeight ? canvasHeightMM : pdfHeight; // Use actual height if smaller than page
+      if (imgActualHeight > pdfHeight) { 
+        imgActualHeight = pdfHeight; 
+        imgActualWidth = imgActualHeight * ratio;
+      } else {
+         imgActualHeight = canvasHeightMM < pdfHeight ? canvasHeightMM : pdfHeight;
          imgActualWidth = imgActualHeight * ratio;
+         if (imgActualWidth > pdfWidth) {
+            imgActualWidth = pdfWidth;
+            imgActualHeight = pdfWidth / ratio;
+         }
       }
 
 
       let position = 0;
-      pdf.addImage(imgData, 'PNG', 0, position, imgActualWidth, imgActualHeight);
+      pdf.addImage(imgData, 'PNG', 0, position, imgActualWidth, canvasHeightMM); 
 
       let heightLeft = canvasHeightMM - imgActualHeight;
 
@@ -224,17 +231,16 @@ export function AnalyzerForm() {
       while (heightLeft > 0) {
         position -= pdfHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgActualWidth, canvasHeightMM); // Use full canvas height for subsequent pages source
+        pdf.addImage(imgData, 'PNG', 0, position, imgActualWidth, canvasHeightMM); 
         heightLeft -= pdfHeight;
       }
 
-      // Add page numbers
       const pageCount = pdf.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         pdf.setPage(i);
         pdf.setFontSize(8);
         pdf.setTextColor(100);
-        pdf.text(`Page ${i} of ${pageCount}`, pdfWidth - 25, pdfHeight - 10, {align: 'right'});
+        pdf.text(`Page ${i} of ${pageCount}`, pdfWidth - 20, pdfHeight - 10, {align: 'right'});
       }
 
 
@@ -385,34 +391,34 @@ export function AnalyzerForm() {
                   <StarRating rating={report.healthRating} /> ({report.healthRating}/5)
                 </AlertDescription>
               </Alert>
-               {report.processingLevelRating && (
+               {report.processingLevelRating?.rating && (
                  <Alert variant="default" className="bg-background">
                    <Zap className="h-5 w-5" />
                    <AlertTitle className="font-semibold">Processing Level</AlertTitle>
                    <AlertDescription className="flex items-center gap-2">
-                     <StarRating rating={report.processingLevelRating} /> ({report.processingLevelRating}/5)
+                     <StarRating rating={report.processingLevelRating.rating} /> ({report.processingLevelRating.rating}/5)
                    </AlertDescription>
-                    <p className="text-xs text-muted-foreground mt-1">{report.detailedAnalysis.summary?.split('Processing Level Rating:')[1]?.split('Sugar Content Rating:')[0]?.trim()}</p>
+                    {report.processingLevelRating.justification && <p className="text-xs text-muted-foreground mt-1">{report.processingLevelRating.justification}</p>}
                  </Alert>
                )}
-               {report.sugarContentRating && (
+               {report.sugarContentRating?.rating && (
                  <Alert variant="default" className="bg-background">
-                    <Wheat className="h-5 w-5" /> {/* Placeholder for sugar icon */}
+                    <Wheat className="h-5 w-5" /> 
                     <AlertTitle className="font-semibold">Sugar Content</AlertTitle>
                    <AlertDescription className="flex items-center gap-2">
-                     <StarRating rating={report.sugarContentRating} /> ({report.sugarContentRating}/5)
+                     <StarRating rating={report.sugarContentRating.rating} /> ({report.sugarContentRating.rating}/5)
                    </AlertDescription>
-                    <p className="text-xs text-muted-foreground mt-1">{report.detailedAnalysis.summary?.split('Sugar Content Rating:')[1]?.split('Nutrient Density Rating:')[0]?.trim()}</p>
+                    {report.sugarContentRating.justification && <p className="text-xs text-muted-foreground mt-1">{report.sugarContentRating.justification}</p>}
                  </Alert>
                )}
-               {report.nutrientDensityRating && (
+               {report.nutrientDensityRating?.rating && (
                  <Alert variant="default" className="bg-background">
                    <Sparkles className="h-5 w-5" />
                    <AlertTitle className="font-semibold">Nutrient Density</AlertTitle>
                    <AlertDescription className="flex items-center gap-2">
-                     <StarRating rating={report.nutrientDensityRating} /> ({report.nutrientDensityRating}/5)
+                     <StarRating rating={report.nutrientDensityRating.rating} /> ({report.nutrientDensityRating.rating}/5)
                    </AlertDescription>
-                    <p className="text-xs text-muted-foreground mt-1">{report.detailedAnalysis.summary?.split('Nutrient Density Rating:')[1]?.trim()}</p>
+                    {report.nutrientDensityRating.justification && <p className="text-xs text-muted-foreground mt-1">{report.nutrientDensityRating.justification}</p>}
                  </Alert>
                )}
             </div>
