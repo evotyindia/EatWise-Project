@@ -8,17 +8,19 @@ export const metadata: Metadata = {
   description: 'Understand food labels, get health ratings, recipe suggestions, and nutrition analysis with AI. For a healthier India.',
 };
 
+interface RootLayoutProps {
+  children: React.ReactNode;
+  params: { locale: string }; // Added locale to params
+}
+
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+  params: { locale } // Destructure locale
+}: Readonly<RootLayoutProps>) {
   // This RootLayout is for the absolute root of the app.
-  // It should not include UI components like Header/Footer or context providers
-  // that depend on locale. Those are handled by src/app/[locale]/layout.tsx.
-  // It primarily sets up the main HTML document structure if needed.
+  // It provides the main HTML document structure.
   return (
-    <html lang="en" suppressHydrationWarning> {/* Default lang, [locale]/layout.tsx will set specific lang for its content */}
+    <html lang={locale} suppressHydrationWarning> {/* Use dynamic locale for lang */}
       <head>
         {/* Global font links can remain here as they are not locale-dependent */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
