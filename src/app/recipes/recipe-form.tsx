@@ -11,7 +11,7 @@ import type { ContextAwareAIChatInput, ContextAwareAIChatOutput, ChatMessage } f
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Leaf, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText } from "lucide-react";
+import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Leaf, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Milk, Cookie, MinusCircle, PlusCircle } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { createRoot } from 'react-dom/client';
 import html2canvas from 'html2canvas';
@@ -36,7 +36,7 @@ const diseaseOptions: { id: Disease; label: string; icon: React.ElementType }[] 
   { id: "high_blood_pressure", label: "High BP", icon: HeartCrack },
   { id: "heart_condition", label: "Heart Condition", icon: HeartCrack },
   { id: "gluten_free", label: "Gluten-Free", icon: WheatIcon },
-  { id: "dairy_free", label: "Dairy-Free", icon: Utensils },
+  { id: "dairy_free", label: "Dairy-Free", icon: MinusCircle }, // Using MinusCircle for dairy-free
 ];
 
 const recipePageInputSchema = z.object({
@@ -55,11 +55,12 @@ const recipePageInputSchema = z.object({
 type RecipePageFormValues = z.infer<typeof recipePageInputSchema>;
 
 const ingredientCategories = [
-  { name: "Vegetables", icon: <Leaf className="mr-2 h-4 w-4" />, items: ["Onion", "Tomato", "Potato", "Spinach", "Carrot", "Capsicum", "Ginger", "Garlic", "Cauliflower", "Peas", "Beans", "Ladyfinger"] },
-  { name: "Spices", icon: <Sparkles className="mr-2 h-4 w-4" />, items: ["Turmeric", "Cumin Powder", "Coriander Powder", "Garam Masala", "Chili Powder", "Mustard Seeds", "Asafoetida (Hing)"] },
-  { name: "Dals & Legumes", icon: <Utensils className="mr-2 h-4 w-4" />, items: ["Moong Dal", "Toor Dal", "Chana Dal", "Masoor Dal", "Rajma (Kidney Beans)", "Chickpeas (Chole)"] },
-  { name: "Grains & Flours", icon: <WheatIcon className="mr-2 h-4 w-4" />, items: ["Rice", "Wheat Flour (Atta)", "Besan (Gram Flour)", "Suji (Semolina)", "Poha (Flattened Rice)"] },
-  { name: "Dairy & Paneer", icon: <ChefHat className="mr-2 h-4 w-4" />, items: ["Paneer (Indian Cheese)", "Curd (Yogurt)", "Milk", "Ghee"] }
+  { name: "Vegetables", icon: <Leaf className="mr-2 h-4 w-4 text-green-500" />, items: ["Onion", "Tomato", "Potato", "Spinach", "Carrot", "Capsicum", "Ginger", "Garlic", "Cauliflower", "Peas", "Beans", "Ladyfinger", "Cabbage", "Mushroom", "Broccoli", "Cucumber", "Radish", "Beetroot", "Coriander Leaves", "Mint Leaves", "Green Chili"] },
+  { name: "Spices", icon: <Sparkles className="mr-2 h-4 w-4 text-yellow-500" />, items: ["Turmeric Powder", "Cumin Powder", "Coriander Powder", "Garam Masala", "Chili Powder", "Mustard Seeds", "Asafoetida (Hing)", "Fenugreek Seeds", "Cumin Seeds", "Black Pepper", "Cardamom", "Cloves", "Cinnamon", "Bay Leaf", "Salt"] },
+  { name: "Dals & Legumes", icon: <Utensils className="mr-2 h-4 w-4 text-orange-500" />, items: ["Moong Dal", "Toor Dal (Arhar)", "Chana Dal", "Masoor Dal", "Rajma (Kidney Beans)", "Chickpeas (Chole/Kabuli Chana)", "Black Eyed Peas (Lobia)", "Urad Dal", "Green Gram (Sabut Moong)"] },
+  { name: "Grains & Flours", icon: <WheatIcon className="mr-2 h-4 w-4 text-amber-700" />, items: ["Rice (Basmati)", "Rice (Sona Masoori)", "Wheat Flour (Atta)", "Besan (Gram Flour)", "Suji (Semolina)", "Poha (Flattened Rice)", "Maida (All-purpose flour)", "Ragi Flour", "Jowar Flour", "Bajra Flour", "Bread"] },
+  { name: "Dairy & Fats", icon: <Milk className="mr-2 h-4 w-4 text-blue-400" />, items: ["Paneer (Indian Cheese)", "Curd (Yogurt)", "Milk", "Ghee", "Butter", "Cooking Oil (Sunflower)", "Cooking Oil (Mustard)", "Cooking Oil (Groundnut)", "Olive Oil", "Cream (Malai)"] },
+  { name: "Sweeteners & Nuts", icon: <Cookie className="mr-2 h-4 w-4 text-yellow-700" />, items: ["Sugar", "Jaggery (Gur)", "Honey", "Almonds", "Cashews", "Raisins", "Walnuts", "Peanuts"] }
 ];
 
 export function RecipeForm() {
@@ -338,13 +339,13 @@ export function RecipeForm() {
             </form>
           </Form>
           <Separator className="my-6"/>
-          <div className="space-y-3">
-            <h3 className="text-md font-medium">Quick Add Common Ingredients:</h3>
-            {ingredientCategories.slice(0,1).map(category => ( 
+          <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+            <h3 className="text-md font-medium sticky top-0 bg-card py-1">Quick Add Common Ingredients:</h3>
+            {ingredientCategories.map(category => ( 
               <div key={category.name}>
-                <h4 className="text-sm font-semibold mb-1 flex items-center">{category.icon} {category.name}</h4>
+                <h4 className="text-sm font-semibold mb-1.5 flex items-center">{category.icon} {category.name}</h4>
                 <div className="flex flex-wrap gap-1.5">
-                  {category.items.slice(0,6).map(item => <Button key={item} variant="outline" size="sm" onClick={() => addIngredientToForm(item)} className="text-xs px-2 py-1 h-auto">{item}</Button>)}
+                  {category.items.map(item => <Button key={item} variant="outline" size="sm" onClick={() => addIngredientToForm(item)} className="text-xs px-2 py-1 h-auto">{item}</Button>)}
                 </div>
               </div>
             ))}
@@ -452,3 +453,5 @@ export function RecipeForm() {
     </div>
   );
 }
+
+    
