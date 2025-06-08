@@ -42,19 +42,16 @@ export default function Home() {
       quote: "This app has changed how my family eats! Understanding labels is so much easier now, and the Indian alternatives are fantastic.",
       name: "Priya S.",
       location: "Mumbai, MH",
-      dataAiHint: "happy family cooking"
     },
     {
       quote: "As a busy professional, planning healthy meals was tough. The recipe suggestions based on my ingredients are a lifesaver!",
       name: "Rahul K.",
       location: "Bengaluru, KA",
-      dataAiHint: "busy professional healthy food"
     },
     {
       quote: "I finally understand what's in packaged foods. The AI chat helps clarify any doubts I have. Highly recommended!",
       name: "Aisha B.",
       location: "Delhi, DL",
-      dataAiHint: "woman reading food label"
     }
   ];
 
@@ -244,14 +241,86 @@ export default function Home() {
             </ul>
           </div>
           <div className="flex justify-center">
-            <Image
-              src="https://placehold.co/600x400.png"
-              alt="How it works illustration"
-              width={600}
-              height={400}
-              className="rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105"
-              data-ai-hint="app interface diagram"
-            />
+            <svg width="600" height="400" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg" className="rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 block mx-auto">
+              <defs>
+                <linearGradient id="howItWorksBgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style={{ stopColor: 'hsl(var(--muted))', stopOpacity: 0.3 }} />
+                  <stop offset="100%" style={{ stopColor: 'hsl(var(--background))', stopOpacity: 0.1 }} />
+                </linearGradient>
+                <marker id="howItWorksArrowhead" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto" fill="hsl(var(--primary))">
+                  <polygon points="0 0, 10 3.5, 0 7" />
+                </marker>
+                <style>
+                  {`
+                    .howItWorks-stage-rect { fill: hsl(var(--card)); stroke: hsl(var(--border)); stroke-width: 1.5; transition: all 0.3s ease; }
+                    .howItWorks-stage-rect:hover { filter: drop-shadow(0 4px 6px hsla(var(--primary-foreground-raw), 0.1)); transform: translateY(-2px); }
+                    .howItWorks-stage-text-title { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; fill: hsl(var(--foreground)); text-anchor: middle; pointer-events: none; }
+                    .howItWorks-stage-text-desc { font-family: 'Inter', sans-serif; font-size: 12px; fill: hsl(var(--muted-foreground)); text-anchor: middle; pointer-events: none; }
+                    .howItWorks-arrow-line { stroke: hsl(var(--primary)); stroke-width: 2.5; marker-end: url(#howItWorksArrowhead); opacity: 0.8; }
+                    .howItWorks-icon { fill: hsl(var(--primary)); transition: fill 0.3s ease; }
+                    .howItWorks-accent-icon { fill: hsl(var(--accent)); transition: fill 0.3s ease; }
+                    .howItWorks-stage-group:hover .howItWorks-icon { fill: hsl(var(--accent)); }
+                    .howItWorks-stage-group:hover .howItWorks-accent-icon { fill: hsl(var(--primary)); }
+                  `}
+                </style>
+              </defs>
+
+              <rect width="600" height="400" rx="12" ry="12" fill="url(#howItWorksBgGradient)" />
+
+              {/* Stage 1: Input Data */}
+              <g className="howItWorks-stage-group" transform="translate(120, 200)">
+                <rect x="-70" y="-50" width="140" height="110" rx="15" ry="15" className="howItWorks-stage-rect" />
+                {/* Icon: Upload Cloud simplified */}
+                <svg x="-20" y="-35" width="40" height="40" viewBox="0 0 24 24" className="howItWorks-icon">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                <text x="0" y="35" className="howItWorks-stage-text-title">1. Input Data</text>
+                <text x="0" y="55" className="howItWorks-stage-text-desc">Upload label or type info</text>
+              </g>
+
+              {/* Arrow 1 */}
+              <line x1="200" y1="200" x2="265" y2="200" className="howItWorks-arrow-line" />
+
+              {/* Stage 2: AI Analysis */}
+              <g className="howItWorks-stage-group" transform="translate(300, 200)">
+                <rect x="-70" y="-50" width="140" height="110" rx="15" ry="15" className="howItWorks-stage-rect" />
+                {/* Icon: Sparkles simplified */}
+                <svg x="-20" y="-35" width="40" height="40" viewBox="0 0 24 24" className="howItWorks-accent-icon">
+                  <path d="M12 3v4M12 17v4M21 12h-4M7 12H3M18.36 5.64l-2.83 2.83M8.49 15.51l-2.83 2.83M18.36 18.36l-2.83-2.83M8.49 8.49l-2.83-2.83" />
+                  <circle cx="12" cy="12" r="1" /> {/* Center sparkle */}
+                </svg>
+                <text x="0" y="35" className="howItWorks-stage-text-title">2. AI Analysis</text>
+                <text x="0" y="55" className="howItWorks-stage-text-desc">AI processes & generates</text>
+              </g>
+
+              {/* Arrow 2 */}
+              <line x1="380" y1="200" x2="445" y2="200" className="howItWorks-arrow-line" />
+
+              {/* Stage 3: Get Advice */}
+              <g className="howItWorks-stage-group" transform="translate(480, 200)">
+                <rect x="-70" y="-50" width="140" height="110" rx="15" ry="15" className="howItWorks-stage-rect" />
+                {/* Icon: FileText simplified */}
+                <svg x="-20" y="-35" width="40" height="40" viewBox="0 0 24 24" className="howItWorks-icon">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                  <polyline points="10 9 9 9 8 9" />
+                </svg>
+                <text x="0" y="35" className="howItWorks-stage-text-title">3. Get Advice</text>
+                <text x="0" y="55" className="howItWorks-stage-text-desc">View report, chat, recipes</text>
+              </g>
+
+              {/* Title for the diagram */}
+              <text x="300" y="70" style={{ fontFamily: "'Poppins', sans-serif", fontSize: '28px', fontWeight: 'bold', fill: 'hsl(var(--primary))', textAnchor: 'middle' }}>
+                How It Works
+              </text>
+              <text x="300" y="105" style={{ fontFamily: "'Inter', sans-serif", fontSize: '16px', fill: 'hsl(var(--muted-foreground))', textAnchor: 'middle' }}>
+                Our platform uses cutting-edge AI to simplify nutrition for you.
+              </text>
+            </svg>
           </div>
         </div>
       </section>
