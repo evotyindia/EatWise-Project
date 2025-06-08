@@ -1,8 +1,12 @@
-
-import { AnalyzerForm } from "./analyzer-form";
+import { AnalyzerForm } from "@/app/analyze/analyzer-form"; // Ensure this path is correct after potential moves
 import { ScanLine } from "lucide-react";
+import type {NextPage} from 'next';
 
-export default function AnalyzePage() {
+// interface AnalyzePageProps { // locale param removed
+//   params: { locale: string };
+// }
+
+const AnalyzePage: NextPage = (/*{ params: { locale } }*/) => { // locale param removed
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <div className="flex flex-col items-center mb-8">
@@ -16,3 +20,4 @@ export default function AnalyzePage() {
     </div>
   );
 }
+export default AnalyzePage;

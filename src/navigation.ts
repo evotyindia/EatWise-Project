@@ -1,6 +1,7 @@
+// Re-export Next.js navigation primitives
+// This allows components to keep using "@/navigation" imports
+// but they will now resolve to standard Next.js navigation.
+import Link from 'next/link';
+import { usePathname, useRouter, redirect } from 'next/navigation';
 
-import {createSharedPathnamesNavigation} from 'next-intl/navigation';
-import {locales, pathnames, localePrefix} from './i18n';
-
-export const {Link, redirect, usePathname, useRouter} =
-  createSharedPathnamesNavigation({locales, pathnames, localePrefix});
+export { Link, usePathname, useRouter, redirect };

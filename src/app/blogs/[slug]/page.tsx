@@ -1,20 +1,28 @@
-
-import { getBlogPostBySlug, blogPosts, BlogPost } from "@/lib/blog-data";
+import { getBlogPostBySlug, blogPosts } from "@/lib/blog-data";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/navigation"; // Will now use standard next/link
 import { notFound } from "next/navigation";
 import { CalendarDays, Tag, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+// import { locales } from '@/i18n'; // Removed
 
 interface BlogPostPageProps {
   params: {
     slug: string;
+    // locale: string; // Removed locale
   };
 }
 
 export async function generateStaticParams() {
+  // const params = []; // Simplified
+  // for (const locale of locales) { // Removed locale iteration
+  //   for (const post of blogPosts) {
+  //     params.push({ locale, slug: post.slug });
+  //   }
+  // }
+  // return params;
   return blogPosts.map((post) => ({
     slug: post.slug,
   }));
@@ -51,6 +59,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
         <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-4">
           <div className="flex items-center">
             <CalendarDays className="mr-1.5 h-4 w-4" />
+            {/* Using 'en-IN' as a default locale for date formatting */}
             <span>{new Date(post.date).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
           </div>
           <div className="flex items-center">

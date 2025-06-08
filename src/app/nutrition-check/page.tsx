@@ -1,8 +1,12 @@
-
 import { NutritionForm } from "./nutrition-form";
 import { BarChart3 } from "lucide-react";
+import {NextPage} from 'next';
 
-export default function NutritionCheckPage() {
+// interface NutritionCheckPageProps { // locale param removed
+//   params: { locale: string };
+// }
+
+const NutritionCheckPage: NextPage = (/*{ params: { locale } }*/) => { // locale param removed
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <div className="flex flex-col items-center mb-8">
@@ -17,3 +21,4 @@ export default function NutritionCheckPage() {
   );
 }
 
+export default NutritionCheckPage;

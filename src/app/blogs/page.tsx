@@ -1,9 +1,13 @@
-
 import { BlogList } from "./blog-list";
 import { BookOpen } from "lucide-react";
 import { blogPosts, getBlogCategories } from "@/lib/blog-data";
+import {NextPage} from 'next';
 
-export default function BlogPage() {
+// interface BlogPageProps { // locale param removed
+//   params: { locale: string };
+// }
+
+const BlogPage: NextPage = (/*{ params: { locale } }*/) => { // locale param removed
   const categories = getBlogCategories();
 
   return (
@@ -19,3 +23,4 @@ export default function BlogPage() {
     </div>
   );
 }
+export default BlogPage;
