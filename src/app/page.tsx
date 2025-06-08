@@ -1,13 +1,10 @@
 import Image from "next/image";
-import { Link } from "@/navigation"; // Will now use standard next/link
+import { Link } from "@/navigation"; 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { CheckCircle, ScanLine, MessageCircle, CookingPot, BarChart3 as ChartColumn, Users, Target, Lightbulb } from "lucide-react";
-// import {useTranslations} from 'next-intl'; // Removed
 
 export default function Home() {
-  // const t = useTranslations('HomePage'); // Removed
-
   const features = [
     {
       icon: <ScanLine className="h-10 w-10 text-primary" />,
@@ -65,13 +62,13 @@ export default function Home() {
       <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-primary/5 via-background to-accent/5">
         <div className="container px-4 md:px-6 text-center">
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-primary">
-            Swasth Bharat Advisor {/* Replaced t('heroTitle') */}
+            EatWise India
           </h1>
           <p className="mx-auto max-w-[700px] text-foreground/80 md:text-xl mt-4 font-headline">
-            Empowering India to Eat Smarter with AI {/* Replaced t('heroSubtitle') */}
+            Empowering India to Eat Smarter with AI
           </p>
           <p className="mx-auto max-w-[600px] text-muted-foreground md:text-lg mt-2">
-            Understand food labels, analyze ingredients, and get healthy Indian recipe suggestions. Your personal AI-powered nutrition guide for a healthier lifestyle. {/* Replaced t('heroDescription') */}
+            Understand food labels, analyze ingredients, and get healthy Indian recipe suggestions. Your personal AI-powered nutrition guide for a healthier lifestyle.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
             <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground transition-transform duration-300 ease-in-out hover:scale-105"><Link href="/analyze">Analyze a Food Label</Link></Button>
@@ -130,7 +127,7 @@ export default function Home() {
               Our Mission
             </h2>
             <p className="mt-4 max-w-[600px] text-muted-foreground md:text-xl/relaxed">
-              To empower every Indian with the knowledge and tools to make healthier food choices, demystifying nutrition labels and promoting traditional healthy eating habits through accessible AI technology.
+              To empower every Indian with the knowledge and tools to make healthier food choices, demystifying nutrition labels and promoting traditional healthy eating habits through accessible AI technology with EatWise India.
             </p>
             <ul className="mt-6 space-y-4">
               <li className="flex items-start">
@@ -176,7 +173,7 @@ export default function Home() {
               Loved by Users Across India
             </h2>
             <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
-              Hear what our community is saying about Swasth Bharat Advisor.
+              Hear what our community is saying about EatWise India.
             </p>
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -258,7 +255,7 @@ export default function Home() {
             Ready to Make Healthier Choices?
           </h2>
           <p className="mx-auto max-w-[600px] text-primary-foreground/80 md:text-xl mb-8">
-            Join thousands of Indians on their journey to better nutrition. Start analyzing, learning, and cooking with Swasth Bharat Advisor today!
+            Join thousands of Indians on their journey to better nutrition. Start analyzing, learning, and cooking with EatWise India today!
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button asChild size="lg" className="bg-background text-primary hover:bg-background/90 transition-transform duration-300 ease-in-out hover:scale-105">

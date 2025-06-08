@@ -39,7 +39,7 @@ export const PrintableRecipeSuggestions: React.FC<PrintableRecipeSuggestionsProp
   return (
     <div style={styles.page}>
       <div style={styles.pageContent}>
-        <div style={styles.companyHeader}>Swasth Bharat Advisor</div>
+        <div style={styles.companyHeader}>EatWise India</div>
         <div style={styles.reportTitle}>AI Recipe Suggestions</div>
 
         <div style={styles.section}>
@@ -72,7 +72,7 @@ export const PrintableRecipeSuggestions: React.FC<PrintableRecipeSuggestionsProp
         )}
       </div>
       <div style={styles.footer}>
-        Generated on {new Date().toLocaleDateString('en-GB')} by Swasth Bharat Advisor. <br/>
+        Generated on {new Date().toLocaleDateString('en-GB')} by EatWise India. <br/>
         Disclaimer: These are AI-generated suggestions. Adjust recipes to your taste and dietary needs.
       </div>
     </div>

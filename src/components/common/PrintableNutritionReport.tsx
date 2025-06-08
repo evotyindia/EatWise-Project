@@ -123,7 +123,7 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
   return (
     <div style={styles.page}>
       <div style={styles.pageContent}>
-        <div style={styles.companyHeader}>Swasth Bharat Advisor</div>
+        <div style={styles.companyHeader}>EatWise India</div>
         <div style={styles.reportTitle}>AI Nutrition Analysis</div>
 
         {renderUserInput()}
@@ -170,7 +170,7 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
         )}
       </div>
       <div style={styles.footer}>
-        Generated on {new Date().toLocaleDateString('en-GB')} by Swasth Bharat Advisor. <br/>
+        Generated on {new Date().toLocaleDateString('en-GB')} by EatWise India. <br/>
         Disclaimer: This AI analysis is for informational purposes only and not a substitute for professional medical or dietary advice.
       </div>
     </div>
