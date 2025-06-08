@@ -36,8 +36,11 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
     ratingBlockContainer: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5mm', marginBottom: '7mm' },
     ratingBlock: { border: '1px solid #CBD5E0', padding: '4mm', borderRadius: '4px', backgroundColor: '#FFFFFF', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' },
     ratingTitle: { fontWeight: 'bold', marginBottom: '2mm', fontSize: '10pt', color: '#4A5568' },
-    ratingValue: { fontSize: '10pt', color: '#1A202C', display: 'flex', alignItems: 'center' },
+    ratingValue: { fontSize: '10pt', color: '#1A202C', display: 'flex', alignItems: 'center', flexWrap: 'wrap' as 'wrap', gap: '2px' },
+    ratingValueWithJustification: { display: 'flex', flexDirection: 'column', gap: '1mm'},
+    justificationText: { fontSize: '8.5pt', color: '#718096', marginLeft: '0px', fontStyle: 'italic' }, // No left margin if on new line
     star: { color: '#FBBF24', marginRight: '1px', fontSize: '12pt' },
+    scaleDescriptionText: { fontSize: '8.5pt', color: '#5A6578', marginLeft: '3px' },
     
     listContainer: { paddingLeft: '0', margin: '0' },
     listItem: { display: 'flex', alignItems: 'flex-start', marginBottom: '2mm', color: '#4A5568' },
@@ -60,13 +63,23 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
     return <>{stars} ({rating}/{maxRating})</>;
   };
   
-  const getRatingDisplay = (ratingInfo?: { rating: number; justification?: string | null }) => {
+  const getRatingDisplay = (ratingInfo?: { rating: number; justification?: string | null }, scaleDescriptionText?: string) => {
     if (!ratingInfo || ratingInfo.rating === undefined) return <div style={styles.ratingValue}>N/A</div>;
-    let text = renderStars(ratingInfo.rating);
+    
+    let starsJsx = renderStars(ratingInfo.rating);
+    let scaleDescJsx = scaleDescriptionText ? <span style={styles.scaleDescriptionText}>{scaleDescriptionText}</span> : null;
+    
+    let ratingLine = <>{starsJsx} {scaleDescJsx}</>;
+
     if (ratingInfo.justification && ratingInfo.justification.trim() && ratingInfo.justification.trim().toLowerCase() !== 'n/a') {
-        return <div style={styles.ratingValue}>{text} <span style={{marginLeft: '5px', fontSize: '9pt', color: '#718096'}}>- {ratingInfo.justification.trim()}</span></div>;
+        return (
+          <div style={styles.ratingValueWithJustification}>
+            <div style={styles.ratingValue}>{ratingLine}</div>
+            <div style={styles.justificationText}>Justification: {ratingInfo.justification.trim()}</div>
+          </div>
+        );
     }
-    return <div style={styles.ratingValue}>{text}</div>;
+    return <div style={styles.ratingValue}>{ratingLine}</div>;
   };
 
   const renderListItems = (text?: string, isConcern?: boolean): JSX.Element[] | JSX.Element => {
@@ -78,7 +91,7 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
         </div>
       );
     }
-    const items = text.split(/\s*[-\*]\s*/g).filter(s => s.trim());
+    const items = text.split(/\n/g).map(s => s.trim().replace(/^(\*|-)\s*/, '')).filter(s => s.trim());
     return items.map((item, index) => (
       <div key={index} style={isConcern ? styles.concernsListItem : styles.listItem}>
         <span style={styles.bullet}>•</span>
@@ -117,7 +130,7 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
             <p style={styles.aboutText}>
               This report offers an AI-generated analysis of the food product based on the information you provided (either via image scan or manual text input). 
               It aims to highlight key nutritional aspects, potential concerns, and suggest healthier Indian alternatives. 
-              Use it as a guide to understand your food better and make conscious decisions about what you consume.
+              Use it as a guide to understand your food better and make conscious decisions about what you consume. Pay attention to the rating scales: for some (like health rating), higher stars are better, while for others (like processing level or sugar), lower levels (and thus potentially fewer stars if the scale is direct) might be preferred. The report provides context for each.
             </p>
           </div>
         </div>
@@ -150,10 +163,10 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Overall Ratings</div>
           <div style={styles.ratingBlockContainer}>
-            <div style={styles.ratingBlock}><div style={styles.ratingTitle}>Health Rating:</div>{getRatingDisplay({rating: report.healthRating})}</div>
-            {report.processingLevelRating && <div style={styles.ratingBlock}><div style={styles.ratingTitle}>Processing Level:</div>{getRatingDisplay(report.processingLevelRating)}</div>}
-            {report.sugarContentRating && <div style={styles.ratingBlock}><div style={styles.ratingTitle}>Sugar Content:</div>{getRatingDisplay(report.sugarContentRating)}</div>}
-            {report.nutrientDensityRating && <div style={styles.ratingBlock}><div style={styles.ratingTitle}>Nutrient Density:</div>{getRatingDisplay(report.nutrientDensityRating)}</div>}
+            <div style={styles.ratingBlock}><div style={styles.ratingTitle}>Health Rating:</div>{getRatingDisplay({rating: report.healthRating}, "(Higher stars = better health)")}</div>
+            {report.processingLevelRating && <div style={styles.ratingBlock}><div style={styles.ratingTitle}>Processing Level:</div>{getRatingDisplay(report.processingLevelRating, "(5 stars = highly processed)")}</div>}
+            {report.sugarContentRating && <div style={styles.ratingBlock}><div style={styles.ratingTitle}>Sugar Content:</div>{getRatingDisplay(report.sugarContentRating, "(5 stars = high sugar)")}</div>}
+            {report.nutrientDensityRating && <div style={styles.ratingBlock}><div style={styles.ratingTitle}>Nutrient Density:</div>{getRatingDisplay(report.nutrientDensityRating, "(Higher stars = more nutrient dense)")}</div>}
           </div>
         </div>
 
