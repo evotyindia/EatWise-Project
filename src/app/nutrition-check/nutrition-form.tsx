@@ -7,6 +7,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { UploadCloud, Sparkles, FileText, Download } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
+import { createRoot } from 'react-dom/client';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 
@@ -21,6 +24,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { PrintableNutritionReport } from "@/components/common/PrintableNutritionReport";
 
 const numberPreprocess = (val: unknown) => (val === "" || val === null || val === undefined ? undefined : Number(val));
 
@@ -42,7 +46,7 @@ const nutritionInputSchema = z.object({
   potassium: z.preprocess(numberPreprocess, z.number({ invalid_type_error: "Must be a number" }).nonnegative("Cannot be negative").optional()),
   vitaminC: z.preprocess(numberPreprocess, z.number({ invalid_type_error: "Must be a number" }).nonnegative("Cannot be negative").optional()),
   servingSize: z.string().optional(),
-}).refine(data => Object.values(data).some(val => val !== undefined && val !== "") || (data.calories !== undefined && data.calories !== null), { // Adjusted refine condition
+}).refine(data => Object.values(data).some(val => val !== undefined && val !== "") || (data.calories !== undefined && data.calories !== null), { 
   message: "At least one nutritional value or serving size must be provided for manual entry if no image is uploaded.",
   path: ["calories"], 
 });
@@ -55,6 +59,7 @@ export function NutritionForm() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalyzeNutritionOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentInputData, setCurrentInputData] = useState<NutritionInputFormValues | null>(null);
   const { toast } = useToast();
 
   const form = useForm<NutritionInputFormValues>({
@@ -78,15 +83,16 @@ export function NutritionForm() {
       reader.readAsDataURL(file);
       form.reset(); 
       setAnalysisResult(null);
+      setCurrentInputData(null);
     }
   };
 
   const onManualSubmit: SubmitHandler<NutritionInputFormValues> = async (data) => {
     setIsLoading(true);
     setAnalysisResult(null);
-    // Clear image if manual submit is chosen
     setImageFile(null); 
     setUploadedImage(null);
+    setCurrentInputData(data); // Store input for PDF
     try {
       const input: AnalyzeNutritionInput = { ...data };
       const result = await analyzeNutrition(input);
@@ -110,13 +116,15 @@ export function NutritionForm() {
     }
     setIsLoading(true);
     setAnalysisResult(null);
-    form.reset(); // Clear manual form fields when image is submitted
+    const servingSizeFromForm = form.getValues("servingSize");
+    setCurrentInputData({ servingSize: servingSizeFromForm }); // Store for PDF
+    form.reset({servingSize: servingSizeFromForm}); // Clear other manual form fields
+    
     try {
       const nutritionDataUri = await fileToDataUri(imageFile);
       const input: AnalyzeNutritionInput = { nutritionDataUri };
-      // Add serving size if available from form, even with image
-      if (form.getValues("servingSize")) {
-        input.servingSize = form.getValues("servingSize");
+      if (servingSizeFromForm) {
+        input.servingSize = servingSizeFromForm;
       }
       const result = await analyzeNutrition(input);
       setAnalysisResult(result);
@@ -132,30 +140,92 @@ export function NutritionForm() {
     setIsLoading(false);
   };
 
-  const handleDownloadReport = () => {
+  const handleDownloadReport = async () => {
     if (!analysisResult) return;
-    let content = `AI Nutrition Analysis\n`;
-    content += `=========================\n`;
-    content += `Nutrition Density Rating: ${analysisResult.nutritionDensityRating}/5\n\n`;
-    
-    content += `Overall Analysis:\n${analysisResult.overallAnalysis}\n\n`;
-    if (analysisResult.macronutrientBalance) content += `Macronutrient Balance:\n${analysisResult.macronutrientBalance}\n\n`;
-    if (analysisResult.micronutrientHighlights) content += `Micronutrient Highlights:\n${analysisResult.micronutrientHighlights}\n\n`;
-    if (analysisResult.processingLevelAssessment) content += `Processing Level Assessment:\n${analysisResult.processingLevelAssessment}\n\n`;
-    content += `Dietary Suitability:\n${analysisResult.dietarySuitability}\n\n`;
-    if (analysisResult.servingSizeContext) content += `Serving Size Context:\n${analysisResult.servingSizeContext}\n\n`;
+    setIsLoading(true);
 
-    content += `Disclaimer: This AI analysis is for informational purposes only and not a substitute for professional medical or dietary advice.`;
+    const tempDiv = document.createElement('div');
+    tempDiv.id = 'pdf-render-source-nutrition';
+    tempDiv.style.position = 'absolute';
+    tempDiv.style.left = '-9999px';
+    tempDiv.style.top = '0px';
+    tempDiv.style.width = '210mm';
+    tempDiv.style.backgroundColor = 'white';
+    document.body.appendChild(tempDiv);
+
+    const root = createRoot(tempDiv);
+    root.render(
+      <PrintableNutritionReport 
+        analysisResult={analysisResult} 
+        userInput={currentInputData || { servingSize: form.getValues("servingSize") }}
+      />
+    );
     
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'nutrition-analysis-report.txt';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(link.href);
-    toast({ title: "Report Downloaded", description: "The nutrition analysis report has been saved." });
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    try {
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        width: tempDiv.scrollWidth,
+        height: tempDiv.scrollHeight,
+        windowWidth: tempDiv.scrollWidth,
+        windowHeight: tempDiv.scrollHeight,
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const canvasWidthMM = (canvas.width / 2) * 0.264583;
+      const canvasHeightMM = (canvas.height / 2) * 0.264583;
+      const ratio = canvasWidthMM / canvasHeightMM;
+      
+      let imgActualHeight = pdfWidth / ratio;
+      let imgActualWidth = pdfWidth;
+
+      if (imgActualHeight < pdfHeight) {
+         imgActualHeight = canvasHeightMM < pdfHeight ? canvasHeightMM : pdfHeight;
+         imgActualWidth = imgActualHeight * ratio;
+      }
+
+
+      let position = 0;
+      pdf.addImage(imgData, 'PNG', 0, position, imgActualWidth, imgActualHeight);
+      let heightLeft = canvasHeightMM - imgActualHeight;
+
+      while (heightLeft > 0) {
+        position -= pdfHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgActualWidth, canvasHeightMM);
+        heightLeft -= pdfHeight;
+      }
+
+      const pageCount = pdf.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(100);
+        pdf.text(`Page ${i} of ${pageCount}`, pdfWidth - 25, pdfHeight - 10, {align: 'right'});
+      }
+
+      pdf.save('nutrition_analysis_report.pdf');
+      toast({ title: "Report Downloaded", description: "The PDF nutrition analysis has been saved." });
+
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast({ title: "PDF Error", description: "Could not generate PDF report. " + (error as Error).message, variant: "destructive" });
+    } finally {
+      root.unmount();
+      document.body.removeChild(tempDiv);
+      setIsLoading(false);
+    }
   };
 
 
@@ -180,7 +250,7 @@ export function NutritionForm() {
                     <FormControl>
                       <Input placeholder="e.g., 1 cup (240ml), 30g" {...field} />
                     </FormControl>
-                    <FormDescription>Important for accurate per-serving analysis.</FormDescription>
+                    <FormDescription>Important for accurate per-serving analysis. Will be used for both image and manual analysis if provided.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -227,7 +297,7 @@ export function NutritionForm() {
               </div>
               {form.formState.errors.root && <FormMessage>{form.formState.errors.root.message}</FormMessage>}
               {form.formState.errors.calories && !Object.values(form.getValues()).filter(v => v !== undefined && v !== "").length && <FormMessage>At least one value is required for manual entry.</FormMessage>}
-              <Button type="submit" disabled={isLoading && form.formState.isSubmitting} className="w-full">
+              <Button type="submit" disabled={isLoading || form.formState.isSubmitting} className="w-full">
                 {isLoading && form.formState.isSubmitting ? "Analyzing Manually..." : "Analyze Manually"}
                 <Sparkles className="ml-2 h-4 w-4" />
               </Button>
@@ -253,8 +323,9 @@ export function NutritionForm() {
               <CardTitle className="flex items-center text-2xl">
                 <FileText className="mr-2 h-6 w-6 text-accent" /> AI Nutrition Analysis
               </CardTitle>
-              <Button onClick={handleDownloadReport} variant="outline" size="sm">
-                <Download className="mr-2 h-4 w-4" /> Download
+              <Button onClick={handleDownloadReport} variant="outline" size="sm" disabled={isLoading}>
+                 {isLoading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                 Download PDF
               </Button>
             </div>
             <CardDescription>Understanding your food's nutritional profile.</CardDescription>

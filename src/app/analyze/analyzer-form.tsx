@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { GenerateHealthReportInput, GenerateHealthReportOutput } from "@/ai/flows/generate-health-report";
@@ -7,7 +8,10 @@ import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UploadCloud, Sparkles, MessageCircle, Send, Download, Zap, HeartPulse, Wheat } from "lucide-react";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { createRoot } from 'react-dom/client';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 
@@ -23,6 +27,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
+import { PrintableHealthReport } from '@/components/common/PrintableHealthReport';
+
 
 const manualInputSchema = z.object({
   productName: z.string().optional(),
@@ -32,7 +38,7 @@ const manualInputSchema = z.object({
 
 type ManualInputFormValues = z.infer<typeof manualInputSchema>;
 
-interface ChatMessage {
+export interface ChatMessage { // Exporting for PrintableReport
   role: "user" | "assistant";
   content: string;
 }
@@ -45,6 +51,8 @@ export function AnalyzerForm() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
+  const pdfSourceRef = useRef<HTMLDivElement | null>(null);
+
 
   const { toast } = useToast();
 
@@ -149,52 +157,100 @@ export function AnalyzerForm() {
     setIsChatLoading(false);
   };
 
-  const formatTextWithBullets = (text?: string) => {
-    if (!text) return null;
-    // Ensure each bullet point starts on a new line for better readability in text file
-    return text.split(/\s*[-\*]\s*/g).filter(s => s.trim()).map(s => `  - ${s.trim()}`).join('\n');
-  };
-
-  const handleDownloadReport = () => {
+  const handleDownloadReport = async () => {
     if (!report) return;
-    let content = `AI Health Report\n`;
-    content += `====================================\n`;
-    if (report.productType) content += `Product Type: ${report.productType}\n`;
-    content += `Overall Health Rating: ${report.healthRating}/5\n`;
-    if (report.processingLevelRating) content += `Processing Level Rating: ${report.processingLevelRating}/5\n`;
-    if (report.sugarContentRating) content += `Sugar Content Rating: ${report.sugarContentRating}/5\n`;
-    if (report.nutrientDensityRating) content += `Nutrient Density Rating: ${report.nutrientDensityRating}/5\n\n`;
-    
-    content += `Detailed Analysis:\n`;
-    content += `------------------\n`;
-    content += `Summary:\n${formatTextWithBullets(report.detailedAnalysis.summary) || 'N/A'}\n\n`;
-    if (report.detailedAnalysis.positiveAspects) content += `Positive Aspects:\n${formatTextWithBullets(report.detailedAnalysis.positiveAspects)}\n\n`;
-    if (report.detailedAnalysis.potentialConcerns) content += `Potential Concerns:\n${formatTextWithBullets(report.detailedAnalysis.potentialConcerns)}\n\n`;
-    if (report.detailedAnalysis.keyNutrientsBreakdown) content += `Key Nutrients Breakdown:\n${formatTextWithBullets(report.detailedAnalysis.keyNutrientsBreakdown)}\n\n`;
-    
-    if (report.alternatives) {
-      content += `Healthier Indian Alternatives:\n`;
-      content += `------------------------------\n`;
-      content += `${formatTextWithBullets(report.alternatives)}\n\n`;
-    }
+    setIsLoading(true);
 
-    if (chatHistory.length > 0) {
-      content += `Chat History:\n`;
-      content += `------------------\n`;
-      chatHistory.forEach(msg => {
-        content += `${msg.role === 'user' ? 'You' : 'AI'}: ${msg.content}\n`;
+    const tempDiv = document.createElement('div');
+    tempDiv.id = 'pdf-render-source-analyzer';
+    tempDiv.style.position = 'absolute';
+    tempDiv.style.left = '-9999px';
+    tempDiv.style.top = '0px';
+    tempDiv.style.width = '210mm'; // Standard A4 width for layout consistency
+    tempDiv.style.backgroundColor = 'white'; // Ensure background for canvas capture
+    document.body.appendChild(tempDiv);
+
+    const root = createRoot(tempDiv);
+    root.render(
+      <PrintableHealthReport 
+        report={report} 
+        chatHistory={chatHistory}
+        productNameContext={manualForm.getValues("productName")}
+      />
+    );
+
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for rendering
+
+    try {
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2, // Higher scale for better quality
+        useCORS: true,
+        logging: false,
+        width: tempDiv.scrollWidth,
+        height: tempDiv.scrollHeight,
+        windowWidth: tempDiv.scrollWidth,
+        windowHeight: tempDiv.scrollHeight,
       });
-    }
 
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `${(report.productType || manualForm.getValues("productName") || 'food-label').toLowerCase().replace(/\s+/g, '-')}-health-report.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(link.href);
-    toast({ title: "Report Downloaded", description: "The health report has been saved." });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      const canvasWidthMM = (canvas.width / 2) * 0.264583; // Convert px (at scale 2) to mm
+      const canvasHeightMM = (canvas.height / 2) * 0.264583;
+
+      const ratio = canvasWidthMM / canvasHeightMM;
+      let imgActualHeight = pdfWidth / ratio;
+      let imgActualWidth = pdfWidth;
+
+      if (imgActualHeight < pdfHeight) { // Content fits on one page (scaled to width)
+         imgActualHeight = canvasHeightMM < pdfHeight ? canvasHeightMM : pdfHeight; // Use actual height if smaller than page
+         imgActualWidth = imgActualHeight * ratio;
+      }
+
+
+      let position = 0;
+      pdf.addImage(imgData, 'PNG', 0, position, imgActualWidth, imgActualHeight);
+      let- (imgActualHeight); // Using 'let-' seems like a typo, should be calculation
+
+      let heightLeft = canvasHeightMM - imgActualHeight;
+
+
+      while (heightLeft > 0) {
+        position -= pdfHeight; 
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgActualWidth, canvasHeightMM); // Use full canvas height for subsequent pages source
+        heightLeft -= pdfHeight;
+      }
+      
+      // Add page numbers
+      const pageCount = pdf.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(100);
+        pdf.text(`Page ${i} of ${pageCount}`, pdfWidth - 25, pdfHeight - 10, {align: 'right'});
+      }
+
+
+      const safeProductName = (report.productType || manualForm.getValues("productName") || 'food-label').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      pdf.save(`${safeProductName}_health_report.pdf`);
+      toast({ title: "Report Downloaded", description: "The PDF health report has been saved." });
+
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast({ title: "PDF Error", description: "Could not generate PDF report. " + (error as Error).message, variant: "destructive" });
+    } finally {
+      root.unmount();
+      document.body.removeChild(tempDiv);
+      setIsLoading(false);
+    }
   };
 
   const renderFormattedText = (text?: string) => {
@@ -282,7 +338,7 @@ export function AnalyzerForm() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={isLoading && manualForm.formState.isSubmitting} className="w-full">
+              <Button type="submit" disabled={isLoading || manualForm.formState.isSubmitting} className="w-full">
                 {isLoading && manualForm.formState.isSubmitting ? "Analyzing Manually..." : "Analyze Manually"}
                 <Sparkles className="ml-2 h-4 w-4" />
               </Button>
@@ -290,6 +346,10 @@ export function AnalyzerForm() {
           </Form>
         </CardContent>
       </Card>
+       <div id="pdf-source-analyzer-wrapper" ref={pdfSourceRef} style={{ position: 'absolute', left: '-9999px', top: '0px', width: '210mm', backgroundColor: 'white' }}>
+        {/* This div is used as a mount point for PDF rendering */}
+      </div>
+
 
       {isLoading && !report && (
         <Card className="lg:col-span-1 flex items-center justify-center h-full min-h-[300px]">
@@ -308,8 +368,9 @@ export function AnalyzerForm() {
               <CardTitle className="flex items-center text-2xl">
                 <Sparkles className="mr-2 h-6 w-6 text-accent" /> AI Health Report
               </CardTitle>
-              <Button onClick={handleDownloadReport} variant="outline" size="sm">
-                <Download className="mr-2 h-4 w-4" /> Download
+              <Button onClick={handleDownloadReport} variant="outline" size="sm" disabled={isLoading}>
+                {isLoading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                 Download PDF
               </Button>
             </div>
             {report.productType && (
@@ -456,4 +517,3 @@ export function AnalyzerForm() {
     </div>
   );
 }
-
