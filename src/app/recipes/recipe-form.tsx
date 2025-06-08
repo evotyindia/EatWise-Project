@@ -338,11 +338,12 @@ export function RecipeForm() {
               </Button>
             </form>
           </Form>
+          {/* Quick Add Ingredients Section */}
           <Separator className="my-6"/>
-          <ScrollArea className="max-h-96 pr-2"> {/* Added ScrollArea here */}
+          <ScrollArea className="max-h-96 pr-2">
             <div className="space-y-4">
               <h3 className="text-md font-medium sticky top-0 bg-card py-1 z-10">Quick Add Common Ingredients:</h3>
-              {ingredientCategories.map(category => ( 
+              {ingredientCategories.map(category => (
                 <div key={category.name}>
                   <h4 className="text-sm font-semibold mb-1.5 flex items-center">{category.icon} {category.name}</h4>
                   <div className="flex flex-wrap gap-1.5">
@@ -454,3 +455,5 @@ export function RecipeForm() {
     </div>
   );
 }
+
+    
