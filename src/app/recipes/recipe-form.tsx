@@ -30,6 +30,8 @@ import { Alert, AlertDescription as UIAlertDescription, AlertTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PrintableDetailedRecipe } from "@/components/common/PrintableDetailedRecipe";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
 
 const diseaseOptions: { id: Disease; label: string; icon: React.ElementType }[] = [
   { id: "diabetes", label: "Diabetes", icon: Scale },
@@ -343,18 +345,32 @@ export function RecipeForm() {
             </form>
           </Form>
           <Separator className="my-6"/>
-          <ScrollArea className="max-h-96 pr-2"> {/* Ensure ScrollArea wraps the entire list section */}
-            <div className="space-y-4">
-              <h3 className="text-md font-medium sticky top-0 bg-card py-1 z-10">Quick Add Common Ingredients:</h3>
-              {ingredientCategories.map(category => (
-                <div key={category.name}>
-                  <h4 className="text-sm font-semibold mb-1.5 flex items-center">{category.icon} {category.name}</h4>
-                  <div className="flex flex-wrap gap-1.5">
-                    {category.items.map(item => <Button key={item} variant="outline" size="sm" onClick={() => addIngredientToForm(item)} className="text-xs px-2 py-1 h-auto">{item}</Button>)}
-                  </div>
-                </div>
+          <h3 className="text-md font-medium mb-3 sticky top-0 bg-card py-1 z-10">Quick Add Common Ingredients:</h3>
+          <ScrollArea className="max-h-80 pr-3"> {/* Adjusted max-h, added pr-3 for scrollbar */}
+            <Accordion type="multiple" className="w-full">
+              {ingredientCategories.map((category, index) => (
+                <AccordionItem value={`category-${index}`} key={category.name}>
+                  <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline [&[data-state=open]>svg]:text-primary">
+                    <div className="flex items-center">{category.icon} {category.name}</div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="flex flex-wrap gap-1.5 pt-1 pb-3">
+                      {category.items.map(item => (
+                        <Button 
+                          key={item} 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => addIngredientToForm(item)} 
+                          className="text-xs px-2 py-1 h-auto rounded-full hover:bg-primary/10 hover:border-primary"
+                        >
+                          {item}
+                        </Button>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
               ))}
-            </div>
+            </Accordion>
           </ScrollArea>
         </CardContent>
       </Card>
