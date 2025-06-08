@@ -40,7 +40,7 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
     ratingValueWithJustification: { display: 'flex', flexDirection: 'column', gap: '1mm'},
     justificationText: { fontSize: '8.5pt', color: '#718096', marginLeft: '0px', fontStyle: 'italic' }, // No left margin if on new line
     star: { color: '#FBBF24', marginRight: '1px', fontSize: '12pt' },
-    scaleDescriptionText: { fontSize: '8.5pt', color: '#5A6578', marginLeft: '3px' },
+    scaleDescriptionText: { fontSize: '8.5pt', color: '#5A6578', marginLeft: '3px', fontStyle: 'italic' },
     
     listContainer: { paddingLeft: '0', margin: '0' },
     listItem: { display: 'flex', alignItems: 'flex-start', marginBottom: '2mm', color: '#4A5568' },
@@ -67,7 +67,8 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
     if (!ratingInfo || ratingInfo.rating === undefined) return <div style={styles.ratingValue}>N/A</div>;
     
     let starsJsx = renderStars(ratingInfo.rating);
-    let scaleDescJsx = scaleDescriptionText ? <span style={styles.scaleDescriptionText}>{scaleDescriptionText}</span> : null;
+    // For scaleDescriptionText, render it with <span> and apply the italic style directly here
+    let scaleDescJsx = scaleDescriptionText ? <span style={{...styles.scaleDescriptionText, fontStyle: 'italic'}}>{scaleDescriptionText}</span> : null;
     
     let ratingLine = <>{starsJsx} {scaleDescJsx}</>;
 
@@ -163,10 +164,28 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Overall Ratings</div>
           <div style={styles.ratingBlockContainer}>
-            <div style={styles.ratingBlock}><div style={styles.ratingTitle}>Health Rating:</div>{getRatingDisplay({rating: report.healthRating}, "(Higher stars = better health)")}</div>
-            {report.processingLevelRating && <div style={styles.ratingBlock}><div style={styles.ratingTitle}>Processing Level:</div>{getRatingDisplay(report.processingLevelRating, "(5 stars = highly processed)")}</div>}
-            {report.sugarContentRating && <div style={styles.ratingBlock}><div style={styles.ratingTitle}>Sugar Content:</div>{getRatingDisplay(report.sugarContentRating, "(5 stars = high sugar)")}</div>}
-            {report.nutrientDensityRating && <div style={styles.ratingBlock}><div style={styles.ratingTitle}>Nutrient Density:</div>{getRatingDisplay(report.nutrientDensityRating, "(Higher stars = more nutrient dense)")}</div>}
+            <div style={styles.ratingBlock}>
+                <div style={styles.ratingTitle}>Health Rating:</div>
+                {getRatingDisplay({rating: report.healthRating}, `Higher stars = better health.`)}
+            </div>
+            {report.processingLevelRating && 
+                <div style={styles.ratingBlock}>
+                    <div style={styles.ratingTitle}>Processing Level:</div>
+                    {getRatingDisplay(report.processingLevelRating, `Generally, less processed (fewer stars) is better.`)}
+                </div>
+            }
+            {report.sugarContentRating && 
+                <div style={styles.ratingBlock}>
+                    <div style={styles.ratingTitle}>Sugar Content:</div>
+                    {getRatingDisplay(report.sugarContentRating, `Generally, lower sugar (fewer stars) is better.`)}
+                </div>
+            }
+            {report.nutrientDensityRating && 
+                <div style={styles.ratingBlock}>
+                    <div style={styles.ratingTitle}>Nutrient Density:</div>
+                    {getRatingDisplay(report.nutrientDensityRating, `Higher stars = more nutrient dense.`)}
+                </div>
+            }
           </div>
         </div>
 
