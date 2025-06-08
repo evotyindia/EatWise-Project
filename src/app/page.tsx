@@ -74,12 +74,8 @@ export default function Home() {
             Understand food labels, analyze ingredients, and get healthy Indian recipe suggestions. Your personal AI-powered nutrition guide for a healthier lifestyle. {/* Replaced t('heroDescription') */}
           </p>
           <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-            <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground transition-transform duration-300 ease-in-out hover:scale-105">
-              <Link href="/analyze">Analyze a Food Label</Link> {/* Replaced t('analyzeLabelButton') */}
-            </Button>
-            <Button asChild variant="outline" size="lg" className="transition-transform duration-300 ease-in-out hover:scale-105 border-primary text-primary hover:bg-primary/5">
-              <Link href="/recipes">Get Recipe Ideas</Link> {/* Replaced t('getRecipeIdeasButton') */}
-            </Button>
+            <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground transition-transform duration-300 ease-in-out hover:scale-105"><Link href="/analyze">Analyze a Food Label</Link></Button>
+            <Button asChild variant="outline" size="lg" className="transition-transform duration-300 ease-in-out hover:scale-105 border-primary text-primary hover:bg-primary/5"><Link href="/recipes">Get Recipe Ideas</Link></Button>
           </div>
         </div>
       </section>
