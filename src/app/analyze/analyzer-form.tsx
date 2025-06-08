@@ -39,17 +39,15 @@ const manualInputSchema = z.object({
 
 type ManualInputFormValues = z.infer<typeof manualInputSchema>;
 
-// ChatMessage type is now imported from context-aware-ai-chat.ts
-
 export function AnalyzerForm() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [report, setReport] = useState<GenerateHealthReportOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPdfDownloading, setIsPdfDownloading] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
-  const pdfSourceRef = useRef<HTMLDivElement | null>(null);
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
 
   const { toast } = useToast();
@@ -72,7 +70,7 @@ export function AnalyzerForm() {
         setUploadedImage(reader.result as string);
       };
       reader.readAsDataURL(file);
-      manualForm.reset(); // Clear manual form if image is uploaded
+      manualForm.reset(); 
       setReport(null);
       setChatHistory([]);
     }
@@ -86,7 +84,6 @@ export function AnalyzerForm() {
       const result = await generateHealthReport(input);
       setReport(result);
       toast({ title: "Report Generated", description: "AI analysis complete." });
-      // Initiate chat with a welcome message
       if (result) {
         initiateChatWithWelcome("labelAnalysis", {
           productName: result.productType || input.productName || "the product",
@@ -120,19 +117,17 @@ export function AnalyzerForm() {
   
   const initiateChatWithWelcome = async (contextType: "labelAnalysis" | "recipe" | "nutritionAnalysis" | "general", contextData: any) => {
     setIsChatLoading(true);
-    setChatHistory([]); // Clear previous history for a fresh welcome
+    setChatHistory([]);
     const input: ContextAwareAIChatInput = {
-        userQuestion: "INIT_CHAT_WELCOME", // Special keyword for the AI to generate a welcome
+        userQuestion: "INIT_CHAT_WELCOME", 
         contextType: contextType,
         labelContext: contextType === "labelAnalysis" ? contextData : undefined,
-        // recipeContext, nutritionContext would be populated if this function was called from those pages
     };
     try {
         const aiResponse = await contextAwareAIChat(input);
         setChatHistory([{ role: "assistant", content: aiResponse.answer }]);
     } catch (error) {
         console.error("Chat init error:", error);
-        // Fallback welcome message
         setChatHistory([{ role: "assistant", content: "Hello! How can I assist you with this analysis report today?" }]);
     }
     setIsChatLoading(false);
@@ -151,7 +146,7 @@ export function AnalyzerForm() {
     try {
       const chatContextInput: ContextAwareAIChatInput = {
         userQuestion: userMessage.content,
-        chatHistory: chatHistory.slice(-5), // Send last 5 messages for context
+        chatHistory: chatHistory.slice(-5), 
         contextType: "labelAnalysis",
         labelContext: {
           productName: report.productType || manualForm.getValues("productName") || "N/A",
@@ -178,7 +173,7 @@ export function AnalyzerForm() {
 
   const handleDownloadReport = async () => {
     if (!report) return;
-    setIsLoading(true); // Using general isLoading for PDF download too
+    setIsPdfDownloading(true);
 
     const tempDiv = document.createElement('div');
     tempDiv.id = 'pdf-render-source-analyzer';
@@ -204,7 +199,9 @@ export function AnalyzerForm() {
 
     try {
       const canvas = await html2canvas(tempDiv, {
-        scale: 2, useCORS: true, logging: false, width: tempDiv.scrollWidth, height: tempDiv.scrollHeight, windowWidth: tempDiv.scrollWidth, windowHeight: tempDiv.scrollHeight,
+        scale: 2, useCORS: true, logging: false, 
+        width: tempDiv.scrollWidth, height: tempDiv.scrollHeight, 
+        windowWidth: tempDiv.scrollWidth, windowHeight: tempDiv.scrollHeight,
       });
 
       const imgData = canvas.toDataURL('image/png');
@@ -235,7 +232,7 @@ export function AnalyzerForm() {
       console.error("Error generating PDF:", error);
       toast({ title: "PDF Error", description: "Could not generate PDF report. " + (error as Error).message, variant: "destructive" });
     } finally {
-      root.unmount(); document.body.removeChild(tempDiv); setIsLoading(false);
+      root.unmount(); document.body.removeChild(tempDiv); setIsPdfDownloading(false);
     }
   };
 
@@ -296,8 +293,6 @@ export function AnalyzerForm() {
         </CardContent>
       </Card>
       
-      {/* Hidden div for PDF rendering - no longer needed here, directly use createRoot on a temp div */}
-
       {isLoading && !report && (
         <Card className="lg:col-span-1 flex items-center justify-center h-full min-h-[300px]">
             <div className="text-center"><Sparkles className="mx-auto h-12 w-12 text-primary animate-spin mb-4" /><p className="text-lg font-semibold">Generating AI Report...</p><p className="text-sm text-muted-foreground">Please wait a moment.</p></div>
@@ -309,8 +304,8 @@ export function AnalyzerForm() {
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="flex items-center text-2xl"><Sparkles className="mr-2 h-6 w-6 text-primary" /> AI Health Report</CardTitle>
-              <Button onClick={handleDownloadReport} variant="outline" size="sm" disabled={isLoading}>
-                {isLoading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Download PDF
+              <Button onClick={handleDownloadReport} variant="outline" size="sm" disabled={isPdfDownloading}>
+                {isPdfDownloading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Download PDF
               </Button>
             </div>
             {report.productType && (<CardDescription>Product Type: <span className="font-semibold">{report.productType}</span></CardDescription>)}

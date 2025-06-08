@@ -36,7 +36,7 @@ const diseaseOptions: { id: Disease; label: string; icon: React.ElementType }[] 
   { id: "high_blood_pressure", label: "High BP", icon: HeartCrack },
   { id: "heart_condition", label: "Heart Condition", icon: HeartCrack },
   { id: "gluten_free", label: "Gluten-Free", icon: WheatIcon },
-  { id: "dairy_free", label: "Dairy-Free", icon: MinusCircle }, // Using MinusCircle for dairy-free
+  { id: "dairy_free", label: "Dairy-Free", icon: MinusCircle },
 ];
 
 const recipePageInputSchema = z.object({
@@ -55,12 +55,12 @@ const recipePageInputSchema = z.object({
 type RecipePageFormValues = z.infer<typeof recipePageInputSchema>;
 
 const ingredientCategories = [
-  { name: "Vegetables", icon: <Leaf className="mr-2 h-4 w-4 text-green-500" />, items: ["Onion", "Tomato", "Potato", "Spinach", "Carrot", "Capsicum", "Ginger", "Garlic", "Cauliflower", "Peas", "Beans", "Ladyfinger", "Cabbage", "Mushroom", "Broccoli", "Cucumber", "Radish", "Beetroot", "Coriander Leaves", "Mint Leaves", "Green Chili"] },
-  { name: "Spices", icon: <Sparkles className="mr-2 h-4 w-4 text-yellow-500" />, items: ["Turmeric Powder", "Cumin Powder", "Coriander Powder", "Garam Masala", "Chili Powder", "Mustard Seeds", "Asafoetida (Hing)", "Fenugreek Seeds", "Cumin Seeds", "Black Pepper", "Cardamom", "Cloves", "Cinnamon", "Bay Leaf", "Salt"] },
-  { name: "Dals & Legumes", icon: <Utensils className="mr-2 h-4 w-4 text-orange-500" />, items: ["Moong Dal", "Toor Dal (Arhar)", "Chana Dal", "Masoor Dal", "Rajma (Kidney Beans)", "Chickpeas (Chole/Kabuli Chana)", "Black Eyed Peas (Lobia)", "Urad Dal", "Green Gram (Sabut Moong)"] },
-  { name: "Grains & Flours", icon: <WheatIcon className="mr-2 h-4 w-4 text-amber-700" />, items: ["Rice (Basmati)", "Rice (Sona Masoori)", "Wheat Flour (Atta)", "Besan (Gram Flour)", "Suji (Semolina)", "Poha (Flattened Rice)", "Maida (All-purpose flour)", "Ragi Flour", "Jowar Flour", "Bajra Flour", "Bread"] },
-  { name: "Dairy & Fats", icon: <Milk className="mr-2 h-4 w-4 text-blue-400" />, items: ["Paneer (Indian Cheese)", "Curd (Yogurt)", "Milk", "Ghee", "Butter", "Cooking Oil (Sunflower)", "Cooking Oil (Mustard)", "Cooking Oil (Groundnut)", "Olive Oil", "Cream (Malai)"] },
-  { name: "Sweeteners & Nuts", icon: <Cookie className="mr-2 h-4 w-4 text-yellow-700" />, items: ["Sugar", "Jaggery (Gur)", "Honey", "Almonds", "Cashews", "Raisins", "Walnuts", "Peanuts"] }
+  { name: "Vegetables", icon: <Leaf className="mr-2 h-4 w-4 text-green-500" />, items: ["Onion", "Tomato", "Potato", "Spinach", "Carrot", "Capsicum", "Ginger", "Garlic", "Cauliflower", "Peas", "Beans", "Ladyfinger (Okra)", "Cabbage", "Mushroom", "Broccoli", "Cucumber", "Radish", "Beetroot", "Coriander Leaves", "Mint Leaves", "Green Chili", "Lemon", "Bottle Gourd (Lauki)", "Ridge Gourd (Turai)", "Brinjal (Eggplant)", "Sweet Potato"] },
+  { name: "Spices & Herbs", icon: <Sparkles className="mr-2 h-4 w-4 text-yellow-500" />, items: ["Turmeric Powder", "Cumin Powder", "Coriander Powder", "Garam Masala", "Red Chili Powder", "Mustard Seeds", "Asafoetida (Hing)", "Fenugreek Seeds (Methi)", "Cumin Seeds (Jeera)", "Black Pepper", "Cardamom (Elaichi)", "Cloves (Laung)", "Cinnamon (Dalchini)", "Bay Leaf (Tej Patta)", "Salt", "Kasuri Methi (Dry Fenugreek)", "Curry Leaves", "Saffron (Kesar)"] },
+  { name: "Dals & Legumes", icon: <Utensils className="mr-2 h-4 w-4 text-orange-500" />, items: ["Moong Dal (Yellow Lentil)", "Toor Dal (Arhar/Pigeon Pea)", "Chana Dal (Split Chickpea)", "Masoor Dal (Red Lentil)", "Rajma (Kidney Beans)", "Chickpeas (Chole/Kabuli Chana)", "Black Eyed Peas (Lobia)", "Urad Dal (Black Gram)", "Green Gram (Sabut Moong)", "Black Chickpeas (Kala Chana)"] },
+  { name: "Grains & Flours", icon: <WheatIcon className="mr-2 h-4 w-4 text-amber-700" />, items: ["Rice (Basmati)", "Rice (Sona Masoori/Regular)", "Wheat Flour (Atta)", "Besan (Gram Flour)", "Suji (Semolina/Rava)", "Poha (Flattened Rice)", "Maida (All-purpose flour)", "Ragi Flour (Finger Millet)", "Jowar Flour (Sorghum)", "Bajra Flour (Pearl Millet)", "Bread (Whole Wheat/White)", "Oats", "Quinoa"] },
+  { name: "Dairy & Fats", icon: <Milk className="mr-2 h-4 w-4 text-blue-400" />, items: ["Paneer (Indian Cheese)", "Curd (Yogurt/Dahi)", "Milk", "Ghee (Clarified Butter)", "Butter", "Cooking Oil (Sunflower)", "Cooking Oil (Mustard)", "Cooking Oil (Groundnut)", "Olive Oil", "Coconut Oil", "Cream (Malai)", "Cheese (Processed/Cheddar)"] },
+  { name: "Sweeteners, Nuts & Seeds", icon: <Cookie className="mr-2 h-4 w-4 text-yellow-700" />, items: ["Sugar", "Jaggery (Gur)", "Honey", "Almonds (Badam)", "Cashews (Kaju)", "Raisins (Kishmish)", "Walnuts (Akhrot)", "Peanuts (Moongphali)", "Pistachios (Pista)", "Coconut (Fresh/Dry)", "Poppy Seeds (Khas Khas)", "Sesame Seeds (Til)", "Flax Seeds (Alsi)", "Chia Seeds"] }
 ];
 
 export function RecipeForm() {
@@ -68,7 +68,7 @@ export function RecipeForm() {
   const [detailedRecipe, setDetailedRecipe] = useState<GetDetailedRecipeOutput | null>(null);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [isPdfDownloading, setIsPdfDownloading] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -97,7 +97,7 @@ export function RecipeForm() {
     setDishSuggestions(null);
     setDetailedRecipe(null);
     setChatHistory([]);
-    setCurrentFormInputs(data); // Save form inputs for fetching detailed recipe later
+    setCurrentFormInputs(data); 
     try {
       const diseases = data.diseaseConcerns?.length ? data.diseaseConcerns : [DiseaseEnum.enum.none];
       const input: GetRecipeSuggestionsInput = {
@@ -123,7 +123,7 @@ export function RecipeForm() {
     if (!currentFormInputs) return;
     setIsLoadingRecipe(true);
     setDetailedRecipe(null);
-    setChatHistory([]); // Reset chat for new recipe
+    setChatHistory([]); 
 
     try {
       const diseases = currentFormInputs.diseaseConcerns?.length ? currentFormInputs.diseaseConcerns : [DiseaseEnum.enum.none];
@@ -140,7 +140,6 @@ export function RecipeForm() {
       const result = await getDetailedRecipe(input);
       setDetailedRecipe(result);
       toast({ title: `Recipe for ${result.recipeTitle} Generated!`, description: "Scroll down to view the recipe and chat." });
-      // Initiate chat with a welcome message
       if (result) {
         initiateChatWithWelcome("recipe", { dishName: result.recipeTitle, recipeIngredients: result.adjustedIngredients.map(i => `${i.quantity} ${i.name}`).join(', '), currentRecipeHealthNotes: result.healthNotes });
       }
@@ -153,12 +152,11 @@ export function RecipeForm() {
   
   const initiateChatWithWelcome = async (contextType: "recipe" | "labelAnalysis" | "nutritionAnalysis" | "general", contextData: any) => {
     setIsChatLoading(true);
-    setChatHistory([]); // Clear previous history
+    setChatHistory([]); 
     const input: ContextAwareAIChatInput = {
         userQuestion: "INIT_CHAT_WELCOME",
         contextType: contextType,
         recipeContext: contextType === "recipe" ? contextData : undefined,
-        // Add other contexts as needed
     };
     try {
         const aiResponse = await contextAwareAIChat(input);
@@ -184,7 +182,7 @@ export function RecipeForm() {
     try {
       const chatContextInput: ContextAwareAIChatInput = {
         userQuestion: userMessage.content,
-        chatHistory: chatHistory.slice(-5), // Send last 5 messages for context
+        chatHistory: chatHistory.slice(-5),
         contextType: "recipe",
         recipeContext: {
           dishName: detailedRecipe.recipeTitle,
@@ -212,10 +210,10 @@ export function RecipeForm() {
 
   const handleDownloadRecipePdf = async () => {
     if (!detailedRecipe || !currentFormInputs) return;
-    setIsDownloading(true);
+    setIsPdfDownloading(true);
 
     const tempDiv = document.createElement('div');
-    tempDiv.id = 'pdf-render-source-detailed-recipe'; // Unique ID
+    tempDiv.id = 'pdf-render-source-detailed-recipe';
     tempDiv.style.position = 'absolute';
     tempDiv.style.left = '-9999px';
     tempDiv.style.top = '0px';
@@ -246,7 +244,9 @@ export function RecipeForm() {
 
     try {
       const canvas = await html2canvas(tempDiv, {
-        scale: 2, useCORS: true, logging: false, width: tempDiv.scrollWidth, height: tempDiv.scrollHeight, windowWidth: tempDiv.scrollWidth, windowHeight: tempDiv.scrollHeight,
+        scale: 2, useCORS: true, logging: false, 
+        width: tempDiv.scrollWidth, height: tempDiv.scrollHeight, 
+        windowWidth: tempDiv.scrollWidth, windowHeight: tempDiv.scrollHeight,
       });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -275,7 +275,7 @@ export function RecipeForm() {
       console.error("Error generating PDF:", error);
       toast({ title: "PDF Error", description: "Could not generate PDF report. " + (error as Error).message, variant: "destructive" });
     } finally {
-      root.unmount(); document.body.removeChild(tempDiv); setIsDownloading(false);
+      root.unmount(); document.body.removeChild(tempDiv); setIsPdfDownloading(false);
     }
   };
 
@@ -339,17 +339,19 @@ export function RecipeForm() {
             </form>
           </Form>
           <Separator className="my-6"/>
-          <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-            <h3 className="text-md font-medium sticky top-0 bg-card py-1">Quick Add Common Ingredients:</h3>
-            {ingredientCategories.map(category => ( 
-              <div key={category.name}>
-                <h4 className="text-sm font-semibold mb-1.5 flex items-center">{category.icon} {category.name}</h4>
-                <div className="flex flex-wrap gap-1.5">
-                  {category.items.map(item => <Button key={item} variant="outline" size="sm" onClick={() => addIngredientToForm(item)} className="text-xs px-2 py-1 h-auto">{item}</Button>)}
+          <ScrollArea className="max-h-96 pr-2"> {/* Added ScrollArea here */}
+            <div className="space-y-4">
+              <h3 className="text-md font-medium sticky top-0 bg-card py-1 z-10">Quick Add Common Ingredients:</h3>
+              {ingredientCategories.map(category => ( 
+                <div key={category.name}>
+                  <h4 className="text-sm font-semibold mb-1.5 flex items-center">{category.icon} {category.name}</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {category.items.map(item => <Button key={item} variant="outline" size="sm" onClick={() => addIngredientToForm(item)} className="text-xs px-2 py-1 h-auto">{item}</Button>)}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </ScrollArea>
         </CardContent>
       </Card>
 
@@ -385,8 +387,8 @@ export function RecipeForm() {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle className="text-2xl flex items-center"><FileText className="mr-2 h-6 w-6 text-primary"/> {detailedRecipe.recipeTitle}</CardTitle>
-                <Button onClick={handleDownloadRecipePdf} variant="outline" size="sm" disabled={isDownloading}>
-                  {isDownloading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Download PDF
+                <Button onClick={handleDownloadRecipePdf} variant="outline" size="sm" disabled={isPdfDownloading}>
+                  {isPdfDownloading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Download PDF
                 </Button>
               </div>
               {detailedRecipe.description && <CardDescription>{detailedRecipe.description}</CardDescription>}
@@ -439,7 +441,6 @@ export function RecipeForm() {
           </Card>
         )}
         
-        {/* Placeholder for initial state or when no specific results are loaded */}
         {!isLoadingSuggestions && !dishSuggestions && !detailedRecipe && !isLoadingRecipe &&(
            <Card className="flex items-center justify-center h-full min-h-[300px] bg-muted/30 md:col-span-2">
             <div className="text-center p-8">
@@ -453,5 +454,3 @@ export function RecipeForm() {
     </div>
   );
 }
-
-    

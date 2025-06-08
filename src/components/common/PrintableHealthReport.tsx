@@ -13,38 +13,39 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
   const styles: { [key: string]: React.CSSProperties } = {
     pdfContainer: { width: '210mm', boxSizing: 'border-box', backgroundColor: '#ffffff', color: '#333333', fontFamily: 'Arial, sans-serif', fontSize: '10pt', lineHeight: '1.4' },
     
-    // About Page Styles
-    aboutPage: { padding: '15mm', minHeight: '277mm', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', borderBottom: '1px solid #e0e0e0' },
-    logoContainer: { marginBottom: '20px' },
-    logoSvg: { width: '150px', height: 'auto' }, // Adjusted logo size
-    aboutTitle: { fontSize: '22pt', fontWeight: 'bold', color: '#0f172a', marginBottom: '10mm' }, // Primary color
-    aboutText: { fontSize: '10pt', marginBottom: '5mm', maxWidth: '170mm', textAlign: 'justify', color: '#4A5568' }, // Darker gray for text
-    disclaimerText: { fontSize: '9pt', fontStyle: 'italic', marginTop: '8mm', maxWidth: '170mm', textAlign: 'center', color: '#718096' }, // Lighter gray
-    aboutPageFooter: { fontSize: '8pt', color: '#A0AEC0', marginTop: 'auto', paddingTop: '10mm' }, // Lightest gray
+    aboutPage: { padding: '15mm', minHeight: '277mm', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center', textAlign: 'center', borderBottom: '1px solid #e0e0e0', boxSizing: 'border-box' },
+    logoContainer: { marginBottom: '10mm' },
+    logoSvg: { width: '150px', height: 'auto' },
+    aboutTitle: { fontSize: '22pt', fontWeight: 'bold', color: '#0f172a', marginBottom: '8mm' },
+    aboutSection: { marginBottom: '6mm', maxWidth: '170mm', textAlign: 'justify' },
+    aboutSectionTitle: { fontSize: '12pt', fontWeight: 'bold', color: '#1A202C', marginBottom: '3mm', textAlign: 'center' },
+    aboutText: { fontSize: '10pt', color: '#4A5568', marginBottom: '4mm' },
+    disclaimerText: { fontSize: '9pt', fontStyle: 'italic', color: '#718096', marginTop: 'auto', paddingTop: '8mm' },
+    aboutPageFooter: { fontSize: '8pt', color: '#A0AEC0', marginTop: '5mm', borderTop: '1px solid #eee', paddingTop: '5mm', width: '100%' },
 
-    // Report Page Styles
-    reportPage: { padding: '15mm', boxSizing: 'border-box' },
-    reportHeader: { textAlign: 'center', marginBottom: '10mm' },
-    reportTitle: { fontSize: '20pt', fontWeight: 'bold', color: '#0f172a', marginBottom: '2mm' }, // Primary color
-    productName: { fontSize: '14pt', fontWeight: 'bold', marginBottom: '8mm', color: '#2D3748' }, // Slightly lighter than title
+    reportPage: { padding: '15mm', boxSizing: 'border-box', minHeight: '277mm' },
+    reportHeader: { textAlign: 'center', marginBottom: '10mm', display: 'flex', flexDirection: 'column', alignItems: 'center' },
+    reportHeaderLogo: { width: '100px', height: 'auto', marginBottom: '5mm'},
+    reportTitle: { fontSize: '20pt', fontWeight: 'bold', color: '#0f172a', marginBottom: '2mm' },
+    productName: { fontSize: '14pt', fontWeight: 'bold', marginBottom: '8mm', color: '#2D3748' },
     
-    section: { marginBottom: '7mm', padding: '5mm', border: '1px solid #E2E8F0', borderRadius: '6px', backgroundColor: '#F7FAFC' }, // Lighter border and bg
-    sectionTitle: { fontSize: '14pt', fontWeight: 'bold', color: '#1A202C', marginTop: '0', marginBottom: '5mm', borderBottom: '2px solid #10b981', paddingBottom: '3mm' }, // Accent color for border
+    section: { marginBottom: '7mm', padding: '5mm', border: '1px solid #E2E8F0', borderRadius: '6px', backgroundColor: '#F7FAFC' },
+    sectionTitle: { fontSize: '14pt', fontWeight: 'bold', color: '#1A202C', marginTop: '0', marginBottom: '5mm', borderBottom: '2px solid #10b981', paddingBottom: '3mm' },
     subSectionTitle: { fontSize: '12pt', fontWeight: 'bold', color: '#2D3748', marginTop: '5mm', marginBottom: '3mm' },
     
     ratingBlockContainer: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5mm', marginBottom: '7mm' },
     ratingBlock: { border: '1px solid #CBD5E0', padding: '4mm', borderRadius: '4px', backgroundColor: '#FFFFFF', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' },
     ratingTitle: { fontWeight: 'bold', marginBottom: '2mm', fontSize: '10pt', color: '#4A5568' },
     ratingValue: { fontSize: '10pt', color: '#1A202C', display: 'flex', alignItems: 'center' },
-    star: { color: '#FBBF24', marginRight: '1px', fontSize: '12pt' }, // Yellow star
+    star: { color: '#FBBF24', marginRight: '1px', fontSize: '12pt' },
     
     list: { listStyleType: 'disc', paddingLeft: '5mm', margin: '0 0 3mm 0' },
     listItem: { marginBottom: '2mm', paddingLeft: '1.5mm', color: '#4A5568' },
-    concernsListItem: { marginBottom: '2mm', paddingLeft: '1.5mm', color: '#c0392b' }, // Keep concern color distinct
+    concernsListItem: { marginBottom: '2mm', paddingLeft: '1.5mm', color: '#c0392b' },
     
     chatContainer: { marginTop: '7mm', borderTop: '1px solid #E2E8F0', paddingTop: '5mm' },
     chatMessage: { marginBottom: '3mm', padding: '3mm', borderRadius: '4px', border: '1px solid #F0F0F0', backgroundColor: '#FFFFFF' },
-    chatUser: { fontWeight: 'bold', color: '#0f172a', display: 'block', marginBottom: '1mm', fontSize: '9pt' }, // Primary color
+    chatUser: { fontWeight: 'bold', color: '#0f172a', display: 'block', marginBottom: '1mm', fontSize: '9pt' },
     chatAssistant: { color: '#2D3748', display: 'block', fontSize: '9pt' },
   };
 
@@ -77,45 +78,56 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
 
   return (
     <div style={styles.pdfContainer}>
-      {/* About Page */}
       <div style={styles.aboutPage} className="pdf-page">
-        <div style={styles.logoContainer}>
-          <svg style={styles.logoSvg} viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg">
-            <rect width="180" height="60" rx="8" ry="8" fill="#E6FFFA" /> {/* Light emerald bg */}
-            <path d="M30 35 Q40 15 50 35 T70 35 M50 15 V35" stroke="#10b981" strokeWidth="3.5" fill="none" strokeLinecap="round"/> {/* Emerald leaf */}
-            <text x="80" y="32" fontFamily="Poppins, Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#0f172a">EatWise</text>
-            <text x="82" y="48" fontFamily="Inter, Arial, sans-serif" fontSize="10" fill="#0f172a">India</text>
-          </svg>
+        <div>
+          <div style={styles.logoContainer}>
+            <svg style={styles.logoSvg} viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg">
+              <rect width="180" height="60" rx="8" ry="8" fill="#E6FFFA" />
+              <path d="M30 35 Q40 15 50 35 T70 35 M50 15 V35" stroke="#10b981" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+              <text x="80" y="32" fontFamily="Poppins, Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#0f172a">EatWise</text>
+              <text x="82" y="48" fontFamily="Inter, Arial, sans-serif" fontSize="10" fill="#0f172a">India</text>
+            </svg>
+          </div>
+          <h1 style={styles.aboutTitle}>AI Health Report by EatWise India</h1>
+          
+          <div style={styles.aboutSection}>
+            <div style={styles.aboutSectionTitle}>Our Mission & Vision</div>
+            <p style={styles.aboutText}>
+              EatWise India is dedicated to empowering individuals across India to make informed and healthier food choices. 
+              Our mission is to demystify nutrition labels, highlight the benefits of traditional Indian ingredients, 
+              and provide accessible AI-powered tools to foster a greater understanding of food. We envision a healthier India, 
+              where everyone has the knowledge to eat wisely and live well.
+            </p>
+          </div>
+
+          <div style={styles.aboutSection}>
+            <div style={styles.aboutSectionTitle}>How to Use This Report</div>
+            <p style={styles.aboutText}>
+              This report offers an AI-generated analysis of the food product based on the information you provided. 
+              It aims to highlight key nutritional aspects, potential concerns, and suggest healthier alternatives. 
+              Use it as a guide to understand your food better and make conscious decisions about what you consume.
+            </p>
+          </div>
         </div>
-        <h1 style={styles.aboutTitle}>AI Health Report by EatWise India</h1>
-        <p style={styles.aboutText}>
-          EatWise India is dedicated to empowering individuals across India to make informed and healthier food choices. 
-          Our mission is to demystify nutrition labels, highlight the benefits of traditional Indian ingredients, 
-          and provide accessible AI-powered tools to foster a greater understanding of food.
-        </p>
-        <p style={styles.aboutText}>
-          This report offers an AI-generated analysis of the food product based on the information you provided. 
-          It aims to highlight key nutritional aspects, potential concerns, and suggest healthier alternatives.
-        </p>
-        <p style={styles.disclaimerText}>
-          <strong>Disclaimer:</strong> This report is for informational purposes only and is not a substitute for professional medical or nutritional advice. 
-          Always consult with a qualified healthcare provider or registered dietitian for any health concerns or before making significant dietary changes. 
-          The AI's analysis is based on the data provided and general nutritional knowledge; it does not consider individual health conditions beyond what might be inferred from general product information.
-        </p>
-        <div style={styles.aboutPageFooter}>EatWise India - Your Partner in Healthy Eating. Generated on: {new Date().toLocaleDateString('en-GB')}</div>
+        
+        <div>
+          <p style={styles.disclaimerText}>
+            <strong>Disclaimer:</strong> This report is for informational purposes only and is not a substitute for professional medical or nutritional advice. 
+            Always consult with a qualified healthcare provider or registered dietitian for any health concerns or before making significant dietary changes. 
+            The AI's analysis is based on the data provided and general nutritional knowledge; it does not consider individual health conditions beyond what might be inferred from general product information.
+          </p>
+          <div style={styles.aboutPageFooter}>EatWise India - Your Partner in Healthy Eating. Generated on: {new Date().toLocaleDateString('en-GB')}</div>
+        </div>
       </div>
 
-      {/* Report Content Page */}
       <div style={styles.reportPage} className="pdf-page">
         <div style={styles.reportHeader}>
-            <div style={styles.logoContainer}> {/* Smaller logo for content pages */}
-              <svg style={{...styles.logoSvg, width: '100px'}} viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg">
-                <rect width="180" height="60" rx="8" ry="8" fill="#E6FFFA" />
-                <path d="M30 35 Q40 15 50 35 T70 35 M50 15 V35" stroke="#10b981" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
-                <text x="80" y="32" fontFamily="Poppins, Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#0f172a">EatWise</text>
-                <text x="82" y="48" fontFamily="Inter, Arial, sans-serif" fontSize="10" fill="#0f172a">India</text>
-              </svg>
-            </div>
+            <svg style={styles.reportHeaderLogo} viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg">
+              <rect width="180" height="60" rx="8" ry="8" fill="#E6FFFA" />
+              <path d="M30 35 Q40 15 50 35 T70 35 M50 15 V35" stroke="#10b981" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+              <text x="80" y="32" fontFamily="Poppins, Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#0f172a">EatWise</text>
+              <text x="82" y="48" fontFamily="Inter, Arial, sans-serif" fontSize="10" fill="#0f172a">India</text>
+            </svg>
           <div style={styles.reportTitle}>AI Health Report</div>
           { (report.productType || productNameContext) && 
             <div style={styles.productName}>Product: {report.productType || productNameContext || "Not Specified"}</div>
@@ -158,7 +170,7 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
         {chatHistory && chatHistory.length > 0 && (
           <div style={{...styles.section, ...styles.chatContainer}} className="pdf-page-break-before">
             <div style={styles.sectionTitle}>Chat History Digest</div>
-            {chatHistory.map((msg, index) => (
+            {chatHistory.slice(-5).map((msg, index) => ( // Show last 5 messages
               <div key={index} style={styles.chatMessage}>
                 <span style={styles.chatUser}>{msg.role === 'user' ? 'Your Question:' : 'AI Advisor Response:'}</span>
                 <span style={msg.role === 'user' ? {color: '#555555'} : styles.chatAssistant }>{msg.content}</span>
