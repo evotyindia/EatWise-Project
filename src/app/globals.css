@@ -4,33 +4,33 @@
 
 @layer base {
   :root {
-    --background: 220 20% 96.5%; /* Softer off-white #f5f6f7 */
-    --foreground: 222 47% 11%; /* Dark text */
+    --background: 40 50% 98%;    /* Very Light Warm Cream: #fcfaf5 */
+    --foreground: 222 47% 11%; /* Dark text (existing) */
 
-    --card: 0 0% 100%; /* White cards */
-    --card-foreground: 222 47% 11%;
+    --card: 0 0% 100%;           /* Pure White: #ffffff */
+    --card-foreground: 222 47% 11%; /* (existing) */
 
-    --popover: 0 0% 100%; /* White popovers */
-    --popover-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;        /* Pure White: #ffffff */
+    --popover-foreground: 222 47% 11%; /* (existing) */
 
-    --primary: 222 47% 11%; /* Dark primary */
-    --primary-foreground: 210 17% 98%; /* Light text for primary buttons */
+    --primary: 222 47% 11%; /* Dark primary (existing) */
+    --primary-foreground: 210 17% 98%; /* Light text for primary buttons (existing) */
 
-    --secondary: 45 93% 53%; /* Yellow */
-    --secondary-foreground: 222 47% 11%; /* Dark text for secondary buttons */
+    --secondary: 45 93% 53%; /* Yellow (existing) */
+    --secondary-foreground: 222 47% 11%; /* Dark text for secondary buttons (existing) */
 
-    --muted: 220 16% 93%; /* Lighter muted #eceef0 */
-    --muted-foreground: 220 9% 45%;
+    --muted: 40 40% 95%;         /* Slightly Darker Cream: #f7f5f1 */
+    --muted-foreground: 40 10% 40%; /* Warmer Dark Grey: #737069 */
 
-    --accent: 160 80% 42%; /* Emerald */
-    --accent-foreground: 210 17% 98%; /* Light text for accent elements */
+    --accent: 160 80% 42%; /* Emerald (existing) */
+    --accent-foreground: 210 17% 98%; /* Light text for accent elements (existing) */
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 15% 89%; /* Softer border #e2e4e8 */
-    --input: 220 15% 89%; /* Input border same as general border */
-    --ring: 160 80% 42%; /* Emerald for rings */
+    --border: 40 30% 92%;          /* Soft Warm Grey Border: #f0ede8 */
+    --input: 40 30% 92%;           /* Input border same as general border */
+    --ring: 160 80% 42%; /* Emerald for rings (existing) */
 
     --radius: 0.5rem;
 
@@ -41,14 +41,14 @@
     --chart-5: 27 87% 67%;
 
     /* Sidebar light theme adjustments */
-    --sidebar-background: 0 0% 100%; /* White sidebar */
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%; 
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 220 20% 95%; /* Light gray accent for sidebar items #f2f3f5 */
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 15% 92%; /* Border for sidebar itself or elements within #eaebed */
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 0 0% 100%; /* White sidebar (contrasts subtly with cream main bg) */
+    --sidebar-foreground: 240 5.3% 26.1%; /* (existing) */
+    --sidebar-primary: 240 5.9% 10%;  /* (existing) */
+    --sidebar-primary-foreground: 0 0% 98%; /* (existing) */
+    --sidebar-accent: 40 40% 96%; /* Very Light Cream for hover: #f8f7f4 */
+    --sidebar-accent-foreground: 240 5.9% 10%; /* (existing) */
+    --sidebar-border: 40 25% 90%; /* Warmer sidebar border: #ebe9e4 */
+    --sidebar-ring: 217.2 91.2% 59.8%; /* (existing) */
   }
 
   .dark {
