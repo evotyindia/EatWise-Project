@@ -1,6 +1,6 @@
 
 import Image from "next/image";
-import { Link } from "@/navigation"; 
+import { Link } from '@/navigation'; 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { CheckCircle, ScanLine, MessageCircle, CookingPot, BarChart3 as ChartColumn, Users, Target, Lightbulb } from "lucide-react";
@@ -60,7 +60,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+      <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-primary/10 via-background to-accent/10">
         <div className="container px-4 md:px-6 text-center">
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-primary">
             EatWise India
@@ -183,7 +183,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {testimonials.map((testimonial, idx) => (
-              <Card key={idx} className="bg-background flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-300 hover:-translate-y-1">
+              <Card key={idx} className="bg-background flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                 <CardContent className="pt-6 pb-4 flex-grow">
                   <blockquote className="text-lg italic text-foreground/90">
                     &quot;{testimonial.quote}&quot;
@@ -275,5 +275,4 @@ export default function Home() {
     </div>
   );
 }
-
     
