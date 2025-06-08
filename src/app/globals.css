@@ -4,32 +4,32 @@
 
 @layer base {
   :root {
-    --background: 210 17% 98%; /* #f8f9fa light mode background */
-    --foreground: 222 47% 11%; /* #0f172a light mode text */
+    --background: 220 20% 96.5%; /* Softer off-white #f5f6f7 */
+    --foreground: 222 47% 11%; /* Dark text */
 
-    --card: 210 17% 98%;
+    --card: 0 0% 100%; /* White cards */
     --card-foreground: 222 47% 11%;
 
-    --popover: 210 17% 98%;
+    --popover: 0 0% 100%; /* White popovers */
     --popover-foreground: 222 47% 11%;
 
-    --primary: 222 47% 11%; /* #0f172a */
+    --primary: 222 47% 11%; /* Dark primary */
     --primary-foreground: 210 17% 98%; /* Light text for primary buttons */
 
-    --secondary: 45 93% 53%; /* #facc15 yellow */
+    --secondary: 45 93% 53%; /* Yellow */
     --secondary-foreground: 222 47% 11%; /* Dark text for secondary buttons */
 
-    --muted: 220 14% 90%;
+    --muted: 220 16% 93%; /* Lighter muted #eceef0 */
     --muted-foreground: 220 9% 45%;
 
-    --accent: 160 80% 42%; /* #10b981 emerald */
+    --accent: 160 80% 42%; /* Emerald */
     --accent-foreground: 210 17% 98%; /* Light text for accent elements */
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 13% 85%;
-    --input: 220 13% 90%;
+    --border: 220 15% 89%; /* Softer border #e2e4e8 */
+    --input: 220 15% 89%; /* Input border same as general border */
     --ring: 160 80% 42%; /* Emerald for rings */
 
     --radius: 0.5rem;
@@ -40,13 +40,14 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
 
-    --sidebar-background: 0 0% 98%;
+    /* Sidebar light theme adjustments */
+    --sidebar-background: 0 0% 100%; /* White sidebar */
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary: 240 5.9% 10%; 
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent: 220 20% 95%; /* Light gray accent for sidebar items #f2f3f5 */
     --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
+    --sidebar-border: 220 15% 92%; /* Border for sidebar itself or elements within #eaebed */
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
