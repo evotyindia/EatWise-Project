@@ -60,7 +60,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-[hsl(var(--primary)/0.05)] via-[hsl(var(--background))] to-[hsl(var(--accent)/0.05)] dark:from-[hsl(var(--primary)/0.1)] dark:via-[hsl(var(--background))] dark:to-[hsl(var(--accent)/0.1)]">
+      <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-[hsl(var(--primary)/0.07)] via-[hsl(var(--background))] to-[hsl(var(--accent)/0.07)] dark:from-[hsl(var(--primary)/0.15)] dark:via-[hsl(var(--background))] dark:to-[hsl(var(--accent)/0.15)]">
         <div className="container px-4 md:px-6 text-center">
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-primary">
             EatWise India
