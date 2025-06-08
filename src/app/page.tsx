@@ -60,7 +60,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-[hsl(160_70%_96%)] to-[hsl(165_65%_94%)]">
+      <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-[hsl(var(--primary)/0.05)] via-[hsl(var(--background))] to-[hsl(var(--accent)/0.05)] dark:from-[hsl(var(--primary)/0.1)] dark:via-[hsl(var(--background))] dark:to-[hsl(var(--accent)/0.1)]">
         <div className="container px-4 md:px-6 text-center">
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-primary">
             EatWise India
@@ -183,7 +183,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {testimonials.map((testimonial, idx) => (
-              <Card key={idx} className="bg-background flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <Card key={idx} className="bg-card flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                 <CardContent className="pt-6 pb-4 flex-grow">
                   <blockquote className="text-lg italic text-foreground/90">
                     &quot;{testimonial.quote}&quot;
@@ -192,7 +192,7 @@ export default function Home() {
                 <CardFooter className="flex items-center gap-4 pt-0 pb-6 px-6">
                    <Image src={"https://placehold.co/80x80.png"} alt={testimonial.name} width={50} height={50} className="rounded-full" data-ai-hint="person smiling face" />
                   <div>
-                    <p className="font-semibold">{testimonial.name}</p>
+                    <p className="font-semibold text-card-foreground">{testimonial.name}</p>
                     <p className="text-sm text-muted-foreground">{testimonial.location}</p>
                   </div>
                 </CardFooter>

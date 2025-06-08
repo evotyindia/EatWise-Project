@@ -29,7 +29,7 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 max-w-screen-2xl items-center">
         <Link href="/" className="mr-6 flex items-center space-x-2">
-          <Leaf className="h-6 w-6 text-[hsl(160_80%_42%)]" /> {/* Consistent emerald green logo */}
+          <Leaf className="h-6 w-6 text-primary" />
           <span className="font-bold sm:inline-block font-headline">
             EatWise India
           </span>

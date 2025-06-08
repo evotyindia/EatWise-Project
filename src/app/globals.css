@@ -1,36 +1,38 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: hsl(40, 50%, 97%);    /* Light Warm Cream: #fbf9f4 */
-    --foreground: hsl(222, 47%, 11%); /* Dark text (existing) */
+    /* Light Theme - Soft, Warm, and Modern */
+    --background: hsl(36, 100%, 98%);    /* Very Soft Peach White */
+    --foreground: hsl(240, 10%, 25%); /* Dark Slate Blue (for text) */
 
-    --card: hsl(0, 0%, 100%);           /* Pure White: #ffffff */
-    --card-foreground: hsl(222, 47%, 11%); /* (existing) */
+    --card: hsl(0, 0%, 100%);           /* Pure White */
+    --card-foreground: hsl(240, 10%, 25%);
 
-    --popover: hsl(0, 0%, 100%);        /* Pure White: #ffffff */
-    --popover-foreground: hsl(222, 47%, 11%); /* (existing) */
+    --popover: hsl(0, 0%, 100%);        /* Pure White */
+    --popover-foreground: hsl(240, 10%, 25%);
 
-    --primary: hsl(222, 47%, 11%); /* Dark primary (existing) */
-    --primary-foreground: hsl(210, 17%, 98%); /* Light text for primary buttons (existing) */
+    --primary: hsl(150, 60%, 40%); /* Emerald Green (main brand color) */
+    --primary-foreground: hsl(0, 0%, 100%); /* White text on primary */
 
-    --secondary: hsl(45, 93%, 53%); /* Yellow (existing) */
-    --secondary-foreground: hsl(222, 47%, 11%); /* Dark text for secondary buttons (existing) */
+    --secondary: hsl(30, 90%, 60%);     /* Warm Orange */
+    --secondary-foreground: hsl(0, 0%, 100%); /* White text on secondary */
 
-    --muted: hsl(40, 40%, 94%);         /* Slightly Darker Cream: #f6f4ef */
-    --muted-foreground: hsl(40, 10%, 35%); /* Warmer Dark Grey: #65625c */
+    --muted: hsl(36, 80%, 94%);         /* Lighter Peach Cream */
+    --muted-foreground: hsl(240, 8%, 45%); /* Medium Slate Blue */
 
-    --accent: hsl(160, 80%, 42%); /* Emerald (existing) */
-    --accent-foreground: hsl(210, 17%, 98%); /* Light text for accent elements (existing) */
+    --accent: hsl(200, 80%, 58%);       /* Sky Blue */
+    --accent-foreground: hsl(0, 0%, 100%);   /* White text on accent */
 
-    --destructive: hsl(0, 84.2%, 60.2%);
-    --destructive-foreground: hsl(0, 0%, 98%);
+    --destructive: hsl(0, 75%, 55%);    /* Vivid Red */
+    --destructive-foreground: hsl(0, 0%, 100%);
 
-    --border: hsl(40, 30%, 88%);          /* Softer Warm Grey Border: #e8e5de */
-    --input: hsl(40, 30%, 88%);           /* Input border same as general border */
-    --ring: hsl(160, 80%, 42%); /* Emerald for rings (existing) */
+    --border: hsl(36, 50%, 88%);          /* Soft Peach Border */
+    --input: hsl(36, 50%, 88%);           /* Input border same as general border */
+    --ring: hsl(150, 60%, 40%); /* Emerald Green for focus rings */
 
     --radius: 0.5rem;
 
@@ -41,53 +43,55 @@
     --chart-5: hsl(27, 87%, 67%);
 
     /* Sidebar light theme adjustments */
-    --sidebar-background: hsl(0, 0%, 100%); /* White sidebar (contrasts subtly with cream main bg) */
-    --sidebar-foreground: hsl(240, 5.3%, 26.1%); /* (existing) */
-    --sidebar-primary: hsl(240, 5.9%, 10%);  /* (existing) */
-    --sidebar-primary-foreground: hsl(0, 0%, 98%); /* (existing) */
-    --sidebar-accent: hsl(40, 40%, 96%); /* Very Light Cream for hover: #f8f7f4 */
-    --sidebar-accent-foreground: hsl(240, 5.9%, 10%); /* (existing) */
-    --sidebar-border: hsl(40, 25%, 90%); /* Warmer sidebar border: #ebe9e4 */
-    --sidebar-ring: hsl(217.2, 91.2%, 59.8%); /* (existing) */
+    --sidebar-background: hsl(0, 0%, 100%); /* White sidebar */
+    --sidebar-foreground: hsl(240, 8%, 35%); /* Darker text for sidebar */
+    --sidebar-primary: hsl(150, 60%, 35%);  /* Slightly darker Emerald for sidebar primary elements */
+    --sidebar-primary-foreground: hsl(0, 0%, 100%);
+    --sidebar-accent: hsl(36, 100%, 96%); /* Very Light Peach for hover */
+    --sidebar-accent-foreground: hsl(150, 60%, 30%); /* Emerald for text on hover */
+    --sidebar-border: hsl(36, 50%, 90%); /* Warmer sidebar border */
+    --sidebar-ring: hsl(150, 60%, 40%);
   }
 
   .dark {
-    --background: hsl(222, 47%, 11%); /* #0f172a dark mode background */
-    --foreground: hsl(210, 17%, 98%); /* #f8f9fa dark mode text */
+    /* Dark Theme - Deep, Rich, and Modern */
+    --background: hsl(220, 25%, 12%);    /* Deep Charcoal Blue */
+    --foreground: hsl(210, 30%, 90%); /* Light Grey-Blue (for text) */
 
-    --card: hsl(224, 71%, 10%);
-    --card-foreground: hsl(210, 17%, 98%);
+    --card: hsl(220, 25%, 18%);           /* Slightly Lighter Charcoal */
+    --card-foreground: hsl(210, 30%, 90%);
 
-    --popover: hsl(224, 71%, 10%);
-    --popover-foreground: hsl(210, 17%, 98%);
+    --popover: hsl(220, 25%, 18%);        /* Slightly Lighter Charcoal */
+    --popover-foreground: hsl(210, 30%, 90%);
 
-    --primary: hsl(160, 80%, 42%); /* #10b981 emerald for primary actions in dark */
-    --primary-foreground: hsl(222, 47%, 11%); /* Dark text for primary buttons */
+    --primary: hsl(150, 65%, 50%); /* Bright Emerald Green (pops in dark mode) */
+    --primary-foreground: hsl(150, 25%, 10%); /* Very dark (near black) text on bright green */
 
-    --secondary: hsl(45, 93%, 53%); /* #facc15 yellow for secondary in dark */
-    --secondary-foreground: hsl(222, 47%, 11%); /* Dark text for secondary buttons */
+    --secondary: hsl(30, 90%, 65%);     /* Bright Warm Orange */
+    --secondary-foreground: hsl(30, 25%, 10%); /* Very dark text on bright orange */
 
-    --muted: hsl(224, 71%, 15%);
-    --muted-foreground: hsl(210, 17%, 70%);
+    --muted: hsl(220, 20%, 22%);         /* Darker Muted Charcoal */
+    --muted-foreground: hsl(210, 20%, 65%); /* Medium-Light Grey */
 
-    --accent: hsl(45, 93%, 53%); /* Yellow for accent in dark mode */
-    --accent-foreground: hsl(222, 47%, 11%); /* Dark text for accent elements */
+    --accent: hsl(200, 80%, 60%);       /* Bright Sky Blue */
+    --accent-foreground: hsl(200, 25%, 10%);   /* Very dark text on bright blue */
+
+    --destructive: hsl(0, 70%, 60%);    /* Bright Red */
+    --destructive-foreground: hsl(0, 0%, 100%);
+
+    --border: hsl(220, 20%, 28%);          /* Subtle Dark Border */
+    --input: hsl(220, 20%, 32%);           /* Slightly lighter input border */
+    --ring: hsl(150, 65%, 50%); /* Bright Emerald for focus rings */
     
-    --destructive: hsl(0, 62.8%, 30.6%);
-    --destructive-foreground: hsl(0, 0%, 98%);
-
-    --border: hsl(224, 71%, 20%);
-    --input: hsl(224, 71%, 25%);
-    --ring: hsl(160, 80%, 42%); /* Emerald for rings */
-
-    --sidebar-background: hsl(240, 5.9%, 10%);
-    --sidebar-foreground: hsl(240, 4.8%, 95.9%);
-    --sidebar-primary: hsl(224.3, 76.3%, 48%);
-    --sidebar-primary-foreground: hsl(0, 0%, 100%);
-    --sidebar-accent: hsl(240, 3.7%, 15.9%);
-    --sidebar-accent-foreground: hsl(240, 4.8%, 95.9%);
-    --sidebar-border: hsl(240, 3.7%, 15.9%);
-    --sidebar-ring: hsl(217.2, 91.2%, 59.8%);
+    /* Sidebar dark theme adjustments */
+    --sidebar-background: hsl(220, 25%, 15%); /* Slightly different from main dark bg */
+    --sidebar-foreground: hsl(210, 25%, 80%);
+    --sidebar-primary: hsl(150, 65%, 55%);  /* Bright Emerald for sidebar primary */
+    --sidebar-primary-foreground: hsl(150, 25%, 10%);
+    --sidebar-accent: hsl(220, 20%, 25%); /* Darker hover accent */
+    --sidebar-accent-foreground: hsl(150, 65%, 55%); /* Bright Emerald for text on hover */
+    --sidebar-border: hsl(220, 20%, 25%);
+    --sidebar-ring: hsl(150, 65%, 50%);
   }
 }
 
