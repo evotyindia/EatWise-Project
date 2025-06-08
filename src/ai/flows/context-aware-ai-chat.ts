@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview This file defines a Genkit flow for context-aware AI chat about food labels.
@@ -45,6 +46,8 @@ const prompt = ai.definePrompt({
   If you do not know the answer, respond that you are unable to answer due to a lack of information.
   Do not generate any disclaimers or safety warnings.
   Avoid weasel words, focus on being helpful and specific.
+
+  IMPORTANT: Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
 `,
 });
 
@@ -56,6 +59,12 @@ const contextAwareAIChatFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      console.error('contextAwareAIChatFlow: LLM output was null or did not match schema for input:', JSON.stringify(input));
+      return {
+        answer: "I'm sorry, I encountered an issue and couldn't process your question right now. Please try again."
+      };
+    }
+    return output;
   }
 );

@@ -113,6 +113,8 @@ const prompt = ai.definePrompt({
       *   **Nutrient Density Rating**: (1=low to 5=high). Justification should be short.
   
   Present all lists (summary, positive aspects, potential concerns, key nutrients breakdown, alternatives) as bullet points using '*' or '-' as prefixes where specified.
+
+  IMPORTANT: Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
 `,
 });
 
@@ -125,11 +127,7 @@ const generateHealthReportFlow = ai.defineFlow(
   async input => {
     const {output} = await prompt(input);
     if (!output) {
-      // This case indicates the LLM failed to produce schema-compliant output.
-      // Log this for debugging on the server side.
       console.error('generateHealthReportFlow: LLM output was null or did not match schema for input:', JSON.stringify(input));
-      // Return a "default" error report that conforms to the schema
-      // This helps prevent the client from crashing if it expects 'report.detailedAnalysis' etc.
       return {
         healthRating: 1,
         detailedAnalysis: {
@@ -145,7 +143,6 @@ const generateHealthReportFlow = ai.defineFlow(
         nutrientDensityRating: { rating: 1, justification: "Error in analysis" },
       };
     }
-    return output; // No longer using output! directly without a check
+    return output;
   }
 );
-
