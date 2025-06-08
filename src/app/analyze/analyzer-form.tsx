@@ -338,8 +338,7 @@ export function AnalyzerForm() {
                 <AlertTitle className="font-semibold">Overall Health Rating</AlertTitle>
                 <AlertDescription className="flex items-center gap-1 flex-wrap">
                     <StarRating rating={report.healthRating} /> 
-                    <span>({report.healthRating}/5)</span>
-                    <span className="text-xs text-muted-foreground ml-1">(Higher stars = better health)</span>
+                    <span>({report.healthRating}/5). <i className="text-xs">Higher stars = better health.</i></span>
                 </AlertDescription>
               </Alert>
                {report.processingLevelRating?.rating !== undefined && (
@@ -348,8 +347,7 @@ export function AnalyzerForm() {
                     <AlertTitle className="font-semibold">Processing Level</AlertTitle>
                     <AlertDescription className="flex items-center gap-1 flex-wrap">
                         <StarRating rating={report.processingLevelRating.rating} /> 
-                        <span>({report.processingLevelRating.rating}/5)</span> 
-                        <span className="text-xs text-muted-foreground ml-1">(5 stars = highly processed)</span>
+                        <span>({report.processingLevelRating.rating}/5). <i className="text-xs">Generally, less processed (fewer stars) is better.</i></span>
                     </AlertDescription>
                     {report.processingLevelRating.justification && <p className="text-xs text-muted-foreground mt-1 pl-7">{report.processingLevelRating.justification}</p>}
                 </Alert>
@@ -360,8 +358,7 @@ export function AnalyzerForm() {
                     <AlertTitle className="font-semibold">Sugar Content</AlertTitle>
                     <AlertDescription className="flex items-center gap-1 flex-wrap">
                         <StarRating rating={report.sugarContentRating.rating} /> 
-                        <span>({report.sugarContentRating.rating}/5)</span>
-                        <span className="text-xs text-muted-foreground ml-1">(5 stars = high sugar)</span>
+                        <span>({report.sugarContentRating.rating}/5). <i className="text-xs">Generally, lower sugar (fewer stars) is better.</i></span>
                     </AlertDescription>
                     {report.sugarContentRating.justification && <p className="text-xs text-muted-foreground mt-1 pl-7">{report.sugarContentRating.justification}</p>}
                 </Alert>
@@ -372,8 +369,7 @@ export function AnalyzerForm() {
                     <AlertTitle className="font-semibold">Nutrient Density</AlertTitle>
                     <AlertDescription className="flex items-center gap-1 flex-wrap">
                         <StarRating rating={report.nutrientDensityRating.rating} /> 
-                        <span>({report.nutrientDensityRating.rating}/5)</span>
-                        <span className="text-xs text-muted-foreground ml-1">(Higher stars = more nutrient dense)</span>
+                        <span>({report.nutrientDensityRating.rating}/5). <i className="text-xs">Higher stars = more nutrient dense.</i></span>
                     </AlertDescription>
                     {report.nutrientDensityRating.justification && <p className="text-xs text-muted-foreground mt-1 pl-7">{report.nutrientDensityRating.justification}</p>}
                 </Alert>
