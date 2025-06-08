@@ -109,7 +109,7 @@ export function NutritionForm() {
       setAnalysisResult(null);
       setCurrentInputDataForPdf(null); 
       setChatHistory([]);
-      form.clearErrors(); // Clear all form errors when a new image is selected
+      form.clearErrors(); 
     }
   };
 
@@ -137,9 +137,7 @@ export function NutritionForm() {
 
   const onManualSubmit: SubmitHandler<NutritionInputFormValues> = async (data) => {
     if (imageFile) {
-        // If user clicks "Analyze Manual Data" but an image is uploaded, prioritize manual.
-        // Or, you could force them to clear the image. For now, this path means manual.
-        toast({ title: "Manual Analysis", description: "Processing manually entered data. Uploaded image is ignored for this submission."});
+        toast({ title: "Manual Analysis Prioritized", description: "Processing manually entered data. Uploaded image is ignored for this submission."});
     }
     const analysisInput: AnalyzeNutritionInput = { ...data, nutritionDataUri: undefined }; // Ensure no image data is sent
     await generateAnalysisSharedLogic(analysisInput, data); // Pass original 'data' for PDF context
@@ -150,7 +148,6 @@ export function NutritionForm() {
       toast({ title: "No Image", description: "Please upload an image first.", variant: "destructive" });
       return;
     }
-    // Clear any validation errors from manual form parts, as image takes precedence.
     form.clearErrors(); 
     
     const nutritionDataUri = await fileToDataUri(imageFile);
@@ -159,7 +156,6 @@ export function NutritionForm() {
         servingSize: form.getValues("servingSize"), 
         foodItemDescription: form.getValues("foodItemDescription") 
     };
-    // For PDF and chat context, mark that an image was used.
     const inputForPdf: AnalyzeNutritionInput = { 
         servingSize: form.getValues("servingSize"), 
         foodItemDescription: form.getValues("foodItemDescription"), 
@@ -227,18 +223,16 @@ export function NutritionForm() {
     setIsPdfDownloading(true);
 
     const tempDiv = document.createElement('div');
-    tempDiv.id = 'pdf-render-source-nutrition-form'; // Unique ID
+    tempDiv.id = 'pdf-render-source-nutrition-form'; 
     tempDiv.style.position = 'absolute'; tempDiv.style.left = '-9999px'; tempDiv.style.top = '0px';
     tempDiv.style.width = '210mm'; tempDiv.style.backgroundColor = 'white'; tempDiv.style.padding = '0'; tempDiv.style.margin = '0';
     document.body.appendChild(tempDiv);
 
     const root = createRoot(tempDiv);
     
-    const pdfInputData = currentInputDataForPdf?.nutritionDataUri === "Image Uploaded" 
-        ? currentInputDataForPdf 
-        : { ...form.getValues(), nutritionDataUri: imageFile ? "Image Uploaded" : undefined };
+    const pdfInputData = currentInputDataForPdf;
 
-    root.render( <PrintableNutritionReport analysisResult={analysisResult} userInput={pdfInputData} /> );
+    root.render( <PrintableNutritionReport analysisResult={analysisResult} userInput={pdfInputData || undefined} /> );
     
     await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -281,40 +275,28 @@ export function NutritionForm() {
   };
 
   const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
-    if (!text) return null;
-
-    const lines = text.split('\n');
-    const listItems: string[] = [];
-    const paragraphItems: string[] = [];
-    let hasBullets = false;
-
-    lines.forEach(line => {
-        const trimmedLine = line.trim();
-        if (trimmedLine.match(/^(\*|-)\s/)) {
-            listItems.push(trimmedLine.substring(trimmedLine.indexOf(' ') + 1));
-            hasBullets = true;
-        } else if (trimmedLine) {
-            paragraphItems.push(trimmedLine);
-        }
-    });
+    if (!text || text.trim() === "") return null;
+    const lines = text.split('\n').filter(s => s.trim() !== "");
+    const hasBullets = lines.some(line => line.trim().match(/^(\*|-)\s/));
 
     if (hasBullets) {
         return (
             <ul className="list-disc list-inside space-y-1 text-sm leading-relaxed">
-                {listItems.map((item, index) => <li key={`bullet-${index}`}>{item}</li>)}
-                {paragraphItems.map((item, index) => <li key={`para-li-${index}`} className="list-none ml-[-1em] mt-1">{item}</li>)}
+                {lines.map((line, index) => (
+                    <li key={index}>{line.replace(/^(\*|-)\s*/, '').trim()}</li>
+                ))}
             </ul>
         );
-    } else if (paragraphItems.length > 0) {
+    } else if (lines.length > 0) {
         return (
             <div className="text-sm leading-relaxed space-y-1">
-                {paragraphItems.map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
+                {lines.map((paragraph, index) => (
+                    <p key={index}>{paragraph.trim()}</p>
                 ))}
             </div>
         );
     }
-    return null;
+    return null; 
   };
 
 
