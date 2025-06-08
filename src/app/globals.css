@@ -91,3 +91,15 @@
     @apply font-headline;
   }
 }
+
+/* PDF specific structural hints */
+.pdf-page-break-before {
+  margin-top: 15mm; /* Provides a visual gap in the continuous canvas, might influence perceived breaks */
+  /* html2canvas does not directly support page-break-before. This is more for structural clarity. */
+}
+
+/* Ensure a minimum height for PDF pages if needed, though scrollHeight usually captures content */
+.pdf-page {
+  /* min-height: 277mm; /* A4 height minus typical margins */
+  /* box-sizing: border-box; */
+}

@@ -32,6 +32,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 const numberPreprocess = (val: unknown) => (val === "" || val === null || val === undefined ? undefined : Number(val));
 
+const coreNutrientFields = [
+  'calories', 'fat', 'saturatedFat', 'transFat', 'cholesterol', 'sodium',
+  'carbohydrates', 'fiber', 'sugar', 'addedSugar', 'protein', 'vitaminD',
+  'calcium', 'iron', 'potassium', 'vitaminC'
+] as const; 
+
+
 const nutritionInputSchema = z.object({
   calories: z.preprocess(numberPreprocess, z.number({ invalid_type_error: "Must be a number" }).nonnegative("Cannot be negative").optional()),
   fat: z.preprocess(numberPreprocess, z.number({ invalid_type_error: "Must be a number" }).nonnegative("Cannot be negative").optional()),
@@ -52,23 +59,14 @@ const nutritionInputSchema = z.object({
   servingSize: z.string().optional(),
   foodItemDescription: z.string().optional().describe("Optional: name or description of the food item, e.g., 'Homemade Dal Makhani' or 'Store-bought cookies'.")
 }).refine(data => {
-  // This refinement only applies if no image is being submitted (i.e., imageFile is null)
-  // OR if all manual fields are empty while an image is present (which is fine, image takes precedence)
-  // The core idea: if no image, then at least one field must be filled.
-  const imageIsPresent = !!document.getElementById('nutrition-image-upload') && (document.getElementById('nutrition-image-upload') as HTMLInputElement).files?.length > 0;
-  if (imageIsPresent) return true; // If image is uploaded, validation passes regardless of manual fields
-
-  // If no image, check if at least one nutritional value is provided
-  return Object.keys(data).some(key => 
-    key !== 'foodItemDescription' && 
-    key !== 'servingSize' && 
-    data[key as keyof Omit<typeof data, 'foodItemDescription'|'servingSize'>] !== undefined && 
-    data[key as keyof Omit<typeof data, 'foodItemDescription'|'servingSize'>] !== null && 
-    String(data[key as keyof Omit<typeof data, 'foodItemDescription'|'servingSize'>]).trim() !== ""
+  // This refinement applies for manual form submission:
+  // At least one of the core nutrient values must be provided.
+  return coreNutrientFields.some(field => 
+    data[field] !== undefined && data[field] !== null && String(data[field]).trim() !== ""
   );
 }, { 
-  message: "At least one nutritional value (calories, fat, etc.) must be provided for manual entry if no image is uploaded.",
-  path: ["calories"], 
+  message: "For manual entry, at least one nutritional value (e.g., calories, fat) must be provided.",
+  path: ["calories"], // Attach error to a common field for display
 });
 
 
@@ -80,7 +78,7 @@ export function NutritionForm() {
   const [analysisResult, setAnalysisResult] = useState<AnalyzeNutritionOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isPdfDownloading, setIsPdfDownloading] = useState(false);
-  const [currentInputData, setCurrentInputData] = useState<AnalyzeNutritionInput | null>(null);
+  const [currentInputDataForPdf, setCurrentInputDataForPdf] = useState<AnalyzeNutritionInput | null>(null);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -109,16 +107,16 @@ export function NutritionForm() {
       };
       reader.readAsDataURL(file);
       setAnalysisResult(null);
-      setCurrentInputData(null); 
+      setCurrentInputDataForPdf(null); 
       setChatHistory([]);
-      form.clearErrors("calories"); // Clear potential manual entry error
+      form.clearErrors(); // Clear all form errors when a new image is selected
     }
   };
 
   const generateAnalysisSharedLogic = async (inputForAI: AnalyzeNutritionInput, inputForPdfAndContext: AnalyzeNutritionInput) => {
     setIsLoading(true);
     setAnalysisResult(null);
-    setCurrentInputData(inputForPdfAndContext); 
+    setCurrentInputDataForPdf(inputForPdfAndContext); 
     setChatHistory([]);
     try {
       const result = await analyzeNutrition(inputForAI);
@@ -138,11 +136,13 @@ export function NutritionForm() {
   };
 
   const onManualSubmit: SubmitHandler<NutritionInputFormValues> = async (data) => {
-    // Explicitly ensure no image is used for this path
-    setImageFile(null); 
-    setUploadedImage(null);
-    const analysisInput: AnalyzeNutritionInput = { ...data };
-    await generateAnalysisSharedLogic(analysisInput, data);
+    if (imageFile) {
+        // If user clicks "Analyze Manual Data" but an image is uploaded, prioritize manual.
+        // Or, you could force them to clear the image. For now, this path means manual.
+        toast({ title: "Manual Analysis", description: "Processing manually entered data. Uploaded image is ignored for this submission."});
+    }
+    const analysisInput: AnalyzeNutritionInput = { ...data, nutritionDataUri: undefined }; // Ensure no image data is sent
+    await generateAnalysisSharedLogic(analysisInput, data); // Pass original 'data' for PDF context
   };
   
   const onImageSubmit = async () => {
@@ -150,22 +150,22 @@ export function NutritionForm() {
       toast({ title: "No Image", description: "Please upload an image first.", variant: "destructive" });
       return;
     }
-    // Clear any validation errors that might have been triggered by the manual form part
-    form.clearErrors();
+    // Clear any validation errors from manual form parts, as image takes precedence.
+    form.clearErrors(); 
     
     const nutritionDataUri = await fileToDataUri(imageFile);
-    const analysisInput: AnalyzeNutritionInput = { 
+    const analysisInputForAI: AnalyzeNutritionInput = { 
         nutritionDataUri, 
         servingSize: form.getValues("servingSize"), 
         foodItemDescription: form.getValues("foodItemDescription") 
     };
-    // For PDF, we indicate image was used, but pass text fields if user filled them for context
+    // For PDF and chat context, mark that an image was used.
     const inputForPdf: AnalyzeNutritionInput = { 
         servingSize: form.getValues("servingSize"), 
         foodItemDescription: form.getValues("foodItemDescription"), 
-        nutritionDataUri: "Image Uploaded" // Special marker for PDF
+        nutritionDataUri: "Image Uploaded" // Marker for PDF
     }; 
-    await generateAnalysisSharedLogic(analysisInput, inputForPdf);
+    await generateAnalysisSharedLogic(analysisInputForAI, inputForPdf);
   };
 
   const initiateChatWithWelcome = async (contextType: "nutritionAnalysis", contextData: any) => {
@@ -202,7 +202,7 @@ export function NutritionForm() {
         contextType: "nutritionAnalysis",
         nutritionContext: {
           nutritionReportSummary: analysisResult.overallAnalysis,
-          foodItemDescription: currentInputData?.foodItemDescription || (imageFile ? "Scanned food item" : "Manually entered data")
+          foodItemDescription: currentInputDataForPdf?.foodItemDescription || (currentInputDataForPdf?.nutritionDataUri === "Image Uploaded" ? "Scanned food item" : "Manually entered data")
         },
       };
       const aiResponse = await contextAwareAIChat(chatContextInput);
@@ -234,8 +234,8 @@ export function NutritionForm() {
 
     const root = createRoot(tempDiv);
     
-    const pdfInputData = currentInputData?.nutritionDataUri === "Image Uploaded" 
-        ? currentInputData 
+    const pdfInputData = currentInputDataForPdf?.nutritionDataUri === "Image Uploaded" 
+        ? currentInputDataForPdf 
         : { ...form.getValues(), nutritionDataUri: imageFile ? "Image Uploaded" : undefined };
 
     root.render( <PrintableNutritionReport analysisResult={analysisResult} userInput={pdfInputData} /> );
@@ -280,18 +280,41 @@ export function NutritionForm() {
     }
   };
 
-  const renderFormattedAnalysisText = (text?: string): JSX.Element | JSX.Element[] | null => {
+  const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
     if (!text) return null;
-    return text.split('\n').map((line, index) => {
-      const trimmedLine = line.trim();
-      if (trimmedLine.match(/^(\*|-)\s/)) {
-        return <li key={index} className="ml-4">{trimmedLine.substring(trimmedLine.indexOf(' ') + 1)}</li>;
-      }
-      if(trimmedLine) {
-        return <p key={index} className="mb-1">{trimmedLine}</p>;
-      }
-      return null;
-    }).filter(Boolean);
+
+    const lines = text.split('\n');
+    const listItems: string[] = [];
+    const paragraphItems: string[] = [];
+    let hasBullets = false;
+
+    lines.forEach(line => {
+        const trimmedLine = line.trim();
+        if (trimmedLine.match(/^(\*|-)\s/)) {
+            listItems.push(trimmedLine.substring(trimmedLine.indexOf(' ') + 1));
+            hasBullets = true;
+        } else if (trimmedLine) {
+            paragraphItems.push(trimmedLine);
+        }
+    });
+
+    if (hasBullets) {
+        return (
+            <ul className="list-disc list-inside space-y-1 text-sm leading-relaxed">
+                {listItems.map((item, index) => <li key={`bullet-${index}`}>{item}</li>)}
+                {paragraphItems.map((item, index) => <li key={`para-li-${index}`} className="list-none ml-[-1em] mt-1">{item}</li>)}
+            </ul>
+        );
+    } else if (paragraphItems.length > 0) {
+        return (
+            <div className="text-sm leading-relaxed space-y-1">
+                {paragraphItems.map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                ))}
+            </div>
+        );
+    }
+    return null;
   };
 
 
@@ -318,7 +341,7 @@ export function NutritionForm() {
                 {uploadedImage && (
                   <div className="mt-4 relative border rounded-md p-2">
                     <Image src={uploadedImage} alt="Uploaded nutrition table" width={300} height={200} className="rounded-md object-contain mx-auto" data-ai-hint="nutrition facts" />
-                    <Button onClick={() => { setUploadedImage(null); setImageFile(null); form.clearErrors("calories"); }} variant="ghost" size="sm" className="absolute top-1 right-1 text-xs">Clear</Button>
+                    <Button type="button" onClick={() => { setUploadedImage(null); setImageFile(null); form.clearErrors(); }} variant="ghost" size="sm" className="absolute top-1 right-1 text-xs">Clear</Button>
                   </div>
                 )}
                 <Button type="button" onClick={onImageSubmit} disabled={isLoading || !imageFile} className="mt-4 w-full">
@@ -346,7 +369,6 @@ export function NutritionForm() {
                 <FormField control={form.control} name="potassium" render={({ field }) => (<FormItem><HookFormLabel>Potassium (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 300" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="vitaminC" render={({ field }) => (<FormItem><HookFormLabel>Vitamin C (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 60" {...field} /></FormControl><FormMessage /></FormItem>)} />
               </div>
-              {/* Display general form error if it's for the 'calories' path (where refine error is attached) and no image is present */}
               {form.formState.errors.calories && !imageFile && <FormMessage>{form.formState.errors.calories.message}</FormMessage>}
               <Button type="submit" disabled={isLoading || form.formState.isSubmitting} className="w-full mt-6">
                 {isLoading && form.formState.isSubmitting ? "Analyzing Manually..." : "Analyze Manual Data"} <Sparkles className="ml-2 h-4 w-4" />
@@ -367,19 +389,19 @@ export function NutritionForm() {
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="flex items-center text-2xl"><FileText className="mr-2 h-6 w-6 text-accent" /> AI Nutrition Analysis</CardTitle>
-              <Button onClick={handleDownloadReport} variant="outline" size="sm" disabled={isPdfDownloading}>
+              <Button type="button" onClick={handleDownloadReport} variant="outline" size="sm" disabled={isPdfDownloading}>
                  {isPdfDownloading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Download PDF
               </Button>
             </div>
-            <CardDescription>Understanding your food's nutritional profile{currentInputData?.foodItemDescription ? ` for: ${currentInputData.foodItemDescription}` : ""}.</CardDescription>
+            <CardDescription>Understanding your food's nutritional profile{currentInputDataForPdf?.foodItemDescription ? ` for: ${currentInputDataForPdf.foodItemDescription}` : ""}.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Overall Analysis:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription className="text-sm leading-relaxed list-disc list-inside">{renderFormattedAnalysisText(analysisResult.overallAnalysis)}</AlertDescription></Alert>
-             {analysisResult.macronutrientBalance && (<Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Macronutrient Balance:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription className="text-sm leading-relaxed list-disc list-inside">{renderFormattedAnalysisText(analysisResult.macronutrientBalance)}</AlertDescription></Alert>)}
-            {analysisResult.micronutrientHighlights && (<Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Micronutrient Highlights:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription className="text-sm leading-relaxed list-disc list-inside">{renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}</AlertDescription></Alert>)}
-             {analysisResult.processingLevelAssessment && (<Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Processing Level Assessment:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription className="text-sm leading-relaxed">{renderFormattedAnalysisText(analysisResult.processingLevelAssessment)}</AlertDescription></Alert>)}
-            <Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Dietary Suitability:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription className="text-sm leading-relaxed">{renderFormattedAnalysisText(analysisResult.dietarySuitability)}</AlertDescription></Alert>
-             {analysisResult.servingSizeContext && (<Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Serving Size Context:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription className="text-sm leading-relaxed">{renderFormattedAnalysisText(analysisResult.servingSizeContext)}</AlertDescription></Alert>)}
+            <Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Overall Analysis:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription>{renderFormattedAnalysisText(analysisResult.overallAnalysis)}</AlertDescription></Alert>
+             {analysisResult.macronutrientBalance && (<Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Macronutrient Balance:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription>{renderFormattedAnalysisText(analysisResult.macronutrientBalance)}</AlertDescription></Alert>)}
+            {analysisResult.micronutrientHighlights && (<Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Micronutrient Highlights:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription>{renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}</AlertDescription></Alert>)}
+             {analysisResult.processingLevelAssessment && (<Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Processing Level Assessment:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription>{renderFormattedAnalysisText(analysisResult.processingLevelAssessment)}</AlertDescription></Alert>)}
+            <Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Dietary Suitability:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription>{renderFormattedAnalysisText(analysisResult.dietarySuitability)}</AlertDescription></Alert>
+             {analysisResult.servingSizeContext && (<Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Serving Size Context:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription>{renderFormattedAnalysisText(analysisResult.servingSizeContext)}</AlertDescription></Alert>)}
             <div className="flex items-center space-x-2 pt-2"><span className="font-semibold text-lg">Nutrition Density Rating:</span><StarRating rating={analysisResult.nutritionDensityRating} /><span>({analysisResult.nutritionDensityRating}/5)</span></div>
           </CardContent>
            <CardFooter className="flex flex-col items-start pt-4 border-t">
@@ -411,5 +433,3 @@ export function NutritionForm() {
     </div>
   );
 }
-
-    
