@@ -1,10 +1,9 @@
 
 import Link from "next/link"
-import { Leaf } from "lucide-react"
+import { Leaf, Languages, Menu } from "lucide-react" // Added Languages icon
 import { ThemeToggleButton } from "@/components/common/theme-toggle-button"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu } from "lucide-react"
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -24,19 +23,39 @@ export function Header() {
             Swasth Bharat Advisor
           </span>
         </Link>
-        <nav className="hidden flex-1 items-center space-x-4 md:flex">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        
+        {/* Spacer to push subsequent items to the right */}
+        <div className="flex-1" />
+
+        {/* Right-aligned items */}
+        <div className="flex items-center space-x-2">
+          {/* Desktop Navigation (now on the right) */}
+          <nav className="hidden items-center space-x-4 md:flex mr-2">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
           <ThemeToggleButton />
+
+          {/* New Translate Button */}
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="h-9 w-9" 
+            onClick={() => console.log('Translate button clicked')}
+          >
+            <Languages className="h-[1.2rem] w-[1.2rem]" />
+            <span className="sr-only">Translate Language</span>
+          </Button>
+
+          {/* Mobile Menu Trigger */}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
