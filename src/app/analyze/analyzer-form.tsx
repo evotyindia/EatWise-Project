@@ -184,7 +184,7 @@ export function AnalyzerForm() {
     setIsPdfDownloading(true);
 
     const tempDiv = document.createElement('div');
-    tempDiv.id = 'pdf-render-source-analyzer-form'; // Unique ID
+    tempDiv.id = 'pdf-render-source-analyzer-form'; 
     tempDiv.style.position = 'absolute'; tempDiv.style.left = '-9999px'; tempDiv.style.top = '0px';
     tempDiv.style.width = '210mm'; tempDiv.style.backgroundColor = 'white'; tempDiv.style.padding = '0'; tempDiv.style.margin = '0';
     document.body.appendChild(tempDiv);
@@ -240,27 +240,28 @@ export function AnalyzerForm() {
   };
 
   const renderFormattedText = (text?: string): JSX.Element | null => {
-    if (!text) return null;
-    const lines = text.split(/\s*[-\*]\s*/g).filter(s => s.trim());
-    const hasBullets = lines.length > 0 && text.match(/\s*[-\*]\s*/);
+    if (!text || text.trim() === "") return null;
+    const lines = text.split('\n').filter(s => s.trim() !== "");
+    const hasBullets = lines.some(line => line.trim().match(/^(\*|-)\s/));
 
     if (hasBullets) {
         return (
             <ul className="list-disc list-inside space-y-1 text-sm leading-relaxed">
-                {lines.map((item, index) => (
-                    <li key={index}>{item.trim()}</li>
+                {lines.map((line, index) => (
+                    <li key={index}>{line.replace(/^(\*|-)\s*/, '').trim()}</li>
                 ))}
             </ul>
         );
-    } else {
+    } else if (lines.length > 0) {
         return (
             <div className="text-sm leading-relaxed space-y-1">
-                {text.split('\n').map((paragraph, index) => (
+                {lines.map((paragraph, index) => (
                     <p key={index}>{paragraph.trim()}</p>
                 ))}
             </div>
         );
     }
+    return null;
   };
 
 
