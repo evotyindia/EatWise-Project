@@ -1,8 +1,9 @@
+
 "use client"
 
 import { Leaf, Menu, Languages as LanguagesIcon } from "lucide-react"
 import { useTranslations, useLocale } from 'next-intl';
-import { usePathname, useRouter, Link } from '@/navigation'; // Use from next-intl/navigation
+import { usePathname, useRouter, Link } from '@/navigation';
 import React from 'react';
 
 import { ThemeToggleButton } from "@/components/common/theme-toggle-button"
@@ -14,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { locales } from '@/i18n.config'; // Import from new config file
+import { locales } from '@/i18n';
 
 
 export function Header() {
