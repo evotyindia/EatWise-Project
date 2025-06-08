@@ -6,7 +6,7 @@ import { generateHealthReport } from "@/ai/flows/generate-health-report";
 import type { ContextAwareAIChatInput, ContextAwareAIChatOutput } from "@/ai/flows/context-aware-ai-chat";
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadCloud, Sparkles, MessageCircle, Send } from "lucide-react";
+import { UploadCloud, Sparkles, MessageCircle, Send, Download } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -23,7 +23,7 @@ import { StarRating } from "@/components/common/star-rating";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Label } from "@/components/ui/label"; // Import the basic Label component
+import { Label } from "@/components/ui/label";
 
 const manualInputSchema = z.object({
   productName: z.string().optional(),
@@ -67,7 +67,6 @@ export function AnalyzerForm() {
         setUploadedImage(reader.result as string);
       };
       reader.readAsDataURL(file);
-      // Clear manual form if image is uploaded
       manualForm.reset();
       setReport(null);
       setChatHistory([]);
@@ -110,7 +109,6 @@ export function AnalyzerForm() {
       const photoDataUri = await fileToDataUri(imageFile);
       const input: GenerateHealthReportInput = {
         photoDataUri,
-        // You could potentially extract product name via OCR too, or leave it for Gemini
       };
       const result = await generateHealthReport(input);
       setReport(result);
@@ -138,8 +136,8 @@ export function AnalyzerForm() {
     try {
       const chatContext: ContextAwareAIChatInput = {
         productName: report.productType || manualForm.getValues("productName") || "N/A",
-        ingredients: manualForm.getValues("ingredients") || "From Image Scan", // Need a better way if only image
-        healthReport: report.report,
+        ingredients: manualForm.getValues("ingredients") || "Ingredients extracted from image scan.",
+        healthReport: `Summary: ${report.detailedAnalysis.summary}. Positive Aspects: ${report.detailedAnalysis.positiveAspects || 'N/A'}. Potential Concerns: ${report.detailedAnalysis.potentialConcerns || 'N/A'}. Key Nutrients: ${report.detailedAnalysis.keyNutrientsBreakdown || 'N/A'}.`,
         userQuestion: userMessage.content,
       };
       const aiResponse = await contextAwareAIChat(chatContext);
@@ -151,6 +149,46 @@ export function AnalyzerForm() {
     }
     setIsChatLoading(false);
   };
+
+  const handleDownloadReport = () => {
+    if (!report) return;
+    let content = `AI Health Report\n`;
+    content += `====================================\n`;
+    if (report.productType) content += `Product Type: ${report.productType}\n`;
+    content += `Health Rating: ${report.healthRating}/5\n\n`;
+    
+    content += `Detailed Analysis:\n`;
+    content += `------------------\n`;
+    content += `Summary: ${report.detailedAnalysis.summary}\n`;
+    if (report.detailedAnalysis.positiveAspects) content += `Positive Aspects: ${report.detailedAnalysis.positiveAspects}\n`;
+    if (report.detailedAnalysis.potentialConcerns) content += `Potential Concerns: ${report.detailedAnalysis.potentialConcerns}\n`;
+    if (report.detailedAnalysis.keyNutrientsBreakdown) content += `Key Nutrients Breakdown: ${report.detailedAnalysis.keyNutrientsBreakdown}\n\n`;
+    
+    if (report.alternatives) {
+      content += `Healthier Indian Alternatives:\n`;
+      content += `------------------------------\n`;
+      content += `${report.alternatives}\n\n`;
+    }
+
+    if (chatHistory.length > 0) {
+      content += `Chat History:\n`;
+      content += `------------------\n`;
+      chatHistory.forEach(msg => {
+        content += `${msg.role === 'user' ? 'You' : 'AI'}: ${msg.content}\n`;
+      });
+    }
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${(report.productType || manualForm.getValues("productName") || 'food-label').toLowerCase().replace(/\s+/g, '-')}-health-report.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+    toast({ title: "Report Downloaded", description: "The health report has been saved." });
+  };
+
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -247,9 +285,14 @@ export function AnalyzerForm() {
       {report && (
         <Card className="shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader>
-            <CardTitle className="flex items-center text-2xl">
-              <Sparkles className="mr-2 h-6 w-6 text-accent" /> AI Health Report
-            </CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle className="flex items-center text-2xl">
+                <Sparkles className="mr-2 h-6 w-6 text-accent" /> AI Health Report
+              </CardTitle>
+              <Button onClick={handleDownloadReport} variant="outline" size="sm">
+                <Download className="mr-2 h-4 w-4" /> Download
+              </Button>
+            </div>
             {report.productType && (
               <CardDescription>Product Type: <span className="font-semibold">{report.productType}</span></CardDescription>
             )}
@@ -264,14 +307,50 @@ export function AnalyzerForm() {
             <Separator />
 
             <div>
-              <h3 className="font-semibold text-lg mb-1">Detailed Analysis:</h3>
+              <h3 className="font-semibold text-lg mb-1">Summary:</h3>
               <Alert variant="default" className="bg-background">
                 <Sparkles className="h-4 w-4" />
                 <AlertDescription className="whitespace-pre-wrap text-sm leading-relaxed">
-                  {report.report}
+                  {report.detailedAnalysis.summary}
                 </AlertDescription>
               </Alert>
             </div>
+
+            {report.detailedAnalysis.positiveAspects && (
+               <div>
+                <h3 className="font-semibold text-lg mb-1">Positive Aspects:</h3>
+                 <Alert variant="default" className="bg-background">
+                  <Sparkles className="h-4 w-4" />
+                  <AlertDescription className="whitespace-pre-wrap text-sm leading-relaxed">
+                    {report.detailedAnalysis.positiveAspects}
+                  </AlertDescription>
+                </Alert>
+              </div>
+            )}
+            
+            {report.detailedAnalysis.potentialConcerns && (
+               <div>
+                <h3 className="font-semibold text-lg mb-1">Potential Concerns:</h3>
+                 <Alert variant="destructive" className="bg-background">
+                  <Sparkles className="h-4 w-4" />
+                  <AlertDescription className="whitespace-pre-wrap text-sm leading-relaxed">
+                    {report.detailedAnalysis.potentialConcerns}
+                  </AlertDescription>
+                </Alert>
+              </div>
+            )}
+
+            {report.detailedAnalysis.keyNutrientsBreakdown && (
+               <div>
+                <h3 className="font-semibold text-lg mb-1">Key Nutrients Breakdown:</h3>
+                 <Alert variant="default" className="bg-background">
+                  <Sparkles className="h-4 w-4" />
+                  <AlertDescription className="whitespace-pre-wrap text-sm leading-relaxed">
+                    {report.detailedAnalysis.keyNutrientsBreakdown}
+                  </AlertDescription>
+                </Alert>
+              </div>
+            )}
 
             {report.alternatives && (
                <div>

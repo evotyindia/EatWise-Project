@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { CalendarDays, Tag, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button"; // Added missing import
+import { Button } from "@/components/ui/button";
 
 interface BlogPostPageProps {
   params: {
