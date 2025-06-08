@@ -10,7 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { DiseaseEnum, HouseholdCompositionSchema, type Disease, type HouseholdComposition } from '@/ai/types/recipe-shared-types'; // Updated import
+import { DiseaseEnum, HouseholdCompositionSchema, type Disease, type HouseholdComposition } from '@/ai/types/recipe-shared-types';
 
 const GetRecipeSuggestionsInputSchema = z.object({
   ingredients: z.string().min(1, "Please provide some ingredients.").describe('A comma-separated list of ingredients the user has.'),
@@ -36,11 +36,11 @@ const prompt = ai.definePrompt({
   prompt: `You are a personal chef specializing in healthy Indian cuisine.
 A user has provided the following:
 Ingredients: {{ingredients}}
+
 {{#if diseaseConcerns.length}}
 Health Considerations/Dietary Restrictions: {{#each diseaseConcerns}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}.
-{{#if (lookup diseaseConcerns 'length')}}{{#each diseaseConcerns}}{{#if (eq this "none")}}(User selected 'none' - implies general healthy suggestions unless other specific restrictions apply or can be inferred for the household).{{/if}}{{/each}}{{/if}}
 {{else}}
-Health Considerations/Dietary Restrictions: None explicitly stated, focus on general healthy options.
+Health Considerations/Dietary Restrictions: General healthy options. (User may have selected 'none' or did not specify particular concerns).
 {{/if}}
 
 {{#if householdComposition}}

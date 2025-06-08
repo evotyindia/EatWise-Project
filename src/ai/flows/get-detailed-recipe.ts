@@ -10,7 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { DiseaseEnum, HouseholdCompositionSchema } from '@/ai/types/recipe-shared-types'; // Updated import
+import { DiseaseEnum, HouseholdCompositionSchema } from '@/ai/types/recipe-shared-types';
 
 const GetDetailedRecipeInputSchema = z.object({
   dishName: z.string().describe("The name of the dish selected by the user."),
@@ -45,7 +45,7 @@ export async function getDetailedRecipe(input: GetDetailedRecipeInput): Promise<
 
 const prompt = ai.definePrompt({
   name: 'getDetailedRecipePrompt',
-  input: {schema: GetDetailedRecipeInputSchema},
+  input: {schema: GetDetailedRecipeInputSchema}, // This schema is for documentation and Genkit's internal use. The actual input to the template is transformed in the flow.
   output: {schema: GetDetailedRecipeOutputSchema},
   prompt: `You are an expert Indian chef and nutritionist. Generate a detailed, healthy recipe for the dish: "{{dishName}}".
 
@@ -54,11 +54,11 @@ Household Composition:
 - Adults (18-60): {{householdComposition.adults}}
 - Seniors (60+): {{householdComposition.seniors}}
 - Kids (2-17): {{householdComposition.kids}}
+
 {{#if diseaseConcerns.length}}
 Health Considerations/Dietary Restrictions: {{#each diseaseConcerns}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}.
-{{#if (lookup diseaseConcerns 'length')}}{{#each diseaseConcerns}}{{#if (eq this "none")}}(User selected 'none' - implies general healthy recipe unless other specific restrictions apply for the household).{{/if}}{{/each}}{{/if}}
 {{else}}
-Health Considerations/Dietary Restrictions: Focus on general healthy preparation.
+Health Considerations/Dietary Restrictions: Focus on general healthy preparation (user may have selected 'none' or no specific concerns).
 {{/if}}
 
 Your task is to provide a complete recipe with the following details:
@@ -73,7 +73,7 @@ Your task is to provide a complete recipe with the following details:
     *   If essential common Indian pantry staples (like oil, salt, turmeric, cumin seeds, mustard seeds, asafoetida) are missing from 'availableIngredients' but are crucial for "{{dishName}}", you may include them. For such added staples, add a note in the 'notes' field of the ingredient like "standard pantry item, add if available".
     *   For each ingredient, provide its name, quantity (e.g., "1 cup", "200g", "1 medium onion"), and any prep notes (e.g., "finely chopped", "soaked").
 7.  **Instructions**: Clear, step-by-step cooking instructions. Each step should be an item in an array.
-8.  **Health Notes**: Provide specific advice or modifications based on 'diseaseConcerns'. If 'none' or no concerns, give general health benefits or tips for making it even healthier. For example, suggest alternative grains, low-sodium options, or cooking methods.
+8.  **Health Notes**: Provide specific advice or modifications based on 'diseaseConcerns'. If no concerns, give general health benefits or tips for making it even healthier. For example, suggest alternative grains, low-sodium options, or cooking methods.
 9.  **Storage or Serving Tips**: (Optional) Any useful tips.
 
 IMPORTANT:
@@ -92,13 +92,13 @@ const getDetailedRecipeFlow = ai.defineFlow(
     outputSchema: GetDetailedRecipeOutputSchema,
   },
   async (input) => {
-    if (input.diseaseConcerns && input.diseaseConcerns.length === 1 && input.diseaseConcerns[0] === 'none') {
-      input.diseaseConcerns = []; 
+    const processedInput = {...input};
+    if (processedInput.diseaseConcerns && processedInput.diseaseConcerns.length === 1 && processedInput.diseaseConcerns[0] === 'none') {
+      processedInput.diseaseConcerns = []; 
     }
-    const {output} = await prompt(input);
+    const {output} = await prompt(processedInput); // Pass the processed input
     if (!output) {
-      console.error('getDetailedRecipeFlow: LLM output was null or did not match schema for input:', JSON.stringify(input));
-      // Provide a structured error response
+      console.error('getDetailedRecipeFlow: LLM output was null or did not match schema for input:', JSON.stringify(processedInput));
       return {
         recipeTitle: `Error generating recipe for ${input.dishName}`,
         description: "Could not generate recipe details at this time.",
