@@ -1,31 +1,40 @@
 
 'use server';
 /**
- * @fileOverview Recipe suggestion AI agent that suggests 2-3 healthy Indian meal ideas based on user-entered ingredients.
+ * @fileOverview Recipe suggestion AI agent that suggests healthy Indian meal ideas based on user-entered ingredients, health concerns, and household size.
  *
  * - getRecipeSuggestions - A function that handles the recipe suggestion process.
  * - GetRecipeSuggestionsInput - The input type for the getRecipeSuggestions function.
  * - GetRecipeSuggestionsOutput - The return type for the getRecipeSuggestions function.
+ * - Disease - Enum for disease concerns.
+ * - HouseholdComposition - Type for household details.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
+export const DiseaseEnum = z.enum([
+  "diabetes", "high_blood_pressure", "heart_condition", "gluten_free", "dairy_free", "none"
+]);
+export type Disease = z.infer<typeof DiseaseEnum>;
+
+export const HouseholdCompositionSchema = z.object({
+  adults: z.number().min(0).default(1).describe("Number of adults (18-60 years)"),
+  seniors: z.number().min(0).default(0).describe("Number of seniors (60+ years)"),
+  kids: z.number().min(0).default(0).describe("Number of kids (2-17 years)")
+}).describe("Composition of the household for portion estimation.");
+export type HouseholdComposition = z.infer<typeof HouseholdCompositionSchema>;
+
 const GetRecipeSuggestionsInputSchema = z.object({
-  ingredients: z
-    .string()
-    .describe('A comma-separated list of ingredients the user has at home.'),
+  ingredients: z.string().min(1, "Please provide some ingredients.").describe('A comma-separated list of ingredients the user has.'),
+  diseaseConcerns: z.array(DiseaseEnum).optional().describe("List of health conditions or dietary restrictions to consider. 'none' means no specific dietary disease concern."),
+  householdComposition: HouseholdCompositionSchema.optional().describe("Details about the household members for portion suggestions and suitability.")
 });
 export type GetRecipeSuggestionsInput = z.infer<typeof GetRecipeSuggestionsInputSchema>;
 
 const GetRecipeSuggestionsOutputSchema = z.object({
-  suggestions: z
-    .array(z.string())
-    .describe('An array of 2-3 healthy Indian meal ideas.'),
-  mealPlan: z
-    .string()
-    .optional()
-    .describe('An optional quick meal plan with timing suggestions.'),
+  suggestions: z.array(z.string()).describe('An array of 2-5 healthy Indian dish names that can be made with the ingredients, considering health concerns and household composition.'),
+  initialContextualGuidance: z.string().optional().describe("A brief message to the user after suggestions are shown, e.g., 'Here are some ideas. Click one for a detailed recipe.'")
 });
 export type GetRecipeSuggestionsOutput = z.infer<typeof GetRecipeSuggestionsOutputSchema>;
 
@@ -37,11 +46,34 @@ const prompt = ai.definePrompt({
   name: 'getRecipeSuggestionsPrompt',
   input: {schema: GetRecipeSuggestionsInputSchema},
   output: {schema: GetRecipeSuggestionsOutputSchema},
-  prompt: `You are a personal chef specializing in healthy Indian cuisine. A user will provide you with a list of ingredients they have at home, and you will suggest 2-3 healthy Indian meal ideas using those ingredients. If possible, suggest a quick meal plan with timing suggestions.
+  prompt: `You are a personal chef specializing in healthy Indian cuisine.
+A user has provided the following:
+Ingredients: {{ingredients}}
+{{#if diseaseConcerns.length}}
+Health Considerations/Dietary Restrictions: {{#each diseaseConcerns}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}.
+{{#if (lookup diseaseConcerns 'length')}}{{#each diseaseConcerns}}{{#if (eq this "none")}}(User selected 'none' - implies general healthy suggestions unless other specific restrictions apply or can be inferred for the household).{{/if}}{{/each}}{{/if}}
+{{else}}
+Health Considerations/Dietary Restrictions: None explicitly stated, focus on general healthy options.
+{{/if}}
 
-Ingredients: {{{ingredients}}}
+{{#if householdComposition}}
+Household Composition:
+- Adults (18-60): {{householdComposition.adults}}
+- Seniors (60+): {{householdComposition.seniors}}
+- Kids (2-17): {{householdComposition.kids}}
+Consider this for suitability of dishes (e.g., less spicy for kids/seniors, softer foods for seniors if appropriate).
+{{/if}}
+
+Based on the available ingredients, health considerations, and household composition, suggest 2-5 healthy Indian dish NAMES.
+These should be just the names of the dishes, not full recipes.
+The dishes should be practical to make with the listed ingredients. Prioritize using the provided ingredients.
+Suggest diverse options if possible (e.g., a dal, a sabzi, a rice dish).
+
+Provide a brief, encouraging message as 'initialContextualGuidance', like "Here are some healthy dish ideas based on your inputs. Click a dish to see its detailed recipe."
 
 IMPORTANT: Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
+Ensure the 'suggestions' array contains only the names of the dishes as strings.
+Example 'suggestions': ["Palak Dal", "Aloo Gobi", "Vegetable Pulao"]
 `,
 });
 
@@ -52,14 +84,19 @@ const getRecipeSuggestionsFlow = ai.defineFlow(
     outputSchema: GetRecipeSuggestionsOutputSchema,
   },
   async input => {
+    // Ensure 'none' is handled correctly if it's the only item
+    if (input.diseaseConcerns && input.diseaseConcerns.length === 1 && input.diseaseConcerns[0] === 'none') {
+      input.diseaseConcerns = []; // Treat as no specific disease concerns for the prompt
+    }
     const {output} = await prompt(input);
     if (!output) {
       console.error('getRecipeSuggestionsFlow: LLM output was null or did not match schema for input:', JSON.stringify(input));
       return {
         suggestions: ["Sorry, I couldn't come up with recipe ideas at this moment. Please check your ingredients or try again later."],
-        mealPlan: "No meal plan available due to an error in generating suggestions."
+        initialContextualGuidance: "There was an issue generating suggestions."
       };
     }
     return output;
   }
 );
+

@@ -35,7 +35,7 @@ export function Header() {
           </span>
         </Link>
         
-        <nav className="hidden items-center space-x-4 md:flex flex-1 justify-end mr-4">
+        <nav className="hidden items-center space-x-4 md:flex flex-1 justify-start mr-4">
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -47,7 +47,8 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center space-x-2">
+        {/* Mobile menu and theme toggle pushed to the right */}
+        <div className="flex items-center space-x-2 md:ml-auto">
           <ThemeToggleButton />
           <Sheet>
             <SheetTrigger asChild>
@@ -75,5 +76,3 @@ export function Header() {
     </header>
   )
 }
-
-    
