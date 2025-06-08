@@ -40,8 +40,8 @@ const GeneralChatContextSchema = z.object({
   topic: z.string().optional().describe("General topic if not specific to a page feature, e.g., 'general health query'.")
 }).describe("Context for general queries not tied to a specific app feature shown on page.");
 
-
-const ContextAwareAIChatInputSchema = z.object({
+// Base schema without refinement
+const BaseContextAwareAIChatInputSchema = z.object({
   userQuestion: z.string().describe('The user question. Can be "INIT_CHAT_WELCOME" to request a welcome message.'),
   chatHistory: z.array(ChatMessageSchema).max(10).optional().describe("Previous messages in the conversation for context (max 10). Last message is newest."),
   contextType: z.enum(["labelAnalysis", "recipe", "nutritionAnalysis", "general"]),
@@ -49,7 +49,10 @@ const ContextAwareAIChatInputSchema = z.object({
   recipeContext: RecipeContextSchema.optional(),
   nutritionContext: NutritionAnalysisContextSchema.optional(),
   generalContext: GeneralChatContextSchema.optional()
-}).refine(data => {
+});
+
+// External schema with refinement
+const ContextAwareAIChatInputSchema = BaseContextAwareAIChatInputSchema.refine(data => {
   if (data.contextType === "labelAnalysis") return !!data.labelContext;
   if (data.contextType === "recipe") return !!data.recipeContext;
   if (data.contextType === "nutritionAnalysis") return !!data.nutritionContext;
@@ -65,8 +68,8 @@ const ContextAwareAIChatOutputSchema = z.object({
 });
 export type ContextAwareAIChatOutput = z.infer<typeof ContextAwareAIChatOutputSchema>;
 
-// Internal type for transforming input for the prompt
-const InternalPromptInputSchema = ContextAwareAIChatInputSchema.extend({
+// Internal type for transforming input for the prompt, extends the base schema
+const InternalPromptInputSchema = BaseContextAwareAIChatInputSchema.extend({
   chatHistoryTransformed: z.array(z.object({
     isUser: z.boolean().optional(),
     isAssistant: z.boolean().optional(),
@@ -149,7 +152,7 @@ IMPORTANT: Your entire response MUST be a single, valid JSON object that conform
 const contextAwareAIChatFlow = ai.defineFlow(
   {
     name: 'contextAwareAIChatFlow',
-    inputSchema: ContextAwareAIChatInputSchema, // External API uses original schema
+    inputSchema: ContextAwareAIChatInputSchema, // External API uses original schema with refinement
     outputSchema: ContextAwareAIChatOutputSchema,
   },
   async (input): Promise<ContextAwareAIChatOutput> => {
