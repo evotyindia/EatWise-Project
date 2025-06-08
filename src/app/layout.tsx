@@ -12,15 +12,13 @@ export const metadata: Metadata = {
 
 interface RootLayoutProps {
   children: React.ReactNode;
-  // params: { locale: string }; // Removed locale param
 }
 
 export default function RootLayout({
   children,
-  // params: { locale }, // Removed locale param
 }: Readonly<RootLayoutProps>) {
   return (
-    <html lang="en" suppressHydrationWarning> {/* Hardcoded lang="en" */}
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -28,7 +26,6 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased min-h-screen bg-background text-foreground flex flex-col">
-        {/* NextIntlClientProvider removed */}
         <CustomThemeProvider>
           <Header />
           <main className="flex-grow">
