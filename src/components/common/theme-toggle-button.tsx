@@ -1,6 +1,7 @@
 
 "use client"
 
+import React, { useState, useEffect } from "react"; // Consolidated and corrected React import
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "@/contexts/theme-context"
 import { Button } from "@/components/ui/button"
@@ -12,12 +13,16 @@ export function ThemeToggleButton() {
     setTheme(theme === "light" ? "dark" : "light")
   }
 
-  // Ensure button only renders client-side where theme is determined
-  const [mounted, setMounted] = React.useState(false)
-  React.useEffect(() => setMounted(true), [])
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, []) // Empty dependency array ensures this runs once on mount, on the client
 
   if (!mounted) {
-    return <Button variant="outline" size="icon" className="h-9 w-9 opacity-0" disabled />; // Placeholder for SSR
+    // Render a simple div placeholder with the same dimensions as the button
+    // to prevent layout shift and minimize differences from server render.
+    // The Button with size="icon" and h-9 w-9 classes results in a 36px by 36px element.
+    return <div className="h-9 w-9" />; 
   }
 
   return (
@@ -31,6 +36,3 @@ export function ThemeToggleButton() {
     </Button>
   )
 }
-
-// Need to export React for the useEffect.
-import React from 'react';
