@@ -43,8 +43,10 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
     inputDataGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5mm 7mm' },
     inputDataItem: { fontSize: '9pt', color: '#2D3748', paddingBottom: '1.5mm' },
     
-    list: { listStyleType: 'disc', paddingLeft: '5mm', margin: '0 0 3mm 0', color: '#4A5568' },
-    listItem: { marginBottom: '2mm', paddingLeft: '1.5mm' },
+    listContainer: { paddingLeft: '5mm', margin: '0 0 3mm 0' }, // Container for list-like blocks
+    listItem: { display: 'flex', alignItems: 'flex-start', marginBottom: '2mm', color: '#4A5568' },
+    bullet: { marginRight: '2.5mm', minWidth: '2.5mm', textAlign: 'left', lineHeight: '1.4' }, // Adjusted spacing
+    listItemText: { flex: 1, textAlign: 'justify' as 'justify' },
   };
 
   const renderStars = (rating: number, maxRating = 5) => {
@@ -58,7 +60,7 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
 
   const renderUserInput = () => {
     if (!userInput || Object.keys(userInput).filter(key => key !== 'nutritionDataUri' && key !== 'foodItemDescription' && userInput[key as keyof AnalyzeNutritionInput] !== undefined && userInput[key as keyof AnalyzeNutritionInput] !== null && String(userInput[key as keyof AnalyzeNutritionInput]).trim() !== "").length === 0) {
-      if (userInput?.nutritionDataUri && userInput.nutritionDataUri !== "Image Uploaded") { // Check if it's actual URI, not placeholder
+      if (userInput?.nutritionDataUri && userInput.nutritionDataUri !== "Image Uploaded") {
         return (
           <div style={styles.inputDataSection}>
             <div style={styles.inputDataTitle}>Nutritional Data Source:</div>
@@ -102,21 +104,29 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
     );
   };
   
-  const renderFormattedAnalysisText = (text?: string): JSX.Element | JSX.Element[] | null => {
+  const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
     if (!text || text.trim().toLowerCase() === 'n/a' || text.trim() === '') {
       return <p style={styles.paragraph}>Not specified / Not applicable.</p>;
     }
-    return text.split('\n').map((line, index) => {
+    const elements: JSX.Element[] = [];
+    text.split('\n').forEach((line, index) => {
       const trimmedLine = line.trim();
       if (trimmedLine.match(/^(\*|-)\s/)) {
-        return <li key={index} style={styles.listItem}>{trimmedLine.substring(trimmedLine.indexOf(' ') + 1)}</li>;
+        elements.push(
+          <div key={`item-${index}`} style={styles.listItem}>
+            <span style={styles.bullet}>•</span>
+            <span style={styles.listItemText}>{trimmedLine.substring(trimmedLine.indexOf(' ') + 1)}</span>
+          </div>
+        );
+      } else if (trimmedLine) {
+        elements.push(
+          <p key={`para-${index}`} style={{...styles.paragraph, marginBottom: '2mm', textAlign: 'justify' as 'justify'}}>{trimmedLine}</p>
+        );
       }
-      if(trimmedLine) {
-        return <p key={index} style={{...styles.paragraph, marginBottom: '2mm'}}>{trimmedLine}</p>;
-      }
-      return null;
-    }).filter(Boolean);
+    });
+    return elements.length > 0 ? <>{elements}</> : null;
   };
+
 
   return (
     <div style={styles.pdfContainer}>
@@ -147,7 +157,7 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
             <p style={styles.aboutText}>
               This report details the AI analysis of the nutritional data you provided, offering an assessment of macronutrients, 
               micronutrients, overall nutritional density, and dietary suitability. Use it to evaluate the nutritional balance of 
-              the item and how it fits into your dietary goals.
+              the item and how it fits into your dietary goals. The analysis is based on the data you entered or was extracted from an uploaded image.
             </p>
           </div>
         </div>
@@ -155,7 +165,8 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
         <div>
           <p style={styles.disclaimerText}>
             <strong>Disclaimer:</strong> This analysis is for informational purposes only and should not replace advice from a qualified healthcare professional or registered dietitian. 
-            Individual nutritional needs vary. Consult an expert for personalized dietary guidance. The AI's analysis is based on the data provided and general nutritional knowledge.
+            Individual nutritional needs vary. Consult an expert for personalized dietary guidance. The AI's analysis is based on the data provided and general nutritional knowledge. 
+            EatWise India is not liable for any decisions made based on this report.
           </p>
           <div style={styles.aboutPageFooter}>EatWise India - Understanding Your Nutrition. Generated on: {new Date().toLocaleDateString('en-GB')}</div>
         </div>
@@ -182,40 +193,41 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
             <div style={styles.ratingValue}>{renderStars(analysisResult.nutritionDensityRating)}</div>
           </div>
           <div style={styles.subSectionTitle}>Overall Analysis:</div>
-          <div>{Array.isArray(renderFormattedAnalysisText(analysisResult.overallAnalysis)) ? <ul style={styles.list}>{renderFormattedAnalysisText(analysisResult.overallAnalysis)}</ul> : renderFormattedAnalysisText(analysisResult.overallAnalysis) }</div>
+          <div style={styles.listContainer}>{renderFormattedAnalysisText(analysisResult.overallAnalysis)}</div>
         </div>
 
         {analysisResult.macronutrientBalance && (
           <div style={styles.section}>
             <div style={styles.subSectionTitle}>Macronutrient Balance:</div>
-            <div>{Array.isArray(renderFormattedAnalysisText(analysisResult.macronutrientBalance)) ? <ul style={styles.list}>{renderFormattedAnalysisText(analysisResult.macronutrientBalance)}</ul> : renderFormattedAnalysisText(analysisResult.macronutrientBalance)}</div>
+            <div style={styles.listContainer}>{renderFormattedAnalysisText(analysisResult.macronutrientBalance)}</div>
           </div>
         )}
         {analysisResult.micronutrientHighlights && (
           <div style={styles.section}>
             <div style={styles.subSectionTitle}>Micronutrient Highlights:</div>
-            <div>{Array.isArray(renderFormattedAnalysisText(analysisResult.micronutrientHighlights)) ? <ul style={styles.list}>{renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}</ul> : renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}</div>
+            <div style={styles.listContainer}>{renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}</div>
           </div>
         )}
         {analysisResult.processingLevelAssessment && (
           <div style={styles.section}>
             <div style={styles.subSectionTitle}>Processing Level Assessment:</div>
-            <div>{renderFormattedAnalysisText(analysisResult.processingLevelAssessment)}</div>
+            <div style={styles.listContainer}>{renderFormattedAnalysisText(analysisResult.processingLevelAssessment)}</div>
           </div>
         )}
         
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Dietary Suitability</div>
-          <div>{renderFormattedAnalysisText(analysisResult.dietarySuitability)}</div>
+          <div style={styles.listContainer}>{renderFormattedAnalysisText(analysisResult.dietarySuitability)}</div>
         </div>
 
         {analysisResult.servingSizeContext && (
           <div style={styles.section}>
             <div style={styles.subSectionTitle}>Comments on Serving Size:</div>
-            <div>{renderFormattedAnalysisText(analysisResult.servingSizeContext)}</div>
+            <div style={styles.listContainer}>{renderFormattedAnalysisText(analysisResult.servingSizeContext)}</div>
           </div>
         )}
       </div>
     </div>
   );
 };
+
