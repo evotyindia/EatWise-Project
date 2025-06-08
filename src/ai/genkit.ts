@@ -1,9 +1,8 @@
 
 import {genkit} from 'genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import {vertexAI} from '@genkit-ai/vertexai'; // Corrected import
 
 export const ai = genkit({
-  plugins: [googleAI()],
-  model: 'googleai/gemini-1.5-flash-latest', // Reverted to Flash model due to quota issues
+  plugins: [vertexAI({location: 'us-central1'})], // Specify a location for Vertex AI
+  model: 'googleai/gemini-1.5-flash-latest', 
 });
-
