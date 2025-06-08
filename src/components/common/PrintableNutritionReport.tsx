@@ -11,20 +11,22 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
   const styles: { [key: string]: React.CSSProperties } = {
     pdfContainer: { width: '210mm', boxSizing: 'border-box', backgroundColor: '#ffffff', color: '#333333', fontFamily: 'Arial, sans-serif', fontSize: '10pt', lineHeight: '1.4' },
     
-    // About Page Styles
-    aboutPage: { padding: '15mm', minHeight: '277mm', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', borderBottom: '1px solid #e0e0e0' },
-    logoContainer: { marginBottom: '20px' },
+    aboutPage: { padding: '15mm', minHeight: '277mm', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center', textAlign: 'center', borderBottom: '1px solid #e0e0e0', boxSizing: 'border-box' },
+    logoContainer: { marginBottom: '10mm' },
     logoSvg: { width: '150px', height: 'auto' },
-    aboutTitle: { fontSize: '22pt', fontWeight: 'bold', color: '#0f172a', marginBottom: '10mm' },
-    aboutText: { fontSize: '10pt', marginBottom: '5mm', maxWidth: '170mm', textAlign: 'justify', color: '#4A5568' },
-    disclaimerText: { fontSize: '9pt', fontStyle: 'italic', marginTop: '8mm', maxWidth: '170mm', textAlign: 'center', color: '#718096' },
-    aboutPageFooter: { fontSize: '8pt', color: '#A0AEC0', marginTop: 'auto', paddingTop: '10mm' },
+    aboutTitle: { fontSize: '22pt', fontWeight: 'bold', color: '#0f172a', marginBottom: '8mm' },
+    aboutSection: { marginBottom: '6mm', maxWidth: '170mm', textAlign: 'justify' },
+    aboutSectionTitle: { fontSize: '12pt', fontWeight: 'bold', color: '#1A202C', marginBottom: '3mm', textAlign: 'center' },
+    aboutText: { fontSize: '10pt', color: '#4A5568', marginBottom: '4mm' },
+    disclaimerText: { fontSize: '9pt', fontStyle: 'italic', color: '#718096', marginTop: 'auto', paddingTop: '8mm' },
+    aboutPageFooter: { fontSize: '8pt', color: '#A0AEC0', marginTop: '5mm', borderTop: '1px solid #eee', paddingTop: '5mm', width: '100%' },
 
-    // Report Page Styles
-    reportPage: { padding: '15mm', boxSizing: 'border-box' },
-    reportHeader: { textAlign: 'center', marginBottom: '10mm' },
+    reportPage: { padding: '15mm', boxSizing: 'border-box', minHeight: '277mm' },
+    reportHeader: { textAlign: 'center', marginBottom: '10mm', display: 'flex', flexDirection: 'column', alignItems: 'center' },
+    reportHeaderLogo: { width: '100px', height: 'auto', marginBottom: '5mm'},
     reportTitle: { fontSize: '20pt', fontWeight: 'bold', color: '#0f172a', marginBottom: '2mm' },
-    
+    foodItemName: { fontSize: '14pt', fontWeight: 'normal', marginBottom: '8mm', color: '#2D3748' },
+
     section: { marginBottom: '7mm', padding: '5mm', border: '1px solid #E2E8F0', borderRadius: '6px', backgroundColor: '#F7FAFC' },
     sectionTitle: { fontSize: '14pt', fontWeight: 'bold', color: '#1A202C', marginTop: '0', marginBottom: '5mm', borderBottom: '2px solid #10b981', paddingBottom: '3mm' },
     subSectionTitle: { fontSize: '12pt', fontWeight: 'bold', color: '#2D3748', marginTop: '5mm', marginBottom: '3mm' },
@@ -36,7 +38,7 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
     ratingValue: { fontSize: '10pt', color: '#1A202C', display: 'flex', alignItems: 'center' },
     star: { color: '#FBBF24', marginRight: '1px', fontSize: '12pt' },
     
-    inputDataSection: { marginBottom: '7mm', padding: '5mm', border: '1px dashed #CBD5E0', borderRadius: '6px', backgroundColor: '#F0F8FF' }, // Light blue bg for input
+    inputDataSection: { marginBottom: '7mm', padding: '5mm', border: '1px dashed #CBD5E0', borderRadius: '6px', backgroundColor: '#F0F8FF' },
     inputDataTitle: { fontSize: '12pt', fontWeight: 'bold', color: '#0f172a', marginBottom: '4mm' },
     inputDataGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5mm 7mm' },
     inputDataItem: { fontSize: '9pt', color: '#2D3748', paddingBottom: '1.5mm' },
@@ -55,13 +57,14 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
   };
 
   const renderUserInput = () => {
-    if (!userInput || Object.keys(userInput).filter(key => key !== 'nutritionDataUri' && userInput[key as keyof AnalyzeNutritionInput] !== undefined && userInput[key as keyof AnalyzeNutritionInput] !== null && String(userInput[key as keyof AnalyzeNutritionInput]).trim() !== "").length === 0) {
-      if (userInput?.nutritionDataUri) {
+    if (!userInput || Object.keys(userInput).filter(key => key !== 'nutritionDataUri' && key !== 'foodItemDescription' && userInput[key as keyof AnalyzeNutritionInput] !== undefined && userInput[key as keyof AnalyzeNutritionInput] !== null && String(userInput[key as keyof AnalyzeNutritionInput]).trim() !== "").length === 0) {
+      if (userInput?.nutritionDataUri && userInput.nutritionDataUri !== "Image Uploaded") { // Check if it's actual URI, not placeholder
         return (
           <div style={styles.inputDataSection}>
             <div style={styles.inputDataTitle}>Nutritional Data Source:</div>
             <div style={styles.inputDataItem}>Data primarily extracted from an uploaded image.</div>
             {userInput.servingSize && <div style={styles.inputDataItem}><strong>Serving Size (from input):</strong> {userInput.servingSize}</div>}
+            {userInput.foodItemDescription && <div style={styles.inputDataItem}><strong>Food Item:</strong> {userInput.foodItemDescription}</div>}
           </div>
         );
       }
@@ -75,13 +78,14 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
     ];
     const unitMap: Partial<Record<keyof AnalyzeNutritionInput, string>> = {
       calories: 'kcal', fat: 'g', saturatedFat: 'g', transFat: 'g', cholesterol: 'mg', sodium: 'mg',
-      carbohydrates: 'g', fiber: 'g', sugar: 'g', addedSugar: 'g', protein: 'g', vitaminD: 'mcg/IU', // Assuming unit might be provided or known
+      carbohydrates: 'g', fiber: 'g', sugar: 'g', addedSugar: 'g', protein: 'g', vitaminD: 'mcg/IU',
       calcium: 'mg', iron: 'mg', potassium: 'mg', vitaminC: 'mg'
     };
 
     return (
       <div style={styles.inputDataSection}>
         <div style={styles.inputDataTitle}>Provided Nutritional Data:</div>
+        {userInput.foodItemDescription && <div style={{...styles.inputDataItem, gridColumn: '1 / -1', marginBottom: '3mm', fontWeight: 'bold'}}>Food Item: {userInput.foodItemDescription}</div>}
         {userInput.servingSize && <div style={{...styles.inputDataItem, gridColumn: '1 / -1', marginBottom: '3mm', fontWeight: 'bold'}}>Serving Size: {userInput.servingSize}</div>}
         <div style={styles.inputDataGrid}>
           {nutrients.map(key => {
@@ -93,7 +97,7 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
             return null;
           }).filter(Boolean)}
         </div>
-         {userInput.nutritionDataUri && <div style={{...styles.inputDataItem, gridColumn: '1 / -1', marginTop: '4mm', fontStyle: 'italic', color: '#666'}}>Note: Analysis may also incorporate data extracted from an uploaded image.</div>}
+         {userInput.nutritionDataUri === "Image Uploaded" && <div style={{...styles.inputDataItem, gridColumn: '1 / -1', marginTop: '4mm', fontStyle: 'italic', color: '#666'}}>Note: Analysis may also incorporate data extracted from an uploaded image.</div>}
       </div>
     );
   };
@@ -102,13 +106,12 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
     if (!text || text.trim().toLowerCase() === 'n/a' || text.trim() === '') {
       return <p style={styles.paragraph}>Not specified / Not applicable.</p>;
     }
-    // Split by newline, then check for bullet points
     return text.split('\n').map((line, index) => {
       const trimmedLine = line.trim();
-      if (trimmedLine.match(/^(\*|-)\s/)) { // If it starts with a bullet
+      if (trimmedLine.match(/^(\*|-)\s/)) {
         return <li key={index} style={styles.listItem}>{trimmedLine.substring(trimmedLine.indexOf(' ') + 1)}</li>;
       }
-      if(trimmedLine) { // Regular paragraph line
+      if(trimmedLine) {
         return <p key={index} style={{...styles.paragraph, marginBottom: '2mm'}}>{trimmedLine}</p>;
       }
       return null;
@@ -117,44 +120,57 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
 
   return (
     <div style={styles.pdfContainer}>
-      {/* About Page */}
       <div style={styles.aboutPage} className="pdf-page">
-        <div style={styles.logoContainer}>
-          <svg style={styles.logoSvg} viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg">
-            <rect width="180" height="60" rx="8" ry="8" fill="#E6FFFA" />
-            <path d="M30 35 Q40 15 50 35 T70 35 M50 15 V35" stroke="#10b981" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
-            <text x="80" y="32" fontFamily="Poppins, Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#0f172a">EatWise</text>
-            <text x="82" y="48" fontFamily="Inter, Arial, sans-serif" fontSize="10" fill="#0f172a">India</text>
-          </svg>
+        <div>
+          <div style={styles.logoContainer}>
+            <svg style={styles.logoSvg} viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg">
+              <rect width="180" height="60" rx="8" ry="8" fill="#E6FFFA" />
+              <path d="M30 35 Q40 15 50 35 T70 35 M50 15 V35" stroke="#10b981" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+              <text x="80" y="32" fontFamily="Poppins, Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#0f172a">EatWise</text>
+              <text x="82" y="48" fontFamily="Inter, Arial, sans-serif" fontSize="10" fill="#0f172a">India</text>
+            </svg>
+          </div>
+          <h1 style={styles.aboutTitle}>AI Nutrition Analysis by EatWise India</h1>
+          
+          <div style={styles.aboutSection}>
+            <div style={styles.aboutSectionTitle}>Our Mission & Vision</div>
+            <p style={styles.aboutText}>
+              EatWise India is dedicated to empowering individuals across India to make informed and healthier food choices. 
+              Our mission is to demystify nutrition labels, highlight the benefits of traditional Indian ingredients, 
+              and provide accessible AI-powered tools to foster a greater understanding of food. We envision a healthier India, 
+              where everyone has the knowledge to eat wisely and live well.
+            </p>
+          </div>
+
+          <div style={styles.aboutSection}>
+            <div style={styles.aboutSectionTitle}>How to Use This Report</div>
+            <p style={styles.aboutText}>
+              This report details the AI analysis of the nutritional data you provided, offering an assessment of macronutrients, 
+              micronutrients, overall nutritional density, and dietary suitability. Use it to evaluate the nutritional balance of 
+              the item and how it fits into your dietary goals.
+            </p>
+          </div>
         </div>
-        <h1 style={styles.aboutTitle}>AI Nutrition Analysis by EatWise India</h1>
-        <p style={styles.aboutText}>
-          EatWise India provides AI-powered insights to help you understand the nutritional content of food items. 
-          Our goal is to make nutrition information accessible and easy to interpret.
-        </p>
-        <p style={styles.aboutText}>
-          This report details the analysis of the nutritional data you provided, offering an assessment of macronutrients, micronutrients, 
-          overall nutritional density, and dietary suitability.
-        </p>
-        <p style={styles.disclaimerText}>
-          <strong>Disclaimer:</strong> This analysis is for informational purposes only and should not replace advice from a qualified healthcare professional or registered dietitian. 
-          Individual nutritional needs vary. Consult an expert for personalized dietary guidance.
-        </p>
-        <div style={styles.aboutPageFooter}>EatWise India - Understanding Your Nutrition. Generated on: {new Date().toLocaleDateString('en-GB')}</div>
+
+        <div>
+          <p style={styles.disclaimerText}>
+            <strong>Disclaimer:</strong> This analysis is for informational purposes only and should not replace advice from a qualified healthcare professional or registered dietitian. 
+            Individual nutritional needs vary. Consult an expert for personalized dietary guidance. The AI's analysis is based on the data provided and general nutritional knowledge.
+          </p>
+          <div style={styles.aboutPageFooter}>EatWise India - Understanding Your Nutrition. Generated on: {new Date().toLocaleDateString('en-GB')}</div>
+        </div>
       </div>
       
-      {/* Report Content Page */}
       <div style={styles.reportPage} className="pdf-page">
         <div style={styles.reportHeader}>
-             <div style={styles.logoContainer}>
-              <svg style={{...styles.logoSvg, width: '100px'}} viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg">
+             <svg style={styles.reportHeaderLogo} viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg">
                 <rect width="180" height="60" rx="8" ry="8" fill="#E6FFFA" />
                 <path d="M30 35 Q40 15 50 35 T70 35 M50 15 V35" stroke="#10b981" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
                 <text x="80" y="32" fontFamily="Poppins, Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#0f172a">EatWise</text>
                 <text x="82" y="48" fontFamily="Inter, Arial, sans-serif" fontSize="10" fill="#0f172a">India</text>
               </svg>
-            </div>
             <div style={styles.reportTitle}>AI Nutrition Analysis</div>
+            {userInput?.foodItemDescription && <div style={styles.foodItemName}>For: {userInput.foodItemDescription}</div>}
         </div>
         
         {renderUserInput()}

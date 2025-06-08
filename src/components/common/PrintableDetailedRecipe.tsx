@@ -1,7 +1,7 @@
 
 import type React from 'react';
 import type { GetDetailedRecipeOutput, GetDetailedRecipeInput } from '@/ai/flows/get-detailed-recipe';
-import type { ChatMessage } from '@/ai/flows/context-aware-ai-chat'; // Ensure this path is correct
+import type { ChatMessage } from '@/ai/flows/context-aware-ai-chat';
 
 interface PrintableDetailedRecipeProps {
   recipe: GetDetailedRecipeOutput;
@@ -13,18 +13,19 @@ export const PrintableDetailedRecipe: React.FC<PrintableDetailedRecipeProps> = (
   const styles: { [key: string]: React.CSSProperties } = {
     pdfContainer: { width: '210mm', boxSizing: 'border-box', backgroundColor: '#ffffff', color: '#333333', fontFamily: 'Arial, sans-serif', fontSize: '10pt', lineHeight: '1.4' },
     
-    // About Page Styles
-    aboutPage: { padding: '15mm', minHeight: '277mm', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', borderBottom: '1px solid #e0e0e0' },
-    logoContainer: { marginBottom: '20px' },
+    aboutPage: { padding: '15mm', minHeight: '277mm', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center', textAlign: 'center', borderBottom: '1px solid #e0e0e0', boxSizing: 'border-box' },
+    logoContainer: { marginBottom: '10mm' },
     logoSvg: { width: '150px', height: 'auto' },
-    aboutTitle: { fontSize: '22pt', fontWeight: 'bold', color: '#0f172a', marginBottom: '10mm' },
-    aboutText: { fontSize: '10pt', marginBottom: '5mm', maxWidth: '170mm', textAlign: 'justify', color: '#4A5568' },
-    disclaimerText: { fontSize: '9pt', fontStyle: 'italic', marginTop: '8mm', maxWidth: '170mm', textAlign: 'center', color: '#718096' },
-    aboutPageFooter: { fontSize: '8pt', color: '#A0AEC0', marginTop: 'auto', paddingTop: '10mm' },
+    aboutTitle: { fontSize: '22pt', fontWeight: 'bold', color: '#0f172a', marginBottom: '8mm' },
+    aboutSection: { marginBottom: '6mm', maxWidth: '170mm', textAlign: 'justify' },
+    aboutSectionTitle: { fontSize: '12pt', fontWeight: 'bold', color: '#1A202C', marginBottom: '3mm', textAlign: 'center' },
+    aboutText: { fontSize: '10pt', color: '#4A5568', marginBottom: '4mm' },
+    disclaimerText: { fontSize: '9pt', fontStyle: 'italic', color: '#718096', marginTop: 'auto', paddingTop: '8mm' },
+    aboutPageFooter: { fontSize: '8pt', color: '#A0AEC0', marginTop: '5mm', borderTop: '1px solid #eee', paddingTop: '5mm', width: '100%' },
 
-    // Report Page Styles
-    reportPage: { padding: '15mm', boxSizing: 'border-box' },
-    reportHeader: { textAlign: 'center', marginBottom: '10mm' },
+    reportPage: { padding: '15mm', boxSizing: 'border-box', minHeight: '277mm' },
+    reportHeader: { textAlign: 'center', marginBottom: '10mm', display: 'flex', flexDirection: 'column', alignItems: 'center' },
+    reportHeaderLogo: { width: '100px', height: 'auto', marginBottom: '5mm'},
     recipeMainTitle: { fontSize: '20pt', fontWeight: 'bold', color: '#0f172a', marginBottom: '2mm' },
     recipeDescription: { fontSize: '10pt', fontStyle: 'italic', color: '#4A5568', marginBottom: '8mm', maxWidth: '180mm', margin: '0 auto 8mm auto' },
 
@@ -44,7 +45,7 @@ export const PrintableDetailedRecipe: React.FC<PrintableDetailedRecipeProps> = (
     instructionList: { listStyleType: 'decimal', paddingLeft: '5mm', margin: '0 0 3mm 0' },
     instructionItem: { marginBottom: '3mm', paddingLeft: '2mm', color: '#2D3748' },
     
-    healthNotesSection: { marginTop: '5mm', padding: '4mm', backgroundColor: '#E6FFFA', borderLeft: '3px solid #10b981', borderRadius: '4px' }, // Accent bg
+    healthNotesSection: { marginTop: '5mm', padding: '4mm', backgroundColor: '#E6FFFA', borderLeft: '3px solid #10b981', borderRadius: '4px' },
     healthNotesText: { fontSize: '9.5pt', color: '#2D3748', whiteSpace: 'pre-line' as 'pre-line'},
 
     userInputSection: { marginBottom: '7mm', padding: '5mm', border: '1px dashed #CBD5E0', borderRadius: '6px', backgroundColor: '#F0F8FF' },
@@ -55,47 +56,61 @@ export const PrintableDetailedRecipe: React.FC<PrintableDetailedRecipeProps> = (
     chatMessage: { marginBottom: '3mm', padding: '3mm', borderRadius: '4px', border: '1px solid #F0F0F0', backgroundColor: '#FFFFFF' },
     chatUser: { fontWeight: 'bold', color: '#0f172a', display: 'block', marginBottom: '1mm', fontSize: '9pt' },
     chatAssistant: { color: '#2D3748', display: 'block', fontSize: '9pt' },
+    paragraph: { marginBottom: '4mm', textAlign: 'justify' as 'justify', whiteSpace: 'pre-wrap' as 'pre-wrap', paddingLeft: '2mm', paddingRight: '2mm', color: '#4A5568'},
   };
 
   return (
     <div style={styles.pdfContainer}>
-      {/* About Page */}
       <div style={styles.aboutPage} className="pdf-page">
-        <div style={styles.logoContainer}>
-          <svg style={styles.logoSvg} viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg">
-            <rect width="180" height="60" rx="8" ry="8" fill="#E6FFFA" />
-            <path d="M30 35 Q40 15 50 35 T70 35 M50 15 V35" stroke="#10b981" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
-            <text x="80" y="32" fontFamily="Poppins, Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#0f172a">EatWise</text>
-            <text x="82" y="48" fontFamily="Inter, Arial, sans-serif" fontSize="10" fill="#0f172a">India</text>
-          </svg>
+        <div>
+          <div style={styles.logoContainer}>
+            <svg style={styles.logoSvg} viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg">
+              <rect width="180" height="60" rx="8" ry="8" fill="#E6FFFA" />
+              <path d="M30 35 Q40 15 50 35 T70 35 M50 15 V35" stroke="#10b981" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+              <text x="80" y="32" fontFamily="Poppins, Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#0f172a">EatWise</text>
+              <text x="82" y="48" fontFamily="Inter, Arial, sans-serif" fontSize="10" fill="#0f172a">India</text>
+            </svg>
+          </div>
+          <h1 style={styles.aboutTitle}>AI Recipe by EatWise India</h1>
+
+          <div style={styles.aboutSection}>
+            <div style={styles.aboutSectionTitle}>Our Mission & Vision</div>
+            <p style={styles.aboutText}>
+              EatWise India is dedicated to empowering individuals across India to make informed and healthier food choices. 
+              Our mission is to demystify nutrition labels, highlight the benefits of traditional Indian ingredients, 
+              and provide accessible AI-powered tools to foster a greater understanding of food. We envision a healthier India, 
+              where everyone has the knowledge to eat wisely and live well.
+            </p>
+          </div>
+
+          <div style={styles.aboutSection}>
+            <div style={styles.aboutSectionTitle}>How to Use This Recipe</div>
+            <p style={styles.aboutText}>
+              This document contains a detailed recipe generated by our AI, tailored to your provided ingredients and preferences. 
+              Follow the steps carefully, and feel free to adjust seasonings or cooking times to your liking. We aim to provide 
+              delicious and healthy Indian meal ideas.
+            </p>
+          </div>
         </div>
-        <h1 style={styles.aboutTitle}>AI Recipe by EatWise India</h1>
-        <p style={styles.aboutText}>
-          Welcome to EatWise India! We're passionate about helping you discover healthy and delicious Indian recipes tailored to your needs. 
-          Our AI chef crafts recipes based on the ingredients you have and your dietary preferences.
-        </p>
-        <p style={styles.aboutText}>
-          This document contains a detailed recipe generated by our AI. We strive to provide accurate and helpful cooking guidance.
-        </p>
-        <p style={styles.disclaimerText}>
-          <strong>Disclaimer:</strong> This AI-generated recipe is for informational and inspirational purposes only. Nutritional information can vary. 
-          Always ensure ingredients are suitable for your specific health conditions and allergies. Consult a healthcare professional or registered dietitian for personalized dietary advice. 
-          Adjust seasoning and cooking times to your preference.
-        </p>
-        <div style={styles.aboutPageFooter}>EatWise India - Cooking Healthy, Made Easy. Generated on: {new Date().toLocaleDateString('en-GB')}</div>
+        
+        <div>
+          <p style={styles.disclaimerText}>
+            <strong>Disclaimer:</strong> This AI-generated recipe is for informational and inspirational purposes only. Nutritional information can vary. 
+            Always ensure ingredients are suitable for your specific health conditions and allergies. Consult a healthcare professional or registered dietitian for personalized dietary advice. 
+            Adjust seasoning and cooking times to your preference. Food safety practices should always be followed.
+          </p>
+          <div style={styles.aboutPageFooter}>EatWise India - Cooking Healthy, Made Easy. Generated on: {new Date().toLocaleDateString('en-GB')}</div>
+        </div>
       </div>
 
-      {/* Recipe Content Page */}
       <div style={styles.reportPage} className="pdf-page">
         <div style={styles.reportHeader}>
-             <div style={styles.logoContainer}>
-              <svg style={{...styles.logoSvg, width: '100px'}} viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg">
-                <rect width="180" height="60" rx="8" ry="8" fill="#E6FFFA" />
-                <path d="M30 35 Q40 15 50 35 T70 35 M50 15 V35" stroke="#10b981" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
-                <text x="80" y="32" fontFamily="Poppins, Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#0f172a">EatWise</text>
-                <text x="82" y="48" fontFamily="Inter, Arial, sans-serif" fontSize="10" fill="#0f172a">India</text>
-              </svg>
-            </div>
+            <svg style={styles.reportHeaderLogo} viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg">
+              <rect width="180" height="60" rx="8" ry="8" fill="#E6FFFA" />
+              <path d="M30 35 Q40 15 50 35 T70 35 M50 15 V35" stroke="#10b981" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+              <text x="80" y="32" fontFamily="Poppins, Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#0f172a">EatWise</text>
+              <text x="82" y="48" fontFamily="Inter, Arial, sans-serif" fontSize="10" fill="#0f172a">India</text>
+            </svg>
           <div style={styles.recipeMainTitle}>{recipe.recipeTitle}</div>
           {recipe.description && <div style={styles.recipeDescription}>{recipe.description}</div>}
         </div>
@@ -155,7 +170,7 @@ export const PrintableDetailedRecipe: React.FC<PrintableDetailedRecipeProps> = (
         {chatHistory && chatHistory.length > 0 && (
           <div style={{...styles.section, ...styles.chatContainer}} className="pdf-page-break-before">
             <div style={styles.sectionTitle}>Chat Highlights</div>
-            {chatHistory.slice(-6).map((msg, index) => ( // Show last few messages
+            {chatHistory.slice(-5).map((msg, index) => ( // Show last 5 messages
               <div key={index} style={styles.chatMessage}>
                 <span style={styles.chatUser}>{msg.role === 'user' ? 'Your Question:' : 'AI Chef Response:'}</span>
                 <span style={msg.role === 'user' ? {color: '#555555'} : styles.chatAssistant }>{msg.content}</span>

@@ -9,7 +9,7 @@ import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UploadCloud, Sparkles, FileText, Download, MessageCircle, Send } from "lucide-react";
 import Image from "next/image";
-import React, { useState, useRef, useEffect } from "react"; // Added useRef, useEffect
+import React, { useState, useRef, useEffect } from "react";
 import { createRoot } from 'react-dom/client';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -23,11 +23,11 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { fileToDataUri } from "@/lib/utils";
 import { StarRating } from "@/components/common/star-rating";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // AlertTitle added
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { PrintableNutritionReport } from "@/components/common/PrintableNutritionReport";
-import { ScrollArea } from "@/components/ui/scroll-area"; // Added ScrollArea
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 
 const numberPreprocess = (val: unknown) => (val === "" || val === null || val === undefined ? undefined : Number(val));
@@ -51,8 +51,8 @@ const nutritionInputSchema = z.object({
   vitaminC: z.preprocess(numberPreprocess, z.number({ invalid_type_error: "Must be a number" }).nonnegative("Cannot be negative").optional()),
   servingSize: z.string().optional(),
   foodItemDescription: z.string().optional().describe("Optional: name or description of the food item, e.g., 'Homemade Dal Makhani' or 'Store-bought cookies'.")
-}).refine(data => Object.values(data).some(val => val !== undefined && val !== "" && val !== null && key !== 'foodItemDescription') || (data.calories !== undefined && data.calories !== null), { 
-  message: "At least one nutritional value must be provided for manual entry if no image is uploaded.",
+}).refine(data => Object.keys(data).some(key => key !== 'foodItemDescription' && key !== 'servingSize' && data[key as keyof Omit<typeof data, 'foodItemDescription'|'servingSize'>] !== undefined && data[key as keyof Omit<typeof data, 'foodItemDescription'|'servingSize'>] !== null && String(data[key as keyof Omit<typeof data, 'foodItemDescription'|'servingSize'>]).trim() !== "" ), { 
+  message: "At least one nutritional value (calories, fat, etc.) must be provided for manual entry if no image is uploaded.",
   path: ["calories"], 
 });
 
@@ -64,6 +64,7 @@ export function NutritionForm() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalyzeNutritionOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPdfDownloading, setIsPdfDownloading] = useState(false);
   const [currentInputData, setCurrentInputData] = useState<AnalyzeNutritionInput | null>(null);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
@@ -95,22 +96,23 @@ export function NutritionForm() {
       setAnalysisResult(null);
       setCurrentInputData(null); 
       setChatHistory([]);
+      // Do not clear form.getValues("servingSize") as it's used by image submit
     }
   };
 
-  const generateAnalysisSharedLogic = async (input: AnalyzeNutritionInput, inputForPdf: AnalyzeNutritionInput) => {
+  const generateAnalysisSharedLogic = async (inputForAI: AnalyzeNutritionInput, inputForPdfAndContext: AnalyzeNutritionInput) => {
     setIsLoading(true);
     setAnalysisResult(null);
-    setCurrentInputData(inputForPdf); 
+    setCurrentInputData(inputForPdfAndContext); 
     setChatHistory([]);
     try {
-      const result = await analyzeNutrition(input);
+      const result = await analyzeNutrition(inputForAI);
       setAnalysisResult(result);
       toast({ title: "Analysis Complete", description: "Nutritional insights generated." });
       if (result) {
         initiateChatWithWelcome("nutritionAnalysis", {
           nutritionReportSummary: result.overallAnalysis,
-          foodItemDescription: form.getValues("foodItemDescription") || (input.nutritionDataUri ? "Scanned food item" : "Manually entered data")
+          foodItemDescription: inputForPdfAndContext.foodItemDescription || (inputForAI.nutritionDataUri ? "Scanned food item" : "Manually entered data")
         });
       }
     } catch (error) {
@@ -133,8 +135,9 @@ export function NutritionForm() {
       return;
     }
     const nutritionDataUri = await fileToDataUri(imageFile);
-    const analysisInput: AnalyzeNutritionInput = { nutritionDataUri, servingSize: form.getValues("servingSize") };
-    const inputForPdf: AnalyzeNutritionInput = { servingSize: form.getValues("servingSize"), foodItemDescription: form.getValues("foodItemDescription"), nutritionDataUri: "Image Uploaded" };
+    const analysisInput: AnalyzeNutritionInput = { nutritionDataUri, servingSize: form.getValues("servingSize"), foodItemDescription: form.getValues("foodItemDescription") };
+    // For PDF, we indicate image was used, but pass text fields if user filled them for context
+    const inputForPdf: AnalyzeNutritionInput = { servingSize: form.getValues("servingSize"), foodItemDescription: form.getValues("foodItemDescription"), nutritionDataUri: "Image Uploaded" }; 
     await generateAnalysisSharedLogic(analysisInput, inputForPdf);
   };
 
@@ -172,7 +175,7 @@ export function NutritionForm() {
         contextType: "nutritionAnalysis",
         nutritionContext: {
           nutritionReportSummary: analysisResult.overallAnalysis,
-          foodItemDescription: form.getValues("foodItemDescription") || (imageFile ? "Scanned food item" : "Manually entered data")
+          foodItemDescription: currentInputData?.foodItemDescription || (imageFile ? "Scanned food item" : "Manually entered data")
         },
       };
       const aiResponse = await contextAwareAIChat(chatContextInput);
@@ -194,7 +197,7 @@ export function NutritionForm() {
 
   const handleDownloadReport = async () => {
     if (!analysisResult) return;
-    setIsLoading(true);
+    setIsPdfDownloading(true);
 
     const tempDiv = document.createElement('div');
     tempDiv.id = 'pdf-render-source-nutrition';
@@ -203,13 +206,17 @@ export function NutritionForm() {
     document.body.appendChild(tempDiv);
 
     const root = createRoot(tempDiv);
-    root.render( <PrintableNutritionReport analysisResult={analysisResult} userInput={currentInputData || { ...form.getValues() }} /> );
+    // Pass either currentInputData (if image was used) or form.getValues() (if manual)
+    const pdfInputData = currentInputData?.nutritionDataUri === "Image Uploaded" ? currentInputData : { ...form.getValues() };
+    root.render( <PrintableNutritionReport analysisResult={analysisResult} userInput={pdfInputData} /> );
     
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     try {
       const canvas = await html2canvas(tempDiv, {
-        scale: 2, useCORS: true, logging: false, width: tempDiv.scrollWidth, height: tempDiv.scrollHeight, windowWidth: tempDiv.scrollWidth, windowHeight: tempDiv.scrollHeight,
+        scale: 2, useCORS: true, logging: false, 
+        width: tempDiv.scrollWidth, height: tempDiv.scrollHeight, 
+        windowWidth: tempDiv.scrollWidth, windowHeight: tempDiv.scrollHeight,
       });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -232,13 +239,14 @@ export function NutritionForm() {
         const footerText = `Page ${i} of ${totalPages} | Generated by EatWise India on ${new Date().toLocaleDateString('en-GB')}`;
         pdf.text(footerText, pdfPageWidth / 2, pdfPageHeight - 10, { align: 'center' });
       }
-      pdf.save('nutrition_analysis_report.pdf');
+      const safeFoodItemName = (pdfInputData?.foodItemDescription || 'nutrition-data').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      pdf.save(`${safeFoodItemName}_analysis_report.pdf`);
       toast({ title: "Report Downloaded", description: "The PDF nutrition analysis has been saved." });
     } catch (error) {
       console.error("Error generating PDF:", error);
       toast({ title: "PDF Error", description: "Could not generate PDF report. " + (error as Error).message, variant: "destructive" });
     } finally {
-      root.unmount(); document.body.removeChild(tempDiv); setIsLoading(false);
+      root.unmount(); document.body.removeChild(tempDiv); setIsPdfDownloading(false);
     }
   };
 
@@ -268,7 +276,7 @@ export function NutritionForm() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onManualSubmit)} className="space-y-4">
                 <FormField control={form.control} name="foodItemDescription" render={({ field }) => (
-                  <FormItem><HookFormLabel>Food Item Name/Description (Optional)</HookFormLabel><FormControl><Input placeholder="e.g., Packaged Biscuits, Homemade Dal" {...field} /></FormControl><FormDescription>Helps AI provide more specific context in chat.</FormDescription><FormMessage /></FormItem>
+                  <FormItem><HookFormLabel>Food Item Name/Description (Optional)</HookFormLabel><FormControl><Input placeholder="e.g., Packaged Biscuits, Homemade Dal" {...field} /></FormControl><FormDescription>Helps AI provide more specific context in chat and PDF.</FormDescription><FormMessage /></FormItem>
                 )} />
                <FormField control={form.control} name="servingSize" render={({ field }) => (
                   <FormItem><HookFormLabel>Serving Size (Important for Context)</HookFormLabel><FormControl><Input placeholder="e.g., 1 cup (240ml), 30g, 1 packet" {...field} /></FormControl><FormDescription>Used for both image and manual analysis to provide context.</FormDescription><FormMessage /></FormItem>
@@ -308,8 +316,7 @@ export function NutritionForm() {
                 <FormField control={form.control} name="potassium" render={({ field }) => (<FormItem><HookFormLabel>Potassium (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 300" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="vitaminC" render={({ field }) => (<FormItem><HookFormLabel>Vitamin C (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 60" {...field} /></FormControl><FormMessage /></FormItem>)} />
               </div>
-              {form.formState.errors.root && <FormMessage>{form.formState.errors.root.message}</FormMessage>}
-              {form.formState.errors.calories && !Object.values(form.getValues()).filter(v => v !== undefined && v !== "").length && <FormMessage>At least one value is required for manual entry.</FormMessage>}
+              {form.formState.errors.calories && <FormMessage>{form.formState.errors.calories.message}</FormMessage>}
               <Button type="submit" disabled={isLoading || form.formState.isSubmitting} className="w-full mt-6">
                 {isLoading && form.formState.isSubmitting ? "Analyzing Manually..." : "Analyze Manual Data"} <Sparkles className="ml-2 h-4 w-4" />
               </Button>
@@ -329,11 +336,11 @@ export function NutritionForm() {
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="flex items-center text-2xl"><FileText className="mr-2 h-6 w-6 text-accent" /> AI Nutrition Analysis</CardTitle>
-              <Button onClick={handleDownloadReport} variant="outline" size="sm" disabled={isLoading}>
-                 {isLoading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Download PDF
+              <Button onClick={handleDownloadReport} variant="outline" size="sm" disabled={isPdfDownloading}>
+                 {isPdfDownloading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Download PDF
               </Button>
             </div>
-            <CardDescription>Understanding your food's nutritional profile{form.getValues("foodItemDescription") ? ` for: ${form.getValues("foodItemDescription")}` : ""}.</CardDescription>
+            <CardDescription>Understanding your food's nutritional profile{currentInputData?.foodItemDescription ? ` for: ${currentInputData.foodItemDescription}` : ""}.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Overall Analysis:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription className="text-sm leading-relaxed list-disc list-inside">{renderFormattedAnalysisText(analysisResult.overallAnalysis)}</AlertDescription></Alert>
