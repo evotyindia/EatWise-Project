@@ -371,7 +371,7 @@ export function AnalyzerForm() {
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="flex items-center text-2xl">
-                <Sparkles className="mr-2 h-6 w-6 text-accent" /> AI Health Report
+                <Sparkles className="mr-2 h-6 w-6 text-primary" /> AI Health Report
               </CardTitle>
               <Button onClick={handleDownloadReport} variant="outline" size="sm" disabled={isLoading}>
                 {isLoading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
@@ -384,16 +384,16 @@ export function AnalyzerForm() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Alert variant="default" className="bg-background">
-                <HeartPulse className="h-5 w-5" />
+              <Alert variant="default" className="bg-muted/60">
+                <HeartPulse className="h-5 w-5 text-red-500" />
                 <AlertTitle className="font-semibold">Overall Health Rating</AlertTitle>
                 <AlertDescription className="flex items-center gap-2">
                   <StarRating rating={report.healthRating} /> ({report.healthRating}/5)
                 </AlertDescription>
               </Alert>
                {report.processingLevelRating?.rating && (
-                 <Alert variant="default" className="bg-background">
-                   <Zap className="h-5 w-5" />
+                 <Alert variant="default" className="bg-muted/60">
+                   <Zap className="h-5 w-5 text-purple-500" />
                    <AlertTitle className="font-semibold">Processing Level</AlertTitle>
                    <AlertDescription className="flex items-center gap-2">
                      <StarRating rating={report.processingLevelRating.rating} /> ({report.processingLevelRating.rating}/5)
@@ -402,8 +402,8 @@ export function AnalyzerForm() {
                  </Alert>
                )}
                {report.sugarContentRating?.rating && (
-                 <Alert variant="default" className="bg-background">
-                    <Wheat className="h-5 w-5" /> 
+                 <Alert variant="default" className="bg-muted/60">
+                    <Wheat className="h-5 w-5 text-amber-600" /> 
                     <AlertTitle className="font-semibold">Sugar Content</AlertTitle>
                    <AlertDescription className="flex items-center gap-2">
                      <StarRating rating={report.sugarContentRating.rating} /> ({report.sugarContentRating.rating}/5)
@@ -412,8 +412,8 @@ export function AnalyzerForm() {
                  </Alert>
                )}
                {report.nutrientDensityRating?.rating && (
-                 <Alert variant="default" className="bg-background">
-                   <Sparkles className="h-5 w-5" />
+                 <Alert variant="default" className="bg-muted/60">
+                   <Sparkles className="h-5 w-5 text-green-500" />
                    <AlertTitle className="font-semibold">Nutrient Density</AlertTitle>
                    <AlertDescription className="flex items-center gap-2">
                      <StarRating rating={report.nutrientDensityRating.rating} /> ({report.nutrientDensityRating.rating}/5)
@@ -428,7 +428,7 @@ export function AnalyzerForm() {
             <div>
               <h3 className="font-semibold text-lg mb-1">Summary:</h3>
               <Alert variant="default" className="bg-background">
-                <Sparkles className="h-4 w-4" />
+                <Sparkles className="h-4 w-4 text-primary" />
                 <AlertDescription>
                   {renderFormattedText(report.detailedAnalysis.summary)}
                 </AlertDescription>
@@ -439,7 +439,7 @@ export function AnalyzerForm() {
                <div>
                 <h3 className="font-semibold text-lg mb-1">Positive Aspects:</h3>
                  <Alert variant="default" className="bg-background">
-                  <Sparkles className="h-4 w-4" />
+                  <Sparkles className="h-4 w-4 text-primary" />
                   <AlertDescription>
                      {renderFormattedText(report.detailedAnalysis.positiveAspects)}
                   </AlertDescription>
@@ -463,7 +463,7 @@ export function AnalyzerForm() {
                <div>
                 <h3 className="font-semibold text-lg mb-1">Key Nutrients Breakdown:</h3>
                  <Alert variant="default" className="bg-background">
-                  <Sparkles className="h-4 w-4" />
+                  <Sparkles className="h-4 w-4 text-primary" />
                   <AlertDescription>
                     {renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown)}
                   </AlertDescription>
@@ -475,7 +475,7 @@ export function AnalyzerForm() {
                <div>
                 <h3 className="font-semibold text-lg mb-1">Healthier Indian Alternatives:</h3>
                  <Alert variant="default" className="bg-background">
-                  <Sparkles className="h-4 w-4" />
+                  <Sparkles className="h-4 w-4 text-primary" />
                   <AlertDescription>
                      {renderFormattedText(report.alternatives)}
                   </AlertDescription>
