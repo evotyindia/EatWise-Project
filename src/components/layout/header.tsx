@@ -27,28 +27,30 @@ const navItems = [
 export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 max-w-screen-2xl items-center">
-        <Link href="/" className="mr-6 flex items-center space-x-2">
-          <Leaf className="h-6 w-6 text-primary" />
-          <span className="font-bold sm:inline-block font-headline">
-            EatWise India
-          </span>
-        </Link>
-        
-        <nav className="hidden items-center space-x-4 md:flex flex-1 justify-start mr-4">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+      <div className="container flex h-14 max-w-screen-2xl items-center justify-between">
+        {/* Left group: Logo and Desktop Nav */}
+        <div className="flex items-center">
+          <Link href="/" className="mr-6 flex items-center space-x-2">
+            <Leaf className="h-6 w-6 text-primary" />
+            <span className="font-bold sm:inline-block font-headline">
+              EatWise India
+            </span>
+          </Link>
+          <nav className="hidden items-center space-x-4 md:flex">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
 
-        {/* Mobile menu and theme toggle pushed to the right */}
-        <div className="flex items-center space-x-2 md:ml-auto">
+        {/* Right group: Theme Toggle and Mobile Menu Trigger */}
+        <div className="flex items-center space-x-2">
           <ThemeToggleButton />
           <Sheet>
             <SheetTrigger asChild>
