@@ -1,6 +1,6 @@
-import { AnalyzerForm } from "./analyzer-form"; // Path might need adjustment based on actual location
+import { AnalyzerForm } from "@/app/analyze/analyzer-form";
 import { ScanLine } from "lucide-react";
-import {NextPage} from 'next';
+import type {NextPage} from 'next';
 
 interface AnalyzePageProps {
   params: { locale: string };
