@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { locales } from '@/i18n-config';
+import { locales } from '@/i18n.config'; // Import from new config file
 
 
 export function Header() {

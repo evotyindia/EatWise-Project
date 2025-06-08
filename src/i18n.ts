@@ -1,16 +1,16 @@
 import {getRequestConfig} from 'next-intl/server';
-import {locales, defaultLocale} from './i18n-config';
+import { locales } from './i18n.config'; // Import from new config file
+import {notFound} from 'next/navigation';
+
+// All other exports (locales, defaultLocale, pathnames, localePrefix) are now in i18n.config.ts
+// This file now ONLY exports the default getRequestConfig
 
 export default getRequestConfig(async ({locale}) => {
-  // Validate that the incoming `locale` parameter is valid
+  // Validate that the incoming `locale` parameter is a valid locale
   if (!locales.includes(locale as any)) {
-    console.warn(`Invalid locale "${locale}" requested. Falling back to "${defaultLocale}".`);
-    const messages = (await import(`./messages/${defaultLocale}.json`)).default;
-    return {messages};
+    notFound();
   }
 
-  // Provide a static import for messages supported by this application.
   const messages = (await import(`./messages/${locale}.json`)).default;
-
   return {messages};
 });
