@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { GenerateHealthReportInput, GenerateHealthReportOutput } from "@/ai/flows/generate-health-report";
@@ -6,7 +5,7 @@ import { generateHealthReport } from "@/ai/flows/generate-health-report";
 import type { ContextAwareAIChatInput, ContextAwareAIChatOutput } from "@/ai/flows/context-aware-ai-chat";
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadCloud, Sparkles, MessageCircle, Send, Download } from "lucide-react";
+import { UploadCloud, Sparkles, MessageCircle, Send, Download, Zap, HeartPulse, Wheat } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -137,7 +136,7 @@ export function AnalyzerForm() {
       const chatContext: ContextAwareAIChatInput = {
         productName: report.productType || manualForm.getValues("productName") || "N/A",
         ingredients: manualForm.getValues("ingredients") || "Ingredients extracted from image scan.",
-        healthReport: `Summary: ${report.detailedAnalysis.summary}. Positive Aspects: ${report.detailedAnalysis.positiveAspects || 'N/A'}. Potential Concerns: ${report.detailedAnalysis.potentialConcerns || 'N/A'}. Key Nutrients: ${report.detailedAnalysis.keyNutrientsBreakdown || 'N/A'}.`,
+        healthReport: `Overall Rating: ${report.healthRating}/5. Summary: ${report.detailedAnalysis.summary}. Positive Aspects: ${report.detailedAnalysis.positiveAspects || 'N/A'}. Potential Concerns: ${report.detailedAnalysis.potentialConcerns || 'N/A'}. Key Nutrients: ${report.detailedAnalysis.keyNutrientsBreakdown || 'N/A'}. Processing: ${report.processingLevelRating || 'N/A'}/5. Sugar: ${report.sugarContentRating || 'N/A'}/5. Nutrient Density: ${report.nutrientDensityRating || 'N/A'}/5.`,
         userQuestion: userMessage.content,
       };
       const aiResponse = await contextAwareAIChat(chatContext);
@@ -150,24 +149,33 @@ export function AnalyzerForm() {
     setIsChatLoading(false);
   };
 
+  const formatTextWithBullets = (text?: string) => {
+    if (!text) return null;
+    // Ensure each bullet point starts on a new line for better readability in text file
+    return text.split(/\s*[-\*]\s*/g).filter(s => s.trim()).map(s => `  - ${s.trim()}`).join('\n');
+  };
+
   const handleDownloadReport = () => {
     if (!report) return;
     let content = `AI Health Report\n`;
     content += `====================================\n`;
     if (report.productType) content += `Product Type: ${report.productType}\n`;
-    content += `Health Rating: ${report.healthRating}/5\n\n`;
+    content += `Overall Health Rating: ${report.healthRating}/5\n`;
+    if (report.processingLevelRating) content += `Processing Level Rating: ${report.processingLevelRating}/5\n`;
+    if (report.sugarContentRating) content += `Sugar Content Rating: ${report.sugarContentRating}/5\n`;
+    if (report.nutrientDensityRating) content += `Nutrient Density Rating: ${report.nutrientDensityRating}/5\n\n`;
     
     content += `Detailed Analysis:\n`;
     content += `------------------\n`;
-    content += `Summary: ${report.detailedAnalysis.summary}\n`;
-    if (report.detailedAnalysis.positiveAspects) content += `Positive Aspects: ${report.detailedAnalysis.positiveAspects}\n`;
-    if (report.detailedAnalysis.potentialConcerns) content += `Potential Concerns: ${report.detailedAnalysis.potentialConcerns}\n`;
-    if (report.detailedAnalysis.keyNutrientsBreakdown) content += `Key Nutrients Breakdown: ${report.detailedAnalysis.keyNutrientsBreakdown}\n\n`;
+    content += `Summary:\n${formatTextWithBullets(report.detailedAnalysis.summary) || 'N/A'}\n\n`;
+    if (report.detailedAnalysis.positiveAspects) content += `Positive Aspects:\n${formatTextWithBullets(report.detailedAnalysis.positiveAspects)}\n\n`;
+    if (report.detailedAnalysis.potentialConcerns) content += `Potential Concerns:\n${formatTextWithBullets(report.detailedAnalysis.potentialConcerns)}\n\n`;
+    if (report.detailedAnalysis.keyNutrientsBreakdown) content += `Key Nutrients Breakdown:\n${formatTextWithBullets(report.detailedAnalysis.keyNutrientsBreakdown)}\n\n`;
     
     if (report.alternatives) {
       content += `Healthier Indian Alternatives:\n`;
       content += `------------------------------\n`;
-      content += `${report.alternatives}\n\n`;
+      content += `${formatTextWithBullets(report.alternatives)}\n\n`;
     }
 
     if (chatHistory.length > 0) {
@@ -187,6 +195,17 @@ export function AnalyzerForm() {
     document.body.removeChild(link);
     URL.revokeObjectURL(link.href);
     toast({ title: "Report Downloaded", description: "The health report has been saved." });
+  };
+
+  const renderFormattedText = (text?: string) => {
+    if (!text) return null;
+    return (
+      <ul className="list-disc list-inside space-y-1 text-sm leading-relaxed">
+        {text.split(/\s*[-\*]\s*/g).filter(s => s.trim()).map((item, index) => (
+          <li key={index}>{item.trim()}</li>
+        ))}
+      </ul>
+    );
   };
 
 
@@ -298,10 +317,44 @@ export function AnalyzerForm() {
             )}
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <span className="font-semibold">Health Rating:</span>
-              <StarRating rating={report.healthRating} />
-              <span>({report.healthRating}/5)</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Alert variant="default" className="bg-background">
+                <HeartPulse className="h-5 w-5" />
+                <AlertTitle className="font-semibold">Overall Health Rating</AlertTitle>
+                <AlertDescription className="flex items-center gap-2">
+                  <StarRating rating={report.healthRating} /> ({report.healthRating}/5)
+                </AlertDescription>
+              </Alert>
+               {report.processingLevelRating && (
+                 <Alert variant="default" className="bg-background">
+                   <Zap className="h-5 w-5" />
+                   <AlertTitle className="font-semibold">Processing Level</AlertTitle>
+                   <AlertDescription className="flex items-center gap-2">
+                     <StarRating rating={report.processingLevelRating} /> ({report.processingLevelRating}/5)
+                   </AlertDescription>
+                    <p className="text-xs text-muted-foreground mt-1">{report.detailedAnalysis.summary?.split('Processing Level Rating:')[1]?.split('Sugar Content Rating:')[0]?.trim()}</p>
+                 </Alert>
+               )}
+               {report.sugarContentRating && (
+                 <Alert variant="default" className="bg-background">
+                    <Wheat className="h-5 w-5" /> {/* Placeholder for sugar icon */}
+                    <AlertTitle className="font-semibold">Sugar Content</AlertTitle>
+                   <AlertDescription className="flex items-center gap-2">
+                     <StarRating rating={report.sugarContentRating} /> ({report.sugarContentRating}/5)
+                   </AlertDescription>
+                    <p className="text-xs text-muted-foreground mt-1">{report.detailedAnalysis.summary?.split('Sugar Content Rating:')[1]?.split('Nutrient Density Rating:')[0]?.trim()}</p>
+                 </Alert>
+               )}
+               {report.nutrientDensityRating && (
+                 <Alert variant="default" className="bg-background">
+                   <Sparkles className="h-5 w-5" />
+                   <AlertTitle className="font-semibold">Nutrient Density</AlertTitle>
+                   <AlertDescription className="flex items-center gap-2">
+                     <StarRating rating={report.nutrientDensityRating} /> ({report.nutrientDensityRating}/5)
+                   </AlertDescription>
+                    <p className="text-xs text-muted-foreground mt-1">{report.detailedAnalysis.summary?.split('Nutrient Density Rating:')[1]?.trim()}</p>
+                 </Alert>
+               )}
             </div>
             
             <Separator />
@@ -310,8 +363,8 @@ export function AnalyzerForm() {
               <h3 className="font-semibold text-lg mb-1">Summary:</h3>
               <Alert variant="default" className="bg-background">
                 <Sparkles className="h-4 w-4" />
-                <AlertDescription className="whitespace-pre-wrap text-sm leading-relaxed">
-                  {report.detailedAnalysis.summary}
+                <AlertDescription>
+                  {renderFormattedText(report.detailedAnalysis.summary)}
                 </AlertDescription>
               </Alert>
             </div>
@@ -321,8 +374,8 @@ export function AnalyzerForm() {
                 <h3 className="font-semibold text-lg mb-1">Positive Aspects:</h3>
                  <Alert variant="default" className="bg-background">
                   <Sparkles className="h-4 w-4" />
-                  <AlertDescription className="whitespace-pre-wrap text-sm leading-relaxed">
-                    {report.detailedAnalysis.positiveAspects}
+                  <AlertDescription>
+                     {renderFormattedText(report.detailedAnalysis.positiveAspects)}
                   </AlertDescription>
                 </Alert>
               </div>
@@ -331,10 +384,10 @@ export function AnalyzerForm() {
             {report.detailedAnalysis.potentialConcerns && (
                <div>
                 <h3 className="font-semibold text-lg mb-1">Potential Concerns:</h3>
-                 <Alert variant="destructive" className="bg-background">
-                  <Sparkles className="h-4 w-4" />
-                  <AlertDescription className="whitespace-pre-wrap text-sm leading-relaxed">
-                    {report.detailedAnalysis.potentialConcerns}
+                 <Alert variant="destructive" className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700">
+                  <Sparkles className="h-4 w-4 text-red-500 dark:text-red-400" />
+                  <AlertDescription className="text-red-700 dark:text-red-300">
+                     {renderFormattedText(report.detailedAnalysis.potentialConcerns)}
                   </AlertDescription>
                 </Alert>
               </div>
@@ -345,8 +398,8 @@ export function AnalyzerForm() {
                 <h3 className="font-semibold text-lg mb-1">Key Nutrients Breakdown:</h3>
                  <Alert variant="default" className="bg-background">
                   <Sparkles className="h-4 w-4" />
-                  <AlertDescription className="whitespace-pre-wrap text-sm leading-relaxed">
-                    {report.detailedAnalysis.keyNutrientsBreakdown}
+                  <AlertDescription>
+                    {renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown)}
                   </AlertDescription>
                 </Alert>
               </div>
@@ -357,8 +410,8 @@ export function AnalyzerForm() {
                 <h3 className="font-semibold text-lg mb-1">Healthier Indian Alternatives:</h3>
                  <Alert variant="default" className="bg-background">
                   <Sparkles className="h-4 w-4" />
-                  <AlertDescription className="whitespace-pre-wrap text-sm leading-relaxed">
-                    {report.alternatives}
+                  <AlertDescription>
+                     {renderFormattedText(report.alternatives)}
                   </AlertDescription>
                 </Alert>
               </div>
@@ -368,10 +421,10 @@ export function AnalyzerForm() {
             <Separator className="my-4"/>
             <h3 className="font-semibold text-xl mb-2 flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat with AI</h3>
             <p className="text-sm text-muted-foreground mb-4">Ask questions about this report. For example: "Can kids eat this daily?"</p>
-            <ScrollArea className="h-[200px] w-full rounded-md border p-3 mb-4 bg-muted/30">
+            <ScrollArea className="h-[200px] w-full rounded-md border p-3 mb-4 bg-muted">
               {chatHistory.map((msg, index) => (
-                <div key={index} className={`mb-2 p-2 rounded-lg text-sm ${msg.role === 'user' ? 'bg-primary/10 text-primary-foreground ml-auto' : 'bg-accent/10 text-accent-foreground mr-auto'}`} style={{maxWidth: '80%'}}>
-                  <span className="font-semibold capitalize">{msg.role}: </span>{msg.content}
+                <div key={index} className={`mb-2 p-2.5 rounded-lg text-sm shadow-sm ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-accent text-accent-foreground mr-auto'}`} style={{maxWidth: '80%'}}>
+                  <span className="font-semibold capitalize">{msg.role === 'user' ? 'You' : 'AI Advisor'}: </span>{msg.content}
                 </div>
               ))}
                {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI is typing...</div>}
@@ -382,6 +435,7 @@ export function AnalyzerForm() {
                 onChange={(e) => setChatInput(e.target.value)}
                 placeholder="Ask a question..."
                 disabled={isChatLoading}
+                className="bg-background"
               />
               <Button type="submit" disabled={isChatLoading || !chatInput.trim()}>
                 <Send className="h-4 w-4" />
@@ -402,3 +456,4 @@ export function AnalyzerForm() {
     </div>
   );
 }
+

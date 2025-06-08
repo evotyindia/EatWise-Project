@@ -1,10 +1,9 @@
-
 "use client";
 
 import type { GetRecipeSuggestionsInput, GetRecipeSuggestionsOutput } from "@/ai/flows/recipe-suggestions";
 import { getRecipeSuggestions } from "@/ai/flows/recipe-suggestions";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles } from "lucide-react";
+import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Spices as SpicesIcon, Leaf, WheatIcon } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -15,13 +14,42 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription as UIAlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription as UIAlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 
 const recipeInputSchema = z.object({
   ingredients: z.string().min(1, "Please enter at least one ingredient."),
 });
 
 type RecipeInputFormValues = z.infer<typeof recipeInputSchema>;
+
+const ingredientCategories = [
+  {
+    name: "Vegetables",
+    icon: <Leaf className="mr-2 h-4 w-4" />,
+    items: ["Onion", "Tomato", "Potato", "Spinach", "Carrot", "Capsicum", "Ginger", "Garlic", "Cauliflower", "Peas", "Beans", "Ladyfinger"]
+  },
+  {
+    name: "Spices",
+    icon: <SpicesIcon className="mr-2 h-4 w-4" />,
+    items: ["Turmeric", "Cumin Powder", "Coriander Powder", "Garam Masala", "Chili Powder", "Mustard Seeds", "Asafoetida (Hing)"]
+  },
+  {
+    name: "Dals & Legumes",
+    icon: <Utensils className="mr-2 h-4 w-4" />,
+    items: ["Moong Dal", "Toor Dal", "Chana Dal", "Masoor Dal", "Rajma (Kidney Beans)", "Chickpeas (Chole)"]
+  },
+  {
+    name: "Grains & Flours",
+    icon: <WheatIcon className="mr-2 h-4 w-4" />,
+    items: ["Rice", "Wheat Flour (Atta)", "Besan (Gram Flour)", "Suji (Semolina)", "Poha (Flattened Rice)"]
+  },
+  {
+    name: "Dairy & Paneer",
+    icon: <ChefHat className="mr-2 h-4 w-4" />,
+    items: ["Paneer (Indian Cheese)", "Curd (Yogurt)", "Milk", "Ghee"]
+  }
+];
 
 export function RecipeForm() {
   const [suggestions, setSuggestions] = useState<GetRecipeSuggestionsOutput | null>(null);
@@ -34,6 +62,12 @@ export function RecipeForm() {
       ingredients: "",
     },
   });
+
+  const addIngredient = (ingredient: string) => {
+    const currentIngredients = form.getValues("ingredients");
+    const newIngredients = currentIngredients ? `${currentIngredients}, ${ingredient}` : ingredient;
+    form.setValue("ingredients", newIngredients, { shouldValidate: true });
+  };
 
   const onSubmit: SubmitHandler<RecipeInputFormValues> = async (data) => {
     setIsLoading(true);
@@ -56,6 +90,37 @@ export function RecipeForm() {
     setIsLoading(false);
   };
 
+  const handleDownloadSuggestions = () => {
+    if (!suggestions) return;
+    let content = `AI Recipe Suggestions\n`;
+    content += `=========================\n\n`;
+    content += `Ingredients Provided:\n${form.getValues("ingredients")}\n\n`;
+    
+    if (suggestions.suggestions.length > 0) {
+      content += `Meal Ideas:\n`;
+      suggestions.suggestions.forEach((idea, index) => {
+        content += `${index + 1}. ${idea}\n`;
+      });
+      content += `\n`;
+    }
+    
+    if (suggestions.mealPlan) {
+      content += `Quick Meal Plan:\n${suggestions.mealPlan}\n\n`;
+    }
+    
+    content += `Disclaimer: These are AI-generated suggestions. Adjust recipes to your taste and dietary needs.`;
+    
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'recipe-suggestions.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+    toast({ title: "Suggestions Downloaded", description: "The recipe ideas have been saved." });
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
       <Card className="md:col-span-1 shadow-lg hover:shadow-xl transition-shadow">
@@ -63,7 +128,7 @@ export function RecipeForm() {
           <CardTitle className="flex items-center text-2xl">
             <Lightbulb className="mr-2 h-6 w-6" /> Your Ingredients
           </CardTitle>
-          <CardDescription>List what you have, and we'll find recipes.</CardDescription>
+          <CardDescription>List what you have, or use shortcuts below.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -79,6 +144,7 @@ export function RecipeForm() {
                         placeholder="e.g., Onions, Tomatoes, Paneer, Rice, Spinach..."
                         {...field}
                         rows={5}
+                        className="bg-background"
                       />
                     </FormControl>
                     <FormDescription>Separate ingredients with commas.</FormDescription>
@@ -92,6 +158,22 @@ export function RecipeForm() {
               </Button>
             </form>
           </Form>
+          <Separator className="my-6"/>
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Ingredient Shortcuts</h3>
+            {ingredientCategories.map(category => (
+              <div key={category.name}>
+                <h4 className="text-sm font-semibold mb-2 flex items-center">{category.icon} {category.name}</h4>
+                <div className="flex flex-wrap gap-2">
+                  {category.items.map(item => (
+                    <Button key={item} variant="outline" size="sm" onClick={() => addIngredient(item)} className="text-xs">
+                      {item}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
@@ -108,7 +190,7 @@ export function RecipeForm() {
         {!isLoading && !suggestions && (
            <Card className="flex items-center justify-center h-full min-h-[300px] bg-muted/30">
             <div className="text-center p-8">
-                <Lightbulb className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <ChefHat className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                 <p className="text-lg font-semibold text-muted-foreground">Recipe ideas will appear here.</p>
                 <p className="text-sm text-muted-foreground">Enter your ingredients to get started.</p>
             </div>
@@ -117,9 +199,14 @@ export function RecipeForm() {
         {suggestions && (
           <Card className="shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader>
-              <CardTitle className="text-2xl flex items-center">
-                <Sparkles className="mr-2 h-6 w-6 text-accent" /> AI Recipe Suggestions
-              </CardTitle>
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-2xl flex items-center">
+                  <Sparkles className="mr-2 h-6 w-6 text-accent" /> AI Recipe Suggestions
+                </CardTitle>
+                <Button onClick={handleDownloadSuggestions} variant="outline" size="sm">
+                  <Download className="mr-2 h-4 w-4" /> Download
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-6">
               {suggestions.suggestions.length > 0 ? (
@@ -173,3 +260,4 @@ export function RecipeForm() {
     </div>
   );
 }
+
