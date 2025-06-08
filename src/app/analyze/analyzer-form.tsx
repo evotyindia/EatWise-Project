@@ -199,50 +199,30 @@ export function AnalyzerForm() {
         format: 'a4',
       });
 
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const pdfPageWidth = pdf.internal.pageSize.getWidth();
+      const pdfPageHeight = pdf.internal.pageSize.getHeight();
 
-      const canvasWidthMM = (canvas.width / 2) * 0.264583; 
-      const canvasHeightMM = (canvas.height / 2) * 0.264583;
+      const contentAspectRatio = canvas.width / canvas.height;
+      const targetWidthOnPdf = pdfPageWidth;
+      const targetTotalHeightOnPdf = targetWidthOnPdf / contentAspectRatio;
+      
+      const numPages = Math.ceil(targetTotalHeightOnPdf / pdfPageHeight);
 
-      const ratio = canvasWidthMM / canvasHeightMM;
-      let imgActualHeight = pdfWidth / ratio;
-      let imgActualWidth = pdfWidth;
-
-      if (imgActualHeight > pdfHeight) { 
-        imgActualHeight = pdfHeight; 
-        imgActualWidth = imgActualHeight * ratio;
-      } else {
-         imgActualHeight = canvasHeightMM < pdfHeight ? canvasHeightMM : pdfHeight;
-         imgActualWidth = imgActualHeight * ratio;
-         if (imgActualWidth > pdfWidth) {
-            imgActualWidth = pdfWidth;
-            imgActualHeight = pdfWidth / ratio;
-         }
+      for (let i = 0; i < numPages; i++) {
+        if (i > 0) {
+          pdf.addPage();
+        }
+        const yPositionOnPdf = -(i * pdfPageHeight);
+        pdf.addImage(imgData, 'PNG', 0, yPositionOnPdf, targetWidthOnPdf, targetTotalHeightOnPdf, undefined, 'FAST');
       }
-
-
-      let position = 0;
-      pdf.addImage(imgData, 'PNG', 0, position, imgActualWidth, canvasHeightMM); 
-
-      let heightLeft = canvasHeightMM - imgActualHeight;
-
-
-      while (heightLeft > 0) {
-        position -= pdfHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgActualWidth, canvasHeightMM); 
-        heightLeft -= pdfHeight;
-      }
-
-      const pageCount = pdf.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
+      
+      const finalPageCount = pdf.getNumberOfPages(); // Use actual number of pages in PDF
+      for (let i = 1; i <= finalPageCount; i++) {
         pdf.setPage(i);
         pdf.setFontSize(8);
         pdf.setTextColor(100);
-        pdf.text(`Page ${i} of ${pageCount}`, pdfWidth - 20, pdfHeight - 10, {align: 'right'});
+        pdf.text(`Page ${i} of ${finalPageCount}`, pdfPageWidth - 20, pdfPageHeight - 10, {align: 'right'});
       }
-
 
       const safeProductName = (report.productType || manualForm.getValues("productName") || 'food-label').replace(/[^a-z0-9]/gi, '_').toLowerCase();
       pdf.save(`${safeProductName}_health_report.pdf`);
