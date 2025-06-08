@@ -1,15 +1,15 @@
 
 import Image from "next/image";
-import { Link } from '@/navigation'; 
+import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { CheckCircle, ScanLine, MessageCircle, CookingPot, BarChart3 as ChartColumn, Users, Target, Lightbulb, User, UploadCloud, Cpu, ClipboardCheck } from "lucide-react";
+import { CheckCircle, ScanLine, MessageCircle, CookingPot, BarChart3 as ChartColumn, Users, Target, Lightbulb, User, UploadCloud, Cpu, ClipboardCheck, Utensils, Smile, MapPin, ShieldCheck, HeartPulse, Leaf } from "lucide-react";
 
 export default function Home() {
   const features = [
     {
       icon: <ScanLine className="h-10 w-10 text-primary" />,
-      title: "Smart Label Analysis", 
+      title: "Smart Label Analysis",
       description: "Upload or type in food label details. Our AI deciphers ingredients, detects risks, gives a health rating, and suggests healthier Indian alternatives.",
       link: "/analyze",
       dataAiHint: "food label scanning"
@@ -35,6 +35,34 @@ export default function Home() {
       link: "/nutrition-check",
       dataAiHint: "nutrition facts chart"
     },
+  ];
+
+  const whyChoosePoints = [
+    {
+      icon: <Cpu className="h-10 w-10 text-accent" />,
+      title: "AI-Powered Precision",
+      description: "Harness advanced AI to decode complex food labels and nutritional data in seconds, providing you with accurate, quick insights."
+    },
+    {
+      icon: <CookingPot className="h-10 w-10 text-accent" />,
+      title: "Culturally Relevant Advice",
+      description: "Discover healthier Indian food alternatives and recipes tailored to local tastes and dietary preferences, making healthy eating enjoyable."
+    },
+    {
+      icon: <ClipboardCheck className="h-10 w-10 text-accent" />,
+      title: "Clear & Actionable Guidance",
+      description: "Receive straightforward health ratings, risk highlights, and practical suggestions, empowering confident food choices."
+    },
+    {
+      icon: <Utensils className="h-10 w-10 text-accent" />,
+      title: "Comprehensive Nutrition Tools",
+      description: "From analyzing processed foods to suggesting wholesome recipes, access a suite of tools for a holistic approach to your diet."
+    },
+    {
+      icon: <Smile className="h-10 w-10 text-accent" />,
+      title: "User-Friendly Experience",
+      description: "Navigate your path to better health with an intuitive interface, making nutritional awareness accessible to everyone."
+    }
   ];
 
   const testimonials = [
@@ -110,12 +138,48 @@ export default function Home() {
           </div>
         </div>
       </section>
-      
-      <section id="mission" className="w-full py-12 md:py-24 lg:py-32 bg-muted/40">
+
+      <section id="why-choose-us" className="w-full py-12 md:py-24 lg:py-32 bg-muted/40">
+        <div className="container px-4 md:px-6">
+          <div className="text-center mb-16">
+            <ShieldCheck className="mx-auto h-12 w-12 text-primary mb-4" />
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+              Why Choose EatWise India?
+            </h2>
+            <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
+              Your Smart Companion for Healthier Eating in India.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
+            {whyChoosePoints.slice(0, 3).map((point) => (
+              <div key={point.title} className="flex flex-col items-center text-center">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  {point.icon}
+                </div>
+                <h3 className="text-xl font-semibold mb-2">{point.title}</h3>
+                <p className="text-muted-foreground">{point.description}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-12 grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-2 lg:gap-x-16 md:px-16 lg:px-32">
+             {whyChoosePoints.slice(3).map((point) => (
+              <div key={point.title} className="flex flex-col items-center text-center">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  {point.icon}
+                </div>
+                <h3 className="text-xl font-semibold mb-2">{point.title}</h3>
+                <p className="text-muted-foreground">{point.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="mission" className="w-full py-12 md:py-24 lg:py-32">
         <div className="container grid items-center gap-8 px-4 md:px-6 lg:grid-cols-2 lg:gap-16">
           <div className="flex justify-center">
             <Image
-              src="/img/mission-community-image.jpg" 
+              src="/img/mission-community-image.jpg"
               alt="Our mission: Diverse group of people enjoying healthy Indian food"
               width={600}
               height={450}
@@ -167,6 +231,48 @@ export default function Home() {
         </div>
       </section>
 
+      <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32 bg-muted/40">
+        <div className="container px-4 md:px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+              How It Works
+            </h2>
+            <p className="mt-4 mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed">
+              Our platform uses cutting-edge AI to simplify nutrition for you in three easy steps.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 mt-8">
+            <div className="flex flex-col items-center text-center p-6 bg-card rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border border-border">
+              <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-primary text-primary-foreground">
+                <UploadCloud className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-foreground">1. Input Your Data</h3>
+              <p className="text-sm text-muted-foreground">
+                Upload a food label image, or manually enter ingredients and nutritional facts.
+              </p>
+            </div>
+            <div className="flex flex-col items-center text-center p-6 bg-card rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border border-border">
+              <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-primary text-primary-foreground">
+                <Cpu className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-foreground">2. AI Analysis</h3>
+              <p className="text-sm text-muted-foreground">
+                Our advanced AI models extract text, analyze for health insights, ratings, and alternatives.
+              </p>
+            </div>
+            <div className="flex flex-col items-center text-center p-6 bg-card rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border border-border">
+              <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-primary text-primary-foreground">
+                <ClipboardCheck className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-foreground">3. Get Smart Advice</h3>
+              <p className="text-sm text-muted-foreground">
+                Receive a comprehensive report, chat with our AI for clarifications, or get recipe ideas.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32">
         <div className="container px-4 md:px-6">
           <div className="text-center mb-12">
@@ -187,7 +293,7 @@ export default function Home() {
                   </blockquote>
                 </CardContent>
                 <CardFooter className="flex items-center gap-4 pt-0 pb-6 px-6">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-muted text-muted-foreground">
+                   <div className="flex items-center justify-center w-12 h-12 rounded-full bg-muted text-muted-foreground">
                     <User className="w-6 h-6" />
                   </div>
                   <div>
@@ -197,51 +303,6 @@ export default function Home() {
                 </CardFooter>
               </Card>
             ))}
-          </div>
-        </div>
-      </section>
-      
-      <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32 bg-muted/40">
-        <div className="container px-4 md:px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-              How It Works
-            </h2>
-            <p className="mt-4 mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed">
-              Our platform uses cutting-edge AI to simplify nutrition for you in three easy steps.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8 mt-8">
-            {/* Step 1 Card */}
-            <div className="flex flex-col items-center text-center p-6 bg-card rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border border-border">
-              <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-primary text-primary-foreground">
-                <UploadCloud className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2 text-foreground">1. Input Your Data</h3>
-              <p className="text-sm text-muted-foreground">
-                Upload a food label image, or manually enter ingredients and nutritional facts.
-              </p>
-            </div>
-            {/* Step 2 Card */}
-            <div className="flex flex-col items-center text-center p-6 bg-card rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border border-border">
-              <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-primary text-primary-foreground">
-                <Cpu className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2 text-foreground">2. AI Analysis</h3>
-              <p className="text-sm text-muted-foreground">
-                Our advanced AI models extract text, analyze for health insights, ratings, and alternatives.
-              </p>
-            </div>
-            {/* Step 3 Card */}
-            <div className="flex flex-col items-center text-center p-6 bg-card rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 border border-border">
-              <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-primary text-primary-foreground">
-                <ClipboardCheck className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2 text-foreground">3. Get Smart Advice</h3>
-              <p className="text-sm text-muted-foreground">
-                Receive a comprehensive report, chat with our AI for clarifications, or get recipe ideas.
-              </p>
-            </div>
           </div>
         </div>
       </section>
@@ -267,3 +328,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
