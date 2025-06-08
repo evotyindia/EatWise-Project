@@ -1,12 +1,9 @@
+
 import { RecipeForm } from "./recipe-form";
 import { CookingPot } from "lucide-react";
 import {NextPage} from 'next';
 
-// interface RecipesPageProps { // locale param removed
-//   params: { locale: string };
-// }
-
-const RecipesPage: NextPage = (/*{ params: { locale } }*/) => { // locale param removed
+const RecipesPage: NextPage = () => {
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <div className="flex flex-col items-center mb-8">
