@@ -16,7 +16,7 @@ export const blogPosts: BlogPost[] = [
     title: "How to Decode Indian Food Labels: A Beginner's Guide",
     category: "Nutrition Basics",
     date: "2024-07-28",
-    featuredImage: "https://placehold.co/600x400.png",
+    featuredImage: "https://placehold.co/600x400.jpg",
     dataAiHint: "food label magnifying glass",
     preview: "Confused by complex food labels? Learn how to read and understand them to make healthier choices in the Indian market.",
     content: `
@@ -158,3 +158,4 @@ export const getBlogCategories = (): string[] => {
   const categories = new Set(blogPosts.map(post => post.category));
   return ["All", ...Array.from(categories)];
 }
+
