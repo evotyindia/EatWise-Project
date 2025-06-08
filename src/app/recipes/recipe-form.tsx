@@ -213,7 +213,7 @@ export function RecipeForm() {
     setIsPdfDownloading(true);
 
     const tempDiv = document.createElement('div');
-    tempDiv.id = 'pdf-render-source-detailed-recipe';
+    tempDiv.id = 'pdf-render-source-detailed-recipe-' + Date.now();
     tempDiv.style.position = 'absolute';
     tempDiv.style.left = '-9999px';
     tempDiv.style.top = '0px';
@@ -275,7 +275,11 @@ export function RecipeForm() {
       console.error("Error generating PDF:", error);
       toast({ title: "PDF Error", description: "Could not generate PDF report. " + (error as Error).message, variant: "destructive" });
     } finally {
-      root.unmount(); document.body.removeChild(tempDiv); setIsPdfDownloading(false);
+      root.unmount(); 
+      if (document.body.contains(tempDiv)) {
+          document.body.removeChild(tempDiv);
+      }
+      setIsPdfDownloading(false);
     }
   };
 
@@ -338,9 +342,8 @@ export function RecipeForm() {
               </Button>
             </form>
           </Form>
-          {/* Quick Add Ingredients Section */}
           <Separator className="my-6"/>
-          <ScrollArea className="max-h-96 pr-2">
+          <ScrollArea className="max-h-96 pr-2"> {/* Ensure ScrollArea wraps the entire list section */}
             <div className="space-y-4">
               <h3 className="text-md font-medium sticky top-0 bg-card py-1 z-10">Quick Add Common Ingredients:</h3>
               {ingredientCategories.map(category => (
@@ -455,5 +458,3 @@ export function RecipeForm() {
     </div>
   );
 }
-
-    
