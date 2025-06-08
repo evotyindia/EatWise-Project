@@ -1,6 +1,7 @@
+"use client"
 
 import Link from "next/link"
-import { Leaf, Languages, Menu } from "lucide-react" // Added Languages icon
+import { Leaf, Languages, Menu } from "lucide-react"
 import { ThemeToggleButton } from "@/components/common/theme-toggle-button"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -24,12 +25,9 @@ export function Header() {
           </span>
         </Link>
         
-        {/* Spacer to push subsequent items to the right */}
         <div className="flex-1" />
 
-        {/* Right-aligned items */}
         <div className="flex items-center space-x-2">
-          {/* Desktop Navigation (now on the right) */}
           <nav className="hidden items-center space-x-4 md:flex mr-2">
             {navItems.map((item) => (
               <Link
@@ -44,7 +42,6 @@ export function Header() {
 
           <ThemeToggleButton />
 
-          {/* New Translate Button */}
           <Button 
             variant="outline" 
             size="icon" 
@@ -55,7 +52,6 @@ export function Header() {
             <span className="sr-only">Translate Language</span>
           </Button>
 
-          {/* Mobile Menu Trigger */}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
