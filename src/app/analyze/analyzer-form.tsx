@@ -99,6 +99,13 @@ export function AnalyzerForm() {
   };
 
   const onManualSubmit: SubmitHandler<ManualInputFormValues> = async (data) => {
+    if (imageFile) {
+        // Clear image if manual submission is chosen to avoid confusion
+        // Or inform user image is ignored
+        setImageFile(null);
+        setUploadedImage(null);
+        toast({ title: "Manual Submission", description: "Analyzing manually entered data. Uploaded image was cleared." });
+    }
     await generateReportSharedLogic({
       productName: data.productName,
       ingredients: data.ingredients,
@@ -111,6 +118,7 @@ export function AnalyzerForm() {
       toast({ title: "No Image", description: "Please upload an image first.", variant: "destructive" });
       return;
     }
+    manualForm.reset(); // Clear manual form fields/errors if image is submitted
     const photoDataUri = await fileToDataUri(imageFile);
     await generateReportSharedLogic({ photoDataUri });
   };
@@ -176,14 +184,9 @@ export function AnalyzerForm() {
     setIsPdfDownloading(true);
 
     const tempDiv = document.createElement('div');
-    tempDiv.id = 'pdf-render-source-analyzer';
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.left = '-9999px'; 
-    tempDiv.style.top = '0px';
-    tempDiv.style.width = '210mm'; 
-    tempDiv.style.backgroundColor = 'white'; 
-    tempDiv.style.padding = '0';
-    tempDiv.style.margin = '0';
+    tempDiv.id = 'pdf-render-source-analyzer-form'; // Unique ID
+    tempDiv.style.position = 'absolute'; tempDiv.style.left = '-9999px'; tempDiv.style.top = '0px';
+    tempDiv.style.width = '210mm'; tempDiv.style.backgroundColor = 'white'; tempDiv.style.padding = '0'; tempDiv.style.margin = '0';
     document.body.appendChild(tempDiv);
 
     const root = createRoot(tempDiv);
@@ -236,15 +239,28 @@ export function AnalyzerForm() {
     }
   };
 
-  const renderFormattedText = (text?: string) => {
+  const renderFormattedText = (text?: string): JSX.Element | null => {
     if (!text) return null;
-    return (
-      <ul className="list-disc list-inside space-y-1 text-sm leading-relaxed">
-        {text.split(/\s*[-\*]\s*/g).filter(s => s.trim()).map((item, index) => (
-          <li key={index}>{item.trim()}</li>
-        ))}
-      </ul>
-    );
+    const lines = text.split(/\s*[-\*]\s*/g).filter(s => s.trim());
+    const hasBullets = lines.length > 0 && text.match(/\s*[-\*]\s*/);
+
+    if (hasBullets) {
+        return (
+            <ul className="list-disc list-inside space-y-1 text-sm leading-relaxed">
+                {lines.map((item, index) => (
+                    <li key={index}>{item.trim()}</li>
+                ))}
+            </ul>
+        );
+    } else {
+        return (
+            <div className="text-sm leading-relaxed space-y-1">
+                {text.split('\n').map((paragraph, index) => (
+                    <p key={index}>{paragraph.trim()}</p>
+                ))}
+            </div>
+        );
+    }
   };
 
 
@@ -265,8 +281,8 @@ export function AnalyzerForm() {
                 <Button onClick={() => { setUploadedImage(null); setImageFile(null); }} variant="ghost" size="sm" className="absolute top-1 right-1 text-xs">Clear</Button>
               </div>
             )}
-            <Button onClick={onImageSubmit} disabled={isLoading || !imageFile} className="mt-4 w-full">
-              {isLoading && !manualForm.formState.isSubmitting ? "Analyzing Image..." : "Analyze Image"} <Sparkles className="ml-2 h-4 w-4" />
+            <Button type="button" onClick={onImageSubmit} disabled={isLoading || !imageFile} className="mt-4 w-full">
+              {isLoading && !manualForm.formState.isSubmitting && imageFile ? "Analyzing Image..." : "Analyze Image"} <Sparkles className="ml-2 h-4 w-4" />
             </Button>
           </div>
 

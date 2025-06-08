@@ -31,7 +31,7 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
     
     section: { marginBottom: '7mm', padding: '5mm', border: '1px solid #E2E8F0', borderRadius: '6px', backgroundColor: '#F7FAFC' },
     sectionTitle: { fontSize: '14pt', fontWeight: 'bold', color: '#1A202C', marginTop: '0', marginBottom: '5mm', borderBottom: '2px solid #10b981', paddingBottom: '3mm' },
-    subSectionTitle: { fontSize: '12pt', fontWeight: 'bold', color: '#2D3748', marginTop: '5mm', marginBottom: '4mm' }, // Increased marginBottom
+    subSectionTitle: { fontSize: '12pt', fontWeight: 'bold', color: '#2D3748', marginTop: '5mm', marginBottom: '4mm' },
     
     ratingBlockContainer: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5mm', marginBottom: '7mm' },
     ratingBlock: { border: '1px solid #CBD5E0', padding: '4mm', borderRadius: '4px', backgroundColor: '#FFFFFF', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' },
@@ -39,10 +39,10 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
     ratingValue: { fontSize: '10pt', color: '#1A202C', display: 'flex', alignItems: 'center' },
     star: { color: '#FBBF24', marginRight: '1px', fontSize: '12pt' },
     
-    listContainer: { paddingLeft: '0', margin: '0' }, // Removed default padding
+    listContainer: { paddingLeft: '0', margin: '0' },
     listItem: { display: 'flex', alignItems: 'flex-start', marginBottom: '2mm', color: '#4A5568' },
-    concernsListItem: { display: 'flex', alignItems: 'flex-start', marginBottom: '2mm', color: '#c0392b' }, // Red for concerns
-    bullet: { marginRight: '2.5mm', minWidth: '2.5mm', textAlign: 'left', lineHeight: '1.4' },
+    concernsListItem: { display: 'flex', alignItems: 'flex-start', marginBottom: '2mm', color: '#c0392b' }, 
+    bullet: { marginRight: '2.5mm', minWidth: '2.5mm', textAlign: 'left', lineHeight: '1.4', paddingTop: '0.5mm' },
     listItemText: { flex: 1, textAlign: 'justify' as 'justify'},
     
     chatContainer: { marginTop: '7mm', borderTop: '1px solid #E2E8F0', paddingTop: '5mm' },
@@ -195,5 +195,3 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
     </div>
   );
 };
-
-    
