@@ -45,7 +45,7 @@ export const blogPosts: BlogPost[] = [
     title: "The Sweet Trap: Uncovering Hidden Sugars in Common Indian Snacks",
     category: "Healthy Eating",
     date: "2024-07-25",
-    featuredImage: "/img/blog-hidden-sugars.png",
+    featuredImage: "/img/sugar.jpg",
     dataAiHint: "sweets cookies snacks",
     preview: "Many popular Indian snacks are loaded with hidden sugars. Discover how to identify them and find healthier alternatives.",
     content: `
@@ -83,7 +83,7 @@ export const blogPosts: BlogPost[] = [
     title: "Nutritious & Delicious: Healthy Tiffin Box Ideas for Indian Kids",
     category: "Kids Nutrition",
     date: "2024-07-20",
-    featuredImage: "/img/blog-tiffin-ideas.png",
+    featuredImage: "/img/lunchbox.jpg",
     dataAiHint: "lunchbox kids school",
     preview: "Packing a healthy and appealing tiffin box can be a challenge. Get creative ideas for nutritious meals your kids will love.",
     content: `
@@ -116,7 +116,7 @@ export const blogPosts: BlogPost[] = [
     title: "Budget-Friendly Powerhouses: Indian Superfoods Under ₹50",
     category: "Healthy Eating",
     date: "2024-07-15",
-    featuredImage: "/img/blog-superfoods-budget.png",
+    featuredImage: "/img/cheapfood.jpg",
     dataAiHint: "vegetables fruits market",
     preview: "Eating healthy doesn't have to be expensive. Explore common Indian superfoods that offer incredible nutritional benefits without breaking the bank.",
     content: `
