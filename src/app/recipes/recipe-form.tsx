@@ -3,7 +3,7 @@
 
 import type { GetRecipeSuggestionsInput, GetRecipeSuggestionsOutput } from "@/ai/flows/recipe-suggestions";
 import { getRecipeSuggestions } from "@/ai/flows/recipe-suggestions";
-import { DiseaseEnum, HouseholdCompositionSchema, type Disease, type HouseholdComposition } from "@/ai/types/recipe-shared-types"; // Updated import
+import { DiseaseEnum, HouseholdCompositionSchema, type Disease, type HouseholdComposition } from "@/ai/types/recipe-shared-types"; 
 
 import type { GetDetailedRecipeInput, GetDetailedRecipeOutput } from "@/ai/flows/get-detailed-recipe";
 import { getDetailedRecipe } from "@/ai/flows/get-detailed-recipe";
@@ -11,7 +11,7 @@ import type { ContextAwareAIChatInput, ContextAwareAIChatOutput, ChatMessage } f
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Leaf, WheatIcon, HeartCrack, Scale, Users, User, UserCog, Baby, Send, MessageCircle, FileText } from "lucide-react";
+import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Leaf, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { createRoot } from 'react-dom/client';
 import html2canvas from 'html2canvas';
@@ -340,11 +340,11 @@ export function RecipeForm() {
           <Separator className="my-6"/>
           <div className="space-y-3">
             <h3 className="text-md font-medium">Quick Add Common Ingredients:</h3>
-            {ingredientCategories.slice(0,2).map(category => ( // Show first 2 categories initially
+            {ingredientCategories.slice(0,1).map(category => ( 
               <div key={category.name}>
                 <h4 className="text-sm font-semibold mb-1 flex items-center">{category.icon} {category.name}</h4>
                 <div className="flex flex-wrap gap-1.5">
-                  {category.items.map(item => <Button key={item} variant="outline" size="sm" onClick={() => addIngredientToForm(item)} className="text-xs px-2 py-1 h-auto">{item}</Button>)}
+                  {category.items.slice(0,6).map(item => <Button key={item} variant="outline" size="sm" onClick={() => addIngredientToForm(item)} className="text-xs px-2 py-1 h-auto">{item}</Button>)}
                 </div>
               </div>
             ))}
