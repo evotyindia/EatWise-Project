@@ -1,9 +1,10 @@
+
 "use client";
 
 import type { GetRecipeSuggestionsInput, GetRecipeSuggestionsOutput } from "@/ai/flows/recipe-suggestions";
 import { getRecipeSuggestions } from "@/ai/flows/recipe-suggestions";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Spices as SpicesIcon, Leaf, WheatIcon } from "lucide-react";
+import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Flower as SpicesIcon, Leaf, WheatIcon } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -11,7 +12,7 @@ import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription as UIAlertDescription, AlertTitle } from "@/components/ui/alert";
