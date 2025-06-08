@@ -1,7 +1,8 @@
+
 "use client"
 
-import { Leaf, Menu, Languages as LanguagesIcon } from "lucide-react"
-import { Link, usePathname } from '@/navigation'; // Will now use standard next/link
+import { Leaf, Menu } from "lucide-react"
+import { Link } from '@/navigation'; // Uses standard next/link via navigation.ts
 import React from 'react';
 
 import { ThemeToggleButton } from "@/components/common/theme-toggle-button"
@@ -14,7 +15,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
-// Hardcoded English nav items as i18n is removed
 const navItems = [
   { href: "/", label: "Home" },
   { href: "/analyze", label: "Analyze Label" },
@@ -24,23 +24,12 @@ const navItems = [
 ]
 
 export function Header() {
-  // const t = useTranslations('Header'); // Removed
-  // const locale = useLocale(); // Removed
-  // const router = useRouter(); // Kept if needed for other logic, but locale change is removed
-  // const pathname = usePathname(); // Kept for active link styling or other logic
-
-  // const handleLocaleChange = (newLocale: string) => { // Removed
-  //   router.replace(pathname, { locale: newLocale });
-  //   if (typeof window !== "undefined") {
-  //     localStorage.setItem('preferredLocale', newLocale);
-  //   }
-  // };
-
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 max-w-screen-2xl items-center">
         <Link href="/" className="mr-6 flex items-center space-x-2">
-          <Leaf className="h-6 w-6 text-primary" />
+          {/* Consistent logo color - using a specific HSL value for emerald green */}
+          <Leaf className="h-6 w-6 text-[hsl(160_80%_42%)]" />
           <span className="font-bold sm:inline-block font-headline">
             Swasth Bharat Advisor
           </span>
@@ -60,29 +49,6 @@ export function Header() {
 
         <div className="flex items-center space-x-2">
           <ThemeToggleButton />
-
-          {/* Language Dropdown Removed
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="h-9 w-9">
-                <LanguagesIcon className="h-[1.2rem] w-[1.2rem]" />
-                <span className="sr-only">Translate Language</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {['en', 'hi', 'bn', 'mr'].map((loc) => ( // Example locales, would have come from i18n config
-                <DropdownMenuItem
-                  key={loc}
-                  onClick={() => handleLocaleChange(loc)}
-                  // disabled={locale === loc} // locale variable removed
-                >
-                  {loc.toUpperCase()} {}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          */}
-
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
