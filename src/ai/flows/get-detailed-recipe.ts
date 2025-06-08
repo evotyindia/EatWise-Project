@@ -54,7 +54,6 @@ Household Composition:
 - Adults (18-60): {{householdComposition.adults}}
 - Seniors (60+): {{householdComposition.seniors}}
 - Kids (2-17): {{householdComposition.kids}}
-The total number of people is {{sum householdComposition.adults householdComposition.seniors householdComposition.kids}}.
 
 {{#if diseaseConcerns.length}}
 Health Considerations/Dietary Restrictions: {{#each diseaseConcerns}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}.
@@ -65,14 +64,14 @@ Health Considerations/Dietary Restrictions: Focus on general healthy preparation
 Your task is to provide a complete recipe with the following details:
 1.  **Recipe Title**: Full title for "{{dishName}}".
 2.  **Description**: A brief 2-3 sentence description.
-3.  **Servings Description**: Clearly state who it serves based on 'householdComposition'. Crucially, ensure the quantities are genuinely sufficient and practical for this number of people. Indicate if portions are generous or average.
+3.  **Servings Description**: Clearly state who it serves based on 'householdComposition'. Crucially, ensure the quantities are genuinely sufficient and practical for this number of people. Indicate if portions are generous or average. (e.g., "Serves 2 adults, 1 senior, and 1 child. Portions are average.").
 4.  **Prep Time**: Estimated preparation time.
 5.  **Cook Time**: Estimated cooking time.
 6.  **Adjusted Ingredients**:
-    *   List all necessary ingredients with quantities *carefully and realistically adjusted* to be sufficient for the specified 'householdComposition'.
+    *   List all necessary ingredients with quantities *carefully and realistically adjusted* to be sufficient for the specified 'householdComposition'. Quantities must be practical and sufficient for the number of people indicated.
     *   Your primary source of ingredients MUST be the 'availableIngredients' list provided by the user.
     *   If, and only if, *essential* common Indian pantry staples (e.g., cooking oil, salt, turmeric powder, cumin seeds, mustard seeds, asafoetida) are *missing* from 'availableIngredients' BUT are *absolutely critical* for preparing "{{dishName}}", you may include a maximum of 2-3 such staples.
-    *   For these *added essential staples*, the 'notes' field for the ingredient MUST clearly state something like "Essential staple: add if available" or "Commonly used: add if you have it". Do NOT add optional flavor enhancers unless they are in the user's list.
+    *   For these *added essential staples*, the 'notes' field for the ingredient MUST clearly state something like "Essential for this dish; add if available" or "Commonly used staple, recommended for authenticity". Do NOT add optional flavor enhancers unless they are in the user's list.
     *   For each ingredient, provide its name, quantity (e.g., "1 cup", "200g", "1 medium onion"), and any prep notes (e.g., "finely chopped", "soaked").
 7.  **Instructions**: Clear, step-by-step cooking instructions.
 8.  **Health Notes**: Provide specific advice or modifications based on 'diseaseConcerns'. If no concerns, give general health benefits or tips for making it even healthier. For example, suggest alternative grains, low-sodium options, or cooking methods.
@@ -80,7 +79,7 @@ Your task is to provide a complete recipe with the following details:
 
 IMPORTANT:
 *   The recipe must be healthy and suitable for an Indian palate.
-*   Pay close attention to the 'diseaseConcerns' and 'householdComposition' to tailor the recipe (e.g. spiciness for kids/seniors, ingredient choices for diabetics like using less sugar/specific carbs). Quantities must be appropriate.
+*   Pay close attention to the 'diseaseConcerns' and 'householdComposition' to tailor the recipe (e.g. spiciness for kids/seniors, ingredient choices for diabetics like using less sugar/specific carbs). Quantities must be appropriate and sufficient.
 *   If 'gluten_free' is a concern, ensure all ingredients and instructions align (e.g., specify gluten-free asafoetida if used, suggest gluten-free flour alternatives).
 *   If 'dairy_free' is a concern, suggest dairy-free alternatives (e.g., plant-based milk/yogurt, oil instead of ghee).
 *   Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
@@ -96,18 +95,8 @@ const getDetailedRecipeFlow = ai.defineFlow(
   async (input) => {
     const processedInput = {...input};
     if (processedInput.diseaseConcerns && processedInput.diseaseConcerns.length === 1 && processedInput.diseaseConcerns[0] === 'none') {
-      processedInput.diseaseConcerns = []; 
+      processedInput.diseaseConcerns = [];
     }
-    
-    // Helper function for sum (Handlebars doesn't have complex math built-in)
-    // This won't be directly available to the prompt template unless you register it as a helper with Genkit/Handlebars,
-    // so I'll adjust the prompt to just show individual counts. The AI should infer the total.
-    // However, if Genkit supports simple arithmetic in prompts, this could be useful.
-    // For now, I'm removing this as it's not standard Handlebars and likely not available.
-    // processedInput.totalPeople = (processedInput.householdComposition.adults || 0) + 
-    //                             (processedInput.householdComposition.seniors || 0) + 
-    //                             (processedInput.householdComposition.kids || 0);
-
 
     const {output} = await prompt(processedInput);
     if (!output) {
@@ -117,7 +106,7 @@ const getDetailedRecipeFlow = ai.defineFlow(
       return {
         recipeTitle: `Error generating recipe for ${input.dishName}`,
         description: "Could not generate recipe details at this time. The AI was unable to produce a valid recipe. Please check your inputs or try again.",
-        servingsDescription: servingsText,
+        servingsDescription: servingsText, // Ensure this reflects the input household
         adjustedIngredients: [{name: "Error", quantity: "N/A", notes: "Could not retrieve ingredients due to an AI processing error."}],
         instructions: ["Failed to generate instructions. Please try again later."],
         healthNotes: "Health notes could not be generated.",
