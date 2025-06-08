@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Link } from '@/navigation'; 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { CheckCircle, ScanLine, MessageCircle, CookingPot, BarChart3 as ChartColumn, Users, Target, Lightbulb } from "lucide-react";
+import { CheckCircle, ScanLine, MessageCircle, CookingPot, BarChart3 as ChartColumn, Users, Target, Lightbulb, User } from "lucide-react"; // Added User
 
 export default function Home() {
   const features = [
@@ -190,7 +190,9 @@ export default function Home() {
                   </blockquote>
                 </CardContent>
                 <CardFooter className="flex items-center gap-4 pt-0 pb-6 px-6">
-                   <Image src={"https://placehold.co/80x80.png"} alt={testimonial.name} width={50} height={50} className="rounded-full" data-ai-hint="person smiling face" />
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-muted text-muted-foreground">
+                    <User className="w-6 h-6" />
+                  </div>
                   <div>
                     <p className="font-semibold text-card-foreground">{testimonial.name}</p>
                     <p className="text-sm text-muted-foreground">{testimonial.location}</p>
