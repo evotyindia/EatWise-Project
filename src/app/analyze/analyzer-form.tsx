@@ -14,7 +14,7 @@ import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel as HookFormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +23,7 @@ import { StarRating } from "@/components/common/star-rating";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label"; // Import the basic Label component
 
 const manualInputSchema = z.object({
   productName: z.string().optional(),
@@ -162,7 +163,7 @@ export function AnalyzerForm() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <FormLabel htmlFor="image-upload">Upload Label Image</FormLabel>
+            <Label htmlFor="image-upload">Upload Label Image</Label>
             <Input id="image-upload" type="file" accept="image/*" onChange={handleImageUpload} className="mt-1 file:text-primary file:font-semibold hover:file:bg-primary/10" />
             {uploadedImage && (
               <div className="mt-4 relative border rounded-md p-2">
@@ -189,7 +190,7 @@ export function AnalyzerForm() {
                 name="productName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Product Name (Optional)</FormLabel>
+                    <HookFormLabel>Product Name (Optional)</HookFormLabel>
                     <FormControl>
                       <Input placeholder="e.g., Instant Noodles" {...field} />
                     </FormControl>
@@ -202,7 +203,7 @@ export function AnalyzerForm() {
                 name="ingredients"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Ingredients List</FormLabel>
+                    <HookFormLabel>Ingredients List</HookFormLabel>
                     <FormControl>
                       <Textarea placeholder="e.g., Wheat flour, Palm oil, Salt, Sugar..." {...field} rows={4}/>
                     </FormControl>
@@ -216,7 +217,7 @@ export function AnalyzerForm() {
                 name="nutritionFacts"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nutrition Facts (Optional)</FormLabel>
+                    <HookFormLabel>Nutrition Facts (Optional)</HookFormLabel>
                     <FormControl>
                       <Textarea placeholder="e.g., Energy: 450kcal, Protein: 8g..." {...field} rows={3}/>
                     </FormControl>

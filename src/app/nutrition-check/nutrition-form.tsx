@@ -12,12 +12,13 @@ import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel as HookFormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { fileToDataUri } from "@/lib/utils";
 import { StarRating } from "@/components/common/star-rating";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label"; // Import the basic Label component
 
 const nutritionInputSchema = z.object({
   calories: z.preprocess(
@@ -130,7 +131,7 @@ export function NutritionForm() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <FormLabel htmlFor="nutrition-image-upload">Upload Nutrition Table Image</FormLabel>
+            <Label htmlFor="nutrition-image-upload">Upload Nutrition Table Image</Label>
             <Input id="nutrition-image-upload" type="file" accept="image/*" onChange={handleImageUpload} className="mt-1 file:text-primary file:font-semibold hover:file:bg-primary/10" />
             {uploadedImage && (
               <div className="mt-4 relative border rounded-md p-2">
@@ -158,7 +159,7 @@ export function NutritionForm() {
                   name="calories"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Calories (kcal)</FormLabel>
+                      <HookFormLabel>Calories (kcal)</HookFormLabel>
                       <FormControl>
                         <Input type="number" placeholder="e.g., 250" {...field} />
                       </FormControl>
@@ -171,7 +172,7 @@ export function NutritionForm() {
                   name="fat"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Fat (g)</FormLabel>
+                      <HookFormLabel>Fat (g)</HookFormLabel>
                       <FormControl>
                         <Input type="number" placeholder="e.g., 10" {...field} />
                       </FormControl>
@@ -184,7 +185,7 @@ export function NutritionForm() {
                   name="sugar"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Sugar (g)</FormLabel>
+                      <HookFormLabel>Sugar (g)</HookFormLabel>
                       <FormControl>
                         <Input type="number" placeholder="e.g., 15" {...field} />
                       </FormControl>
@@ -197,7 +198,7 @@ export function NutritionForm() {
                   name="protein"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Protein (g)</FormLabel>
+                      <HookFormLabel>Protein (g)</HookFormLabel>
                       <FormControl>
                         <Input type="number" placeholder="e.g., 5" {...field} />
                       </FormControl>
