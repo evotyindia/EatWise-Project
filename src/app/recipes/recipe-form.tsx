@@ -7,6 +7,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Flower as SpicesIcon, Leaf, WheatIcon } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
+import { createRoot } from 'react-dom/client';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 
@@ -17,6 +20,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription as UIAlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { PrintableRecipeSuggestions } from "@/components/common/PrintableRecipeSuggestions";
+
 
 const recipeInputSchema = z.object({
   ingredients: z.string().min(1, "Please enter at least one ingredient."),
@@ -55,6 +60,7 @@ const ingredientCategories = [
 export function RecipeForm() {
   const [suggestions, setSuggestions] = useState<GetRecipeSuggestionsOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<RecipeInputFormValues>({
@@ -91,36 +97,100 @@ export function RecipeForm() {
     setIsLoading(false);
   };
 
-  const handleDownloadSuggestions = () => {
+  const handleDownloadSuggestionsPdf = async () => {
     if (!suggestions) return;
-    let content = `AI Recipe Suggestions\n`;
-    content += `=========================\n\n`;
-    content += `Ingredients Provided:\n${form.getValues("ingredients")}\n\n`;
+    setIsDownloading(true);
+
+    const tempDiv = document.createElement('div');
+    tempDiv.id = 'pdf-render-source-recipes';
+    tempDiv.style.position = 'absolute';
+    tempDiv.style.left = '-9999px';
+    tempDiv.style.top = '0px';
+    tempDiv.style.width = '210mm'; 
+    tempDiv.style.backgroundColor = 'white';
+    document.body.appendChild(tempDiv);
     
-    if (suggestions.suggestions.length > 0) {
-      content += `Meal Ideas:\n`;
-      suggestions.suggestions.forEach((idea, index) => {
-        content += `${index + 1}. ${idea}\n`;
+    const root = createRoot(tempDiv);
+    root.render(
+      <PrintableRecipeSuggestions
+        suggestions={suggestions}
+        ingredientsProvided={form.getValues("ingredients")}
+      />
+    );
+
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for rendering
+
+    try {
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        width: tempDiv.scrollWidth,
+        height: tempDiv.scrollHeight,
+        windowWidth: tempDiv.scrollWidth,
+        windowHeight: tempDiv.scrollHeight,
       });
-      content += `\n`;
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const canvasWidthMM = (canvas.width / 2) * 0.264583;
+      const canvasHeightMM = (canvas.height / 2) * 0.264583;
+      const ratio = canvasWidthMM / canvasHeightMM;
+      
+      let imgActualHeight = pdfWidth / ratio;
+      let imgActualWidth = pdfWidth;
+
+      if (imgActualHeight > pdfHeight) { // If content is taller than one page (at full width)
+        imgActualHeight = pdfHeight; // Cap image height to one page for the first addImage
+        imgActualWidth = imgActualHeight * ratio; 
+      } else { // Content fits on one page (or less) when scaled to width
+         imgActualHeight = canvasHeightMM < pdfHeight ? canvasHeightMM : pdfHeight;
+         imgActualWidth = imgActualHeight * ratio;
+         if (imgActualWidth > pdfWidth) { // If scaling by height makes it too wide
+            imgActualWidth = pdfWidth;
+            imgActualHeight = pdfWidth / ratio;
+         }
+      }
+      
+      let position = 0;
+      pdf.addImage(imgData, 'PNG', 0, position, imgActualWidth, canvasHeightMM); // Use full canvasHeightMM for source rect height
+      let heightLeft = canvasHeightMM - imgActualHeight; // Initial calculation based on first page's draw
+
+      while (heightLeft > 0) {
+        position -= pdfHeight; // This is the y-offset for the source image on the canvas
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgActualWidth, canvasHeightMM);
+        heightLeft -= pdfHeight;
+      }
+      
+      const pageCount = pdf.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(100);
+        pdf.text(`Page ${i} of ${pageCount}`, pdfWidth - 25, pdfHeight - 10, {align: 'right'});
+      }
+
+      pdf.save('recipe_suggestions_report.pdf');
+      toast({ title: "Suggestions PDF Downloaded", description: "The recipe ideas PDF has been saved." });
+
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast({ title: "PDF Error", description: "Could not generate PDF report. " + (error as Error).message, variant: "destructive" });
+    } finally {
+      root.unmount();
+      document.body.removeChild(tempDiv);
+      setIsDownloading(false);
     }
-    
-    if (suggestions.mealPlan) {
-      content += `Quick Meal Plan:\n${suggestions.mealPlan}\n\n`;
-    }
-    
-    content += `Disclaimer: These are AI-generated suggestions. Adjust recipes to your taste and dietary needs.`;
-    
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'recipe-suggestions.txt';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(link.href);
-    toast({ title: "Suggestions Downloaded", description: "The recipe ideas have been saved." });
   };
+
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -204,8 +274,9 @@ export function RecipeForm() {
                 <CardTitle className="text-2xl flex items-center">
                   <Sparkles className="mr-2 h-6 w-6 text-accent" /> AI Recipe Suggestions
                 </CardTitle>
-                <Button onClick={handleDownloadSuggestions} variant="outline" size="sm">
-                  <Download className="mr-2 h-4 w-4" /> Download
+                <Button onClick={handleDownloadSuggestionsPdf} variant="outline" size="sm" disabled={isDownloading}>
+                  {isDownloading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                  Download PDF
                 </Button>
               </div>
             </CardHeader>
@@ -261,4 +332,3 @@ export function RecipeForm() {
     </div>
   );
 }
-
