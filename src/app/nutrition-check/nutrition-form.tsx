@@ -61,12 +61,14 @@ const nutritionInputSchema = z.object({
 }).refine(data => {
   // This refinement applies for manual form submission:
   // At least one of the core nutrient values must be provided.
+  // This check is bypassed if data.nutritionDataUri has a value (implicitly, image upload path).
+  if (data.foodItemDescription === "IGNORE_VALIDATION_FOR_IMAGE_SUBMIT") return true; // Special marker to skip validation
   return coreNutrientFields.some(field => 
     data[field] !== undefined && data[field] !== null && String(data[field]).trim() !== ""
   );
 }, { 
-  message: "For manual entry, at least one nutritional value (e.g., calories, fat) must be provided.",
-  path: ["calories"], // Attach error to a common field for display
+  message: "For manual entry, at least one nutritional value (e.g., calories, fat) must be provided if no image is uploaded.",
+  path: ["calories"], 
 });
 
 
@@ -136,11 +138,11 @@ export function NutritionForm() {
   };
 
   const onManualSubmit: SubmitHandler<NutritionInputFormValues> = async (data) => {
-    if (imageFile) {
+    if (imageFile && !data.foodItemDescription?.includes("IGNORE_VALIDATION_FOR_IMAGE_SUBMIT")) { // Check if not image submission marker
         toast({ title: "Manual Analysis Prioritized", description: "Processing manually entered data. Uploaded image is ignored for this submission."});
     }
-    const analysisInput: AnalyzeNutritionInput = { ...data, nutritionDataUri: undefined }; // Ensure no image data is sent
-    await generateAnalysisSharedLogic(analysisInput, data); // Pass original 'data' for PDF context
+    const analysisInput: AnalyzeNutritionInput = { ...data, nutritionDataUri: undefined }; 
+    await generateAnalysisSharedLogic(analysisInput, data); 
   };
   
   const onImageSubmit = async () => {
@@ -154,12 +156,15 @@ export function NutritionForm() {
     const analysisInputForAI: AnalyzeNutritionInput = { 
         nutritionDataUri, 
         servingSize: form.getValues("servingSize"), 
-        foodItemDescription: form.getValues("foodItemDescription") 
+        // Use a marker to bypass Zod refinement for image-only submissions.
+        // This is a workaround as Zod schema is validated before onSubmit typically.
+        // Alternatively, use two separate forms or more complex conditional validation.
+        foodItemDescription: form.getValues("foodItemDescription") || "IGNORE_VALIDATION_FOR_IMAGE_SUBMIT"
     };
     const inputForPdf: AnalyzeNutritionInput = { 
         servingSize: form.getValues("servingSize"), 
-        foodItemDescription: form.getValues("foodItemDescription"), 
-        nutritionDataUri: "Image Uploaded" // Marker for PDF
+        foodItemDescription: form.getValues("foodItemDescription")?.replace("IGNORE_VALIDATION_FOR_IMAGE_SUBMIT", "").trim() || "Scanned Food Item", 
+        nutritionDataUri: "Image Uploaded" 
     }; 
     await generateAnalysisSharedLogic(analysisInputForAI, inputForPdf);
   };
@@ -198,7 +203,7 @@ export function NutritionForm() {
         contextType: "nutritionAnalysis",
         nutritionContext: {
           nutritionReportSummary: analysisResult.overallAnalysis,
-          foodItemDescription: currentInputDataForPdf?.foodItemDescription || (currentInputDataForPdf?.nutritionDataUri === "Image Uploaded" ? "Scanned food item" : "Manually entered data")
+          foodItemDescription: currentInputDataForPdf?.foodItemDescription?.replace("IGNORE_VALIDATION_FOR_IMAGE_SUBMIT", "").trim() || (currentInputDataForPdf?.nutritionDataUri === "Image Uploaded" ? "Scanned food item" : "Manually entered data")
         },
       };
       const aiResponse = await contextAwareAIChat(chatContextInput);
@@ -223,14 +228,15 @@ export function NutritionForm() {
     setIsPdfDownloading(true);
 
     const tempDiv = document.createElement('div');
-    tempDiv.id = 'pdf-render-source-nutrition-form'; 
+    tempDiv.id = 'pdf-render-source-nutrition-form-' + Date.now(); 
     tempDiv.style.position = 'absolute'; tempDiv.style.left = '-9999px'; tempDiv.style.top = '0px';
     tempDiv.style.width = '210mm'; tempDiv.style.backgroundColor = 'white'; tempDiv.style.padding = '0'; tempDiv.style.margin = '0';
     document.body.appendChild(tempDiv);
 
     const root = createRoot(tempDiv);
     
-    const pdfInputData = currentInputDataForPdf;
+    const pdfInputData = {...currentInputDataForPdf, foodItemDescription: currentInputDataForPdf?.foodItemDescription?.replace("IGNORE_VALIDATION_FOR_IMAGE_SUBMIT", "").trim()};
+
 
     root.render( <PrintableNutritionReport analysisResult={analysisResult} userInput={pdfInputData || undefined} /> );
     
@@ -275,21 +281,25 @@ export function NutritionForm() {
   };
 
   const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
-    if (!text || text.trim() === "") return null;
+    if (!text || text.trim() === "" || text.trim().toLowerCase() === "n/a") return null;
+
     const lines = text.split('\n').filter(s => s.trim() !== "");
     const hasBullets = lines.some(line => line.trim().match(/^(\*|-)\s/));
 
     if (hasBullets) {
         return (
-            <ul className="list-disc list-inside space-y-1 text-sm leading-relaxed">
+            <ul className="list-none p-0 m-0"> {/* Changed from list-disc list-inside */}
                 {lines.map((line, index) => (
-                    <li key={index}>{line.replace(/^(\*|-)\s*/, '').trim()}</li>
+                    <li key={index} className="flex items-start">
+                        <span className="mr-2 mt-[1px] text-primary">&#8226;</span> {/* Manual bullet */}
+                        <span>{line.replace(/^(\*|-)\s*/, '').trim()}</span>
+                    </li>
                 ))}
             </ul>
         );
     } else if (lines.length > 0) {
         return (
-            <div className="text-sm leading-relaxed space-y-1">
+            <div className="space-y-1">
                 {lines.map((paragraph, index) => (
                     <p key={index}>{paragraph.trim()}</p>
                 ))}
@@ -311,7 +321,7 @@ export function NutritionForm() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onManualSubmit)} className="space-y-4">
                 <FormField control={form.control} name="foodItemDescription" render={({ field }) => (
-                  <FormItem><HookFormLabel>Food Item Name/Description (Optional)</HookFormLabel><FormControl><Input placeholder="e.g., Packaged Biscuits, Homemade Dal" {...field} /></FormControl><FormDescription>Helps AI provide more specific context in chat and PDF.</FormDescription><FormMessage /></FormItem>
+                  <FormItem><HookFormLabel>Food Item Name/Description (Optional)</HookFormLabel><FormControl><Input placeholder="e.g., Packaged Biscuits, Homemade Dal" {...field} value={field.value?.replace("IGNORE_VALIDATION_FOR_IMAGE_SUBMIT","")}/></FormControl><FormDescription>Helps AI provide more specific context in chat and PDF.</FormDescription><FormMessage /></FormItem>
                 )} />
                <FormField control={form.control} name="servingSize" render={({ field }) => (
                   <FormItem><HookFormLabel>Serving Size (Important for Context)</HookFormLabel><FormControl><Input placeholder="e.g., 1 cup (240ml), 30g, 1 packet" {...field} /></FormControl><FormDescription>Used for both image and manual analysis to provide context.</FormDescription><FormMessage /></FormItem>
@@ -370,20 +380,55 @@ export function NutritionForm() {
         <Card className="shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle className="flex items-center text-2xl"><FileText className="mr-2 h-6 w-6 text-accent" /> AI Nutrition Analysis</CardTitle>
+              <div className="flex items-center text-2xl">
+                <FileText className="mr-2 h-6 w-6 text-accent" />
+                <CardTitle>AI Nutrition Analysis</CardTitle>
+              </div>
               <Button type="button" onClick={handleDownloadReport} variant="outline" size="sm" disabled={isPdfDownloading}>
                  {isPdfDownloading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Download PDF
               </Button>
             </div>
-            <CardDescription>Understanding your food's nutritional profile{currentInputDataForPdf?.foodItemDescription ? ` for: ${currentInputDataForPdf.foodItemDescription}` : ""}.</CardDescription>
+            <CardDescription>Understanding your food's nutritional profile{currentInputDataForPdf?.foodItemDescription ? ` for: ${currentInputDataForPdf.foodItemDescription.replace("IGNORE_VALIDATION_FOR_IMAGE_SUBMIT", "").trim()}` : ""}.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Overall Analysis:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription>{renderFormattedAnalysisText(analysisResult.overallAnalysis)}</AlertDescription></Alert>
-             {analysisResult.macronutrientBalance && (<Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Macronutrient Balance:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription>{renderFormattedAnalysisText(analysisResult.macronutrientBalance)}</AlertDescription></Alert>)}
-            {analysisResult.micronutrientHighlights && (<Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Micronutrient Highlights:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription>{renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}</AlertDescription></Alert>)}
-             {analysisResult.processingLevelAssessment && (<Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Processing Level Assessment:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription>{renderFormattedAnalysisText(analysisResult.processingLevelAssessment)}</AlertDescription></Alert>)}
-            <Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Dietary Suitability:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription>{renderFormattedAnalysisText(analysisResult.dietarySuitability)}</AlertDescription></Alert>
-             {analysisResult.servingSizeContext && (<Alert variant="default" className="bg-background"><AlertTitle className="font-bold">Serving Size Context:</AlertTitle><Sparkles className="h-4 w-4 text-primary" /><AlertDescription>{renderFormattedAnalysisText(analysisResult.servingSizeContext)}</AlertDescription></Alert>)}
+            <Alert variant="default" className="bg-background">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <AlertTitle className="font-bold">Overall Analysis:</AlertTitle>
+                <AlertDescription>{renderFormattedAnalysisText(analysisResult.overallAnalysis)}</AlertDescription>
+            </Alert>
+             {analysisResult.macronutrientBalance && (
+                <Alert variant="default" className="bg-background">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <AlertTitle className="font-bold">Macronutrient Balance:</AlertTitle>
+                    <AlertDescription>{renderFormattedAnalysisText(analysisResult.macronutrientBalance)}</AlertDescription>
+                </Alert>
+            )}
+            {analysisResult.micronutrientHighlights && (
+                <Alert variant="default" className="bg-background">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <AlertTitle className="font-bold">Micronutrient Highlights:</AlertTitle>
+                    <AlertDescription>{renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}</AlertDescription>
+                </Alert>
+            )}
+             {analysisResult.processingLevelAssessment && (
+                <Alert variant="default" className="bg-background">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <AlertTitle className="font-bold">Processing Level Assessment:</AlertTitle>
+                    <AlertDescription>{renderFormattedAnalysisText(analysisResult.processingLevelAssessment)}</AlertDescription>
+                </Alert>
+            )}
+            <Alert variant="default" className="bg-background">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <AlertTitle className="font-bold">Dietary Suitability:</AlertTitle>
+                <AlertDescription>{renderFormattedAnalysisText(analysisResult.dietarySuitability)}</AlertDescription>
+            </Alert>
+             {analysisResult.servingSizeContext && (
+                <Alert variant="default" className="bg-background">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <AlertTitle className="font-bold">Serving Size Context:</AlertTitle>
+                    <AlertDescription>{renderFormattedAnalysisText(analysisResult.servingSizeContext)}</AlertDescription>
+                </Alert>
+             )}
             <div className="flex items-center space-x-2 pt-2"><span className="font-semibold text-lg">Nutrition Density Rating:</span><StarRating rating={analysisResult.nutritionDensityRating} /><span>({analysisResult.nutritionDensityRating}/5)</span></div>
           </CardContent>
            <CardFooter className="flex flex-col items-start pt-4 border-t">
