@@ -116,7 +116,7 @@ export const blogPosts: BlogPost[] = [
     title: "Budget-Friendly Powerhouses: Indian Superfoods Under ₹50",
     category: "Healthy Eating",
     date: "2024-07-15",
-    featuredImage: "/img/cheapfood.jpg",
+    featuredImage: "/img/cheap50.jpg",
     dataAiHint: "vegetables fruits market",
     preview: "Eating healthy doesn't have to be expensive. Explore common Indian superfoods that offer incredible nutritional benefits without breaking the bank.",
     content: `
