@@ -12,10 +12,10 @@ import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription as UIAlertDescription } from "@/components/ui/alert"; // Renamed to avoid conflict
 
 const recipeInputSchema = z.object({
   ingredients: z.string().min(1, "Please enter at least one ingredient."),
@@ -144,9 +144,9 @@ export function RecipeForm() {
               ) : (
                  <Alert>
                   <Lightbulb className="h-4 w-4" />
-                  <AlertDescription>
+                  <UIAlertDescription>
                     No specific meal ideas generated with the provided ingredients. Try adding more common Indian staples.
-                  </AlertDescription>
+                  </UIAlertDescription>
                 </Alert>
               )}
 
@@ -155,9 +155,9 @@ export function RecipeForm() {
                   <h3 className="text-xl font-semibold mt-6 mb-2">Quick Meal Plan:</h3>
                   <Alert variant="default" className="bg-background">
                      <Lightbulb className="h-4 w-4" />
-                    <AlertDescription className="whitespace-pre-wrap text-sm leading-relaxed">
+                    <UIAlertDescription className="whitespace-pre-wrap text-sm leading-relaxed">
                       {suggestions.mealPlan}
-                    </AlertDescription>
+                    </UIAlertDescription>
                   </Alert>
                 </div>
               )}
