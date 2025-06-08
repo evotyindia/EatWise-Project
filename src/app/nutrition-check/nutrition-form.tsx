@@ -20,6 +20,7 @@ import { StarRating } from "@/components/common/star-rating";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 
 const numberPreprocess = (val: unknown) => (val === "" || val === null || val === undefined ? undefined : Number(val));
 
@@ -41,8 +42,8 @@ const nutritionInputSchema = z.object({
   potassium: z.preprocess(numberPreprocess, z.number({ invalid_type_error: "Must be a number" }).nonnegative("Cannot be negative").optional()),
   vitaminC: z.preprocess(numberPreprocess, z.number({ invalid_type_error: "Must be a number" }).nonnegative("Cannot be negative").optional()),
   servingSize: z.string().optional(),
-}).refine(data => Object.values(data).some(val => val !== undefined && val !== ""), {
-  message: "At least one nutritional value or serving size must be provided for manual entry.",
+}).refine(data => Object.values(data).some(val => val !== undefined && val !== "") || (data.calories !== undefined && data.calories !== null), { // Adjusted refine condition
+  message: "At least one nutritional value or serving size must be provided for manual entry if no image is uploaded.",
   path: ["calories"], 
 });
 
@@ -83,6 +84,9 @@ export function NutritionForm() {
   const onManualSubmit: SubmitHandler<NutritionInputFormValues> = async (data) => {
     setIsLoading(true);
     setAnalysisResult(null);
+    // Clear image if manual submit is chosen
+    setImageFile(null); 
+    setUploadedImage(null);
     try {
       const input: AnalyzeNutritionInput = { ...data };
       const result = await analyzeNutrition(input);
@@ -106,6 +110,7 @@ export function NutritionForm() {
     }
     setIsLoading(true);
     setAnalysisResult(null);
+    form.reset(); // Clear manual form fields when image is submitted
     try {
       const nutritionDataUri = await fileToDataUri(imageFile);
       const input: AnalyzeNutritionInput = { nutritionDataUri };
@@ -221,7 +226,7 @@ export function NutritionForm() {
                 <FormField control={form.control} name="vitaminC" render={({ field }) => (<FormItem><HookFormLabel>Vitamin C (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 60" {...field} /></FormControl><FormMessage /></FormItem>)} />
               </div>
               {form.formState.errors.root && <FormMessage>{form.formState.errors.root.message}</FormMessage>}
-              {form.formState.errors.calories && !Object.values(form.getValues()).some(v=>v) && <FormMessage>At least one value is required for manual entry.</FormMessage>}
+              {form.formState.errors.calories && !Object.values(form.getValues()).filter(v => v !== undefined && v !== "").length && <FormMessage>At least one value is required for manual entry.</FormMessage>}
               <Button type="submit" disabled={isLoading && form.formState.isSubmitting} className="w-full">
                 {isLoading && form.formState.isSubmitting ? "Analyzing Manually..." : "Analyze Manually"}
                 <Sparkles className="ml-2 h-4 w-4" />
