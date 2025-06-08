@@ -16,7 +16,7 @@ export const blogPosts: BlogPost[] = [
     title: "How to Decode Indian Food Labels: A Beginner's Guide",
     category: "Nutrition Basics",
     date: "2024-07-28",
-    featuredImage: "https://placehold.co/600x400.jpg",
+    featuredImage: "/img/blog-decode-labels.jpg",
     dataAiHint: "food label magnifying glass",
     preview: "Confused by complex food labels? Learn how to read and understand them to make healthier choices in the Indian market.",
     content: `
@@ -45,7 +45,7 @@ export const blogPosts: BlogPost[] = [
     title: "The Sweet Trap: Uncovering Hidden Sugars in Common Indian Snacks",
     category: "Healthy Eating",
     date: "2024-07-25",
-    featuredImage: "https://placehold.co/600x400.png",
+    featuredImage: "/img/blog-hidden-sugars.png",
     dataAiHint: "sweets cookies snacks",
     preview: "Many popular Indian snacks are loaded with hidden sugars. Discover how to identify them and find healthier alternatives.",
     content: `
@@ -83,7 +83,7 @@ export const blogPosts: BlogPost[] = [
     title: "Nutritious & Delicious: Healthy Tiffin Box Ideas for Indian Kids",
     category: "Kids Nutrition",
     date: "2024-07-20",
-    featuredImage: "https://placehold.co/600x400.png",
+    featuredImage: "/img/blog-tiffin-ideas.png",
     dataAiHint: "lunchbox kids school",
     preview: "Packing a healthy and appealing tiffin box can be a challenge. Get creative ideas for nutritious meals your kids will love.",
     content: `
@@ -116,7 +116,7 @@ export const blogPosts: BlogPost[] = [
     title: "Budget-Friendly Powerhouses: Indian Superfoods Under ₹50",
     category: "Healthy Eating",
     date: "2024-07-15",
-    featuredImage: "https://placehold.co/600x400.png",
+    featuredImage: "/img/blog-superfoods-budget.png",
     dataAiHint: "vegetables fruits market",
     preview: "Eating healthy doesn't have to be expensive. Explore common Indian superfoods that offer incredible nutritional benefits without breaking the bank.",
     content: `
