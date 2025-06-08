@@ -32,7 +32,7 @@ export function BlogList({ initialPosts, categories }: BlogListProps) {
         <div className="flex items-center gap-2">
           <Filter className="h-5 w-5 text-muted-foreground" />
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] transition-transform duration-300 ease-in-out hover:scale-105">
               <SelectValue placeholder="Filter by category" />
             </SelectTrigger>
             <SelectContent>
@@ -52,9 +52,9 @@ export function BlogList({ initialPosts, categories }: BlogListProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredPosts.map((post) => (
-          <Card key={post.slug} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <Card key={post.slug} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <CardHeader className="p-0">
-              <Link href={`/blogs/${post.slug}`} aria-label={post.title}>
+              <Link href={`/blogs/${post.slug}`} aria-label={post.title} className="block overflow-hidden">
                 <Image
                   src={post.featuredImage}
                   alt={post.title}
@@ -75,7 +75,7 @@ export function BlogList({ initialPosts, categories }: BlogListProps) {
               <CardDescription className="mt-2 text-sm line-clamp-3">{post.preview}</CardDescription>
             </CardContent>
             <CardFooter className="p-6 pt-0">
-              <Button variant="link" asChild className="px-0 text-primary group">
+              <Button variant="link" asChild className="px-0 text-primary group transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
                 <Link href={`/blogs/${post.slug}`}>
                   Read More <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
@@ -87,3 +87,5 @@ export function BlogList({ initialPosts, categories }: BlogListProps) {
     </div>
   );
 }
+
+    

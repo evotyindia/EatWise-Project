@@ -1,3 +1,4 @@
+
 import { getBlogPostBySlug, blogPosts } from "@/lib/blog-data";
 import Image from "next/image";
 import { Link } from "@/navigation"; 
@@ -40,7 +41,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
   return (
     <article className="container mx-auto max-w-3xl py-8 px-4 md:px-6">
       <div className="mb-8">
-        <Button variant="outline" asChild size="sm" className="mb-6 group">
+        <Button variant="outline" asChild size="sm" className="mb-6 group transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
           <Link href="/blogs">
             <ArrowLeft className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
             Back to Blog
@@ -57,15 +58,17 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             <Badge variant="secondary">{post.category}</Badge>
           </div>
         </div>
-        <Image
-          src={post.featuredImage}
-          alt={post.title}
-          width={1200}
-          height={675}
-          className="w-full rounded-lg shadow-md mb-8 object-cover aspect-video"
-          priority
-          data-ai-hint={post.dataAiHint}
-        />
+        <div className="overflow-hidden rounded-lg shadow-md mb-8">
+          <Image
+            src={post.featuredImage}
+            alt={post.title}
+            width={1200}
+            height={675}
+            className="w-full object-cover aspect-video transition-transform duration-300 hover:scale-105"
+            priority
+            data-ai-hint={post.dataAiHint}
+          />
+        </div>
       </div>
       
       <Separator className="my-8" />
@@ -84,10 +87,12 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
       <Separator className="my-12" />
 
       <div className="text-center">
-        <Button asChild>
+        <Button asChild className="transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
           <Link href="/analyze">Analyze Your Food Label Now</Link>
         </Button>
       </div>
     </article>
   );
 }
+
+    

@@ -1,3 +1,4 @@
+
 import Image from "next/image";
 import { Link } from "@/navigation"; 
 import { Button } from "@/components/ui/button";
@@ -71,8 +72,12 @@ export default function Home() {
             Understand food labels, analyze ingredients, and get healthy Indian recipe suggestions. Your personal AI-powered nutrition guide for a healthier lifestyle.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-            <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground transition-transform duration-300 ease-in-out hover:scale-105"><Link href="/analyze">Analyze a Food Label</Link></Button>
-            <Button asChild variant="outline" size="lg" className="transition-transform duration-300 ease-in-out hover:scale-105 border-primary text-primary hover:bg-primary/5"><Link href="/recipes">Get Recipe Ideas</Link></Button>
+            <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
+              <Link href="/analyze">Analyze a Food Label</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 border-primary text-primary hover:bg-primary/5">
+              <Link href="/recipes">Get Recipe Ideas</Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -99,7 +104,7 @@ export default function Home() {
                   <p className="text-muted-foreground">{feature.description}</p>
                 </CardContent>
                 <CardFooter>
-                  <Button variant="link" asChild className="px-0 mt-2 text-primary group">
+                  <Button variant="link" asChild className="px-0 mt-2 text-primary group transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
                     <Link href={feature.link}>Try Now <CheckCircle className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" /></Link>
                   </Button>
                 </CardFooter>
@@ -117,7 +122,7 @@ export default function Home() {
               alt="Diverse group of people enjoying healthy Indian food"
               width={600}
               height={450}
-              className="rounded-xl shadow-lg"
+              className="rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105"
               data-ai-hint="healthy food community"
             />
           </div>
@@ -158,7 +163,7 @@ export default function Home() {
                 </div>
               </li>
             </ul>
-             <Button asChild size="lg" className="mt-8 bg-accent hover:bg-accent/90 text-accent-foreground transition-transform duration-300 ease-in-out hover:scale-105">
+             <Button asChild size="lg" className="mt-8 bg-accent hover:bg-accent/90 text-accent-foreground transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
                 <Link href="/blogs">Read Our Blog</Link>
             </Button>
           </div>
@@ -178,7 +183,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {testimonials.map((testimonial, idx) => (
-              <Card key={idx} className="bg-background flex flex-col shadow-lg hover:shadow-xl transition-shadow">
+              <Card key={idx} className="bg-background flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-300 hover:-translate-y-1">
                 <CardContent className="pt-6 pb-4 flex-grow">
                   <blockquote className="text-lg italic text-foreground/90">
                     &quot;{testimonial.quote}&quot;
@@ -242,7 +247,7 @@ export default function Home() {
               alt="How it works illustration"
               width={600}
               height={400}
-              className="rounded-xl shadow-lg"
+              className="rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105"
               data-ai-hint="app interface diagram"
             />
           </div>
@@ -258,10 +263,10 @@ export default function Home() {
             Join thousands of Indians on their journey to better nutrition. Start analyzing, learning, and cooking with EatWise India today!
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button asChild size="lg" className="bg-background text-primary hover:bg-background/90 transition-transform duration-300 ease-in-out hover:scale-105">
+            <Button asChild size="lg" className="bg-background text-primary hover:bg-background/90 transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
               <Link href="/analyze">Start Analyzing Labels</Link>
             </Button>
-            <Button asChild variant="secondary" size="lg" className="transition-transform duration-300 ease-in-out hover:scale-105">
+            <Button asChild variant="secondary" size="lg" className="transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
               <Link href="/nutrition-check">Check Nutrition Facts</Link>
             </Button>
           </div>
@@ -270,3 +275,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
