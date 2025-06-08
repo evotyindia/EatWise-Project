@@ -1,6 +1,8 @@
 
 # EatWise India / Swasth Bharat Advisor
 
+**AI-powered nutrition guide helping Indians make healthier food choices through label analysis, recipe suggestions, and personalized dietary advice.**
+
 EatWise India (formerly Swasth Bharat Advisor) is an AI-powered nutrition guide designed to help users in India make healthier food choices. It offers features like food label analysis, ingredient insights, health ratings, AI-driven chat for nutritional queries, and personalized Indian recipe suggestions.
 
 ## Core Features
@@ -70,7 +72,6 @@ Follow these steps to get the project running locally:
 A brief overview of key directories:
 
 *   `src/app/`: Contains the Next.js pages and layouts (App Router).
-    *   `src/app/[locale]/`: Structure for internationalization (currently simplified).
     *   `src/app/analyze/`: Food label analysis page and components.
     *   `src/app/recipes/`: Recipe suggestion page and components.
     *   `src/app/nutrition-check/`: Nutrition facts analysis page and components.
@@ -85,8 +86,7 @@ A brief overview of key directories:
 *   `src/contexts/`: React context providers (e.g., ThemeContext).
 *   `src/hooks/`: Custom React hooks.
 *   `src/lib/`: Utility functions and libraries.
-*   `src/messages/`: JSON files for internationalization.
-*   `public/`: Static assets.
+*   `public/`: Static assets (including images in `public/img/`).
 
 ## Available Scripts
 
@@ -104,7 +104,7 @@ In the project directory, you can run:
 
 *   `GOOGLE_API_KEY`: **Required**. Your API key for Google AI services (Gemini).
 
-Make sure to add this to your `.env` file. Do not commit your `.env` file to version control.
+Make sure to add this to your `.env` file for local development. For production deployments (e.g., Vercel, Firebase), set this as an environment variable in your hosting provider's settings. Do not commit your `.env` file to version control.
 
 ## Deployment
 
@@ -119,3 +119,4 @@ Contributions are welcome! Please follow the existing code style and ensure your
 ## License
 
 This project is licensed under the MIT License. (Or specify your chosen license).
+
