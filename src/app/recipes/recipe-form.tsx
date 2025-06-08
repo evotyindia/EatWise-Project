@@ -15,7 +15,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription as UIAlertDescription } from "@/components/ui/alert"; // Renamed to avoid conflict
+import { Alert, AlertDescription as UIAlertDescription } from "@/components/ui/alert";
 
 const recipeInputSchema = z.object({
   ingredients: z.string().min(1, "Please enter at least one ingredient."),
