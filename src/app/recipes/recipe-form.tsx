@@ -31,6 +31,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PrintableDetailedRecipe } from "@/components/common/PrintableDetailedRecipe";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 
 
 const diseaseOptions: { id: Disease; label: string; icon: React.ElementType }[] = [
@@ -57,12 +58,12 @@ const recipePageInputSchema = z.object({
 type RecipePageFormValues = z.infer<typeof recipePageInputSchema>;
 
 const ingredientCategories = [
-  { name: "Vegetables", icon: <Leaf className="mr-2 h-4 w-4 text-green-500" />, items: ["Onion", "Tomato", "Potato", "Spinach", "Carrot", "Capsicum", "Ginger", "Garlic", "Cauliflower", "Peas", "Beans", "Ladyfinger (Okra)", "Cabbage", "Mushroom", "Broccoli", "Cucumber", "Radish", "Beetroot", "Coriander Leaves", "Mint Leaves", "Green Chili", "Lemon", "Bottle Gourd (Lauki)", "Ridge Gourd (Turai)", "Brinjal (Eggplant)", "Sweet Potato"] },
-  { name: "Spices & Herbs", icon: <Sparkles className="mr-2 h-4 w-4 text-yellow-500" />, items: ["Turmeric Powder", "Cumin Powder", "Coriander Powder", "Garam Masala", "Red Chili Powder", "Mustard Seeds", "Asafoetida (Hing)", "Fenugreek Seeds (Methi)", "Cumin Seeds (Jeera)", "Black Pepper", "Cardamom (Elaichi)", "Cloves (Laung)", "Cinnamon (Dalchini)", "Bay Leaf (Tej Patta)", "Salt", "Kasuri Methi (Dry Fenugreek)", "Curry Leaves", "Saffron (Kesar)"] },
-  { name: "Dals & Legumes", icon: <Utensils className="mr-2 h-4 w-4 text-orange-500" />, items: ["Moong Dal (Yellow Lentil)", "Toor Dal (Arhar/Pigeon Pea)", "Chana Dal (Split Chickpea)", "Masoor Dal (Red Lentil)", "Rajma (Kidney Beans)", "Chickpeas (Chole/Kabuli Chana)", "Black Eyed Peas (Lobia)", "Urad Dal (Black Gram)", "Green Gram (Sabut Moong)", "Black Chickpeas (Kala Chana)"] },
-  { name: "Grains & Flours", icon: <WheatIcon className="mr-2 h-4 w-4 text-amber-700" />, items: ["Rice (Basmati)", "Rice (Sona Masoori/Regular)", "Wheat Flour (Atta)", "Besan (Gram Flour)", "Suji (Semolina/Rava)", "Poha (Flattened Rice)", "Maida (All-purpose flour)", "Ragi Flour (Finger Millet)", "Jowar Flour (Sorghum)", "Bajra Flour (Pearl Millet)", "Bread (Whole Wheat/White)", "Oats", "Quinoa"] },
-  { name: "Dairy & Fats", icon: <Milk className="mr-2 h-4 w-4 text-blue-400" />, items: ["Paneer (Indian Cheese)", "Curd (Yogurt/Dahi)", "Milk", "Ghee (Clarified Butter)", "Butter", "Cooking Oil (Sunflower)", "Cooking Oil (Mustard)", "Cooking Oil (Groundnut)", "Olive Oil", "Coconut Oil", "Cream (Malai)", "Cheese (Processed/Cheddar)"] },
-  { name: "Sweeteners, Nuts & Seeds", icon: <Cookie className="mr-2 h-4 w-4 text-yellow-700" />, items: ["Sugar", "Jaggery (Gur)", "Honey", "Almonds (Badam)", "Cashews (Kaju)", "Raisins (Kishmish)", "Walnuts (Akhrot)", "Peanuts (Moongphali)", "Pistachios (Pista)", "Coconut (Fresh/Dry)", "Poppy Seeds (Khas Khas)", "Sesame Seeds (Til)", "Flax Seeds (Alsi)", "Chia Seeds"] }
+  { name: "Vegetables", icon: <Leaf className="text-green-500" />, items: ["Onion", "Tomato", "Potato", "Spinach", "Carrot", "Capsicum", "Ginger", "Garlic", "Cauliflower", "Peas", "Beans", "Ladyfinger (Okra)", "Cabbage", "Mushroom", "Broccoli", "Cucumber", "Radish", "Beetroot", "Coriander Leaves", "Mint Leaves", "Green Chili", "Lemon", "Bottle Gourd (Lauki)", "Ridge Gourd (Turai)", "Brinjal (Eggplant)", "Sweet Potato"] },
+  { name: "Spices & Herbs", icon: <Sparkles className="text-yellow-500" />, items: ["Turmeric Powder", "Cumin Powder", "Coriander Powder", "Garam Masala", "Red Chili Powder", "Mustard Seeds", "Asafoetida (Hing)", "Fenugreek Seeds (Methi)", "Cumin Seeds (Jeera)", "Black Pepper", "Cardamom (Elaichi)", "Cloves (Laung)", "Cinnamon (Dalchini)", "Bay Leaf (Tej Patta)", "Salt", "Kasuri Methi (Dry Fenugreek)", "Curry Leaves", "Saffron (Kesar)"] },
+  { name: "Dals & Legumes", icon: <Utensils className="text-orange-500" />, items: ["Moong Dal (Yellow Lentil)", "Toor Dal (Arhar/Pigeon Pea)", "Chana Dal (Split Chickpea)", "Masoor Dal (Red Lentil)", "Rajma (Kidney Beans)", "Chickpeas (Chole/Kabuli Chana)", "Black Eyed Peas (Lobia)", "Urad Dal (Black Gram)", "Green Gram (Sabut Moong)", "Black Chickpeas (Kala Chana)"] },
+  { name: "Grains & Flours", icon: <WheatIcon className="text-amber-700" />, items: ["Rice (Basmati)", "Rice (Sona Masoori/Regular)", "Wheat Flour (Atta)", "Besan (Gram Flour)", "Suji (Semolina/Rava)", "Poha (Flattened Rice)", "Maida (All-purpose flour)", "Ragi Flour (Finger Millet)", "Jowar Flour (Sorghum)", "Bajra Flour (Pearl Millet)", "Bread (Whole Wheat/White)", "Oats", "Quinoa"] },
+  { name: "Dairy & Fats", icon: <Milk className="text-blue-400" />, items: ["Paneer (Indian Cheese)", "Curd (Yogurt/Dahi)", "Milk", "Ghee (Clarified Butter)", "Butter", "Cooking Oil (Sunflower)", "Cooking Oil (Mustard)", "Cooking Oil (Groundnut)", "Olive Oil", "Coconut Oil", "Cream (Malai)", "Cheese (Processed/Cheddar)"] },
+  { name: "Sweeteners, Nuts & Seeds", icon: <Cookie className="text-yellow-700" />, items: ["Sugar", "Jaggery (Gur)", "Honey", "Almonds (Badam)", "Cashews (Kaju)", "Raisins (Kishmish)", "Walnuts (Akhrot)", "Peanuts (Moongphali)", "Pistachios (Pista)", "Coconut (Fresh/Dry)", "Poppy Seeds (Khas Khas)", "Sesame Seeds (Til)", "Flax Seeds (Alsi)", "Chia Seeds"] }
 ];
 
 export function RecipeForm() {
@@ -346,12 +347,12 @@ export function RecipeForm() {
           </Form>
           <Separator className="my-6"/>
           <h3 className="text-md font-medium mb-3 sticky top-0 bg-card py-1 z-10">Quick Add Common Ingredients:</h3>
-          <ScrollArea className="max-h-80 pr-3"> {/* Adjusted max-h, added pr-3 for scrollbar */}
+          <ScrollArea className="h-80 pr-3"> {/* Changed max-h-80 to h-80 for fixed height */}
             <Accordion type="multiple" className="w-full">
               {ingredientCategories.map((category, index) => (
                 <AccordionItem value={`category-${index}`} key={category.name}>
                   <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline [&[data-state=open]>svg]:text-primary">
-                    <div className="flex items-center">{category.icon} {category.name}</div>
+                    <div className="flex items-center">{React.cloneElement(category.icon, { className: cn(category.icon.props.className, "mr-2 h-4 w-4") })} {category.name}</div>
                   </AccordionTrigger>
                   <AccordionContent>
                     <div className="flex flex-wrap gap-1.5 pt-1 pb-3">
@@ -361,7 +362,7 @@ export function RecipeForm() {
                           variant="outline" 
                           size="sm" 
                           onClick={() => addIngredientToForm(item)} 
-                          className="text-xs px-2 py-1 h-auto rounded-full hover:bg-primary/10 hover:border-primary"
+                          className="text-xs px-2 py-1 h-auto rounded-full hover:bg-primary/10 hover:border-primary transition-transform duration-150 ease-in-out hover:scale-105 active:scale-95"
                         >
                           {item}
                         </Button>
@@ -474,3 +475,5 @@ export function RecipeForm() {
     </div>
   );
 }
+
+    
