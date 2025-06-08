@@ -172,8 +172,8 @@ export function AnalyzerForm() {
 
     const root = createRoot(tempDiv);
     root.render(
-      <PrintableHealthReport 
-        report={report} 
+      <PrintableHealthReport
+        report={report}
         chatHistory={chatHistory}
         productNameContext={manualForm.getValues("productName")}
       />
@@ -201,7 +201,7 @@ export function AnalyzerForm() {
 
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      
+
       const canvasWidthMM = (canvas.width / 2) * 0.264583; // Convert px (at scale 2) to mm
       const canvasHeightMM = (canvas.height / 2) * 0.264583;
 
@@ -217,18 +217,17 @@ export function AnalyzerForm() {
 
       let position = 0;
       pdf.addImage(imgData, 'PNG', 0, position, imgActualWidth, imgActualHeight);
-      let- (imgActualHeight); // Using 'let-' seems like a typo, should be calculation
 
       let heightLeft = canvasHeightMM - imgActualHeight;
 
 
       while (heightLeft > 0) {
-        position -= pdfHeight; 
+        position -= pdfHeight;
         pdf.addPage();
         pdf.addImage(imgData, 'PNG', 0, position, imgActualWidth, canvasHeightMM); // Use full canvas height for subsequent pages source
         heightLeft -= pdfHeight;
       }
-      
+
       // Add page numbers
       const pageCount = pdf.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
@@ -417,7 +416,7 @@ export function AnalyzerForm() {
                  </Alert>
                )}
             </div>
-            
+
             <Separator />
 
             <div>
@@ -441,7 +440,7 @@ export function AnalyzerForm() {
                 </Alert>
               </div>
             )}
-            
+
             {report.detailedAnalysis.potentialConcerns && (
                <div>
                 <h3 className="font-semibold text-lg mb-1">Potential Concerns:</h3>
