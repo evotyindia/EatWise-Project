@@ -14,7 +14,8 @@ import {z} from 'genkit';
 const GenerateHealthReportInputSchema = z.object({
   ingredients: z
     .string()
-    .describe('The list of ingredients of the food product.'),
+    .optional()
+    .describe('The list of ingredients of the food product. If not provided, extract from photoDataUri if available.'),
   productName: z.string().optional().describe('The name of the food product.'),
   nutritionFacts: z.string().optional().describe('The nutrition facts of the food product.'),
   photoDataUri: z
@@ -52,10 +53,25 @@ const prompt = ai.definePrompt({
 
   Analyze the following food product and generate a health report with a health rating from 1 to 5 stars. Also suggest healthier Indian alternatives.
 
+  {{#if productName}}
   Product Name: {{productName}}
-  Ingredients: {{ingredients}}
+  {{/if}}
+
+  {{#if ingredients}}
+  Ingredients (provided): {{ingredients}}
+  {{else if photoDataUri}}
+  Ingredients: Please extract the ingredients from the provided photo.
+  {{else}}
+  Ingredients: Not provided. Analysis might be limited if no photo is available either.
+  {{/if}}
+
+  {{#if nutritionFacts}}
   Nutrition Facts: {{nutritionFacts}}
-  {{~#if photoDataUri}}Photo: {{media url=photoDataUri}}{{/if}}
+  {{/if}}
+
+  {{~#if photoDataUri}}
+  Photo: {{media url=photoDataUri}}
+  {{/if}}
 
   Respond gently if you are unsure about the product. For example, respond with 'Sorry, I’m not sure about this product. Please upload a clearer label or check another item.'.
 `,
