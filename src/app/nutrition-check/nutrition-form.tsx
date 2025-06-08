@@ -51,7 +51,22 @@ const nutritionInputSchema = z.object({
   vitaminC: z.preprocess(numberPreprocess, z.number({ invalid_type_error: "Must be a number" }).nonnegative("Cannot be negative").optional()),
   servingSize: z.string().optional(),
   foodItemDescription: z.string().optional().describe("Optional: name or description of the food item, e.g., 'Homemade Dal Makhani' or 'Store-bought cookies'.")
-}).refine(data => Object.keys(data).some(key => key !== 'foodItemDescription' && key !== 'servingSize' && data[key as keyof Omit<typeof data, 'foodItemDescription'|'servingSize'>] !== undefined && data[key as keyof Omit<typeof data, 'foodItemDescription'|'servingSize'>] !== null && String(data[key as keyof Omit<typeof data, 'foodItemDescription'|'servingSize'>]).trim() !== "" ), { 
+}).refine(data => {
+  // This refinement only applies if no image is being submitted (i.e., imageFile is null)
+  // OR if all manual fields are empty while an image is present (which is fine, image takes precedence)
+  // The core idea: if no image, then at least one field must be filled.
+  const imageIsPresent = !!document.getElementById('nutrition-image-upload') && (document.getElementById('nutrition-image-upload') as HTMLInputElement).files?.length > 0;
+  if (imageIsPresent) return true; // If image is uploaded, validation passes regardless of manual fields
+
+  // If no image, check if at least one nutritional value is provided
+  return Object.keys(data).some(key => 
+    key !== 'foodItemDescription' && 
+    key !== 'servingSize' && 
+    data[key as keyof Omit<typeof data, 'foodItemDescription'|'servingSize'>] !== undefined && 
+    data[key as keyof Omit<typeof data, 'foodItemDescription'|'servingSize'>] !== null && 
+    String(data[key as keyof Omit<typeof data, 'foodItemDescription'|'servingSize'>]).trim() !== ""
+  );
+}, { 
   message: "At least one nutritional value (calories, fat, etc.) must be provided for manual entry if no image is uploaded.",
   path: ["calories"], 
 });
@@ -96,7 +111,7 @@ export function NutritionForm() {
       setAnalysisResult(null);
       setCurrentInputData(null); 
       setChatHistory([]);
-      // Do not clear form.getValues("servingSize") as it's used by image submit
+      form.clearErrors("calories"); // Clear potential manual entry error
     }
   };
 
@@ -123,6 +138,7 @@ export function NutritionForm() {
   };
 
   const onManualSubmit: SubmitHandler<NutritionInputFormValues> = async (data) => {
+    // Explicitly ensure no image is used for this path
     setImageFile(null); 
     setUploadedImage(null);
     const analysisInput: AnalyzeNutritionInput = { ...data };
@@ -134,10 +150,21 @@ export function NutritionForm() {
       toast({ title: "No Image", description: "Please upload an image first.", variant: "destructive" });
       return;
     }
+    // Clear any validation errors that might have been triggered by the manual form part
+    form.clearErrors();
+    
     const nutritionDataUri = await fileToDataUri(imageFile);
-    const analysisInput: AnalyzeNutritionInput = { nutritionDataUri, servingSize: form.getValues("servingSize"), foodItemDescription: form.getValues("foodItemDescription") };
+    const analysisInput: AnalyzeNutritionInput = { 
+        nutritionDataUri, 
+        servingSize: form.getValues("servingSize"), 
+        foodItemDescription: form.getValues("foodItemDescription") 
+    };
     // For PDF, we indicate image was used, but pass text fields if user filled them for context
-    const inputForPdf: AnalyzeNutritionInput = { servingSize: form.getValues("servingSize"), foodItemDescription: form.getValues("foodItemDescription"), nutritionDataUri: "Image Uploaded" }; 
+    const inputForPdf: AnalyzeNutritionInput = { 
+        servingSize: form.getValues("servingSize"), 
+        foodItemDescription: form.getValues("foodItemDescription"), 
+        nutritionDataUri: "Image Uploaded" // Special marker for PDF
+    }; 
     await generateAnalysisSharedLogic(analysisInput, inputForPdf);
   };
 
@@ -200,14 +227,17 @@ export function NutritionForm() {
     setIsPdfDownloading(true);
 
     const tempDiv = document.createElement('div');
-    tempDiv.id = 'pdf-render-source-nutrition';
+    tempDiv.id = 'pdf-render-source-nutrition-form'; // Unique ID
     tempDiv.style.position = 'absolute'; tempDiv.style.left = '-9999px'; tempDiv.style.top = '0px';
     tempDiv.style.width = '210mm'; tempDiv.style.backgroundColor = 'white'; tempDiv.style.padding = '0'; tempDiv.style.margin = '0';
     document.body.appendChild(tempDiv);
 
     const root = createRoot(tempDiv);
-    // Pass either currentInputData (if image was used) or form.getValues() (if manual)
-    const pdfInputData = currentInputData?.nutritionDataUri === "Image Uploaded" ? currentInputData : { ...form.getValues() };
+    
+    const pdfInputData = currentInputData?.nutritionDataUri === "Image Uploaded" 
+        ? currentInputData 
+        : { ...form.getValues(), nutritionDataUri: imageFile ? "Image Uploaded" : undefined };
+
     root.render( <PrintableNutritionReport analysisResult={analysisResult} userInput={pdfInputData} /> );
     
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -288,11 +318,11 @@ export function NutritionForm() {
                 {uploadedImage && (
                   <div className="mt-4 relative border rounded-md p-2">
                     <Image src={uploadedImage} alt="Uploaded nutrition table" width={300} height={200} className="rounded-md object-contain mx-auto" data-ai-hint="nutrition facts" />
-                    <Button onClick={() => { setUploadedImage(null); setImageFile(null); }} variant="ghost" size="sm" className="absolute top-1 right-1 text-xs">Clear</Button>
+                    <Button onClick={() => { setUploadedImage(null); setImageFile(null); form.clearErrors("calories"); }} variant="ghost" size="sm" className="absolute top-1 right-1 text-xs">Clear</Button>
                   </div>
                 )}
-                <Button onClick={onImageSubmit} disabled={isLoading || !imageFile} className="mt-4 w-full">
-                  {isLoading && !form.formState.isSubmitting ? "Analyzing Image..." : "Analyze Image Data"} <Sparkles className="ml-2 h-4 w-4" />
+                <Button type="button" onClick={onImageSubmit} disabled={isLoading || !imageFile} className="mt-4 w-full">
+                  {isLoading && !form.formState.isSubmitting && imageFile ? "Analyzing Image..." : "Analyze Image Data"} <Sparkles className="ml-2 h-4 w-4" />
                 </Button>
               </div>
 
@@ -316,7 +346,8 @@ export function NutritionForm() {
                 <FormField control={form.control} name="potassium" render={({ field }) => (<FormItem><HookFormLabel>Potassium (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 300" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="vitaminC" render={({ field }) => (<FormItem><HookFormLabel>Vitamin C (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 60" {...field} /></FormControl><FormMessage /></FormItem>)} />
               </div>
-              {form.formState.errors.calories && <FormMessage>{form.formState.errors.calories.message}</FormMessage>}
+              {/* Display general form error if it's for the 'calories' path (where refine error is attached) and no image is present */}
+              {form.formState.errors.calories && !imageFile && <FormMessage>{form.formState.errors.calories.message}</FormMessage>}
               <Button type="submit" disabled={isLoading || form.formState.isSubmitting} className="w-full mt-6">
                 {isLoading && form.formState.isSubmitting ? "Analyzing Manually..." : "Analyze Manual Data"} <Sparkles className="ml-2 h-4 w-4" />
               </Button>
@@ -380,3 +411,5 @@ export function NutritionForm() {
     </div>
   );
 }
+
+    
