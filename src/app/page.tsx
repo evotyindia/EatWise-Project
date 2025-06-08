@@ -60,7 +60,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-primary/10 via-background to-accent/10">
+      <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-primary/20 via-background to-accent/20">
         <div className="container px-4 md:px-6 text-center">
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-primary">
             EatWise India
