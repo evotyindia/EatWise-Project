@@ -55,7 +55,7 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
   return (
     <div style={styles.page}>
       <div style={styles.pageContent}>
-        <div style={styles.companyHeader}>Swasth Bharat Advisor</div>
+        <div style={styles.companyHeader}>EatWise India</div>
         <div style={styles.reportTitle}>AI Health Report</div>
         { (report.productType || productNameContext) && 
           <div style={styles.productName}>Product: {report.productType || productNameContext || "Not Specified"}</div>
@@ -134,7 +134,7 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
         )}
       </div>
       <div style={styles.footer}>
-        Generated on {new Date().toLocaleDateString('en-GB')} by Swasth Bharat Advisor. This report is AI-generated and for informational purposes only.
+        Generated on {new Date().toLocaleDateString('en-GB')} by EatWise India. This report is AI-generated and for informational purposes only.
       </div>
     </div>
   );
