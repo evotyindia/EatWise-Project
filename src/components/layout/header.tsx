@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { locales } from '@/i18n';
+import { locales } from '@/i18n-config';
 
 
 export function Header() {
@@ -49,21 +49,19 @@ export function Header() {
           </span>
         </Link>
         
-        <div className="flex-1" />
+        <nav className="hidden items-center space-x-4 md:flex flex-1 justify-end mr-4">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
 
         <div className="flex items-center space-x-2">
-          <nav className="hidden items-center space-x-4 md:flex mr-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
           <ThemeToggleButton />
 
           <DropdownMenu>
