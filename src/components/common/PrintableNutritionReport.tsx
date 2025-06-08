@@ -29,7 +29,7 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
 
     section: { marginBottom: '7mm', padding: '5mm', border: '1px solid #E2E8F0', borderRadius: '6px', backgroundColor: '#F7FAFC' },
     sectionTitle: { fontSize: '14pt', fontWeight: 'bold', color: '#1A202C', marginTop: '0', marginBottom: '5mm', borderBottom: '2px solid #10b981', paddingBottom: '3mm' },
-    subSectionTitle: { fontSize: '12pt', fontWeight: 'bold', color: '#2D3748', marginTop: '5mm', marginBottom: '3mm' },
+    subSectionTitle: { fontSize: '12pt', fontWeight: 'bold', color: '#2D3748', marginTop: '5mm', marginBottom: '4mm' }, // Increased marginBottom
     
     paragraph: { marginBottom: '4mm', textAlign: 'justify' as 'justify', whiteSpace: 'pre-wrap' as 'pre-wrap', paddingLeft: '2mm', paddingRight: '2mm', color: '#4A5568'},
     
@@ -43,9 +43,9 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
     inputDataGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5mm 7mm' },
     inputDataItem: { fontSize: '9pt', color: '#2D3748', paddingBottom: '1.5mm' },
     
-    listContainer: { paddingLeft: '5mm', margin: '0 0 3mm 0' }, // Container for list-like blocks
+    listContainer: { paddingLeft: '0', margin: '0' }, // Removed default padding
     listItem: { display: 'flex', alignItems: 'flex-start', marginBottom: '2mm', color: '#4A5568' },
-    bullet: { marginRight: '2.5mm', minWidth: '2.5mm', textAlign: 'left', lineHeight: '1.4' }, // Adjusted spacing
+    bullet: { marginRight: '2.5mm', minWidth: '2.5mm', textAlign: 'left', lineHeight: '1.4' },
     listItemText: { flex: 1, textAlign: 'justify' as 'justify' },
   };
 
@@ -60,7 +60,7 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
 
   const renderUserInput = () => {
     if (!userInput || Object.keys(userInput).filter(key => key !== 'nutritionDataUri' && key !== 'foodItemDescription' && userInput[key as keyof AnalyzeNutritionInput] !== undefined && userInput[key as keyof AnalyzeNutritionInput] !== null && String(userInput[key as keyof AnalyzeNutritionInput]).trim() !== "").length === 0) {
-      if (userInput?.nutritionDataUri && userInput.nutritionDataUri !== "Image Uploaded") {
+      if (userInput?.nutritionDataUri && userInput.nutritionDataUri === "Image Uploaded") { // Check for marker
         return (
           <div style={styles.inputDataSection}>
             <div style={styles.inputDataTitle}>Nutritional Data Source:</div>
@@ -104,9 +104,14 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
     );
   };
   
-  const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
+  const renderFormattedAnalysisText = (text?: string): JSX.Element[] | JSX.Element | null => {
     if (!text || text.trim().toLowerCase() === 'n/a' || text.trim() === '') {
-      return <p style={styles.paragraph}>Not specified / Not applicable.</p>;
+      return (
+         <div style={styles.listItem}>
+           <span style={styles.bullet}>•</span>
+           <span style={styles.listItemText}>Not specified / Not applicable.</span>
+         </div>
+      );
     }
     const elements: JSX.Element[] = [];
     text.split('\n').forEach((line, index) => {
@@ -119,8 +124,12 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
           </div>
         );
       } else if (trimmedLine) {
+        // For non-bullet lines, render them as paragraphs but within the list context if needed
         elements.push(
-          <p key={`para-${index}`} style={{...styles.paragraph, marginBottom: '2mm', textAlign: 'justify' as 'justify'}}>{trimmedLine}</p>
+          <div key={`para-${index}`} style={{...styles.listItem, alignItems: 'baseline' }}>
+            <span style={{...styles.bullet, opacity: 0}}>{/* Invisible bullet for alignment */}•</span>
+            <span style={{...styles.listItemText, textAlign: 'justify' as 'justify'}}>{trimmedLine}</span>
+          </div>
         );
       }
     });
@@ -231,3 +240,4 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
   );
 };
 
+    
