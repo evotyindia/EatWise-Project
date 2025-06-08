@@ -6,24 +6,11 @@
  * - getRecipeSuggestions - A function that handles the recipe suggestion process.
  * - GetRecipeSuggestionsInput - The input type for the getRecipeSuggestions function.
  * - GetRecipeSuggestionsOutput - The return type for the getRecipeSuggestions function.
- * - Disease - Enum for disease concerns.
- * - HouseholdComposition - Type for household details.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-
-export const DiseaseEnum = z.enum([
-  "diabetes", "high_blood_pressure", "heart_condition", "gluten_free", "dairy_free", "none"
-]);
-export type Disease = z.infer<typeof DiseaseEnum>;
-
-export const HouseholdCompositionSchema = z.object({
-  adults: z.number().min(0).default(1).describe("Number of adults (18-60 years)"),
-  seniors: z.number().min(0).default(0).describe("Number of seniors (60+ years)"),
-  kids: z.number().min(0).default(0).describe("Number of kids (2-17 years)")
-}).describe("Composition of the household for portion estimation.");
-export type HouseholdComposition = z.infer<typeof HouseholdCompositionSchema>;
+import { DiseaseEnum, HouseholdCompositionSchema, type Disease, type HouseholdComposition } from '@/ai/types/recipe-shared-types'; // Updated import
 
 const GetRecipeSuggestionsInputSchema = z.object({
   ingredients: z.string().min(1, "Please provide some ingredients.").describe('A comma-separated list of ingredients the user has.'),
@@ -99,4 +86,3 @@ const getRecipeSuggestionsFlow = ai.defineFlow(
     return output;
   }
 );
-
