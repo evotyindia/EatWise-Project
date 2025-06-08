@@ -1,8 +1,10 @@
 
 "use client";
 
-import type { GetRecipeSuggestionsInput, GetRecipeSuggestionsOutput, Disease, HouseholdComposition } from "@/ai/flows/recipe-suggestions";
-import { getRecipeSuggestions, DiseaseEnum, HouseholdCompositionSchema } from "@/ai/flows/recipe-suggestions";
+import type { GetRecipeSuggestionsInput, GetRecipeSuggestionsOutput } from "@/ai/flows/recipe-suggestions";
+import { getRecipeSuggestions } from "@/ai/flows/recipe-suggestions";
+import { DiseaseEnum, HouseholdCompositionSchema, type Disease, type HouseholdComposition } from "@/ai/types/recipe-shared-types"; // Updated import
+
 import type { GetDetailedRecipeInput, GetDetailedRecipeOutput } from "@/ai/flows/get-detailed-recipe";
 import { getDetailedRecipe } from "@/ai/flows/get-detailed-recipe";
 import type { ContextAwareAIChatInput, ContextAwareAIChatOutput, ChatMessage } from "@/ai/flows/context-aware-ai-chat";
@@ -186,7 +188,7 @@ export function RecipeForm() {
         recipeContext: {
           dishName: detailedRecipe.recipeTitle,
           recipeIngredients: detailedRecipe.adjustedIngredients.map(i => `${i.quantity} ${i.name} (${i.notes || ''})`).join('; '),
-          recipeInstructions: detailedRecipe.instructions.join('\n'),
+          recipeInstructions: detailedRecipe.instructions.join('\\n'),
           currentRecipeHealthNotes: detailedRecipe.healthNotes
         },
       };
@@ -450,5 +452,3 @@ export function RecipeForm() {
     </div>
   );
 }
-
-    

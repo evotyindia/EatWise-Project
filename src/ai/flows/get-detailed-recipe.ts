@@ -10,7 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { DiseaseEnum, HouseholdCompositionSchema } from './recipe-suggestions'; // Re-use from recipe-suggestions
+import { DiseaseEnum, HouseholdCompositionSchema } from '@/ai/types/recipe-shared-types'; // Updated import
 
 const GetDetailedRecipeInputSchema = z.object({
   dishName: z.string().describe("The name of the dish selected by the user."),
