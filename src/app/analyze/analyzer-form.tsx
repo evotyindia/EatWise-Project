@@ -44,6 +44,8 @@ export function AnalyzerForm() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [report, setReport] = useState<GenerateHealthReportOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const [isProcessingManually, setIsProcessingManually] = useState(false);
   const [isPdfDownloading, setIsPdfDownloading] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
@@ -76,8 +78,10 @@ export function AnalyzerForm() {
     }
   };
 
-  const generateReportSharedLogic = async (input: GenerateHealthReportInput) => {
+  const generateReportSharedLogic = async (input: GenerateHealthReportInput, processingType: 'image' | 'manual') => {
     setIsLoading(true);
+    if (processingType === 'image') setIsProcessingImage(true);
+    if (processingType === 'manual') setIsProcessingManually(true);
     setReport(null);
     setChatHistory([]);
     try {
@@ -96,6 +100,8 @@ export function AnalyzerForm() {
       toast({ title: "Error", description: "Failed to generate report. Please try again.", variant: "destructive" });
     }
     setIsLoading(false);
+    setIsProcessingImage(false);
+    setIsProcessingManually(false);
   };
 
   const onManualSubmit: SubmitHandler<ManualInputFormValues> = async (data) => {
@@ -108,7 +114,7 @@ export function AnalyzerForm() {
       productName: data.productName,
       ingredients: data.ingredients,
       nutritionFacts: data.nutritionFacts,
-    });
+    }, 'manual');
   };
 
   const onImageSubmit = async () => {
@@ -118,7 +124,7 @@ export function AnalyzerForm() {
     }
     manualForm.reset(); 
     const photoDataUri = await fileToDataUri(imageFile);
-    await generateReportSharedLogic({ photoDataUri });
+    await generateReportSharedLogic({ photoDataUri }, 'image');
   };
   
   const initiateChatWithWelcome = async (contextType: "labelAnalysis" | "recipe" | "nutritionAnalysis" | "general", contextData: any) => {
@@ -241,7 +247,7 @@ export function AnalyzerForm() {
     }
   };
 
-  const renderFormattedText = (text?: string): JSX.Element | null => {
+ const renderFormattedText = (text?: string): JSX.Element | null => {
     if (!text || text.trim() === "" || text.trim().toLowerCase() === "n/a") return null;
 
     const lines = text.split('\n').map(line => line.trim()).filter(line => line !== "");
@@ -250,23 +256,26 @@ export function AnalyzerForm() {
     const hasBullets = lines.some(line => line.startsWith('* ') || line.startsWith('- '));
 
     if (hasBullets) {
-      return (
-        <ul className="list-disc list-inside space-y-1 text-sm leading-relaxed">
-          {lines.map((line, index) => (
-            <li key={index}>{line.replace(/^(\*|-)\s*/, '')}</li>
-          ))}
-        </ul>
-      );
+        return (
+            <ul className="list-none space-y-1 text-sm leading-relaxed">
+                {lines.map((line, index) => (
+                    <li key={index} className="flex items-start">
+                        <span className="mr-2 mt-1 text-primary">&#8226;</span>
+                        <span>{line.replace(/^(\*|-)\s*/, '')}</span>
+                    </li>
+                ))}
+            </ul>
+        );
     } else {
-      return (
-        <div className="text-sm leading-relaxed space-y-1">
-          {lines.map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
-          ))}
-        </div>
-      );
+        return (
+            <div className="text-sm leading-relaxed space-y-1">
+                {lines.map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                ))}
+            </div>
+        );
     }
-  };
+};
 
 
   return (
@@ -287,7 +296,8 @@ export function AnalyzerForm() {
               </div>
             )}
             <Button type="button" onClick={onImageSubmit} disabled={isLoading || !imageFile} className="mt-4 w-full">
-              {isLoading && !manualForm.formState.isSubmitting && imageFile ? "Analyzing Image..." : "Analyze Image"} <Sparkles className="ml-2 h-4 w-4" />
+              {isProcessingImage ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+              Analyze Image
             </Button>
           </div>
 
@@ -306,8 +316,9 @@ export function AnalyzerForm() {
               <FormField control={manualForm.control} name="nutritionFacts" render={({ field }) => (
                 <FormItem><HookFormLabel>Nutrition Facts (Optional)</HookFormLabel><FormControl><Textarea placeholder="e.g., Energy: 450kcal, Protein: 8g..." {...field} rows={3}/></FormControl><FormMessage /></FormItem>
               )} />
-              <Button type="submit" disabled={isLoading || manualForm.formState.isSubmitting} className="w-full">
-                {isLoading && manualForm.formState.isSubmitting ? "Analyzing Manually..." : "Analyze Manually"} <Sparkles className="ml-2 h-4 w-4" />
+              <Button type="submit" disabled={isLoading} className="w-full">
+                 {isProcessingManually ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                Analyze Manually
               </Button>
             </form>
           </Form>
@@ -316,7 +327,11 @@ export function AnalyzerForm() {
       
       {isLoading && !report && (
         <Card className="lg:col-span-1 flex items-center justify-center h-full min-h-[300px]">
-            <div className="text-center"><Sparkles className="mx-auto h-12 w-12 text-primary animate-spin mb-4" /><p className="text-lg font-semibold">Generating AI Report...</p><p className="text-sm text-muted-foreground">Please wait a moment.</p></div>
+            <div className="text-center">
+                <Sparkles className="mx-auto h-12 w-12 text-primary animate-spin mb-4" />
+                <p className="text-lg font-semibold">Generating AI Report...</p>
+                <p className="text-sm text-muted-foreground mt-1">Our AI is carefully analyzing the data. This may take a few moments, especially for images.</p>
+            </div>
         </Card>
       )}
 
@@ -376,15 +391,53 @@ export function AnalyzerForm() {
                )}
             </div>
             <Separator />
-            <div><h3 className="font-semibold text-lg mb-1">Summary:</h3><Alert variant="default" className="bg-background"><Info className="h-4 w-4 text-primary" /><AlertTitle>Report Summary</AlertTitle><AlertDescription>{renderFormattedText(report.detailedAnalysis.summary)}</AlertDescription></Alert></div>
+            <div>
+                <Alert variant="default" className="bg-background">
+                    <Info className="h-4 w-4 text-primary" />
+                     <AlertTitle className="font-semibold text-lg mb-1">Summary:</AlertTitle>
+                    <AlertDescription>{renderFormattedText(report.detailedAnalysis.summary)}</AlertDescription>
+                </Alert>
+            </div>
             
-            {renderFormattedText(report.detailedAnalysis.positiveAspects) && (<div><h3 className="font-semibold text-lg mb-1">Positive Aspects:</h3><Alert variant="default" className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700"><Info className="h-4 w-4 text-green-600 dark:text-green-400" /><AlertTitle>Positives</AlertTitle><AlertDescription className="text-green-700 dark:text-green-300">{renderFormattedText(report.detailedAnalysis.positiveAspects)}</AlertDescription></Alert></div>)}
+            {renderFormattedText(report.detailedAnalysis.positiveAspects) && (
+                <div>
+                    <Alert variant="default" className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700">
+                        <Info className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        <AlertTitle className="font-semibold text-lg mb-1 text-green-700 dark:text-green-300">Positive Aspects:</AlertTitle>
+                        <AlertDescription className="text-green-700 dark:text-green-300">{renderFormattedText(report.detailedAnalysis.positiveAspects)}</AlertDescription>
+                    </Alert>
+                </div>
+            )}
             
-            {renderFormattedText(report.detailedAnalysis.potentialConcerns) && (<div><h3 className="font-semibold text-lg mb-1">Potential Concerns:</h3><Alert variant="destructive" className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"><Info className="h-4 w-4 text-red-500 dark:text-red-400" /><AlertTitle>Concerns</AlertTitle><AlertDescription className="text-red-700 dark:text-red-300">{renderFormattedText(report.detailedAnalysis.potentialConcerns)}</AlertDescription></Alert></div>)}
+            {renderFormattedText(report.detailedAnalysis.potentialConcerns) && (
+                <div>
+                    <Alert variant="destructive" className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700">
+                        <Info className="h-4 w-4 text-red-600 dark:text-red-400" />
+                        <AlertTitle className="font-semibold text-lg mb-1 text-red-700 dark:text-red-300">Potential Concerns:</AlertTitle>
+                        <AlertDescription className="text-red-700 dark:text-red-300">{renderFormattedText(report.detailedAnalysis.potentialConcerns)}</AlertDescription>
+                    </Alert>
+                </div>
+            )}
             
-            {renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown) && (<div><h3 className="font-semibold text-lg mb-1">Key Nutrients Breakdown:</h3><Alert variant="default" className="bg-background"><Info className="h-4 w-4 text-primary" /><AlertTitle>Nutrients</AlertTitle><AlertDescription>{renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown)}</AlertDescription></Alert></div>)}
+            {renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown) && (
+                <div>
+                    <Alert variant="default" className="bg-background">
+                        <Info className="h-4 w-4 text-primary" />
+                        <AlertTitle className="font-semibold text-lg mb-1">Key Nutrients Breakdown:</AlertTitle>
+                        <AlertDescription>{renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown)}</AlertDescription>
+                    </Alert>
+                </div>
+            )}
 
-            {renderFormattedText(report.alternatives) && (<div><h3 className="font-semibold text-lg mb-1">Healthier Indian Alternatives:</h3><Alert variant="default" className="bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-700"><Info className="h-4 w-4 text-sky-600 dark:text-sky-400" /><AlertTitle>Alternatives</AlertTitle><AlertDescription className="text-sky-700 dark:text-sky-300">{renderFormattedText(report.alternatives)}</AlertDescription></Alert></div>)}
+            {renderFormattedText(report.alternatives) && (
+                <div>
+                    <Alert variant="default" className="bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-700">
+                        <Info className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                        <AlertTitle className="font-semibold text-lg mb-1 text-sky-700 dark:text-sky-300">Healthier Indian Alternatives:</AlertTitle>
+                        <AlertDescription className="text-sky-700 dark:text-sky-300">{renderFormattedText(report.alternatives)}</AlertDescription>
+                    </Alert>
+                </div>
+            )}
           </CardContent>
           <CardFooter className="flex flex-col items-start pt-4 border-t">
             <Separator className="my-4"/>
