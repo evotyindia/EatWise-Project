@@ -1,12 +1,12 @@
 
 import type React from 'react';
 import type { GenerateHealthReportOutput } from '@/ai/flows/generate-health-report';
-import type { ChatMessage } from '@/app/analyze/analyzer-form'; // Assuming ChatMessage is defined here
+import type { ChatMessage } from '@/app/analyze/analyzer-form';
 
 interface PrintableHealthReportProps {
   report: GenerateHealthReportOutput;
   chatHistory?: ChatMessage[];
-  productNameContext?: string; // From manual form input if image not scanned
+  productNameContext?: string;
 }
 
 export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ report, chatHistory, productNameContext }) => {
@@ -39,9 +39,11 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
     ratingValue: { fontSize: '10pt', color: '#1A202C', display: 'flex', alignItems: 'center' },
     star: { color: '#FBBF24', marginRight: '1px', fontSize: '12pt' },
     
-    list: { listStyleType: 'disc', paddingLeft: '5mm', margin: '0 0 3mm 0' },
-    listItem: { marginBottom: '2mm', paddingLeft: '1.5mm', color: '#4A5568' },
-    concernsListItem: { marginBottom: '2mm', paddingLeft: '1.5mm', color: '#c0392b' },
+    listContainer: { paddingLeft: '5mm', margin: '0 0 3mm 0' },
+    listItem: { display: 'flex', alignItems: 'flex-start', marginBottom: '2mm', color: '#4A5568' },
+    concernsListItem: { display: 'flex', alignItems: 'flex-start', marginBottom: '2mm', color: '#c0392b' },
+    bullet: { marginRight: '2.5mm', minWidth: '2.5mm', textAlign: 'left', lineHeight: '1.4' },
+    listItemText: { flex: 1, textAlign: 'justify' as 'justify'},
     
     chatContainer: { marginTop: '7mm', borderTop: '1px solid #E2E8F0', paddingTop: '5mm' },
     chatMessage: { marginBottom: '3mm', padding: '3mm', borderRadius: '4px', border: '1px solid #F0F0F0', backgroundColor: '#FFFFFF' },
@@ -58,15 +60,6 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
     return <>{stars} ({rating}/{maxRating})</>;
   };
   
-  const renderListItems = (text?: string, isConcern?: boolean): JSX.Element[] | JSX.Element => {
-    if (!text || text.trim().toLowerCase() === 'n/a' || text.trim() === '') {
-      return <li style={styles.listItem}>Not specified / Not applicable.</li>;
-    }
-    return text.split(/\s*[-\*]\s*/g).filter(s => s.trim()).map((item, index) => (
-      <li key={index} style={isConcern ? styles.concernsListItem : styles.listItem}>{item.trim()}</li>
-    ));
-  };
-  
   const getRatingDisplay = (ratingInfo?: { rating: number; justification?: string | null }) => {
     if (!ratingInfo || ratingInfo.rating === undefined) return <div style={styles.ratingValue}>N/A</div>;
     let text = renderStars(ratingInfo.rating);
@@ -75,6 +68,25 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
     }
     return <div style={styles.ratingValue}>{text}</div>;
   };
+
+  const renderListItems = (text?: string, isConcern?: boolean): JSX.Element[] | JSX.Element => {
+    if (!text || text.trim().toLowerCase() === 'n/a' || text.trim() === '') {
+      return (
+        <div style={isConcern ? styles.concernsListItem : styles.listItem}>
+          <span style={styles.bullet}>•</span>
+          <span style={styles.listItemText}>Not specified / Not applicable.</span>
+        </div>
+      );
+    }
+    const items = text.split(/\s*[-\*]\s*/g).filter(s => s.trim());
+    return items.map((item, index) => (
+      <div key={index} style={isConcern ? styles.concernsListItem : styles.listItem}>
+        <span style={styles.bullet}>•</span>
+        <span style={styles.listItemText}>{item.trim()}</span>
+      </div>
+    ));
+  };
+
 
   return (
     <div style={styles.pdfContainer}>
@@ -103,8 +115,8 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
           <div style={styles.aboutSection}>
             <div style={styles.aboutSectionTitle}>How to Use This Report</div>
             <p style={styles.aboutText}>
-              This report offers an AI-generated analysis of the food product based on the information you provided. 
-              It aims to highlight key nutritional aspects, potential concerns, and suggest healthier alternatives. 
+              This report offers an AI-generated analysis of the food product based on the information you provided (either via image scan or manual text input). 
+              It aims to highlight key nutritional aspects, potential concerns, and suggest healthier Indian alternatives. 
               Use it as a guide to understand your food better and make conscious decisions about what you consume.
             </p>
           </div>
@@ -114,7 +126,8 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
           <p style={styles.disclaimerText}>
             <strong>Disclaimer:</strong> This report is for informational purposes only and is not a substitute for professional medical or nutritional advice. 
             Always consult with a qualified healthcare provider or registered dietitian for any health concerns or before making significant dietary changes. 
-            The AI's analysis is based on the data provided and general nutritional knowledge; it does not consider individual health conditions beyond what might be inferred from general product information.
+            The AI's analysis is based on the data provided and general nutritional knowledge; it does not consider individual health conditions beyond what might be inferred from general product information. 
+            EatWise India is not liable for any decisions made based on this report.
           </p>
           <div style={styles.aboutPageFooter}>EatWise India - Your Partner in Healthy Eating. Generated on: {new Date().toLocaleDateString('en-GB')}</div>
         </div>
@@ -147,30 +160,30 @@ export const PrintableHealthReport: React.FC<PrintableHealthReportProps> = ({ re
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Detailed Analysis</div>
           <div style={styles.subSectionTitle}>Summary:</div>
-          <ul style={styles.list}>{renderListItems(report.detailedAnalysis.summary)}</ul>
+          <div style={styles.listContainer}>{renderListItems(report.detailedAnalysis.summary)}</div>
 
           {(report.detailedAnalysis.positiveAspects && report.detailedAnalysis.positiveAspects.toLowerCase() !== 'n/a' && report.detailedAnalysis.positiveAspects.trim() !== '') && (
-            <><div style={styles.subSectionTitle}>Positive Aspects:</div><ul style={styles.list}>{renderListItems(report.detailedAnalysis.positiveAspects)}</ul></>
+            <><div style={styles.subSectionTitle}>Positive Aspects:</div><div style={styles.listContainer}>{renderListItems(report.detailedAnalysis.positiveAspects)}</div></>
           )}
           {(report.detailedAnalysis.potentialConcerns && report.detailedAnalysis.potentialConcerns.toLowerCase() !== 'n/a' && report.detailedAnalysis.potentialConcerns.trim() !== '') && (
-            <><div style={{...styles.subSectionTitle, color: '#c0392b'}}>Potential Concerns:</div><ul style={styles.list}>{renderListItems(report.detailedAnalysis.potentialConcerns, true)}</ul></>
+            <><div style={{...styles.subSectionTitle, color: '#c0392b'}}>Potential Concerns:</div><div style={styles.listContainer}>{renderListItems(report.detailedAnalysis.potentialConcerns, true)}</div></>
           )}
           {(report.detailedAnalysis.keyNutrientsBreakdown && report.detailedAnalysis.keyNutrientsBreakdown.toLowerCase() !== 'n/a' && report.detailedAnalysis.keyNutrientsBreakdown.trim() !== '') && (
-            <><div style={styles.subSectionTitle}>Key Nutrients Breakdown:</div><ul style={styles.list}>{renderListItems(report.detailedAnalysis.keyNutrientsBreakdown)}</ul></>
+            <><div style={styles.subSectionTitle}>Key Nutrients Breakdown:</div><div style={styles.listContainer}>{renderListItems(report.detailedAnalysis.keyNutrientsBreakdown)}</div></>
           )}
         </div>
         
         {(report.alternatives && report.alternatives.toLowerCase() !== 'n/a' && report.alternatives.trim() !== '') && (
           <div style={styles.section}>
             <div style={styles.sectionTitle}>Healthier Indian Alternatives</div>
-            <ul style={styles.list}>{renderListItems(report.alternatives)}</ul>
+            <div style={styles.listContainer}>{renderListItems(report.alternatives)}</div>
           </div>
         )}
 
         {chatHistory && chatHistory.length > 0 && (
           <div style={{...styles.section, ...styles.chatContainer}} className="pdf-page-break-before">
             <div style={styles.sectionTitle}>Chat History Digest</div>
-            {chatHistory.slice(-5).map((msg, index) => ( // Show last 5 messages
+            {chatHistory.slice(-5).map((msg, index) => ( 
               <div key={index} style={styles.chatMessage}>
                 <span style={styles.chatUser}>{msg.role === 'user' ? 'Your Question:' : 'AI Advisor Response:'}</span>
                 <span style={msg.role === 'user' ? {color: '#555555'} : styles.chatAssistant }>{msg.content}</span>
