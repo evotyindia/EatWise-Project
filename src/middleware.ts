@@ -1,9 +1,9 @@
+
 import type { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest): NextResponse | void {
   // This is a basic middleware structure.
-  // If you had other middleware logic, it would go here.
-  // For now, it does nothing specific to i18n.
+  // It no longer needs next-intl logic.
   return;
 }
 

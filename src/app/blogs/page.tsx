@@ -1,13 +1,10 @@
+
 import { BlogList } from "./blog-list";
 import { BookOpen } from "lucide-react";
 import { blogPosts, getBlogCategories } from "@/lib/blog-data";
 import {NextPage} from 'next';
 
-// interface BlogPageProps { // locale param removed
-//   params: { locale: string };
-// }
-
-const BlogPage: NextPage = (/*{ params: { locale } }*/) => { // locale param removed
+const BlogPage: NextPage = () => {
   const categories = getBlogCategories();
 
   return (

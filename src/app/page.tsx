@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Link } from '@/navigation'; 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { CheckCircle, ScanLine, MessageCircle, CookingPot, BarChart3 as ChartColumn, Users, Target, Lightbulb, User } from "lucide-react"; // Added User
+import { CheckCircle, ScanLine, MessageCircle, CookingPot, BarChart3 as ChartColumn, Users, Target, Lightbulb, User } from "lucide-react";
 
 export default function Home() {
   const features = [
@@ -277,4 +277,3 @@ export default function Home() {
     </div>
   );
 }
-    
