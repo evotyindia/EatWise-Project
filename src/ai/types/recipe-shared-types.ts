@@ -1,5 +1,4 @@
 
-'use server'; // This directive should NOT be here for a types/schemas file.
 // Correction: This file should NOT have 'use server'. Schemas are values.
 
 import { z } from 'zod';
