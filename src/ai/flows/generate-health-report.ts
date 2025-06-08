@@ -74,9 +74,9 @@ const prompt = ai.definePrompt({
   {{#if ingredients}}
   Ingredients (provided): {{ingredients}}
   {{else if photoDataUri}}
-  Ingredients: Please extract the ingredients from the provided photo. If the photo is unclear for ingredient extraction, state that in your analysis.
+  Ingredients: Please extract the ingredients from the provided photo. If the photo is unclear for ingredient extraction, state that in your analysis by populating the 'summary' field appropriately.
   {{else}}
-  Ingredients: Not provided. Analysis might be limited if no photo is available either.
+  Ingredients: Not provided. Analysis might be limited if no photo is available either. Populate the 'summary' field to reflect this.
   {{/if}}
 
   {{#if nutritionFacts}}
@@ -87,22 +87,32 @@ const prompt = ai.definePrompt({
   Photo: {{media url=photoDataUri}}
   {{/if}}
 
-  Generate a detailed health report. Ensure all output fields are addressed:
+  Generate a detailed health report. Ensure all output fields are addressed and strictly adhere to the JSON schema.
+
+  If you are unsure about the product due to lack of clear information (e.g., blurry photo, missing ingredients, or inability to extract from photo):
+  - Set 'healthRating' to 1.
+  - Set 'detailedAnalysis.summary' to 'Sorry, I am not sure about this product. The provided information (e.g., photo, ingredients list) may be unclear or insufficient for a complete analysis. Please try uploading a clearer label or provide more details.'.
+  - Set 'detailedAnalysis.positiveAspects', 'detailedAnalysis.potentialConcerns', and 'detailedAnalysis.keyNutrientsBreakdown' to 'N/A due to unclear input.'.
+  - Set 'alternatives' to 'N/A due to unclear input.'.
+  - For 'processingLevelRating', 'sugarContentRating', and 'nutrientDensityRating': set their 'rating' to 1 and 'justification' to 'Analysis not possible due to unclear input.'. If the entire rating object is optional and cannot be formed, omit it if the schema allows, otherwise provide default values as specified.
+  - Set 'productType' to 'Unknown due to unclear input.'.
+  Ensure the output strictly adheres to the defined JSON schema even in this case. Do not output any text outside of the JSON structure.
+
+  For successful analysis:
   1.  **Product Type**: Identify the type of product (e.g., Snack, Beverage, Breakfast Cereal).
   2.  **Overall Health Rating**: Assign an overall health rating (number) from 1 (least healthy) to 5 (most healthy) stars.
-  3.  **Detailed Analysis** (use bullet points for each sub-section of detailedAnalysis):
+  3.  **Detailed Analysis** (use bullet points starting with '*' or '-' for each sub-section of detailedAnalysis):
       *   **Summary**: Provide a concise overall summary of the product's healthiness.
-      *   **Positive Aspects**: List any key positive aspects (e.g., "Good source of whole grains", "Low in saturated fat"). If none, state that.
-      *   **Potential Concerns**: List potential health concerns or ingredients to watch out for (e.g., "High sodium content", "Contains palm oil", "Added sugars are high"). If none, state that.
-      *   **Key Nutrients Breakdown**: Briefly comment on key nutrients if identifiable and noteworthy (e.g., "Provides Xg of protein per serving", "Mainly refined carbohydrates").
-  4.  **Healthier Indian Alternatives** (use bullet points): Suggest 2-3 healthier Indian alternatives, explaining briefly why they are better choices.
-  5.  **Additional Ratings**: For each of the following, provide an object with a 'rating' (number 1-5) and a 'justification' (string):
+      *   **Positive Aspects**: List any key positive aspects (e.g., "Good source of whole grains", "Low in saturated fat"). If none, state that or return "N/A".
+      *   **Potential Concerns**: List potential health concerns or ingredients to watch out for (e.g., "High sodium content", "Contains palm oil", "Added sugars are high"). If none, state that or return "N/A".
+      *   **Key Nutrients Breakdown**: Briefly comment on key nutrients if identifiable and noteworthy (e.g., "Provides Xg of protein per serving", "Mainly refined carbohydrates"). If none, return "N/A".
+  4.  **Healthier Indian Alternatives** (use bullet points starting with '*' or '-'): Suggest 2-3 healthier Indian alternatives, explaining briefly why they are better choices.
+  5.  **Additional Ratings**: For each of the following, provide an object with a 'rating' (number 1-5) and a 'justification' (string). If a rating cannot be determined, and the field is optional, it can be omitted. Otherwise, provide a default rating of 1 and justification 'Cannot be determined'.
       *   **Processing Level Rating**: (1=unprocessed to 5=ultra-processed). Justification should be short.
       *   **Sugar Content Rating**: (1=low to 5=high). Justification should be short.
       *   **Nutrient Density Rating**: (1=low to 5=high). Justification should be short.
-
-  If you are unsure about the product due to lack of clear information (e.g., blurry photo, missing ingredients), respond gently, for example: 'Sorry, I’m not sure about this product. Please upload a clearer label or check another item.'
-  Present lists (summary, positive aspects, potential concerns, key nutrients breakdown, alternatives) as bullet points using '*' or '-' as prefixes.
+  
+  Present all lists (summary, positive aspects, potential concerns, key nutrients breakdown, alternatives) as bullet points using '*' or '-' as prefixes where specified.
 `,
 });
 
@@ -114,6 +124,28 @@ const generateHealthReportFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      // This case indicates the LLM failed to produce schema-compliant output.
+      // Log this for debugging on the server side.
+      console.error('generateHealthReportFlow: LLM output was null or did not match schema for input:', JSON.stringify(input));
+      // Return a "default" error report that conforms to the schema
+      // This helps prevent the client from crashing if it expects 'report.detailedAnalysis' etc.
+      return {
+        healthRating: 1,
+        detailedAnalysis: {
+          summary: "An error occurred while analyzing the product. The AI could not generate a valid report based on the provided input. Please try again or ensure the input is clear.",
+          positiveAspects: "N/A",
+          potentialConcerns: "N/A",
+          keyNutrientsBreakdown: "N/A",
+        },
+        alternatives: "N/A",
+        productType: "Unknown",
+        processingLevelRating: { rating: 1, justification: "Error in analysis" },
+        sugarContentRating: { rating: 1, justification: "Error in analysis" },
+        nutrientDensityRating: { rating: 1, justification: "Error in analysis" },
+      };
+    }
+    return output; // No longer using output! directly without a check
   }
 );
+
