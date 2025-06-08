@@ -1,4 +1,5 @@
 
+import React from "react"; // Added this line
 import { Mail, Phone, Share2, Facebook, Twitter, Instagram, Linkedin, Youtube } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -120,5 +121,3 @@ const ContactPage: NextPage = () => {
 }
 
 export default ContactPage;
-
-    
