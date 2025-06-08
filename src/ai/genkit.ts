@@ -1,14 +1,10 @@
 
 import {genkit} from 'genkit';
-import {vertexAI} from '@genkit-ai/vertexai'; // Use Vertex AI plugin
+import {googleAI} from '@genkit-ai/googleai'; // Use Google AI plugin
 
 export const ai = genkit({
   plugins: [
-    vertexAI({
-      location: 'us-central1', // Specify a default location for Vertex AI
-      // You can also specify projectId here if needed, though it's often picked up from the environment
-      // projectId: 'your-google-cloud-project-id', 
-    }),
+    googleAI(), // This will look for GOOGLE_API_KEY in your environment
   ],
-  model: 'vertexai/gemini-1.5-pro-latest', // Use Vertex AI model prefix and Pro model
+  model: 'googleai/gemini-1.5-flash-latest', // Default model
 });
