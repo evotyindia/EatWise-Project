@@ -1,15 +1,17 @@
-
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/navigation"; // Will now use standard next/link
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { CheckCircle, ScanLine, MessageCircle, CookingPot, BarChart3, Users, Target, Lightbulb } from "lucide-react";
+import { CheckCircle, ScanLine, MessageCircle, CookingPot, BarChart3 as ChartColumn, Users, Target, Lightbulb } from "lucide-react";
+// import {useTranslations} from 'next-intl'; // Removed
 
 export default function Home() {
+  // const t = useTranslations('HomePage'); // Removed
+
   const features = [
     {
       icon: <ScanLine className="h-10 w-10 text-primary" />,
-      title: "Smart Label Analysis",
+      title: "Smart Label Analysis", 
       description: "Upload or type in food label details. Our AI deciphers ingredients, detects risks, gives a health rating, and suggests healthier Indian alternatives.",
       link: "/analyze",
       dataAiHint: "food label scanning"
@@ -29,7 +31,7 @@ export default function Home() {
       dataAiHint: "indian cuisine recipes"
     },
     {
-      icon: <BarChart3 className="h-10 w-10 text-primary" />,
+      icon: <ChartColumn className="h-10 w-10 text-primary" />,
       title: "Detailed Nutrition Check",
       description: "Upload a nutrition table or manually input values for calories, fats, vitamins, etc. Get a detailed AI analysis of its balance and suitability.",
       link: "/nutrition-check",
@@ -63,21 +65,20 @@ export default function Home() {
       <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-primary/5 via-background to-accent/5">
         <div className="container px-4 md:px-6 text-center">
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-primary">
-            Swasth Bharat Advisor
+            Swasth Bharat Advisor {/* Replaced t('heroTitle') */}
           </h1>
           <p className="mx-auto max-w-[700px] text-foreground/80 md:text-xl mt-4 font-headline">
-            Empowering India to Eat Smarter with AI
+            Empowering India to Eat Smarter with AI {/* Replaced t('heroSubtitle') */}
           </p>
           <p className="mx-auto max-w-[600px] text-muted-foreground md:text-lg mt-2">
-            Understand food labels, analyze ingredients, and get healthy Indian recipe suggestions.
-            Your personal AI-powered nutrition guide for a healthier lifestyle.
+            Understand food labels, analyze ingredients, and get healthy Indian recipe suggestions. Your personal AI-powered nutrition guide for a healthier lifestyle. {/* Replaced t('heroDescription') */}
           </p>
           <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
             <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground transition-transform duration-300 ease-in-out hover:scale-105">
-              <Link href="/analyze">Analyze a Food Label</Link>
+              <Link href="/analyze">Analyze a Food Label</Link> {/* Replaced t('analyzeLabelButton') */}
             </Button>
             <Button asChild variant="outline" size="lg" className="transition-transform duration-300 ease-in-out hover:scale-105 border-primary text-primary hover:bg-primary/5">
-              <Link href="/recipes">Get Recipe Ideas</Link>
+              <Link href="/recipes">Get Recipe Ideas</Link> {/* Replaced t('getRecipeIdeasButton') */}
             </Button>
           </div>
         </div>
@@ -191,7 +192,7 @@ export default function Home() {
                   </blockquote>
                 </CardContent>
                 <CardFooter className="flex items-center gap-4 pt-0 pb-6 px-6">
-                   <Image src={`https://placehold.co/80x80.png`} alt={testimonial.name} width={50} height={50} className="rounded-full" data-ai-hint="person smiling face" />
+                   <Image src={"https://placehold.co/80x80.png"} alt={testimonial.name} width={50} height={50} className="rounded-full" data-ai-hint="person smiling face" />
                   <div>
                     <p className="font-semibold">{testimonial.name}</p>
                     <p className="text-sm text-muted-foreground">{testimonial.location}</p>

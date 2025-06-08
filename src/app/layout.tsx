@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
-import './globals.css'; // Keep global styles
+import './globals.css';
+import { CustomThemeProvider } from '@/contexts/theme-context';
+import { Header } from '@/components/layout/header';
+import { Footer } from '@/components/layout/footer';
+import { Toaster } from "@/components/ui/toaster";
 
-// Metadata can be defined here for aspects that are truly global
 export const metadata: Metadata = {
   title: 'Swasth Bharat Advisor - AI Nutrition Guide for India',
   description: 'Understand food labels, get health ratings, recipe suggestions, and nutrition analysis with AI. For a healthier India.',
@@ -9,27 +12,31 @@ export const metadata: Metadata = {
 
 interface RootLayoutProps {
   children: React.ReactNode;
-  params: { locale: string };
+  // params: { locale: string }; // Removed locale param
 }
 
 export default function RootLayout({
   children,
-  params: { locale }
+  // params: { locale }, // Removed locale param
 }: Readonly<RootLayoutProps>) {
-  // This RootLayout is for the absolute root of the app.
-  // It provides the main HTML document structure.
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning> {/* Hardcoded lang="en" */}
       <head>
-        {/* Global font links can remain here as they are not locale-dependent */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body>
-        {/* Children will typically be the content from src/app/[locale]/layout.tsx for localized routes */}
-        {children}
+      <body className="font-body antialiased min-h-screen bg-background text-foreground flex flex-col">
+        {/* NextIntlClientProvider removed */}
+        <CustomThemeProvider>
+          <Header />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
+          <Toaster />
+        </CustomThemeProvider>
       </body>
     </html>
   );
