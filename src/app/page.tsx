@@ -118,8 +118,8 @@ export default function Home() {
         <div className="container grid items-center gap-8 px-4 md:px-6 lg:grid-cols-2 lg:gap-16">
           <div className="flex justify-center">
             <Image
-              src="https://placehold.co/600x450.png"
-              alt="Diverse group of people enjoying healthy Indian food"
+              src="/img/mission-community-image.jpg" 
+              alt="Our mission: Diverse group of people enjoying healthy Indian food"
               width={600}
               height={450}
               className="rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105"
