@@ -8,11 +8,11 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   const socialLinks = [
-    { name: "Facebook", icon: <Facebook className="h-5 w-5" />, url: "https://facebook.com/eatwiseindia" }, // Placeholder
-    { name: "Twitter", icon: <Twitter className="h-5 w-5" />, url: "https://twitter.com/eatwiseindia" },   // Placeholder
-    { name: "Instagram", icon: <Instagram className="h-5 w-5" />, url: "https://instagram.com/eatwiseindia" }, // Placeholder
-    { name: "LinkedIn", icon: <Linkedin className="h-5 w-5" />, url: "https://linkedin.com/company/eatwiseindia" }, // Placeholder
-    { name: "YouTube", icon: <Youtube className="h-5 w-5" />, url: "https://youtube.com/c/eatwiseindia" }, // Placeholder
+    { name: "Facebook", icon: <Facebook className="h-5 w-5" />, url: "https://facebook.com/eatwiseindia" }, 
+    { name: "Twitter", icon: <Twitter className="h-5 w-5" />, url: "https://twitter.com/eatwiseindia" },   
+    { name: "Instagram", icon: <Instagram className="h-5 w-5" />, url: "https://instagram.com/eatwiseindia" }, 
+    { name: "LinkedIn", icon: <Linkedin className="h-5 w-5" />, url: "https://linkedin.com/company/eatwiseindia" }, 
+    { name: "YouTube", icon: <Youtube className="h-5 w-5" />, url: "https://youtube.com/c/eatwiseindia" }, 
   ];
 
   return (
@@ -31,7 +31,7 @@ export function Footer() {
               <li><Link href="/analyze" className="text-sm text-muted-foreground hover:text-primary transition-colors">Analyze Label</Link></li>
               <li><Link href="/recipes" className="text-sm text-muted-foreground hover:text-primary transition-colors">Recipe Suggestions</Link></li>
               <li><Link href="/nutrition-check" className="text-sm text-muted-foreground hover:text-primary transition-colors">Nutrition Check</Link></li>
-              <li><Link href="/blogs" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link></li>
+              <li><Link href="/blogs" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blogs</Link></li>
               <li><Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Contact Us</Link></li>
             </ul>
           </div>

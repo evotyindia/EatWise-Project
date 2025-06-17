@@ -4,12 +4,11 @@ import { BookOpen } from "lucide-react";
 import { blogPosts, getBlogCategories } from "@/lib/blog-data";
 import type { NextPage, Metadata } from 'next';
 
-// IMPORTANT: Replace this with your actual website's base URL
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.example.com';
 
 export const metadata: Metadata = {
-  title: "Nutrition & Wellness Blog | EatWise India",
-  description: "Explore articles and insights on healthy eating, understanding food labels, and Indian nutrition with the EatWise India blog.",
+  title: "Nutrition & Wellness Blogs | EatWise India",
+  description: "Explore articles and insights on healthy eating, understanding food labels, and Indian nutrition with the EatWise India blogs.",
   alternates: {
     canonical: `${BASE_URL}/blogs`,
   },
@@ -22,7 +21,7 @@ const BlogPage: NextPage = () => {
     <div className="container mx-auto py-8 px-4 md:px-6">
       <div className="flex flex-col items-center mb-12">
         <BookOpen className="w-16 h-16 text-primary mb-4" />
-        <h1 className="text-4xl font-bold tracking-tight text-center">Nutrition & Wellness Blog</h1>
+        <h1 className="text-4xl font-bold tracking-tight text-center">Nutrition & Wellness Blogs</h1>
         <p className="mt-2 text-lg text-muted-foreground text-center max-w-2xl">
           Articles and insights on healthy eating, understanding food labels, and Indian nutrition.
         </p>
