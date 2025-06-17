@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 
 import { ThemeToggleButton } from "@/components/common/theme-toggle-button"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from "@/components/ui/sheet" // Added SheetClose and SheetTitle
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from "@/components/ui/sheet" 
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -15,7 +15,7 @@ const navItems = [
   { href: "/analyze", label: "Analyze Label" },
   { href: "/recipes", label: "Recipes" },
   { href: "/nutrition-check", label: "Nutrition Check" },
-  { href: "/blogs", label: "Blog" },
+  { href: "/blogs", label: "Blogs" },
   { href: "/contact", label: "Contact"},
 ]
 

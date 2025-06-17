@@ -33,28 +33,28 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     };
   }
   return {
-    title: `${post.title} | EatWise India Blog`,
+    title: `${post.title} | EatWise India Blogs`,
     description: post.preview,
     alternates: {
       canonical: `${BASE_URL}/blogs/${post.slug}`,
     },
-    openGraph: { // Specific OG tags for blog posts
+    openGraph: { 
       type: 'article',
       title: post.title,
       description: post.preview,
       url: `${BASE_URL}/blogs/${post.slug}`,
       publishedTime: new Date(post.date).toISOString(),
-      authors: [`${BASE_URL}/#organization`], // Reference to your organization
+      authors: [`${BASE_URL}/#organization`], 
       images: [
         {
           url: `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : '/' + post.featuredImage}`,
-          width: 1200, // Assuming images are this size or optimize for it
+          width: 1200, 
           height: 675,
           alt: post.title,
         }
       ]
     },
-    twitter: { // Specific Twitter card for blog posts
+    twitter: { 
         card: 'summary_large_image',
         title: post.title,
         description: post.preview,
@@ -85,7 +85,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
     author: {
       "@type": "Organization", 
       name: "EatWise India Team",
-      url: BASE_URL, // Link to organization's main page
+      url: BASE_URL, 
     },
     publisher: {
       "@type": "Organization",
@@ -112,14 +112,14 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
       {
         "@type": "ListItem",
         "position": 2,
-        "name": "Blog", // Assuming your blog list page H1 is "Blog" or similar
+        "name": "Blogs", 
         "item": `${BASE_URL}/blogs`
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": post.title
-        // No item for the last element as it's the current page
+        
       }
     ]
   };
@@ -141,7 +141,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           <Button variant="outline" asChild size="sm" className="mb-6 group transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
             <Link href="/blogs">
               <ArrowLeft className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
-              Back to Blog
+              Back to Blogs
             </Link>
           </Button>
           <h1 className="text-4xl font-bold tracking-tight mb-3">{post.title}</h1>
@@ -158,7 +158,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           <div className="overflow-hidden rounded-lg shadow-md mb-8">
             <Image
               src={post.featuredImage}
-              alt={post.title} // Alt text using post title
+              alt={post.title} 
               width={1200}
               height={675}
               className="w-full object-cover aspect-video transition-transform duration-300 hover:scale-105"

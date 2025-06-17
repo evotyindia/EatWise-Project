@@ -22,7 +22,7 @@ const WebAppStructuredData: WebApplication = {
     price: "0",
     priceCurrency: "INR"
   },
-  publisher: { // Re-iterating publisher for this specific entity
+  publisher: { 
     "@type": "Organization",
     name: "EatWise India",
     logo: {
@@ -49,7 +49,7 @@ export default function Home() {
       icon: <MessageCircle className="h-10 w-10 text-primary group-hover:scale-110 transition-transform duration-300" />,
       title: "Contextual AI Chat",
       description: "After analyzing a product, ask specific questions. Get personalized advice from our AI nutrition assistant based on the report.",
-      link: "/analyze", // Should link to a page where chat is contextually available, e.g., after analysis
+      link: "/analyze", 
       dataAiHint: "nutrition chat bot",
       animationDelay: "delay-200"
     },
@@ -244,7 +244,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="mission" className="w-full py-12 md:py-24 lg:py-32 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
+      <section id="mission" className="w-full py-12 md:py-24 lg:py-32 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-1000 ease-out delay-200">
         <div className="container grid items-center gap-8 px-4 md:px-6 lg:grid-cols-2 lg:gap-16">
           <div className="flex justify-center animate-in fade-in slide-in-from-left-20 duration-1000 ease-out delay-200">
             <Image
@@ -280,7 +280,7 @@ export default function Home() {
               ))}
             </ul>
              <Button asChild size="lg" className="mt-8 bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:shadow-md animate-in fade-in slide-in-from-bottom-6 duration-700 delay-600">
-                <Link href="/blogs">Read Our Blog</Link>
+                <Link href="/blogs">Read Our Blogs</Link>
             </Button>
           </div>
         </div>
@@ -346,7 +346,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="call-to-action" className="w-full py-16 md:py-28 lg:py-36 bg-primary text-primary-foreground overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
+      <section id="call-to-action" className="w-full py-16 md:py-28 lg:py-36 bg-primary text-primary-foreground overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-1000 ease-out delay-200">
         <div className="container px-4 md:px-6 text-center">
           <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out">
             Ready to Make Healthier Choices?
