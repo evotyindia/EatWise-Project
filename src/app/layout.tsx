@@ -7,6 +7,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Toaster } from '@/components/ui/toaster';
 import type { WebSite, Organization } from 'schema-dts';
+import { Analytics } from "@vercel/analytics/next"
 
 const BASE_URL = 'https://eatwise.evotyindia.me';
 
@@ -152,6 +153,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
           <Footer />
           <Toaster />
         </CustomThemeProvider>
+        <Analytics/>
       </body>
     </html>
   );
