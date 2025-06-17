@@ -11,7 +11,7 @@ import type { ContextAwareAIChatInput, ContextAwareAIChatOutput, ChatMessage } f
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Leaf, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Milk, Cookie, MinusCircle, PlusCircle } from "lucide-react";
+import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Leaf, WheatIcon as Wheat, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Milk, Cookie, MinusCircle, PlusCircle } from "lucide-react"; // Renamed WheatIcon to Wheat to avoid conflict
 import React, { useState, useEffect, useRef } from "react";
 import { createRoot } from 'react-dom/client';
 import html2canvas from 'html2canvas';
@@ -38,7 +38,7 @@ const diseaseOptions: { id: Disease; label: string; icon: React.ElementType }[] 
   { id: "diabetes", label: "Diabetes", icon: Scale },
   { id: "high_blood_pressure", label: "High BP", icon: HeartCrack },
   { id: "heart_condition", label: "Heart Condition", icon: HeartCrack },
-  { id: "gluten_free", label: "Gluten-Free", icon: WheatIcon },
+  { id: "gluten_free", label: "Gluten-Free", icon: Wheat },
   { id: "dairy_free", label: "Dairy-Free", icon: MinusCircle },
 ];
 
@@ -58,12 +58,12 @@ const recipePageInputSchema = z.object({
 type RecipePageFormValues = z.infer<typeof recipePageInputSchema>;
 
 const ingredientCategories = [
-  { name: "Vegetables", icon: <Leaf className="text-green-500" />, items: ["Onion", "Tomato", "Potato", "Spinach", "Carrot", "Capsicum", "Ginger", "Garlic", "Cauliflower", "Peas", "Beans", "Ladyfinger (Okra)", "Cabbage", "Mushroom", "Broccoli", "Cucumber", "Radish", "Beetroot", "Coriander Leaves", "Mint Leaves", "Green Chili", "Lemon", "Bottle Gourd (Lauki)", "Ridge Gourd (Turai)", "Brinjal (Eggplant)", "Sweet Potato"] },
-  { name: "Spices & Herbs", icon: <Sparkles className="text-yellow-500" />, items: ["Turmeric Powder", "Cumin Powder", "Coriander Powder", "Garam Masala", "Red Chili Powder", "Mustard Seeds", "Asafoetida (Hing)", "Fenugreek Seeds (Methi)", "Cumin Seeds (Jeera)", "Black Pepper", "Cardamom (Elaichi)", "Cloves (Laung)", "Cinnamon (Dalchini)", "Bay Leaf (Tej Patta)", "Salt", "Kasuri Methi (Dry Fenugreek)", "Curry Leaves", "Saffron (Kesar)"] },
-  { name: "Dals & Legumes", icon: <Utensils className="text-orange-500" />, items: ["Moong Dal (Yellow Lentil)", "Toor Dal (Arhar/Pigeon Pea)", "Chana Dal (Split Chickpea)", "Masoor Dal (Red Lentil)", "Rajma (Kidney Beans)", "Chickpeas (Chole/Kabuli Chana)", "Black Eyed Peas (Lobia)", "Urad Dal (Black Gram)", "Green Gram (Sabut Moong)", "Black Chickpeas (Kala Chana)"] },
-  { name: "Grains & Flours", icon: <WheatIcon className="text-amber-700" />, items: ["Rice (Basmati)", "Rice (Sona Masoori/Regular)", "Wheat Flour (Atta)", "Besan (Gram Flour)", "Suji (Semolina/Rava)", "Poha (Flattened Rice)", "Maida (All-purpose flour)", "Ragi Flour (Finger Millet)", "Jowar Flour (Sorghum)", "Bajra Flour (Pearl Millet)", "Bread (Whole Wheat/White)", "Oats", "Quinoa"] },
-  { name: "Dairy & Fats", icon: <Milk className="text-blue-400" />, items: ["Paneer (Indian Cheese)", "Curd (Yogurt/Dahi)", "Milk", "Ghee (Clarified Butter)", "Butter", "Cooking Oil (Sunflower)", "Cooking Oil (Mustard)", "Cooking Oil (Groundnut)", "Olive Oil", "Coconut Oil", "Cream (Malai)", "Cheese (Processed/Cheddar)"] },
-  { name: "Sweeteners, Nuts & Seeds", icon: <Cookie className="text-yellow-700" />, items: ["Sugar", "Jaggery (Gur)", "Honey", "Almonds (Badam)", "Cashews (Kaju)", "Raisins (Kishmish)", "Walnuts (Akhrot)", "Peanuts (Moongphali)", "Pistachios (Pista)", "Coconut (Fresh/Dry)", "Poppy Seeds (Khas Khas)", "Sesame Seeds (Til)", "Flax Seeds (Alsi)", "Chia Seeds"] }
+  { name: "Vegetables", icon: Leaf, items: ["Onion", "Tomato", "Potato", "Spinach", "Carrot", "Capsicum", "Ginger", "Garlic", "Cauliflower", "Peas", "Beans", "Ladyfinger (Okra)", "Cabbage", "Mushroom", "Broccoli", "Cucumber", "Radish", "Beetroot", "Coriander Leaves", "Mint Leaves", "Green Chili", "Lemon", "Bottle Gourd (Lauki)", "Ridge Gourd (Turai)", "Brinjal (Eggplant)", "Sweet Potato"] },
+  { name: "Spices & Herbs", icon: Sparkles, items: ["Turmeric Powder", "Cumin Powder", "Coriander Powder", "Garam Masala", "Red Chili Powder", "Mustard Seeds", "Asafoetida (Hing)", "Fenugreek Seeds (Methi)", "Cumin Seeds (Jeera)", "Black Pepper", "Cardamom (Elaichi)", "Cloves (Laung)", "Cinnamon (Dalchini)", "Bay Leaf (Tej Patta)", "Salt", "Kasuri Methi (Dry Fenugreek)", "Curry Leaves", "Saffron (Kesar)"] },
+  { name: "Dals & Legumes", icon: Utensils, items: ["Moong Dal (Yellow Lentil)", "Toor Dal (Arhar/Pigeon Pea)", "Chana Dal (Split Chickpea)", "Masoor Dal (Red Lentil)", "Rajma (Kidney Beans)", "Chickpeas (Chole/Kabuli Chana)", "Black Eyed Peas (Lobia)", "Urad Dal (Black Gram)", "Green Gram (Sabut Moong)", "Black Chickpeas (Kala Chana)"] },
+  { name: "Grains & Flours", icon: Wheat, items: ["Rice (Basmati)", "Rice (Sona Masoori/Regular)", "Wheat Flour (Atta)", "Besan (Gram Flour)", "Suji (Semolina/Rava)", "Poha (Flattened Rice)", "Maida (All-purpose flour)", "Ragi Flour (Finger Millet)", "Jowar Flour (Sorghum)", "Bajra Flour (Pearl Millet)", "Bread (Whole Wheat/White)", "Oats", "Quinoa"] },
+  { name: "Dairy & Fats", icon: Milk, items: ["Paneer (Indian Cheese)", "Curd (Yogurt/Dahi)", "Milk", "Ghee (Clarified Butter)", "Butter", "Cooking Oil (Sunflower)", "Cooking Oil (Mustard)", "Cooking Oil (Groundnut)", "Olive Oil", "Coconut Oil", "Cream (Malai)", "Cheese (Processed/Cheddar)"] },
+  { name: "Sweeteners, Nuts & Seeds", icon: Cookie, items: ["Sugar", "Jaggery (Gur)", "Honey", "Almonds (Badam)", "Cashews (Kaju)", "Raisins (Kishmish)", "Walnuts (Akhrot)", "Peanuts (Moongphali)", "Pistachios (Pista)", "Coconut (Fresh/Dry)", "Poppy Seeds (Khas Khas)", "Sesame Seeds (Til)", "Flax Seeds (Alsi)", "Chia Seeds"] }
 ];
 
 export function RecipeForm() {
@@ -306,6 +306,43 @@ export function RecipeForm() {
                 </FormItem>
               )} />
 
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-foreground mb-3 sticky top-0 bg-card py-1 z-10">Or tap to add common ingredients:</h3>
+                <ScrollArea className="h-80 pr-3">
+                  <Accordion type="multiple" className="w-full">
+                    {ingredientCategories.map((category, index) => {
+                      const CategoryIcon = category.icon;
+                      return (
+                        <AccordionItem value={`category-${index}`} key={category.name}>
+                          <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline [&[data-state=open]>svg]:text-primary">
+                            <div className="flex items-center">
+                              <CategoryIcon className={cn("mr-2 h-4 w-4", category.icon.props.className)} /> {category.name}
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent>
+                            <div className="flex flex-wrap gap-1.5 pt-1 pb-3">
+                              {category.items.map(item => (
+                                <Button 
+                                  key={item} 
+                                  type="button"
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => addIngredientToForm(item)} 
+                                  className="text-xs px-2.5 py-1 h-auto rounded-full hover:bg-primary/10 hover:border-primary focus:ring-primary/50 transition-all duration-150 ease-in-out hover:scale-105 active:scale-95"
+                                >
+                                  <PlusCircle className="mr-1.5 h-3 w-3 opacity-70" />{item}
+                                </Button>
+                              ))}
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      );
+                    })}
+                  </Accordion>
+                </ScrollArea>
+              </div>
+              <Separator/>
+
               <div>
                 <FormLabel>Health Considerations (Optional)</FormLabel>
                 <div className="grid grid-cols-2 gap-2 mt-2">
@@ -345,34 +382,6 @@ export function RecipeForm() {
               </Button>
             </form>
           </Form>
-          <Separator className="my-6"/>
-          <h3 className="text-md font-medium mb-3 sticky top-0 bg-card py-1 z-10">Quick Add Common Ingredients:</h3>
-          <ScrollArea className="h-80 pr-3"> {/* Changed max-h-80 to h-80 for fixed height */}
-            <Accordion type="multiple" className="w-full">
-              {ingredientCategories.map((category, index) => (
-                <AccordionItem value={`category-${index}`} key={category.name}>
-                  <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline [&[data-state=open]>svg]:text-primary">
-                    <div className="flex items-center">{React.cloneElement(category.icon, { className: cn(category.icon.props.className, "mr-2 h-4 w-4") })} {category.name}</div>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="flex flex-wrap gap-1.5 pt-1 pb-3">
-                      {category.items.map(item => (
-                        <Button 
-                          key={item} 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => addIngredientToForm(item)} 
-                          className="text-xs px-2 py-1 h-auto rounded-full hover:bg-primary/10 hover:border-primary transition-transform duration-150 ease-in-out hover:scale-105 active:scale-95"
-                        >
-                          {item}
-                        </Button>
-                      ))}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </ScrollArea>
         </CardContent>
       </Card>
 
