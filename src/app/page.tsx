@@ -244,9 +244,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="mission" className="w-full py-12 md:py-24 lg:py-32 overflow-hidden">
+      <section id="mission" className="w-full py-12 md:py-24 lg:py-32 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
         <div className="container grid items-center gap-8 px-4 md:px-6 lg:grid-cols-2 lg:gap-16">
-          <div className="flex justify-center animate-in fade-in slide-in-from-left-20 duration-700 ease-out">
+          <div className="flex justify-center animate-in fade-in slide-in-from-left-20 duration-1000 ease-out delay-200">
             <Image
               src="/img/mission-community-image.jpg"
               alt="Our mission: Diverse group of people enjoying healthy Indian food"
@@ -256,8 +256,8 @@ export default function Home() {
               data-ai-hint="healthy food community"
             />
           </div>
-          <div className="animate-in fade-in slide-in-from-right-20 duration-700 ease-out">
-            <Target className="h-12 w-12 text-accent mb-4" />
+          <div className="animate-in fade-in slide-in-from-right-20 duration-1000 ease-out delay-200">
+            <Target className="h-12 w-12 text-primary mb-4" />
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Our Mission
             </h2>
@@ -265,11 +265,11 @@ export default function Home() {
               To empower every Indian with the knowledge and tools to make healthier food choices, demystifying nutrition labels and promoting traditional healthy eating habits through accessible AI technology with EatWise India.
             </p>
             <ul className="mt-6 space-y-4">
-              {[{title: "Simplify Nutrition", desc: "Break down complex food information into easy-to-understand insights.", delay: "delay-100"},
-               {title: "Promote Healthy Alternatives", desc: "Highlight nutritious Indian food options and recipes.", delay: "delay-200"},
-               {title: "Foster Awareness", desc: "Educate users about hidden ingredients and making informed choices.", delay: "delay-300"}].map(item => (
-                <li key={item.title} className={`flex items-start animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out ${item.delay}`}>
-                  <CheckCircle className="mr-3 mt-1 h-5 w-5 flex-shrink-0 text-accent" />
+              {[{title: "Simplify Nutrition", desc: "Break down complex food information into easy-to-understand insights.", delay: "delay-300"},
+               {title: "Promote Healthy Alternatives", desc: "Highlight nutritious Indian food options and recipes.", delay: "delay-400"},
+               {title: "Foster Awareness", desc: "Educate users about hidden ingredients and making informed choices.", delay: "delay-500"}].map(item => (
+                <li key={item.title} className={`flex items-start animate-in fade-in slide-in-from-bottom-6 duration-700 ease-out ${item.delay}`}>
+                  <CheckCircle className="mr-3 mt-1 h-5 w-5 flex-shrink-0 text-primary" />
                   <div>
                     <h3 className="font-semibold">{item.title}</h3>
                     <p className="text-sm text-muted-foreground">
@@ -279,16 +279,16 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-             <Button asChild size="lg" className="mt-8 bg-accent hover:bg-accent/90 text-accent-foreground transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:shadow-md animate-in fade-in slide-in-from-bottom-6 duration-500 delay-400">
+             <Button asChild size="lg" className="mt-8 bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:shadow-md animate-in fade-in slide-in-from-bottom-6 duration-700 delay-600">
                 <Link href="/blogs">Read Our Blog</Link>
             </Button>
           </div>
         </div>
       </section>
 
-      <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32 bg-muted/40 overflow-hidden">
+      <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32 bg-muted/40 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
         <div className="container px-4 md:px-6">
-          <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-8 duration-500 ease-out">
+          <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               How It Works
             </h2>
@@ -298,7 +298,7 @@ export default function Home() {
           </div>
           <div className="grid md:grid-cols-3 gap-8 mt-8">
             {howItWorksSteps.map((step) => (
-              <div key={step.title} className={`flex flex-col items-center text-center p-6 bg-card rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out hover:border-primary border border-transparent hover:-translate-y-1.5 animate-in fade-in slide-in-from-bottom-12 duration-700 ease-out ${step.animationDelay}`}>
+              <div key={step.title} className={`flex flex-col items-center text-center p-6 bg-card rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out hover:border-primary border border-transparent hover:-translate-y-1.5 animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-out ${step.animationDelay}`}>
                 <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-primary text-primary-foreground">
                   {step.icon}
                 </div>
@@ -312,9 +312,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32 overflow-hidden">
+      <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
         <div className="container px-4 md:px-6">
-          <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-8 duration-500 ease-out">
+          <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out">
             <Users className="mx-auto h-12 w-12 text-primary mb-4" />
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Loved by Users Across India
@@ -325,7 +325,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {testimonials.map((testimonial) => (
-              <Card key={testimonial.name} className={`bg-card flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out hover:-translate-y-1.5 animate-in fade-in slide-in-from-bottom-12 duration-700 ease-out ${testimonial.animationDelay}`}>
+              <Card key={testimonial.name} className={`bg-card flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out hover:-translate-y-1.5 animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-out ${testimonial.animationDelay}`}>
                 <CardContent className="pt-6 pb-4 flex-grow">
                   <blockquote className="text-lg italic text-foreground/90">
                     &quot;{testimonial.quote}&quot;
@@ -346,15 +346,15 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="call-to-action" className="w-full py-16 md:py-28 lg:py-36 bg-primary text-primary-foreground overflow-hidden">
+      <section id="call-to-action" className="w-full py-16 md:py-28 lg:py-36 bg-primary text-primary-foreground overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
         <div className="container px-4 md:px-6 text-center">
-          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out">
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out">
             Ready to Make Healthier Choices?
           </h2>
-          <p className="mx-auto max-w-[600px] text-primary-foreground/80 md:text-xl mb-8 animate-in fade-in slide-in-from-bottom-10 duration-700 ease-out delay-200">
+          <p className="mx-auto max-w-[600px] text-primary-foreground/80 md:text-xl mb-8 animate-in fade-in slide-in-from-bottom-10 duration-1000 ease-out delay-200">
             Join thousands of Indians on their journey to better nutrition. Start analyzing, learning, and cooking with EatWise India today!
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4 animate-in fade-in slide-in-from-bottom-12 duration-700 ease-out delay-400">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-out delay-400">
             <Button asChild size="lg" className="bg-background text-primary hover:bg-background/90 transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:shadow-lg">
               <Link href="/analyze">Start Analyzing Labels</Link>
             </Button>
