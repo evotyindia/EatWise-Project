@@ -49,7 +49,7 @@ export default function Home() {
       icon: <MessageCircle className="h-10 w-10 text-primary group-hover:scale-110 transition-transform duration-300" />,
       title: "Contextual AI Chat",
       description: "After analyzing a product, ask specific questions. Get personalized advice from our AI nutrition assistant based on the report.",
-      link: "/analyze",
+      link: "/analyze", // Should link to a page where chat is contextually available, e.g., after analysis
       dataAiHint: "nutrition chat bot",
       animationDelay: "delay-200"
     },
@@ -189,7 +189,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 gap-8 mt-12 md:grid-cols-2 lg:grid-cols-2">
             {features.map((feature) => (
-              <Card key={feature.title} className={`group transform transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2 flex flex-col animate-in fade-in slide-in-from-bottom-16 duration-500 ${feature.animationDelay}`}>
+              <Card key={feature.title} className={`group transform transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2 flex flex-col animate-in fade-in slide-in-from-bottom-12 duration-700 ease-out ${feature.animationDelay}`}>
                 <CardHeader className="flex flex-row items-start gap-4 pb-2">
                   {feature.icon}
                   <CardTitle className="text-xl font-semibold">{feature.title}</CardTitle>
@@ -221,7 +221,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
             {whyChoosePoints.slice(0, 3).map((point) => (
-              <div key={point.title} className={`flex flex-col items-center text-center p-4 transition-all duration-300 ease-in-out hover:shadow-xl hover:scale-105 hover:bg-card rounded-lg animate-in fade-in slide-in-from-bottom-12 duration-500 ${point.animationDelay}`}>
+              <div key={point.title} className={`flex flex-col items-center text-center p-4 transition-all duration-300 ease-in-out hover:shadow-xl hover:scale-105 hover:bg-card rounded-lg animate-in fade-in slide-in-from-bottom-12 duration-700 ease-out ${point.animationDelay}`}>
                 <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-110">
                   {point.icon}
                 </div>
@@ -232,7 +232,7 @@ export default function Home() {
           </div>
           <div className="mt-12 grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-2 lg:gap-x-16 md:px-16 lg:px-32">
              {whyChoosePoints.slice(3).map((point) => (
-              <div key={point.title} className={`flex flex-col items-center text-center p-4 transition-all duration-300 ease-in-out hover:shadow-xl hover:scale-105 hover:bg-card rounded-lg animate-in fade-in slide-in-from-bottom-12 duration-500 ${point.animationDelay}`}>
+              <div key={point.title} className={`flex flex-col items-center text-center p-4 transition-all duration-300 ease-in-out hover:shadow-xl hover:scale-105 hover:bg-card rounded-lg animate-in fade-in slide-in-from-bottom-12 duration-700 ease-out ${point.animationDelay}`}>
                 <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-110">
                   {point.icon}
                 </div>
@@ -298,7 +298,7 @@ export default function Home() {
           </div>
           <div className="grid md:grid-cols-3 gap-8 mt-8">
             {howItWorksSteps.map((step) => (
-              <div key={step.title} className={`flex flex-col items-center text-center p-6 bg-card rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out hover:border-primary border border-transparent hover:-translate-y-1.5 animate-in fade-in slide-in-from-bottom-16 duration-500 ${step.animationDelay}`}>
+              <div key={step.title} className={`flex flex-col items-center text-center p-6 bg-card rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out hover:border-primary border border-transparent hover:-translate-y-1.5 animate-in fade-in slide-in-from-bottom-12 duration-700 ease-out ${step.animationDelay}`}>
                 <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-primary text-primary-foreground">
                   {step.icon}
                 </div>
@@ -325,7 +325,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {testimonials.map((testimonial) => (
-              <Card key={testimonial.name} className={`bg-card flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out hover:-translate-y-1.5 animate-in fade-in slide-in-from-bottom-16 duration-500 ${testimonial.animationDelay}`}>
+              <Card key={testimonial.name} className={`bg-card flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out hover:-translate-y-1.5 animate-in fade-in slide-in-from-bottom-12 duration-700 ease-out ${testimonial.animationDelay}`}>
                 <CardContent className="pt-6 pb-4 flex-grow">
                   <blockquote className="text-lg italic text-foreground/90">
                     &quot;{testimonial.quote}&quot;
