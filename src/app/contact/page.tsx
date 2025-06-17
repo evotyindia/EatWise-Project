@@ -7,8 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import type { NextPage, Metadata } from 'next';
 
-// IMPORTANT: Replace this with your actual website's base URL
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.example.com';
+const BASE_URL = 'https://eatwise.evotyindia.me';
 
 export const metadata: Metadata = {
   title: "Contact Us | EatWise India",
@@ -19,15 +18,15 @@ export const metadata: Metadata = {
 };
 
 const ContactPage: NextPage = () => {
-  const contactEmail = "support@eatwiseindia.com"; // Placeholder
-  const contactPhone = "+91-123-456-7890"; // Placeholder
+  const contactEmail = "support@eatwiseindia.com"; 
+  const contactPhone = "+91-123-456-7890"; 
 
   const socialLinks = [
-    { name: "Facebook", icon: <Facebook className="h-6 w-6" />, url: "https://facebook.com/eatwiseindia" }, // Placeholder URL
-    { name: "Twitter", icon: <Twitter className="h-6 w-6" />, url: "https://twitter.com/eatwiseindia" },   // Placeholder URL
-    { name: "Instagram", icon: <Instagram className="h-6 w-6" />, url: "https://instagram.com/eatwiseindia" }, // Placeholder URL
-    { name: "LinkedIn", icon: <Linkedin className="h-6 w-6" />, url: "https://linkedin.com/company/eatwiseindia" }, // Placeholder URL
-    { name: "YouTube", icon: <Youtube className="h-6 w-6" />, url: "https://youtube.com/c/eatwiseindia" }, // Placeholder URL
+    { name: "Facebook", icon: <Facebook className="h-6 w-6" />, url: "https://facebook.com/eatwiseindia" }, 
+    { name: "Twitter", icon: <Twitter className="h-6 w-6" />, url: "https://twitter.com/eatwiseindia" },   
+    { name: "Instagram", icon: <Instagram className="h-6 w-6" />, url: "https://instagram.com/eatwiseindia" }, 
+    { name: "LinkedIn", icon: <Linkedin className="h-6 w-6" />, url: "https://linkedin.com/company/eatwiseindia" }, 
+    { name: "YouTube", icon: <Youtube className="h-6 w-6" />, url: "https://youtube.com/c/eatwiseindia" }, 
   ];
 
   return (

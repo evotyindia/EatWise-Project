@@ -3,8 +3,7 @@ import { NutritionForm } from "./nutrition-form";
 import { BarChart3 } from "lucide-react";
 import type { NextPage, Metadata } from 'next';
 
-// IMPORTANT: Replace this with your actual website's base URL
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.example.com';
+const BASE_URL = 'https://eatwise.evotyindia.me';
 
 export const metadata: Metadata = {
   title: "AI Nutrition Analyzer | EatWise India",

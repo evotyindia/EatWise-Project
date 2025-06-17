@@ -7,8 +7,8 @@ import { CheckCircle, ScanLine, MessageCircle, CookingPot, BarChart3 as ChartCol
 import type { WebApplication } from 'schema-dts';
 import Script from 'next/script';
 
-// This WebApplication schema is specific to the homepage as the main "app" entry.
-// General WebSite and Organization schema are in layout.tsx.
+const BASE_URL = 'https://eatwise.evotyindia.me';
+
 const WebAppStructuredData: WebApplication = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
@@ -16,7 +16,7 @@ const WebAppStructuredData: WebApplication = {
   description: "Empowering India to Eat Smarter with AI. Understand food labels, analyze ingredients, and get healthy Indian recipe suggestions.",
   applicationCategory: "HealthApplication",
   operatingSystem: "WEB",
-  url: process.env.NEXT_PUBLIC_BASE_URL || "https://www.example.com",
+  url: BASE_URL,
   offers: {
     "@type": "Offer",
     price: "0",
@@ -27,7 +27,7 @@ const WebAppStructuredData: WebApplication = {
     name: "EatWise India",
     logo: {
       "@type": "ImageObject",
-      url: `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.example.com"}/img/logo_200x60.png`,
+      url: `${BASE_URL}/img/logo_200x60.png`,
       width: "200",
       height: "60"
     }

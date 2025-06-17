@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import type { Article, BreadcrumbList } from 'schema-dts';
 import Script from 'next/script';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.example.com';
+const BASE_URL = 'https://eatwise.evotyindia.me';
 
 interface BlogPostPageProps {
   params: {
