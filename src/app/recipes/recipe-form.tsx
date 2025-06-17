@@ -94,6 +94,7 @@ export function RecipeForm() {
   const ingredientsValueFromForm = form.watch("ingredients");
 
   useEffect(() => {
+    // Sync selectedQuickAddIngredients Set with textarea content
     if (typeof ingredientsValueFromForm === 'string') {
         const currentTextareaIngredients = new Set(
             ingredientsValueFromForm.split(',')
@@ -101,47 +102,39 @@ export function RecipeForm() {
                 .filter(Boolean)
         );
         
-        let changed = false;
-        if (currentTextareaIngredients.size !== selectedQuickAddIngredients.size) {
-            changed = true;
-        } else {
-            for (const ing of currentTextareaIngredients) {
-                if (!selectedQuickAddIngredients.has(ing)) {
-                    changed = true;
-                    break;
-                }
-            }
-        }
-        if (changed) {
+        // Only update if the set has actually changed to avoid infinite loops
+        if (currentTextareaIngredients.size !== selectedQuickAddIngredients.size || 
+            ![...currentTextareaIngredients].every(ing => selectedQuickAddIngredients.has(ing))) {
             setSelectedQuickAddIngredients(currentTextareaIngredients);
         }
-    } else if (selectedQuickAddIngredients.size > 0) {
+    } else if (selectedQuickAddIngredients.size > 0) { // Handle case where textarea becomes empty/undefined
         setSelectedQuickAddIngredients(new Set());
     }
-  }, [ingredientsValueFromForm, selectedQuickAddIngredients]);
+  }, [ingredientsValueFromForm]); // Removed selectedQuickAddIngredients from dependency array
 
-  const addIngredientToForm = (ingredient: string) => {
+  const toggleIngredientQuickAdd = (ingredient: string) => {
     const currentIngredientsStr = form.getValues("ingredients") || "";
-    const currentIngredientsArray = currentIngredientsStr.split(',')
+    const currentIngredientsArray = currentIngredientsStr
+        .split(',')
         .map(ing => ing.trim())
         .filter(Boolean);
 
     const ingredientLower = ingredient.toLowerCase();
     const isAlreadyAdded = currentIngredientsArray.some(ing => ing.trim().toLowerCase() === ingredientLower);
 
-    if (!isAlreadyAdded) {
-        const newIngredients = currentIngredientsArray.length > 0 
-            ? `${currentIngredientsStr}, ${ingredient}` 
-            : ingredient;
-        form.setValue("ingredients", newIngredients, { shouldValidate: true, shouldDirty: true });
+    if (isAlreadyAdded) {
+        // Remove the ingredient
+        const newIngredientsArray = currentIngredientsArray.filter(
+            ing => ing.trim().toLowerCase() !== ingredientLower
+        );
+        form.setValue("ingredients", newIngredientsArray.join(', '), { shouldValidate: true, shouldDirty: true });
     } else {
-        toast({
-            title: "Ingredient Already Added",
-            description: `${ingredient} is already in your list.`,
-            duration: 2000,
-        });
+        // Add the ingredient
+        const newIngredientsList = [...currentIngredientsArray, ingredient];
+        form.setValue("ingredients", newIngredientsList.join(', '), { shouldValidate: true, shouldDirty: true });
     }
   };
+
 
   const onGetSuggestionsSubmit: SubmitHandler<RecipePageFormValues> = async (data) => {
     setIsLoadingSuggestions(true);
@@ -368,7 +361,7 @@ export function RecipeForm() {
                             </div>
                           </AccordionTrigger>
                           <AccordionContent>
-                            <div className="flex flex-wrap gap-1.5 p-2"> {/* Added p-2 here */}
+                            <div className="flex flex-wrap gap-1.5 p-2">
                               {category.items.map(item => {
                                 const isSelected = selectedQuickAddIngredients.has(item.toLowerCase());
                                 return (
@@ -377,7 +370,7 @@ export function RecipeForm() {
                                     type="button"
                                     variant="outline" 
                                     size="sm" 
-                                    onClick={() => addIngredientToForm(item)} 
+                                    onClick={() => toggleIngredientQuickAdd(item)} 
                                     className={cn(
                                       "text-xs px-2.5 py-1 h-auto rounded-full hover:bg-primary/10 hover:border-primary focus:ring-primary/50 transition-all duration-150 ease-in-out hover:scale-105 active:scale-95 flex items-center",
                                       isSelected && "bg-primary/20 border-primary text-primary font-semibold"
