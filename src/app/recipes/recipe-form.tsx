@@ -316,7 +316,7 @@ export function RecipeForm() {
                         <AccordionItem value={`category-${index}`} key={category.name}>
                           <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline [&[data-state=open]>svg]:text-primary">
                             <div className="flex items-center">
-                              <CategoryIcon className={cn("mr-2 h-4 w-4", category.icon.props.className)} /> {category.name}
+                              <CategoryIcon className="mr-2 h-4 w-4" /> {category.name}
                             </div>
                           </AccordionTrigger>
                           <AccordionContent>
