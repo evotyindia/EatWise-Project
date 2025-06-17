@@ -11,7 +11,7 @@ import type { ContextAwareAIChatInput, ContextAwareAIChatOutput, ChatMessage } f
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Leaf, Wheat, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Milk, Cookie, MinusCircle, PlusCircle, CheckCircle } from "lucide-react"; // Added CheckCircle
+import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Leaf, Wheat, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Milk, Cookie, MinusCircle, PlusCircle, CheckCircle } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { createRoot } from 'react-dom/client';
 import html2canvas from 'html2canvas';
@@ -97,14 +97,28 @@ export function RecipeForm() {
     if (typeof ingredientsValueFromForm === 'string') {
         const currentTextareaIngredients = new Set(
             ingredientsValueFromForm.split(',')
-                .map(ing => ing.trim().toLowerCase()) // Normalize to lowercase for comparison
+                .map(ing => ing.trim().toLowerCase()) 
                 .filter(Boolean)
         );
-        setSelectedQuickAddIngredients(currentTextareaIngredients);
-    } else {
+        
+        let changed = false;
+        if (currentTextareaIngredients.size !== selectedQuickAddIngredients.size) {
+            changed = true;
+        } else {
+            for (const ing of currentTextareaIngredients) {
+                if (!selectedQuickAddIngredients.has(ing)) {
+                    changed = true;
+                    break;
+                }
+            }
+        }
+        if (changed) {
+            setSelectedQuickAddIngredients(currentTextareaIngredients);
+        }
+    } else if (selectedQuickAddIngredients.size > 0) {
         setSelectedQuickAddIngredients(new Set());
     }
-  }, [ingredientsValueFromForm]);
+  }, [ingredientsValueFromForm, selectedQuickAddIngredients]);
 
   const addIngredientToForm = (ingredient: string) => {
     const currentIngredientsStr = form.getValues("ingredients") || "";
@@ -113,7 +127,7 @@ export function RecipeForm() {
         .filter(Boolean);
 
     const ingredientLower = ingredient.toLowerCase();
-    const isAlreadyAdded = currentIngredientsArray.some(ing => ing.toLowerCase() === ingredientLower);
+    const isAlreadyAdded = currentIngredientsArray.some(ing => ing.trim().toLowerCase() === ingredientLower);
 
     if (!isAlreadyAdded) {
         const newIngredients = currentIngredientsArray.length > 0 
@@ -354,7 +368,7 @@ export function RecipeForm() {
                             </div>
                           </AccordionTrigger>
                           <AccordionContent>
-                            <div className="flex flex-wrap gap-1.5 pt-1 pb-3">
+                            <div className="flex flex-wrap gap-1.5 p-2"> {/* Added p-2 here */}
                               {category.items.map(item => {
                                 const isSelected = selectedQuickAddIngredients.has(item.toLowerCase());
                                 return (
