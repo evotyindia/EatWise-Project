@@ -4,9 +4,11 @@ import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { CheckCircle, ScanLine, MessageCircle, CookingPot, BarChart3 as ChartColumn, Users, Target, Lightbulb, User, UploadCloud, Cpu, ClipboardCheck, Utensils, Smile, MapPin, ShieldCheck, HeartPulse, Leaf } from "lucide-react";
-import type { WebApplication } from 'schema-dts'; // Import type for structured data
-import Script from 'next/script'; // Import Script component
+import type { WebApplication } from 'schema-dts';
+import Script from 'next/script';
 
+// This WebApplication schema is specific to the homepage as the main "app" entry.
+// General WebSite and Organization schema are in layout.tsx.
 const WebAppStructuredData: WebApplication = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
@@ -14,18 +16,18 @@ const WebAppStructuredData: WebApplication = {
   description: "Empowering India to Eat Smarter with AI. Understand food labels, analyze ingredients, and get healthy Indian recipe suggestions.",
   applicationCategory: "HealthApplication",
   operatingSystem: "WEB",
-  url: "https://www.example.com", // IMPORTANT: Replace with your actual URL
+  url: process.env.NEXT_PUBLIC_BASE_URL || "https://www.example.com",
   offers: {
     "@type": "Offer",
-    price: "0", // Assuming the app is free
+    price: "0",
     priceCurrency: "INR"
   },
-  publisher: {
+  publisher: { // Re-iterating publisher for this specific entity
     "@type": "Organization",
     name: "EatWise India",
     logo: {
       "@type": "ImageObject",
-      url: "https://www.example.com/img/logo_200x60.png", // IMPORTANT: Replace with your actual logo URL
+      url: `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.example.com"}/img/logo_200x60.png`,
       width: "200",
       height: "60"
     }
