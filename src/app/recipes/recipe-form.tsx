@@ -9,10 +9,13 @@ import type { GetDetailedRecipeInput, GetDetailedRecipeOutput } from "@/ai/flows
 import { getDetailedRecipe } from "@/ai/flows/get-detailed-recipe";
 import type { ContextAwareAIChatInput, ContextAwareAIChatOutput, ChatMessage } from "@/ai/flows/context-aware-ai-chat";
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
+import type { SuggestIngredientsOutput } from "@/ai/flows/ingredient-suggestions-flow";
+import { suggestIngredients } from "@/ai/flows/ingredient-suggestions-flow";
+
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Leaf, Wheat, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Milk, Cookie, MinusCircle, PlusCircle, CheckCircle } from "lucide-react";
-import React, { useState, useEffect, useRef } from "react";
+import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Leaf, Wheat, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Milk, Cookie, MinusCircle, PlusCircle, CheckCircle, Search } from "lucide-react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { createRoot } from 'react-dom/client';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -31,6 +34,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PrintableDetailedRecipe } from "@/components/common/PrintableDetailedRecipe";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 
@@ -78,6 +82,12 @@ export function RecipeForm() {
   const [currentFormInputs, setCurrentFormInputs] = useState<RecipePageFormValues | null>(null);
   const [selectedQuickAddIngredients, setSelectedQuickAddIngredients] = useState<Set<string>>(new Set());
 
+  const [aiIngredientSuggestions, setAiIngredientSuggestions] = useState<string[]>([]);
+  const [isSuggestingIngredients, setIsSuggestingIngredients] = useState(false);
+  const [showSuggestionsPopover, setShowSuggestionsPopover] = useState(false);
+  const ingredientsTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
 
   const { toast } = useToast();
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
@@ -93,46 +103,117 @@ export function RecipeForm() {
 
   const ingredientsValueFromForm = form.watch("ingredients");
 
+  // Effect to synchronize quick-add button states with textarea content
   useEffect(() => {
-    // Sync selectedQuickAddIngredients Set with textarea content
     if (typeof ingredientsValueFromForm === 'string') {
-        const currentTextareaIngredients = new Set(
-            ingredientsValueFromForm.split(',')
-                .map(ing => ing.trim().toLowerCase()) 
-                .filter(Boolean)
-        );
-        
-        // Only update if the set has actually changed to avoid infinite loops
-        if (currentTextareaIngredients.size !== selectedQuickAddIngredients.size || 
-            ![...currentTextareaIngredients].every(ing => selectedQuickAddIngredients.has(ing))) {
-            setSelectedQuickAddIngredients(currentTextareaIngredients);
+        const currentTextareaIngredientsArray = ingredientsValueFromForm.split(',')
+            .map(ing => ing.trim().toLowerCase())
+            .filter(Boolean);
+        const newSelectedIngredients = new Set(currentTextareaIngredientsArray);
+
+        if (newSelectedIngredients.size !== selectedQuickAddIngredients.size || 
+            ![...newSelectedIngredients].every(ing => selectedQuickAddIngredients.has(ing))) {
+            setSelectedQuickAddIngredients(newSelectedIngredients);
         }
-    } else if (selectedQuickAddIngredients.size > 0) { // Handle case where textarea becomes empty/undefined
+    } else if (selectedQuickAddIngredients.size > 0) {
         setSelectedQuickAddIngredients(new Set());
     }
-  }, [ingredientsValueFromForm]); // Removed selectedQuickAddIngredients from dependency array
+  }, [ingredientsValueFromForm, selectedQuickAddIngredients]);
+
+
+  const fetchIngredientSuggestions = useCallback(async (currentText: string) => {
+    if (currentText.trim().length < 2) { // Minimum length to trigger AI suggestions
+      setAiIngredientSuggestions([]);
+      setShowSuggestionsPopover(false);
+      return;
+    }
+    setIsSuggestingIngredients(true);
+    try {
+      const existing = ingredientsValueFromForm.split(',').map(s => s.trim()).filter(Boolean);
+      const result = await suggestIngredients({ currentText, existingIngredients: existing });
+      setAiIngredientSuggestions(result.suggestions);
+      setShowSuggestionsPopover(result.suggestions.length > 0);
+    } catch (error) {
+      console.error("Error fetching ingredient suggestions:", error);
+      setAiIngredientSuggestions([]);
+      setShowSuggestionsPopover(false);
+    }
+    setIsSuggestingIngredients(false);
+  }, [ingredientsValueFromForm]);
+
+  const handleIngredientsTextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = event.target.value;
+    form.setValue("ingredients", value, { shouldValidate: true, shouldDirty: true });
+
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    if (value.trim().length > 0) {
+        debounceTimeoutRef.current = setTimeout(() => {
+            // Only fetch suggestions if the last char is not a comma, indicating user might be typing a new word
+            if (value.trim().length > 0 && !value.endsWith(',')) {
+                 fetchIngredientSuggestions(value);
+            } else {
+                 setShowSuggestionsPopover(false);
+            }
+        }, 700); // Debounce time: 700ms
+    } else {
+        setAiIngredientSuggestions([]);
+        setShowSuggestionsPopover(false);
+    }
+  };
+  
+  const handleSuggestionClick = (suggestion: string) => {
+    const currentText = form.getValues("ingredients");
+    const parts = currentText.split(',');
+    
+    if (parts.length > 0) {
+        const lastPart = parts[parts.length - 1].trim();
+        // Replace the last part if it's a partial word, otherwise append
+        if (lastPart.length > 0 && suggestion.toLowerCase().startsWith(lastPart.toLowerCase())) {
+             parts[parts.length - 1] = suggestion;
+        } else {
+            parts.push(suggestion);
+        }
+    } else {
+        parts.push(suggestion);
+    }
+
+    let newText = parts.map(p=>p.trim()).filter(Boolean).join(', ');
+    if (parts.length > 1) { // Ensure there's a comma and space if multiple ingredients
+        newText += ', ';
+    } else if (parts.length === 1 && parts[0] !== '') { // If only one ingredient, ensure space for next
+        newText += ', ';
+    }
+
+
+    form.setValue("ingredients", newText, { shouldValidate: true, shouldDirty: true });
+    setAiIngredientSuggestions([]);
+    setShowSuggestionsPopover(false);
+    if (ingredientsTextareaRef.current) {
+      ingredientsTextareaRef.current.focus();
+    }
+  };
+
 
   const toggleIngredientQuickAdd = (ingredient: string) => {
     const currentIngredientsStr = form.getValues("ingredients") || "";
-    const currentIngredientsArray = currentIngredientsStr
+    let currentIngredientsArray = currentIngredientsStr
         .split(',')
         .map(ing => ing.trim())
         .filter(Boolean);
 
     const ingredientLower = ingredient.toLowerCase();
-    const isAlreadyAdded = currentIngredientsArray.some(ing => ing.trim().toLowerCase() === ingredientLower);
+    const index = currentIngredientsArray.findIndex(ing => ing.trim().toLowerCase() === ingredientLower);
 
-    if (isAlreadyAdded) {
+    if (index > -1) {
         // Remove the ingredient
-        const newIngredientsArray = currentIngredientsArray.filter(
-            ing => ing.trim().toLowerCase() !== ingredientLower
-        );
-        form.setValue("ingredients", newIngredientsArray.join(', '), { shouldValidate: true, shouldDirty: true });
+        currentIngredientsArray.splice(index, 1);
     } else {
         // Add the ingredient
-        const newIngredientsList = [...currentIngredientsArray, ingredient];
-        form.setValue("ingredients", newIngredientsList.join(', '), { shouldValidate: true, shouldDirty: true });
+        currentIngredientsArray.push(ingredient);
     }
+    form.setValue("ingredients", currentIngredientsArray.join(', '), { shouldValidate: true, shouldDirty: true });
   };
 
 
@@ -142,6 +223,7 @@ export function RecipeForm() {
     setDetailedRecipe(null);
     setChatHistory([]);
     setCurrentFormInputs(data); 
+    setShowSuggestionsPopover(false); // Hide suggestions popover on submit
     try {
       const diseases = data.diseaseConcerns?.length ? data.diseaseConcerns : [DiseaseEnum.enum.none];
       const input: GetRecipeSuggestionsInput = {
@@ -338,14 +420,59 @@ export function RecipeForm() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onGetSuggestionsSubmit)} className="space-y-6">
-              <FormField control={form.control} name="ingredients" render={({ field }) => (
+            <FormField control={form.control} name="ingredients" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Available Ingredients</FormLabel>
-                  <FormControl><Textarea placeholder="e.g., Onions, Tomatoes, Paneer, Rice..." {...field} rows={4} className="bg-background" /></FormControl>
-                  <FormDescription>Separate ingredients with commas.</FormDescription>
+                  <Popover open={showSuggestionsPopover} onOpenChange={setShowSuggestionsPopover}>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Textarea
+                          placeholder="e.g., Onions, Tomatoes, Paneer, Rice..."
+                          {...field}
+                          ref={ingredientsTextareaRef}
+                          onChange={handleIngredientsTextChange}
+                          onBlurCapture={() => setTimeout(() => setShowSuggestionsPopover(false), 150)} // Delay to allow click on popover
+                          onFocus={() => {
+                            if (aiIngredientSuggestions.length > 0) setShowSuggestionsPopover(true);
+                          }}
+                          rows={4}
+                          className="bg-background"
+                        />
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent 
+                      className="w-[--radix-popover-trigger-width] p-1 max-h-60 overflow-y-auto" 
+                      style={{
+                         // Attach to textarea width.
+                         // Ensure 'position: absolute' if PopoverContent isn't already.
+                      }}
+                      onOpenAutoFocus={(e) => e.preventDefault()} // Prevent focus stealing
+                     >
+                      {isSuggestingIngredients ? (
+                        <div className="p-2 text-sm text-muted-foreground">Loading suggestions...</div>
+                      ) : (
+                        aiIngredientSuggestions.length > 0 ? (
+                          aiIngredientSuggestions.map((suggestion, index) => (
+                            <Button
+                              key={index}
+                              variant="ghost"
+                              className="w-full justify-start p-2 h-auto text-sm"
+                              onClick={() => handleSuggestionClick(suggestion)}
+                            >
+                              {suggestion}
+                            </Button>
+                          ))
+                        ) : (
+                          !isSuggestingIngredients && field.value && field.value.trim().length > 1 && <div className="p-2 text-sm text-muted-foreground">No suggestions.</div>
+                        )
+                      )}
+                    </PopoverContent>
+                  </Popover>
+                  <FormDescription>Separate ingredients with commas. AI suggestions will appear as you type.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )} />
+
 
               <div className="space-y-3">
                 <h3 className="text-sm font-medium text-foreground mb-3 sticky top-0 bg-card py-1 z-10">Or tap to add common ingredients:</h3>
