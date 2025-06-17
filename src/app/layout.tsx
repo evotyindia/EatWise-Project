@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import './globals.css';
@@ -5,47 +6,90 @@ import { CustomThemeProvider } from '@/contexts/theme-context';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Toaster } from '@/components/ui/toaster';
+import type { WebSite, Organization } from 'schema-dts';
 
-// IMPORTANT: Replace this with your actual website's base URL
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.example.com';
 
+const websiteStructuredData: WebSite = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "EatWise India",
+  url: BASE_URL,
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: `${BASE_URL}/search?q={search_term_string}` // Generic placeholder, update if you add site search
+    },
+    "query-input": "required name=search_term_string"
+  },
+  publisher: { // Added publisher here as well
+    "@type": "Organization",
+    name: "EatWise India",
+    logo: {
+      "@type": "ImageObject",
+      url: `${BASE_URL}/img/logo_200x60.png`,
+      width: "200",
+      height: "60"
+    }
+  }
+};
+
+const organizationStructuredData: Organization = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "EatWise India",
+  url: BASE_URL,
+  logo: `${BASE_URL}/img/logo_200x60.png`,
+  // "contactPoint": [{ // Optional: Add contact points
+  //   "@type": "ContactPoint",
+  //   "telephone": "+91-123-456-7890", // Replace with actual
+  //   "contactType": "Customer Service"
+  // }],
+  // "sameAs": [ // Optional: Add social media links if they represent the org
+  //   "https://facebook.com/eatwiseindia",
+  //   "https://twitter.com/eatwiseindia"
+  // ]
+};
+
+
 export const metadata: Metadata = {
-  metadataBase: new URL(BASE_URL), // Essential for resolving relative image paths in openGraph, etc.
+  metadataBase: new URL(BASE_URL),
   title: {
     default: 'EatWise India - AI Nutrition Guide',
-    template: '%s | EatWise India', // Used by child pages to append their title
+    template: '%s | EatWise India',
   },
   description:
     'Understand food labels, get health ratings, recipe suggestions, and nutrition analysis with AI. For a healthier India with EatWise India.',
   applicationName: 'EatWise India',
-  keywords: ['nutrition', 'health', 'AI', 'food label', 'recipes', 'India', 'healthy eating', 'diet', 'wellness'],
+  keywords: ['nutrition', 'health', 'AI', 'food label', 'recipes', 'India', 'healthy eating', 'diet', 'wellness', 'food scanner', 'calorie counter india'],
   authors: [{ name: 'EatWise India Team', url: BASE_URL }],
   creator: 'EatWise India Team',
   publisher: 'EatWise India',
   openGraph: {
     type: 'website',
-    locale: 'en_IN', // Assuming primary locale
+    locale: 'en_IN',
     url: BASE_URL,
     title: 'EatWise India - AI Nutrition Guide',
     description: 'Your AI-powered guide to healthier food choices in India. Analyze labels, get recipes, and check nutrition.',
     siteName: 'EatWise India',
-    images: [ // Default OG image
+    images: [
       {
-        url: `${BASE_URL}/img/og-default-image.png`, // IMPORTANT: Create this image (1200x630 recommended)
+        url: `${BASE_URL}/img/og-default-image.png`,
         width: 1200,
         height: 630,
         alt: 'EatWise India - AI Nutrition Guide',
       },
     ],
   },
-  twitter: { // Basic Twitter card setup
+  twitter: {
     card: 'summary_large_image',
     title: 'EatWise India - AI Nutrition Guide',
     description: 'AI-powered nutrition insights for India. Analyze food labels, get recipes, and make healthier choices.',
-    // images: [`${BASE_URL}/img/twitter-card-image.png`], // Optionally, a different image for Twitter (1200x675 or similar)
-    // creator: '@YourTwitterHandle', // Add your Twitter handle if you have one
+    // images: [`${BASE_URL}/img/twitter-card-image.png`], // Optionally, a different image for Twitter
+    // creator: '@YourTwitterHandle',
   },
-  robots: { // Basic robots meta tag
+  robots: {
     index: true,
     follow: true,
     googleBot: {
@@ -56,32 +100,22 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  // Add verification codes if you have them
   // verification: {
   //   google: 'YOUR_GOOGLE_SITE_VERIFICATION_CODE',
-  //   // yandex: 'YOUR_YANDEX_VERIFICATION_CODE',
-  //   // other: {
-  //   //   me: ['my-email@example.com', 'my-link-to-profile.com'],
-  //   // },
   // },
   alternates: {
     canonical: BASE_URL,
-    // If you had multiple languages:
-    // languages: {
-    //   'en-US': `${BASE_URL}/en-US`,
-    //   'hi-IN': `${BASE_URL}/hi-IN`,
-    // },
   },
-  // For PWAs, you might add manifest link here
-  // manifest: "/manifest.json",
-  // icons: { // Favicon and app icons
-  //   icon: "/favicon.ico",
-  //   shortcut: "/shortcut-icon.png",
-  //   apple: "/apple-touch-icon.png",
-  //   // other: [
-  //   //   { rel: 'apple-touch-icon-precomposed', url: '/apple-touch-icon-precomposed.png' },
-  //   // ],
-  // },
+  // manifest: "/manifest.json", // For PWAs
+  icons: {
+    icon: [ // Array for multiple icon sizes/types
+      { url: '/favicon.ico', type: 'image/x-icon', sizes: 'any' }, // Traditional
+      { url: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
+      { url: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
+    ],
+    apple: '/apple-touch-icon.png', // For Apple devices (180x180 recommended)
+    // shortcut: '/shortcut-icon.png', // Less common
+  },
 };
 
 interface RootLayoutProps {
@@ -92,7 +126,6 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Fonts are already preconnected in the original file, keeping them */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -103,9 +136,19 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
           href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
+        {/* Favicon links are now managed by Next.js metadata.icons */}
+        <Script
+          id="website-structured-data"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteStructuredData) }}
+        />
+        <Script
+          id="organization-structured-data"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationStructuredData) }}
+        />
       </head>
       <body className="font-body antialiased min-h-screen bg-background text-foreground flex flex-col">
-        {/* Google Analytics Script */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-K396ETRNRR"
           strategy="afterInteractive"

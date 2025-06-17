@@ -7,10 +7,9 @@ import { CalendarDays, Tag, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import type { Article } from 'schema-dts';
+import type { Article, BreadcrumbList } from 'schema-dts';
 import Script from 'next/script';
 
-// IMPORTANT: Replace this with your actual website's base URL
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.example.com';
 
 interface BlogPostPageProps {
@@ -39,6 +38,28 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     alternates: {
       canonical: `${BASE_URL}/blogs/${post.slug}`,
     },
+    openGraph: { // Specific OG tags for blog posts
+      type: 'article',
+      title: post.title,
+      description: post.preview,
+      url: `${BASE_URL}/blogs/${post.slug}`,
+      publishedTime: new Date(post.date).toISOString(),
+      authors: [`${BASE_URL}/#organization`], // Reference to your organization
+      images: [
+        {
+          url: `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : '/' + post.featuredImage}`,
+          width: 1200, // Assuming images are this size or optimize for it
+          height: 675,
+          alt: post.title,
+        }
+      ]
+    },
+    twitter: { // Specific Twitter card for blog posts
+        card: 'summary_large_image',
+        title: post.title,
+        description: post.preview,
+        images: [`${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : '/' + post.featuredImage}`],
+    }
   };
 }
 
@@ -58,23 +79,49 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
     },
     headline: post.title,
     description: post.preview,
-    image: `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : '/' + post.featuredImage}`, // Ensure leading slash
+    image: `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : '/' + post.featuredImage}`,
     datePublished: new Date(post.date).toISOString(),
-    dateModified: new Date(post.date).toISOString(), // Assuming no separate modified date for now
+    dateModified: new Date(post.date).toISOString(), 
     author: {
-      "@type": "Organization", // Or "Person" if you have individual authors
+      "@type": "Organization", 
       name: "EatWise India Team",
+      url: BASE_URL, // Link to organization's main page
     },
     publisher: {
       "@type": "Organization",
       name: "EatWise India",
       logo: {
         "@type": "ImageObject",
-        url: `${BASE_URL}/img/logo_200x60.png`, // IMPORTANT: Replace with your actual logo URL
+        url: `${BASE_URL}/img/logo_200x60.png`,
         width: "200",
         height: "60"
       },
     },
+  };
+
+  const breadcrumbStructuredData: BreadcrumbList = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": BASE_URL
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Blog", // Assuming your blog list page H1 is "Blog" or similar
+        "item": `${BASE_URL}/blogs`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": post.title
+        // No item for the last element as it's the current page
+      }
+    ]
   };
 
   return (
@@ -83,6 +130,11 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
         id="article-structured-data"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleStructuredData) }}
+      />
+      <Script
+        id="breadcrumb-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbStructuredData) }}
       />
       <article className="container mx-auto max-w-3xl py-8 px-4 md:px-6">
         <div className="mb-8">
@@ -106,7 +158,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           <div className="overflow-hidden rounded-lg shadow-md mb-8">
             <Image
               src={post.featuredImage}
-              alt={post.title}
+              alt={post.title} // Alt text using post title
               width={1200}
               height={675}
               className="w-full object-cover aspect-video transition-transform duration-300 hover:scale-105"
