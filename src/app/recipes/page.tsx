@@ -1,7 +1,18 @@
 
 import { RecipeForm } from "./recipe-form";
 import { CookingPot } from "lucide-react";
-import {NextPage} from 'next';
+import type { NextPage, Metadata } from 'next';
+
+// IMPORTANT: Replace this with your actual website's base URL
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.example.com';
+
+export const metadata: Metadata = {
+  title: "AI Recipe Suggestions | EatWise India",
+  description: "Get healthy Indian meal ideas and AI-generated recipes based on ingredients you have. Perfect for quick meal planning with EatWise India.",
+  alternates: {
+    canonical: `${BASE_URL}/recipes`,
+  },
+};
 
 const RecipesPage: NextPage = () => {
   return (

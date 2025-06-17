@@ -1,11 +1,22 @@
 
-import React from "react"; // Added this line
+import React from "react";
 import { Mail, Phone, Share2, Facebook, Twitter, Instagram, Linkedin, Youtube } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import type {NextPage} from 'next';
+import type { NextPage, Metadata } from 'next';
+
+// IMPORTANT: Replace this with your actual website's base URL
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.example.com';
+
+export const metadata: Metadata = {
+  title: "Contact Us | EatWise India",
+  description: "Get in touch with the EatWise India team for support, feedback, or inquiries. We're here to help you on your journey to healthier eating.",
+  alternates: {
+    canonical: `${BASE_URL}/contact`,
+  },
+};
 
 const ContactPage: NextPage = () => {
   const contactEmail = "support@eatwiseindia.com"; // Placeholder
