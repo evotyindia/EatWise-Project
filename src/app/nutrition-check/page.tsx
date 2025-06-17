@@ -1,7 +1,18 @@
 
 import { NutritionForm } from "./nutrition-form";
 import { BarChart3 } from "lucide-react";
-import {NextPage} from 'next';
+import type { NextPage, Metadata } from 'next';
+
+// IMPORTANT: Replace this with your actual website's base URL
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.example.com';
+
+export const metadata: Metadata = {
+  title: "AI Nutrition Analyzer | EatWise India",
+  description: "Analyze nutritional information from food labels or manual input. Get AI insights on balance, suitability, and density rating with EatWise India.",
+  alternates: {
+    canonical: `${BASE_URL}/nutrition-check`,
+  },
+};
 
 const NutritionCheckPage: NextPage = () => {
   return (

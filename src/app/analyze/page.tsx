@@ -1,7 +1,18 @@
 
 import { AnalyzerForm } from "@/app/analyze/analyzer-form";
 import { ScanLine } from "lucide-react";
-import type {NextPage} from 'next';
+import type { NextPage, Metadata } from 'next';
+
+// IMPORTANT: Replace this with your actual website's base URL
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.example.com';
+
+export const metadata: Metadata = {
+  title: "AI Food Label Analyzer | EatWise India",
+  description: "Upload a food label image or enter ingredients to get an AI health report, analysis, and healthier Indian alternatives with EatWise India.",
+  alternates: {
+    canonical: `${BASE_URL}/analyze`,
+  },
+};
 
 const AnalyzePage: NextPage = () => {
   return (

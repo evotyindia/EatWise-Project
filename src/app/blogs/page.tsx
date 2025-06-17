@@ -2,7 +2,18 @@
 import { BlogList } from "./blog-list";
 import { BookOpen } from "lucide-react";
 import { blogPosts, getBlogCategories } from "@/lib/blog-data";
-import {NextPage} from 'next';
+import type { NextPage, Metadata } from 'next';
+
+// IMPORTANT: Replace this with your actual website's base URL
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.example.com';
+
+export const metadata: Metadata = {
+  title: "Nutrition & Wellness Blog | EatWise India",
+  description: "Explore articles and insights on healthy eating, understanding food labels, and Indian nutrition with the EatWise India blog.",
+  alternates: {
+    canonical: `${BASE_URL}/blogs`,
+  },
+};
 
 const BlogPage: NextPage = () => {
   const categories = getBlogCategories();

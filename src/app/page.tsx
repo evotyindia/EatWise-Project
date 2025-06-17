@@ -4,6 +4,34 @@ import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { CheckCircle, ScanLine, MessageCircle, CookingPot, BarChart3 as ChartColumn, Users, Target, Lightbulb, User, UploadCloud, Cpu, ClipboardCheck, Utensils, Smile, MapPin, ShieldCheck, HeartPulse, Leaf } from "lucide-react";
+import type { WebApplication } from 'schema-dts'; // Import type for structured data
+import Script from 'next/script'; // Import Script component
+
+const WebAppStructuredData: WebApplication = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "EatWise India",
+  description: "Empowering India to Eat Smarter with AI. Understand food labels, analyze ingredients, and get healthy Indian recipe suggestions.",
+  applicationCategory: "HealthApplication",
+  operatingSystem: "WEB",
+  url: "https://www.example.com", // IMPORTANT: Replace with your actual URL
+  offers: {
+    "@type": "Offer",
+    price: "0", // Assuming the app is free
+    priceCurrency: "INR"
+  },
+  publisher: {
+    "@type": "Organization",
+    name: "EatWise India",
+    logo: {
+      "@type": "ImageObject",
+      url: "https://www.example.com/img/logo_200x60.png", // IMPORTANT: Replace with your actual logo URL
+      width: "200",
+      height: "60"
+    }
+  }
+};
+
 
 export default function Home() {
   const features = [
@@ -85,6 +113,11 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <Script
+        id="webapplication-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(WebAppStructuredData) }}
+      />
       <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-primary/35 via-background to-accent/35">
         <div className="container px-4 md:px-6 text-center">
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-primary">
@@ -328,5 +361,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
