@@ -69,27 +69,27 @@ export default function Home() {
 
   const whyChoosePoints = [
     {
-      icon: <Cpu className="h-10 w-10 text-accent" />,
+      icon: <Cpu className="h-10 w-10 text-primary" />,
       title: "AI-Powered Precision",
       description: "Harness advanced AI to decode complex food labels and nutritional data in seconds, providing you with accurate, quick insights."
     },
     {
-      icon: <CookingPot className="h-10 w-10 text-accent" />,
+      icon: <CookingPot className="h-10 w-10 text-primary" />,
       title: "Culturally Relevant Advice",
       description: "Discover healthier Indian food alternatives and recipes tailored to local tastes and dietary preferences, making healthy eating enjoyable."
     },
     {
-      icon: <ClipboardCheck className="h-10 w-10 text-accent" />,
+      icon: <ClipboardCheck className="h-10 w-10 text-primary" />,
       title: "Clear & Actionable Guidance",
       description: "Receive straightforward health ratings, risk highlights, and practical suggestions, empowering confident food choices."
     },
     {
-      icon: <Utensils className="h-10 w-10 text-accent" />,
+      icon: <Utensils className="h-10 w-10 text-primary" />,
       title: "Comprehensive Nutrition Tools",
       description: "From analyzing processed foods to suggesting wholesome recipes, access a suite of tools for a holistic approach to your diet."
     },
     {
-      icon: <Smile className="h-10 w-10 text-accent" />,
+      icon: <Smile className="h-10 w-10 text-primary" />,
       title: "User-Friendly Experience",
       description: "Navigate your path to better health with an intuitive interface, making nutritional awareness accessible to everyone."
     }
@@ -145,7 +145,7 @@ export default function Home() {
       <section id="features" className="w-full py-12 md:py-24 lg:py-32">
         <div className="container px-4 md:px-6">
           <div className="text-center mb-12">
-            <Lightbulb className="mx-auto h-12 w-12 text-accent mb-4" />
+            <Lightbulb className="mx-auto h-12 w-12 text-primary mb-4" />
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Unlock a Healthier You
             </h2>
