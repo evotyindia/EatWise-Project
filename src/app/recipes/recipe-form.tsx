@@ -11,7 +11,7 @@ import type { ContextAwareAIChatInput, ContextAwareAIChatOutput, ChatMessage } f
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Leaf, Wheat, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Milk, Cookie, MinusCircle, PlusCircle } from "lucide-react";
+import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Leaf, Wheat, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Milk, Cookie, MinusCircle, PlusCircle, CheckCircle } from "lucide-react"; // Added CheckCircle
 import React, { useState, useEffect, useRef } from "react";
 import { createRoot } from 'react-dom/client';
 import html2canvas from 'html2canvas';
@@ -76,6 +76,8 @@ export function RecipeForm() {
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [currentFormInputs, setCurrentFormInputs] = useState<RecipePageFormValues | null>(null);
+  const [selectedQuickAddIngredients, setSelectedQuickAddIngredients] = useState<Set<string>>(new Set());
+
 
   const { toast } = useToast();
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
@@ -89,10 +91,42 @@ export function RecipeForm() {
     },
   });
 
+  const ingredientsValueFromForm = form.watch("ingredients");
+
+  useEffect(() => {
+    if (typeof ingredientsValueFromForm === 'string') {
+        const currentTextareaIngredients = new Set(
+            ingredientsValueFromForm.split(',')
+                .map(ing => ing.trim().toLowerCase()) // Normalize to lowercase for comparison
+                .filter(Boolean)
+        );
+        setSelectedQuickAddIngredients(currentTextareaIngredients);
+    } else {
+        setSelectedQuickAddIngredients(new Set());
+    }
+  }, [ingredientsValueFromForm]);
+
   const addIngredientToForm = (ingredient: string) => {
-    const currentIngredients = form.getValues("ingredients");
-    const newIngredients = currentIngredients ? `${currentIngredients}, ${ingredient}` : ingredient;
-    form.setValue("ingredients", newIngredients, { shouldValidate: true });
+    const currentIngredientsStr = form.getValues("ingredients") || "";
+    const currentIngredientsArray = currentIngredientsStr.split(',')
+        .map(ing => ing.trim())
+        .filter(Boolean);
+
+    const ingredientLower = ingredient.toLowerCase();
+    const isAlreadyAdded = currentIngredientsArray.some(ing => ing.toLowerCase() === ingredientLower);
+
+    if (!isAlreadyAdded) {
+        const newIngredients = currentIngredientsArray.length > 0 
+            ? `${currentIngredientsStr}, ${ingredient}` 
+            : ingredient;
+        form.setValue("ingredients", newIngredients, { shouldValidate: true, shouldDirty: true });
+    } else {
+        toast({
+            title: "Ingredient Already Added",
+            description: `${ingredient} is already in your list.`,
+            duration: 2000,
+        });
+    }
   };
 
   const onGetSuggestionsSubmit: SubmitHandler<RecipePageFormValues> = async (data) => {
@@ -321,18 +355,25 @@ export function RecipeForm() {
                           </AccordionTrigger>
                           <AccordionContent>
                             <div className="flex flex-wrap gap-1.5 pt-1 pb-3">
-                              {category.items.map(item => (
-                                <Button 
-                                  key={item} 
-                                  type="button"
-                                  variant="outline" 
-                                  size="sm" 
-                                  onClick={() => addIngredientToForm(item)} 
-                                  className="text-xs px-2.5 py-1 h-auto rounded-full hover:bg-primary/10 hover:border-primary focus:ring-primary/50 transition-all duration-150 ease-in-out hover:scale-105 active:scale-95"
-                                >
-                                  <PlusCircle className="mr-1.5 h-3 w-3 opacity-70" />{item}
-                                </Button>
-                              ))}
+                              {category.items.map(item => {
+                                const isSelected = selectedQuickAddIngredients.has(item.toLowerCase());
+                                return (
+                                  <Button 
+                                    key={item} 
+                                    type="button"
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => addIngredientToForm(item)} 
+                                    className={cn(
+                                      "text-xs px-2.5 py-1 h-auto rounded-full hover:bg-primary/10 hover:border-primary focus:ring-primary/50 transition-all duration-150 ease-in-out hover:scale-105 active:scale-95 flex items-center",
+                                      isSelected && "bg-primary/20 border-primary text-primary font-semibold"
+                                    )}
+                                  >
+                                    {isSelected ? <CheckCircle className="mr-1.5 h-3 w-3" /> : <PlusCircle className="mr-1.5 h-3 w-3 opacity-70" />}
+                                    {item}
+                                  </Button>
+                                );
+                              })}
                             </div>
                           </AccordionContent>
                         </AccordionItem>
@@ -484,7 +525,5 @@ export function RecipeForm() {
     </div>
   );
 }
-
-    
 
     
