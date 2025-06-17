@@ -8,7 +8,7 @@ import { Footer } from '@/components/layout/footer';
 import { Toaster } from '@/components/ui/toaster';
 import type { WebSite, Organization } from 'schema-dts';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.example.com';
+const BASE_URL = 'https://eatwise.evotyindia.me';
 
 const websiteStructuredData: WebSite = {
   "@context": "https://schema.org",
@@ -19,11 +19,11 @@ const websiteStructuredData: WebSite = {
     "@type": "SearchAction",
     target: {
       "@type": "EntryPoint",
-      urlTemplate: `${BASE_URL}/search?q={search_term_string}` // Generic placeholder, update if you add site search
+      urlTemplate: `${BASE_URL}/search?q={search_term_string}`
     },
     "query-input": "required name=search_term_string"
   },
-  publisher: { // Added publisher here as well
+  publisher: { 
     "@type": "Organization",
     name: "EatWise India",
     logo: {
@@ -41,15 +41,6 @@ const organizationStructuredData: Organization = {
   name: "EatWise India",
   url: BASE_URL,
   logo: `${BASE_URL}/img/logo_200x60.png`,
-  // "contactPoint": [{ // Optional: Add contact points
-  //   "@type": "ContactPoint",
-  //   "telephone": "+91-123-456-7890", // Replace with actual
-  //   "contactType": "Customer Service"
-  // }],
-  // "sameAs": [ // Optional: Add social media links if they represent the org
-  //   "https://facebook.com/eatwiseindia",
-  //   "https://twitter.com/eatwiseindia"
-  // ]
 };
 
 
@@ -86,8 +77,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'EatWise India - AI Nutrition Guide',
     description: 'AI-powered nutrition insights for India. Analyze food labels, get recipes, and make healthier choices.',
-    // images: [`${BASE_URL}/img/twitter-card-image.png`], // Optionally, a different image for Twitter
-    // creator: '@YourTwitterHandle',
+    images: [`${BASE_URL}/img/og-default-image.png`], 
   },
   robots: {
     index: true,
@@ -100,21 +90,16 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  // verification: {
-  //   google: 'YOUR_GOOGLE_SITE_VERIFICATION_CODE',
-  // },
   alternates: {
     canonical: BASE_URL,
   },
-  // manifest: "/manifest.json", // For PWAs
   icons: {
-    icon: [ // Array for multiple icon sizes/types
-      { url: '/favicon.ico', type: 'image/x-icon', sizes: 'any' }, // Traditional
+    icon: [ 
+      { url: '/favicon.ico', type: 'image/x-icon', sizes: 'any' }, 
       { url: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
       { url: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
     ],
-    apple: '/apple-touch-icon.png', // For Apple devices (180x180 recommended)
-    // shortcut: '/shortcut-icon.png', // Less common
+    apple: '/apple-touch-icon.png', 
   },
 };
 
@@ -136,7 +121,6 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
           href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
-        {/* Favicon links are now managed by Next.js metadata.icons */}
         <Script
           id="website-structured-data"
           type="application/ld+json"

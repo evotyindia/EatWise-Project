@@ -4,11 +4,11 @@ import { BookOpen } from "lucide-react";
 import { blogPosts, getBlogCategories } from "@/lib/blog-data";
 import type { NextPage, Metadata } from 'next';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.example.com';
+const BASE_URL = 'https://eatwise.evotyindia.me';
 
 export const metadata: Metadata = {
   title: "Nutrition & Wellness Blogs | EatWise India",
-  description: "Explore articles and insights on healthy eating, understanding food labels, and Indian nutrition with the EatWise India blogs.",
+  description: "Explore articles and insights on healthy eating, understanding food labels, and Indian nutrition with the EatWise India Blogs.",
   alternates: {
     canonical: `${BASE_URL}/blogs`,
   },

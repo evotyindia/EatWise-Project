@@ -3,7 +3,7 @@
 
 **AI-powered nutrition guide helping Indians make healthier food choices through label analysis, recipe suggestions, and personalized dietary advice.**
 
-EatWise India (formerly Swasth Bharat Advisor) is an AI-powered nutrition guide designed to help users in India make healthier food choices. It offers features like food label analysis, ingredient insights, health ratings, AI-driven chat for nutritional queries, and personalized Indian recipe suggestions.
+EatWise India (formerly Swasth Bharat Advisor) is an AI-powered nutrition guide designed to help users in India make healthier food choices. It offers features like food label analysis, ingredient insights, health ratings, AI-driven chat for nutritional queries, and personalized Indian recipe suggestions. Its primary domain is [https://eatwise.evotyindia.me](https://eatwise.evotyindia.me).
 
 ## Core Features
 
@@ -29,7 +29,7 @@ Follow these steps to get the project running locally:
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://your-repository-url/eatwise-india.git
+    git clone <your-repository-url>/eatwise-india.git
     cd eatwise-india
     ```
 
@@ -46,8 +46,10 @@ Follow these steps to get the project running locally:
     Create a `.env` file in the root of your project and add your Google AI API key:
     ```env
     GOOGLE_API_KEY=your_google_api_key_here
+    NEXT_PUBLIC_BASE_URL=https://eatwise.evotyindia.me 
     ```
     You can obtain a Google AI API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+    Set `NEXT_PUBLIC_BASE_URL` to `http://localhost:3000` for local development if needed, or your production URL.
 
 4.  **Run the Genkit Development Server (for AI features):**
     Open a new terminal window/tab and run:
@@ -103,14 +105,16 @@ In the project directory, you can run:
 ## Environment Variables
 
 *   `GOOGLE_API_KEY`: **Required**. Your API key for Google AI services (Gemini).
+*   `NEXT_PUBLIC_BASE_URL`: **Required for correct sitemap and metadata generation.** Set to your production domain (e.g., `https://eatwise.evotyindia.me`) or `http://localhost:3000` for local development.
 
-Make sure to add this to your `.env` file for local development. For production deployments (e.g., Vercel, Firebase), set this as an environment variable in your hosting provider's settings. Do not commit your `.env` file to version control.
+Make sure to add these to your `.env` file for local development. For production deployments (e.g., Vercel, Firebase), set these as environment variables in your hosting provider's settings. Do not commit your `.env` file to version control.
 
 ## Deployment
 
 This Next.js application can be deployed to any platform that supports Next.js, such as Vercel, Netlify, or Firebase App Hosting (an `apphosting.yaml` is included).
 
 For Genkit flows to work in production, ensure your deployment environment has the `GOOGLE_API_KEY` environment variable set.
+Ensure `NEXT_PUBLIC_BASE_URL` is set to your production domain for correct SEO and link generation.
 
 ## Contributing
 
