@@ -260,20 +260,20 @@ export function AnalyzerForm() {
 
     if (hasBullets) {
         return (
-            <ul className="list-none space-y-1.5 text-sm leading-relaxed break-words">
+            <ul className="list-none space-y-1.5 text-sm leading-relaxed">
                 {lines.map((line, index) => (
                     <li key={index} className="flex items-start">
                         <span className="mr-2.5 mt-1 text-primary">&#8226;</span>
-                        <span>{line.replace(/^(\*|-)\s*/, '')}</span>
+                        <span className="break-all">{line.replace(/^(\*|-)\s*/, '')}</span>
                     </li>
                 ))}
             </ul>
         );
     } else {
         return (
-            <div className="text-sm leading-relaxed space-y-1.5 break-words">
+            <div className="text-sm leading-relaxed space-y-1.5">
                 {lines.map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
+                    <p key={index} className="break-all">{paragraph}</p>
                 ))}
             </div>
         );
@@ -485,3 +485,5 @@ export function AnalyzerForm() {
     </div>
   );
 }
+
+    
