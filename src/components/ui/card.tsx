@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
@@ -9,7 +10,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm",
+      "rounded-xl border bg-card text-card-foreground shadow-lg", // Changed to rounded-xl and default shadow-lg
       className
     )}
     {...props}
@@ -30,13 +31,14 @@ const CardHeader = React.forwardRef<
 CardHeader.displayName = "CardHeader"
 
 const CardTitle = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
+  HTMLDivElement, // Changed from HTMLParagraphElement to HTMLDivElement for semantic correctness if it contains other elements or acts as a heading container
+  React.HTMLAttributes<HTMLHeadingElement> // Changed from HTMLParagraphElement to HTMLHeadingElement for props
 >(({ className, ...props }, ref) => (
-  <div
+  // Assuming CardTitle is used for h2, h3 etc. Using div with role heading for flexibility or direct h-tag
+  <div // Can be changed to h2, h3 etc. based on usage context, or use role="heading" aria-level="2"
     ref={ref}
     className={cn(
-      "text-2xl font-semibold leading-none tracking-tight",
+      "text-2xl font-semibold leading-none tracking-tight", // Kept original styling
       className
     )}
     {...props}
@@ -44,11 +46,12 @@ const CardTitle = React.forwardRef<
 ))
 CardTitle.displayName = "CardTitle"
 
+
 const CardDescription = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
+  HTMLParagraphElement, // Correctly HTMLParagraphElement
+  React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <div
+  <p // Changed div to p for semantic correctness
     ref={ref}
     className={cn("text-sm text-muted-foreground", className)}
     {...props}

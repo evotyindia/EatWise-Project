@@ -3,12 +3,13 @@ import { getBlogPostBySlug, blogPosts } from "@/lib/blog-data";
 import Image from "next/image";
 import { Link } from "@/navigation"; 
 import { notFound } from "next/navigation";
-import { CalendarDays, Tag, ArrowLeft } from "lucide-react";
+import { CalendarDays, Tag, ArrowLeft, Edit3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import type { Article, BreadcrumbList } from 'schema-dts';
 import Script from 'next/script';
+import { Card, CardContent } from "@/components/ui/card";
 
 const BASE_URL = 'https://eatwise.evotyindia.me';
 
@@ -136,26 +137,30 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbStructuredData) }}
       />
-      <article className="container mx-auto max-w-3xl py-8 px-4 md:px-6">
+      <article className="container mx-auto max-w-3xl py-10 px-4 md:px-0"> {/* Removed horizontal padding for wider content on md+ */}
         <div className="mb-8">
-          <Button variant="outline" asChild size="sm" className="mb-6 group transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
+          <Button variant="outline" asChild size="sm" className="mb-8 group transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 hover:bg-accent/10 hover:text-accent">
             <Link href="/blogs">
               <ArrowLeft className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
               Back to Blogs
             </Link>
           </Button>
-          <h1 className="text-4xl font-bold tracking-tight mb-3">{post.title}</h1>
-          <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-4">
+          <Badge variant="secondary" className="mb-3 text-sm bg-accent/10 text-accent-foreground hover:bg-accent/20">
+            <Tag className="mr-1.5 h-3.5 w-3.5" />{post.category}
+          </Badge>
+          <h1 className="text-4xl lg:text-5xl font-bold tracking-tight mb-4 text-primary">{post.title}</h1>
+          <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-6">
             <div className="flex items-center">
-              <CalendarDays className="mr-1.5 h-4 w-4" />
-              <span>{new Date(post.date).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+              <CalendarDays className="mr-1.5 h-4 w-4 text-primary/70" />
+              <span>Published on {new Date(post.date).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
             </div>
+             {/* Example author, replace with actual data if available */}
             <div className="flex items-center">
-              <Tag className="mr-1.5 h-4 w-4" />
-              <Badge variant="secondary">{post.category}</Badge>
+                <Edit3 className="mr-1.5 h-4 w-4 text-primary/70" />
+                <span>By EatWise India Team</span>
             </div>
           </div>
-          <div className="overflow-hidden rounded-lg shadow-md mb-8">
+          <Card className="overflow-hidden shadow-xl rounded-xl mb-8 border-border">
             <Image
               src={post.featuredImage}
               alt={post.title} 
@@ -165,29 +170,39 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
               priority
               data-ai-hint={post.dataAiHint}
             />
-          </div>
+          </Card>
         </div>
         
-        <Separator className="my-8" />
+        <Separator className="my-10" />
 
         <div
           className="prose prose-lg dark:prose-invert max-w-none 
-                     prose-headings:font-headline prose-headings:text-primary dark:prose-headings:text-primary-foreground/90
-                     prose-p:text-foreground/90 dark:prose-p:text-foreground/80
-                     prose-a:text-accent hover:prose-a:text-accent/80 dark:prose-a:text-accent dark:hover:prose-a:text-accent/80
+                     prose-headings:font-headline prose-headings:text-primary dark:prose-headings:text-primary-foreground/90 prose-headings:mb-3 prose-headings:mt-8
+                     prose-p:text-foreground/90 dark:prose-p:text-foreground/80 prose-p:leading-relaxed prose-p:mb-5
+                     prose-a:text-accent hover:prose-a:text-accent/80 dark:prose-a:text-accent dark:hover:prose-a:text-accent/80 prose-a:font-medium prose-a:underline-offset-2 prose-a:underline
                      prose-strong:text-foreground dark:prose-strong:text-primary-foreground/90
-                     prose-ul:list-disc prose-ul:pl-6 prose-li:marker:text-accent
-                     prose-ol:list-decimal prose-ol:pl-6 prose-li:marker:text-accent"
+                     prose-ul:list-disc prose-ul:pl-6 prose-ul:space-y-1 prose-li:marker:text-primary prose-li:mb-1
+                     prose-ol:list-decimal prose-ol:pl-6 prose-ol:space-y-1 prose-li:marker:text-primary prose-li:mb-1
+                     prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-muted-foreground"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
         
         <Separator className="my-12" />
 
-        <div className="text-center">
-          <Button asChild className="transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
-            <Link href="/analyze">Analyze Your Food Label Now</Link>
-          </Button>
-        </div>
+        <Card className="p-6 bg-primary/5 border-primary/20 rounded-xl text-center">
+            <h3 className="text-xl font-semibold text-primary mb-3">Ready to Eat Wiser?</h3>
+            <p className="text-muted-foreground mb-4">
+                Apply what you've learned! Analyze your next meal's label or find a healthy recipe.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-3">
+                <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 text-base">
+                    <Link href="/analyze">Analyze Your Food Label</Link>
+                </Button>
+                <Button asChild variant="outline" className="text-primary border-primary hover:bg-primary/10 hover:text-primary transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 text-base">
+                    <Link href="/recipes">Get Recipe Ideas</Link>
+                </Button>
+            </div>
+        </Card>
       </article>
     </>
   );

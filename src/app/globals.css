@@ -5,7 +5,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 210 40% 98%; /* Softer off-white for light mode */
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
@@ -17,8 +17,8 @@
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 200 70% 60%; /* Updated light mode accent */
-    --accent-foreground: 222.2 47.4% 11.2%; /* Should still contrast well */
+    --accent: 200 70% 55%; /* Slightly deeper blue for light mode accent */
+    --accent-foreground: 0 0% 98%; /* Brighter foreground for accent */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 214.3 31.8% 91.4%;
@@ -36,7 +36,7 @@
     --sidebar-foreground: 240 10% 3.9%; 
     --sidebar-primary: 142.1 76.2% 36.3%; 
     --sidebar-primary-foreground: 355.7 100% 97.3%;
-    --sidebar-accent: 200 70% 90%; /* Lighter version of the main accent for sidebar hover */
+    --sidebar-accent: 200 70% 90%; 
     --sidebar-accent-foreground: 222.2 47.4% 11.2%; 
     --sidebar-border: 214.3 31.8% 91.4%; 
     --sidebar-ring: 142.1 76.2% 36.3%;
@@ -55,7 +55,7 @@
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 15%;
     --muted-foreground: 240 5% 64.9%;
-    --accent: 200 60% 35%; /* Dark mode accent - visible blue */
+    --accent: 200 65% 45%; /* Richer blue for dark mode accent */
     --accent-foreground: 0 0% 98%; 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 85.7% 97.3%;
@@ -103,3 +103,4 @@
   /* min-height: 277mm; /* A4 height minus typical margins */
   /* box-sizing: border-box; */
 }
+
