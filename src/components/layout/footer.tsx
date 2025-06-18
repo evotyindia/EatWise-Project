@@ -16,67 +16,90 @@ export function Footer() {
     { name: "YouTube", icon: <Youtube className="h-5 w-5" />, url: "https://youtube.com/c/eatwiseindia" }, 
   ];
 
+  const footerWaveSvgLight = `url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1200 120' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,60 C150,120 300,0 450,60 C600,120 750,0 900,60 C1050,120 1200,60 1200,60 L1200,120 L0,120 Z' fill='%23f1f5f9'/%3E%3C/svg%3E")`; // hsl(220, 13%, 96%) ~ slate-100
+  const footerWaveSvgDark = `url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' viewBox='0 0 1200 120' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,60 C150,120 300,0 450,60 C600,120 750,0 900,60 C1050,120 1200,60 1200,60 L1200,120 L0,120 Z' fill='%231e293b'/%3E%3C/svg%3E")`; // hsl(215, 28%, 17%) ~ slate-800
+
+
   return (
-    <footer className="bg-muted/40 dark:bg-neutral-900/50 border-t border-border/60 text-foreground/90">
-      <div className="container py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12 mb-10 md:mb-12">
-          
-          <div className="md:col-span-2 lg:col-span-2">
-             <Link href="/" className="flex items-center space-x-2.5 mb-4 group">
-                <Leaf className="h-8 w-8 text-primary group-hover:text-accent transition-colors duration-300 ease-in-out" />
-                <span className="font-bold text-2xl font-headline text-primary group-hover:text-accent transition-colors duration-300 ease-in-out">
-                    EatWise India
-                </span>
-            </Link>
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
-              Empowering India to Eat Smarter with AI. Understand food labels, analyze ingredients, and get healthy Indian recipe suggestions for a conscious lifestyle.
-            </p>
-          </div>
+    <footer className="bg-background text-foreground/90 border-t border-border/60">
+      <div 
+        className="relative pt-20 pb-12 md:pb-16 bg-muted dark:bg-neutral-900 overflow-hidden"
+      >
+        {/* Decorative SVG Wave - Light mode */}
+        <div 
+            className="absolute top-0 left-0 w-full h-[100px] sm:h-[120px] dark:hidden" 
+            style={{ backgroundImage: footerWaveSvgLight, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'bottom center' }}
+            aria-hidden="true"
+        ></div>
+        {/* Decorative SVG Wave - Dark mode */}
+        <div 
+            className="absolute top-0 left-0 w-full h-[100px] sm:h-[120px] hidden dark:block" 
+            style={{ backgroundImage: footerWaveSvgDark, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'bottom center' }}
+            aria-hidden="true"
+        ></div>
 
-          <div>
-            <h3 className="text-lg font-semibold mb-4 font-headline text-primary/90">Quick Links</h3>
-            <ul className="space-y-2.5">
-              <li><Link href="/analyze" className="text-sm text-muted-foreground hover:text-primary hover:underline underline-offset-2 transition-colors">Analyze Label</Link></li>
-              <li><Link href="/recipes" className="text-sm text-muted-foreground hover:text-primary hover:underline underline-offset-2 transition-colors">Recipe Suggestions</Link></li>
-              <li><Link href="/nutrition-check" className="text-sm text-muted-foreground hover:text-primary hover:underline underline-offset-2 transition-colors">Nutrition Check</Link></li>
-              <li><Link href="/blogs" className="text-sm text-muted-foreground hover:text-primary hover:underline underline-offset-2 transition-colors">Our Blogs</Link></li>
-              <li><Link href="/contact" className="text-sm text-muted-foreground hover:text-primary hover:underline underline-offset-2 transition-colors">Contact Us</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-4 font-headline text-primary/90">Connect With Us</h3>
-            <div className="flex space-x-2 mb-3">
-              {socialLinks.map((social) => (
-                <Button
-                  key={social.name}
-                  variant="outline"
-                  size="icon"
-                  asChild
-                  className="rounded-lg hover:bg-primary/10 hover:border-primary/50 group transition-all duration-300 ease-in-out hover:scale-110 border-border/70 shadow-sm"
-                  title={social.name}
-                >
-                  <Link href={social.url} target="_blank" rel="noopener noreferrer">
-                    {React.cloneElement(social.icon, { className: "h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" })}
-                  </Link>
-                </Button>
-              ))}
+        <div className="container relative z-10"> {/* Ensure content is above the SVG */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12 mb-10 md:mb-12">
+            
+            <div className="md:col-span-2 lg:col-span-2">
+              <Link href="/" className="flex items-center space-x-3 mb-5 group">
+                  <Leaf className="h-9 w-9 text-primary group-hover:text-accent transition-colors duration-300 ease-in-out transform group-hover:rotate-12" />
+                  <span className="font-bold text-3xl font-headline text-primary group-hover:text-accent transition-colors duration-300 ease-in-out">
+                      EatWise India
+                  </span>
+              </Link>
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
+                Empowering India to Eat Smarter with AI. Understand food labels, analyze ingredients, and get healthy Indian recipe suggestions for a conscious lifestyle.
+              </p>
             </div>
-             <p className="text-xs text-muted-foreground/80 leading-normal">
-              Follow us on social media for the latest tips, feature updates, and community health discussions.
-            </p>
+
+            <div>
+              <h3 className="text-lg font-semibold mb-5 font-headline text-primary">Quick Links</h3>
+              <ul className="space-y-3">
+                <li><Link href="/analyze" className="text-sm text-muted-foreground hover:text-primary hover:underline underline-offset-2 transition-colors duration-200">Analyze Label</Link></li>
+                <li><Link href="/recipes" className="text-sm text-muted-foreground hover:text-primary hover:underline underline-offset-2 transition-colors duration-200">Recipe Suggestions</Link></li>
+                <li><Link href="/nutrition-check" className="text-sm text-muted-foreground hover:text-primary hover:underline underline-offset-2 transition-colors duration-200">Nutrition Check</Link></li>
+                <li><Link href="/blogs" className="text-sm text-muted-foreground hover:text-primary hover:underline underline-offset-2 transition-colors duration-200">Our Blogs</Link></li>
+                <li><Link href="/contact" className="text-sm text-muted-foreground hover:text-primary hover:underline underline-offset-2 transition-colors duration-200">Contact Us</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold mb-5 font-headline text-primary">Connect With Us</h3>
+              <div className="flex space-x-2.5 mb-4">
+                {socialLinks.map((social) => (
+                  <Button
+                    key={social.name}
+                    variant="outline"
+                    size="icon"
+                    asChild
+                    className="rounded-lg hover:bg-primary/10 hover:border-primary/60 group transition-all duration-300 ease-in-out hover:scale-110 border-border/80 shadow-sm"
+                    title={social.name}
+                  >
+                    <Link href={social.url} target="_blank" rel="noopener noreferrer">
+                      {React.cloneElement(social.icon, { className: "h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" })}
+                    </Link>
+                  </Button>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground/90 leading-normal">
+                Follow us on social media for the latest tips, feature updates, and community health discussions.
+              </p>
+            </div>
           </div>
         </div>
-        
-        <Separator className="my-8 bg-border/50" />
-
-        <div className="flex flex-col sm:flex-row items-center justify-between text-center sm:text-left">
-          <p className="text-xs text-muted-foreground">
-            © {currentYear} EatWise India. All rights reserved.
-          </p>
-          <p className="text-xs text-muted-foreground mt-1 sm:mt-0">
-            AI for a Healthier You. Made with <span className="text-red-500 animate-pulse">❤</span> in India.
-          </p>
+      </div>
+      
+      <div className="bg-background dark:bg-neutral-950 py-6 border-t border-border/70">
+        <div className="container">
+            <div className="flex flex-col sm:flex-row items-center justify-between text-center sm:text-left">
+            <p className="text-xs text-muted-foreground">
+                © {currentYear} EatWise India. All rights reserved.
+            </p>
+            <p className="text-xs text-muted-foreground mt-1 sm:mt-0">
+                AI for a Healthier You. Made with <span className="text-red-500 animate-pulse">❤</span> in India.
+            </p>
+            </div>
         </div>
       </div>
     </footer>
