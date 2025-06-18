@@ -296,7 +296,7 @@ export function AnalyzerForm() {
                   htmlFor="image-upload"
                   className={cn(
                     buttonVariants({ variant: "outline" }),
-                    "cursor-pointer flex-grow w-full sm:w-auto justify-center truncate text-sm"
+                    "cursor-pointer flex-grow w-full sm:w-auto justify-center truncate text-sm py-2.5" 
                   )}
                 >
                   <UploadCloud className="mr-2 h-4 w-4" />
@@ -422,8 +422,8 @@ export function AnalyzerForm() {
             </div>
             <Separator />
             <Alert variant="default" className="bg-card rounded-lg border-border shadow-sm">
-                <Info className="h-5 w-5 text-accent" />
-                 <AlertTitle className="font-semibold text-lg mb-1.5 text-accent-foreground">Summary:</AlertTitle>
+                <Info className="h-5 w-5 text-primary" />
+                 <AlertTitle className="font-semibold text-lg mb-1.5 text-primary">Summary:</AlertTitle>
                 <AlertDescription className="text-foreground/80">{renderFormattedText(report.detailedAnalysis.summary)}</AlertDescription>
             </Alert>
             
@@ -445,8 +445,8 @@ export function AnalyzerForm() {
             
             {renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown) && (
                  <Alert variant="default" className="bg-card rounded-lg border-border shadow-sm">
-                    <Info className="h-5 w-5 text-accent" />
-                    <AlertTitle className="font-semibold text-lg mb-1.5 text-accent-foreground">Key Nutrients Breakdown:</AlertTitle>
+                    <Info className="h-5 w-5 text-primary" />
+                    <AlertTitle className="font-semibold text-lg mb-1.5 text-primary">Key Nutrients Breakdown:</AlertTitle>
                     <AlertDescription className="text-foreground/80">{renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown)}</AlertDescription>
                 </Alert>
             )}
@@ -485,5 +485,3 @@ export function AnalyzerForm() {
     </div>
   );
 }
-
-    

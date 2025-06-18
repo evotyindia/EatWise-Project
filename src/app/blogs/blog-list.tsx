@@ -53,14 +53,14 @@ export function BlogList({ initialPosts, categories }: BlogListProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredPosts.map((post) => (
-          <Card key={post.slug} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5 border border-border rounded-xl hover:border-primary/50">
+          <Card key={post.slug} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5 border border-border rounded-xl hover:border-primary/50 min-w-0">
             <CardHeader className="p-0">
               <Link href={`/blogs/${post.slug}`} aria-label={post.title} className="block overflow-hidden rounded-t-xl">
                 <Image
                   src={post.featuredImage}
                   alt={post.title}
                   width={600}
-                  height={350} // Adjusted height for better aspect ratio
+                  height={350} 
                   className="w-full h-52 object-cover transition-transform duration-300 hover:scale-105"
                   data-ai-hint={post.dataAiHint}
                 />

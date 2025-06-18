@@ -137,7 +137,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbStructuredData) }}
       />
-      <article className="container mx-auto max-w-3xl py-10 px-4 md:px-0"> {/* Removed horizontal padding for wider content on md+ */}
+      <article className="container mx-auto max-w-3xl py-10 px-4 md:px-0 min-w-0"> {/* Removed horizontal padding for wider content on md+ */}
         <div className="mb-8">
           <Button variant="outline" asChild size="sm" className="mb-8 group transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 hover:bg-accent/10 hover:text-accent border-accent/50 text-accent">
             <Link href="/blogs">
@@ -159,7 +159,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
                 <span>By EatWise India Team</span>
             </div>
           </div>
-          <Card className="overflow-hidden shadow-xl rounded-xl mb-8 border-border">
+          <Card className="overflow-hidden shadow-xl rounded-xl mb-8 border-border min-w-0">
             <Image
               src={post.featuredImage}
               alt={post.title} 
@@ -177,18 +177,18 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
         <div
           className="prose prose-lg dark:prose-invert max-w-none 
                      prose-headings:font-headline prose-headings:text-primary dark:prose-headings:text-primary-foreground/90 prose-headings:mb-4 prose-headings:mt-10 prose-headings:pb-1 prose-headings:border-b prose-headings:border-primary/20
-                     prose-p:text-foreground/90 dark:prose-p:text-foreground/80 prose-p:leading-relaxed prose-p:mb-5
+                     prose-p:text-foreground/90 dark:prose-p:text-foreground/80 prose-p:leading-relaxed prose-p:mb-5 prose-p:break-words
                      prose-a:text-accent hover:prose-a:text-accent/80 dark:prose-a:text-accent dark:hover:prose-a:text-accent/80 prose-a:font-medium prose-a:underline-offset-2 prose-a:underline
                      prose-strong:text-foreground dark:prose-strong:text-primary-foreground/90 font-medium
-                     prose-ul:list-disc prose-ul:pl-6 prose-ul:space-y-2 prose-li:marker:text-primary prose-li:mb-1.5
-                     prose-ol:list-decimal prose-ol:pl-6 prose-ol:space-y-2 prose-li:marker:text-primary prose-li:mb-1.5
+                     prose-ul:list-disc prose-ul:pl-6 prose-ul:space-y-2 prose-li:marker:text-primary prose-li:mb-1.5 prose-li:break-words
+                     prose-ol:list-decimal prose-ol:pl-6 prose-ol:space-y-2 prose-li:marker:text-primary prose-li:mb-1.5 prose-li:break-words
                      prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-muted-foreground prose-blockquote:bg-primary/5 prose-blockquote:py-2 prose-blockquote:rounded-r-md"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
         
         <Separator className="my-12 border-border" />
 
-        <Card className="p-6 bg-primary/5 border-primary/20 rounded-xl text-center shadow-lg">
+        <Card className="p-6 bg-primary/5 border-primary/20 rounded-xl text-center shadow-lg min-w-0">
             <h3 className="text-xl font-semibold text-primary mb-3">Ready to Eat Wiser?</h3>
             <p className="text-muted-foreground mb-4">
                 Apply what you've learned! Analyze your next meal's label or find a healthy recipe.

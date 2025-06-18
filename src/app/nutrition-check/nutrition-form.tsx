@@ -323,7 +323,7 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
                     return (
                         <li key={index} className="flex items-start">
                             {isBullet && <span className="mr-2.5 mt-1 text-primary">&#8226;</span>}
-                            <span>{content}</span>
+                            <span className="break-all">{content}</span>
                         </li>
                     );
                 }).filter(Boolean)}
@@ -333,7 +333,7 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
         return (
             <div className="space-y-1.5 text-sm text-foreground/80">
                 {lines.map((paragraph, index) => (
-                    <p key={index}>{paragraph.trim()}</p>
+                    <p key={index} className="break-all">{paragraph.trim()}</p>
                 ))}
             </div>
         );
@@ -485,7 +485,7 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
             <Accordion type="multiple" className="w-full space-y-3">
                 {analysisResult.macronutrientBalance && (
                     <AccordionItem value="macro" className="border border-border rounded-lg shadow-sm bg-card hover:bg-muted/30 transition-colors">
-                        <AccordionTrigger className="px-4 py-3 text-base font-medium text-accent-foreground hover:no-underline">
+                        <AccordionTrigger className="px-4 py-3 text-base font-medium text-accent hover:no-underline">
                             <div className="flex items-center"><PieChart className="mr-2.5 h-5 w-5 text-accent"/>Macronutrient Balance</div>
                         </AccordionTrigger>
                         <AccordionContent className="px-4 pb-4 pt-1">{renderFormattedAnalysisText(analysisResult.macronutrientBalance)}</AccordionContent>
@@ -493,7 +493,7 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
                 )}
                 {analysisResult.micronutrientHighlights && (
                      <AccordionItem value="micro" className="border border-border rounded-lg shadow-sm bg-card hover:bg-muted/30 transition-colors">
-                        <AccordionTrigger className="px-4 py-3 text-base font-medium text-accent-foreground hover:no-underline">
+                        <AccordionTrigger className="px-4 py-3 text-base font-medium text-accent hover:no-underline">
                            <div className="flex items-center"> <ClipboardList className="mr-2.5 h-5 w-5 text-accent"/>Micronutrient Highlights</div>
                         </AccordionTrigger>
                         <AccordionContent className="px-4 pb-4 pt-1">{renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}</AccordionContent>
@@ -501,7 +501,7 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
                 )}
                 {analysisResult.processingLevelAssessment && (
                     <AccordionItem value="processing" className="border border-border rounded-lg shadow-sm bg-card hover:bg-muted/30 transition-colors">
-                        <AccordionTrigger className="px-4 py-3 text-base font-medium text-accent-foreground hover:no-underline">
+                        <AccordionTrigger className="px-4 py-3 text-base font-medium text-accent hover:no-underline">
                            <div className="flex items-center"> <Zap className="mr-2.5 h-5 w-5 text-accent"/>Processing Level Assessment</div>
                         </AccordionTrigger>
                         <AccordionContent className="px-4 pb-4 pt-1">{renderFormattedAnalysisText(analysisResult.processingLevelAssessment)}</AccordionContent>
@@ -509,7 +509,7 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
                 )}
                 {analysisResult.dietarySuitability && (
                     <AccordionItem value="suitability" className="border border-border rounded-lg shadow-sm bg-card hover:bg-muted/30 transition-colors">
-                        <AccordionTrigger className="px-4 py-3 text-base font-medium text-accent-foreground hover:no-underline">
+                        <AccordionTrigger className="px-4 py-3 text-base font-medium text-accent hover:no-underline">
                             <div className="flex items-center"><Users className="mr-2.5 h-5 w-5 text-accent"/>Dietary Suitability</div>
                         </AccordionTrigger>
                         <AccordionContent className="px-4 pb-4 pt-1">{renderFormattedAnalysisText(analysisResult.dietarySuitability)}</AccordionContent>
@@ -517,7 +517,7 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
                 )}
                 {analysisResult.servingSizeContext && (
                     <AccordionItem value="serving" className="border border-border rounded-lg shadow-sm bg-card hover:bg-muted/30 transition-colors">
-                        <AccordionTrigger className="px-4 py-3 text-base font-medium text-accent-foreground hover:no-underline">
+                        <AccordionTrigger className="px-4 py-3 text-base font-medium text-accent hover:no-underline">
                            <div className="flex items-center"> <Scaling className="mr-2.5 h-5 w-5 text-accent"/>Serving Size Context</div>
                         </AccordionTrigger>
                         <AccordionContent className="px-4 pb-4 pt-1">{renderFormattedAnalysisText(analysisResult.servingSizeContext)}</AccordionContent>

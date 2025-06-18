@@ -337,7 +337,7 @@ export function RecipeForm() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <Card className="md:col-span-1 shadow-lg hover:shadow-xl transition-shadow rounded-xl">
+      <Card className="md:col-span-1 shadow-lg hover:shadow-xl transition-shadow rounded-xl min-w-0">
         <CardHeader>
           <CardTitle className="flex items-center text-2xl text-primary"><ChefHat className="mr-2 h-7 w-7" /> Recipe Finder</CardTitle>
           <CardDescription>Tell us what you have and any health needs. We'll suggest some healthy Indian dishes!</CardDescription>
@@ -475,11 +475,11 @@ export function RecipeForm() {
         </CardContent>
       </Card>
 
-      <div className="md:col-span-2 space-y-8">
+      <div className="md:col-span-2 space-y-8 min-w-0">
         {isLoadingSuggestions && ( <Card className="flex items-center justify-center h-64 rounded-xl shadow-lg"><Sparkles className="h-12 w-12 text-primary animate-spin" /><p className="ml-3 text-lg text-muted-foreground">Finding dish ideas...</p></Card> )}
         
         {dishSuggestions && !detailedRecipe && (
-          <Card className="shadow-lg rounded-xl">
+          <Card className="shadow-lg rounded-xl min-w-0">
             <CardHeader>
               <CardTitle className="text-xl flex items-center text-primary"><Lightbulb className="mr-2 h-6 w-6"/> Suggested Dishes</CardTitle>
               {dishSuggestions.initialContextualGuidance && <CardDescription>{dishSuggestions.initialContextualGuidance}</CardDescription>}
@@ -503,7 +503,7 @@ export function RecipeForm() {
         {isLoadingRecipe && ( <Card className="flex items-center justify-center h-64 rounded-xl shadow-lg"><Sparkles className="h-12 w-12 text-primary animate-spin" /><p className="ml-3 text-lg text-muted-foreground">Generating detailed recipe...</p></Card> )}
 
         {detailedRecipe && (
-          <Card className="shadow-xl hover:shadow-2xl transition-shadow rounded-xl">
+          <Card className="shadow-xl hover:shadow-2xl transition-shadow rounded-xl min-w-0">
             <CardHeader className="border-b border-border pb-4">
               <div className="flex justify-between items-start">
                 <CardTitle className="text-2xl flex items-center text-primary"><FileText className="mr-2 h-7 w-7"/> {detailedRecipe.recipeTitle}</CardTitle>
@@ -511,20 +511,20 @@ export function RecipeForm() {
                   {isPdfDownloading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Download PDF
                 </Button>
               </div>
-              {detailedRecipe.description && <CardDescription className="mt-1">{detailedRecipe.description}</CardDescription>}
+              {detailedRecipe.description && <CardDescription className="mt-1 break-words">{detailedRecipe.description}</CardDescription>}
             </CardHeader>
             <CardContent className="space-y-5 pt-5">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm bg-muted/50 p-3 rounded-lg border border-border">
                 {detailedRecipe.prepTime && <div className="font-medium"><strong className="text-foreground/80 block">Prep Time:</strong> {detailedRecipe.prepTime}</div>}
                 {detailedRecipe.cookTime && <div className="font-medium"><strong className="text-foreground/80 block">Cook Time:</strong> {detailedRecipe.cookTime}</div>}
-                <div className="font-medium"><strong className="text-foreground/80 block">Serves:</strong> {detailedRecipe.servingsDescription}</div>
+                <div className="font-medium"><strong className="text-foreground/80 block">Serves:</strong> <span className="break-all">{detailedRecipe.servingsDescription}</span></div>
               </div>
               <Separator className="border-border"/>
               <div>
                 <h3 className="font-semibold text-lg mb-2 text-foreground/90">Ingredients:</h3>
                 <ul className="list-disc list-inside space-y-1.5 text-sm text-foreground/80 marker:text-primary">
                   {detailedRecipe.adjustedIngredients.map((ing, i) => (
-                    <li key={i}><strong>{ing.quantity}</strong> {ing.name}{ing.notes ? <span className="text-muted-foreground text-xs"> ({ing.notes})</span> : ""}</li>
+                    <li key={i} className="break-words"><strong>{ing.quantity}</strong> {ing.name}{ing.notes ? <span className="text-muted-foreground text-xs"> ({ing.notes})</span> : ""}</li>
                   ))}
                 </ul>
               </div>
@@ -532,14 +532,14 @@ export function RecipeForm() {
               <div>
                 <h3 className="font-semibold text-lg mb-2 text-foreground/90">Instructions:</h3>
                 <ol className="list-decimal list-inside space-y-2 text-sm text-foreground/80 marker:text-primary marker:font-semibold">
-                  {detailedRecipe.instructions.map((step, i) => <li key={i} className="pl-1">{step}</li>)}
+                  {detailedRecipe.instructions.map((step, i) => <li key={i} className="pl-1 break-words">{step}</li>)}
                 </ol>
               </div>
               {detailedRecipe.healthNotes && (
-                <> <Separator className="border-border"/> <div className="p-3 bg-primary/5 rounded-lg border border-primary/20"><h3 className="font-semibold text-lg mb-1.5 text-primary/90">Health Notes:</h3><p className="text-sm text-primary/80 whitespace-pre-line">{detailedRecipe.healthNotes}</p></div></>
+                <> <Separator className="border-border"/> <div className="p-3 bg-primary/5 rounded-lg border border-primary/20"><h3 className="font-semibold text-lg mb-1.5 text-primary">Health Notes:</h3><p className="text-sm text-primary/80 whitespace-pre-line break-words">{detailedRecipe.healthNotes}</p></div></>
               )}
               {detailedRecipe.storageOrServingTips && (
-                <> <Separator className="border-border"/> <div className="p-3 bg-accent/5 rounded-lg border border-accent/20"><h3 className="font-semibold text-lg mb-1.5 text-accent-foreground/90">Storage & Serving Tips:</h3><p className="text-sm text-accent-foreground/80 whitespace-pre-line">{detailedRecipe.storageOrServingTips}</p></div></>
+                <> <Separator className="border-border"/> <div className="p-3 bg-accent/10 rounded-lg border border-accent/20"><h3 className="font-semibold text-lg mb-1.5 text-accent">Storage & Serving Tips:</h3><p className="text-sm text-muted-foreground whitespace-pre-line break-words">{detailedRecipe.storageOrServingTips}</p></div></>
               )}
             </CardContent>
              <CardFooter className="flex flex-col items-start pt-5 border-t border-border">
@@ -562,7 +562,7 @@ export function RecipeForm() {
         )}
         
         {!isLoadingSuggestions && !dishSuggestions && !detailedRecipe && !isLoadingRecipe &&(
-           <Card className="flex items-center justify-center h-full min-h-[300px] bg-muted/30 md:col-span-2 rounded-xl border-2 border-dashed border-border">
+           <Card className="flex items-center justify-center h-full min-h-[300px] bg-muted/30 md:col-span-2 rounded-xl border-2 border-dashed border-border min-w-0">
             <div className="text-center p-8">
                 <ChefHat className="mx-auto h-16 w-16 text-muted-foreground/70 mb-5" />
                 <p className="text-xl font-semibold text-muted-foreground">Let's find some recipes!</p>

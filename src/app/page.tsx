@@ -189,7 +189,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 gap-8 mt-12 md:grid-cols-2 lg:grid-cols-2">
             {features.map((feature) => (
-              <Card key={feature.title} className={`group transform transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2 flex flex-col bg-card border-border hover:border-primary/50 animate-in fade-in slide-in-from-bottom-12 duration-700 ease-out ${feature.animationDelay} rounded-xl`}>
+              <Card key={feature.title} className={`group transform transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2 flex flex-col bg-card border-border hover:border-primary/50 animate-in fade-in slide-in-from-bottom-12 duration-700 ease-out ${feature.animationDelay} rounded-xl min-w-0`}>
                 <CardHeader className="flex flex-row items-start gap-4 pb-3">
                   {feature.icon}
                   <CardTitle className="text-xl font-semibold group-hover:text-primary transition-colors">{feature.title}</CardTitle>
@@ -221,7 +221,7 @@ export default function Home() {
           </div>
           <div className="grid md:grid-cols-3 gap-8 mt-8">
             {howItWorksSteps.map((step) => (
-              <div key={step.title} className={`flex flex-col items-center text-center p-6 bg-card rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out hover:border-primary/50 border border-transparent hover:-translate-y-1.5 animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-out ${step.animationDelay}`}>
+              <div key={step.title} className={`flex flex-col items-center text-center p-6 bg-card rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out hover:border-primary/50 border border-transparent hover:-translate-y-1.5 animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-out ${step.animationDelay} min-w-0`}>
                 <div className="flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-primary/10 text-primary">
                   {step.icon}
                 </div>
@@ -248,7 +248,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
             {whyChoosePoints.map((point) => (
-              <div key={point.title} className={`flex flex-col items-center text-center p-6 transition-all duration-300 ease-in-out hover:shadow-xl hover:scale-105 hover:bg-card rounded-xl border border-border animate-in fade-in slide-in-from-bottom-12 duration-700 ease-out ${point.animationDelay}`}>
+              <div key={point.title} className={`flex flex-col items-center text-center p-6 transition-all duration-300 ease-in-out hover:shadow-xl hover:scale-105 hover:bg-card rounded-xl border border-border animate-in fade-in slide-in-from-bottom-12 duration-700 ease-out ${point.animationDelay} min-w-0`}>
                 <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-110">
                   {point.icon}
                 </div>
@@ -262,7 +262,7 @@ export default function Home() {
 
       <section id="mission" className="w-full py-12 md:py-24 lg:py-32 bg-muted/30 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-1000 ease-out delay-200">
         <div className="container grid items-center gap-10 px-4 md:px-6 lg:grid-cols-2 lg:gap-16">
-          <div className="flex justify-center animate-in fade-in slide-in-from-left-20 duration-1000 ease-out delay-200">
+          <div className="flex justify-center animate-in fade-in slide-in-from-left-20 duration-1000 ease-out delay-200 min-w-0">
             <Image
               src="/img/mission-community-image.jpg"
               alt="Our mission: Diverse group of people enjoying healthy Indian food"
@@ -272,7 +272,7 @@ export default function Home() {
               data-ai-hint="healthy food community"
             />
           </div>
-          <div className="animate-in fade-in slide-in-from-right-20 duration-1000 ease-out delay-200">
+          <div className="animate-in fade-in slide-in-from-right-20 duration-1000 ease-out delay-200 min-w-0">
             <Target className="h-14 w-14 text-accent mb-5" />
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Our Mission
@@ -317,7 +317,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {testimonials.map((testimonial) => (
-              <Card key={testimonial.name} className={`bg-card flex flex-col shadow-xl hover:shadow-2xl transition-all duration-300 ease-in-out hover:-translate-y-1.5 border border-border animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-out ${testimonial.animationDelay} rounded-xl`}>
+              <Card key={testimonial.name} className={`bg-card flex flex-col shadow-xl hover:shadow-2xl transition-all duration-300 ease-in-out hover:-translate-y-1.5 border border-border animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-out ${testimonial.animationDelay} rounded-xl min-w-0`}>
                 <CardContent className="pt-8 pb-6 flex-grow">
                   <blockquote className="text-lg italic text-foreground/90 before:content-['“'] before:mr-1 before:text-2xl before:text-primary after:content-['”'] after:ml-1 after:text-2xl after:text-primary">
                     {testimonial.quote}

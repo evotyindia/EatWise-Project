@@ -42,7 +42,7 @@ const ContactPage: NextPage = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-xl border border-border hover:border-primary/30">
+        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-xl border border-border hover:border-primary/30 min-w-0">
           <CardHeader>
             <CardTitle className="flex items-center text-2xl text-accent">
               <Mail className="mr-3 h-7 w-7" /> Email Us
@@ -61,7 +61,7 @@ const ContactPage: NextPage = () => {
           </CardContent>
         </Card>
 
-        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-xl border border-border hover:border-primary/30">
+        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-xl border border-border hover:border-primary/30 min-w-0">
           <CardHeader>
             <CardTitle className="flex items-center text-2xl text-accent">
               <Phone className="mr-3 h-7 w-7" /> Phone Support
@@ -83,7 +83,7 @@ const ContactPage: NextPage = () => {
 
       <Separator className="my-16 max-w-4xl mx-auto border-border" />
 
-      <Card className="max-w-4xl mx-auto shadow-xl transition-shadow duration-300 rounded-xl border border-border">
+      <Card className="max-w-4xl mx-auto shadow-xl transition-shadow duration-300 rounded-xl border border-border min-w-0">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center text-2xl justify-center text-primary">
             <Share2 className="mr-3 h-7 w-7" /> Connect With Us
