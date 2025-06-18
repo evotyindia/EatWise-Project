@@ -98,22 +98,27 @@ export function RecipeForm() {
 
   const ingredientsValueFromForm = form.watch("ingredients");
 
- useEffect(() => {
+  useEffect(() => {
     if (typeof ingredientsValueFromForm === 'string') {
-        const currentTextareaIngredientsArray = ingredientsValueFromForm
-            .split(',')
-            .map(ing => ing.trim().toLowerCase())
-            .filter(Boolean);
-        const newSetFromTextarea = new Set(currentTextareaIngredientsArray);
+      const currentTextareaIngredientsArray = ingredientsValueFromForm
+        .split(',')
+        .map(ing => ing.trim().toLowerCase())
+        .filter(Boolean);
+      
+      const newSetFromTextarea = new Set(currentTextareaIngredientsArray);
 
-        if (newSetFromTextarea.size !== selectedQuickAddIngredients.size || 
-            !Array.from(newSetFromTextarea).every(item => selectedQuickAddIngredients.has(item))) {
-            setSelectedQuickAddIngredients(newSetFromTextarea);
-        }
-    } else if (!ingredientsValueFromForm && selectedQuickAddIngredients.size > 0) {
+      // Only update if the Set content actually differs
+      if (newSetFromTextarea.size !== selectedQuickAddIngredients.size || 
+          !Array.from(newSetFromTextarea).every(item => selectedQuickAddIngredients.has(item))) {
+        setSelectedQuickAddIngredients(newSetFromTextarea);
+      }
+    } else if (ingredientsValueFromForm === undefined || ingredientsValueFromForm === null || ingredientsValueFromForm === "") {
+      // If textarea is cleared, ensure the Set is also cleared if it's not already
+      if (selectedQuickAddIngredients.size > 0) {
         setSelectedQuickAddIngredients(new Set());
+      }
     }
-  }, [ingredientsValueFromForm]); // Removed selectedQuickAddIngredients
+  }, [ingredientsValueFromForm]);
 
 
   useEffect(() => {
@@ -125,7 +130,7 @@ export function RecipeForm() {
     if (newTextareaValue !== form.getValues("ingredients")) {
       form.setValue("ingredients", newTextareaValue, { shouldValidate: true, shouldDirty: true });
     }
-  }, [selectedQuickAddIngredients, form]);
+  }, [selectedQuickAddIngredients, form.setValue, form.getValues]);
 
 
   const toggleIngredientInDialog = (ingredient: string) => {
@@ -358,69 +363,74 @@ export function RecipeForm() {
                   <FormMessage />
                 </FormItem>
               )} />
-
-              <Dialog open={isIngredientPickerDialogOpen} onOpenChange={setIsIngredientPickerDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full sm:w-auto">
-                    <ListPlus className="mr-2 h-4 w-4" /> Browse & Add Common Ingredients
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[600px]">
-                  <DialogHeader>
-                    <DialogTitle>Select Common Ingredients</DialogTitle>
-                    <DialogDescription>
-                      Tap ingredients to add or remove them from your list. Selected items will appear in the textarea above.
-                    </DialogDescription>
-                  </DialogHeader>
-                    <ScrollArea className="max-h-[60vh] py-4">
-                      <Accordion type="multiple" className="w-full" defaultValue={ingredientCategories.map((_, index) => `category-${index}`)}>
-                        {ingredientCategories.map((category, index) => {
-                          const CategoryIcon = category.icon;
-                          return (
-                            <AccordionItem value={`category-${index}`} key={category.name}>
-                              <AccordionTrigger className="text-base font-semibold py-3 hover:no-underline [&[data-state=open]>svg]:text-primary">
-                                <div className="flex items-center">
-                                  <CategoryIcon className="mr-2 h-5 w-5 text-primary/80" /> {category.name}
-                                </div>
-                              </AccordionTrigger>
-                              <AccordionContent>
-                                <div className="flex flex-wrap gap-2 p-2">
-                                  {category.items.map(item => {
-                                    const isSelected = selectedQuickAddIngredients.has(item.toLowerCase());
-                                    return (
-                                      <Button
-                                        key={item}
-                                        type="button"
-                                        variant={isSelected ? "default" : "outline"}
-                                        onClick={() => toggleIngredientInDialog(item)}
-                                        className={cn(
-                                          "px-3 py-1.5 text-sm h-auto rounded-full",
-                                          "transition-all duration-150 ease-in-out",
-                                          "flex items-center active:scale-95",
-                                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-background",
-                                          isSelected && "bg-primary text-primary-foreground hover:bg-primary/90 border-primary font-semibold",
-                                          !isSelected && "border-input bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground"
-                                        )}
-                                      >
-                                        {isSelected ? <CheckCircle className="mr-1.5 h-4 w-4" /> : <PlusCircle className="mr-1.5 h-4 w-4 opacity-70" />}
-                                        {item}
-                                      </Button>
-                                    );
-                                  })}
-                                </div>
-                              </AccordionContent>
-                            </AccordionItem>
-                          );
-                        })}
-                      </Accordion>
-                    </ScrollArea>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button type="button">Done</Button>
-                    </DialogClose>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              <div className="flex justify-center">
+                <Dialog open={isIngredientPickerDialogOpen} onOpenChange={setIsIngredientPickerDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="w-full sm:w-fit whitespace-normal h-auto min-h-10 text-center"
+                    >
+                      <ListPlus className="mr-2 h-4 w-4 shrink-0" />
+                      <span>Browse & Add Common Ingredients</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[600px]">
+                    <DialogHeader>
+                      <DialogTitle>Select Common Ingredients</DialogTitle>
+                      <DialogDescription>
+                        Tap ingredients to add or remove them from your list. Selected items will appear in the textarea above.
+                      </DialogDescription>
+                    </DialogHeader>
+                      <ScrollArea className="max-h-[60vh] py-4">
+                        <Accordion type="multiple" className="w-full" defaultValue={ingredientCategories.map((_, index) => `category-${index}`)}>
+                          {ingredientCategories.map((category, index) => {
+                            const CategoryIcon = category.icon;
+                            return (
+                              <AccordionItem value={`category-${index}`} key={category.name}>
+                                <AccordionTrigger className="text-base font-semibold py-3 hover:no-underline [&[data-state=open]>svg]:text-primary">
+                                  <div className="flex items-center">
+                                    <CategoryIcon className="mr-2 h-5 w-5 text-primary/80" /> {category.name}
+                                  </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                  <div className="flex flex-wrap gap-2 p-2">
+                                    {category.items.map(item => {
+                                      const isSelected = selectedQuickAddIngredients.has(item.toLowerCase());
+                                      return (
+                                        <Button
+                                          key={item}
+                                          type="button"
+                                          variant={isSelected ? "default" : "outline"}
+                                          onClick={() => toggleIngredientInDialog(item)}
+                                          className={cn(
+                                            "px-3 py-1.5 text-sm h-auto rounded-full",
+                                            "transition-all duration-150 ease-in-out",
+                                            "flex items-center active:scale-95",
+                                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-background",
+                                            isSelected && "bg-primary text-primary-foreground hover:bg-primary/90 border-primary font-semibold",
+                                            !isSelected && "border-input bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground"
+                                          )}
+                                        >
+                                          {isSelected ? <CheckCircle className="mr-1.5 h-4 w-4" /> : <PlusCircle className="mr-1.5 h-4 w-4 opacity-70" />}
+                                          {item}
+                                        </Button>
+                                      );
+                                    })}
+                                  </div>
+                                </AccordionContent>
+                              </AccordionItem>
+                            );
+                          })}
+                        </Accordion>
+                      </ScrollArea>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button type="button">Done</Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
               
               <Separator className="my-6" />
 
