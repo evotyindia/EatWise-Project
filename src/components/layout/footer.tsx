@@ -83,15 +83,16 @@ export function Footer() {
       </div>
 
       {/* Bottom Copyright Bar */}
-      <div className="bg-background dark:bg-neutral-950 py-4 border-t border-border/50">
-        <div className="container">
-          <div className="flex flex-col sm:flex-row items-center justify-between text-center sm:text-left">
-            <p className="text-xs text-muted-foreground">
-              © {currentYear} EatWise India. All Rights Reserved.
+      <div className="bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700/60">
+        <div className="container py-5">
+          <div className="flex flex-col items-center justify-center gap-y-2 text-center md:flex-row md:justify-between md:gap-y-0">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              &copy; {currentYear} EatWise India. All Rights Reserved.
             </p>
-            <p className="text-xs text-muted-foreground mt-1 sm:mt-0">
-              AI for a Healthier You. Made in India.
-            </p>
+            <div className="flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-400">
+              <Leaf className="h-4 w-4 text-primary/90" />
+              <span>AI for a Healthier You. Crafted with care in India.</span>
+            </div>
           </div>
         </div>
       </div>
