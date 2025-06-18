@@ -67,7 +67,7 @@ export function BlogList({ initialPosts, categories }: BlogListProps) {
               </Link>
             </CardHeader>
             <CardContent className="p-6 flex-grow">
-              <Badge variant="secondary" className="mb-2 text-sm bg-accent/10 text-accent-foreground hover:bg-accent/20">
+              <Badge variant="secondary" className="mb-2 text-sm bg-accent/10 text-accent hover:bg-accent/20">
                 <Tag className="mr-1.5 h-3.5 w-3.5" />{post.category}
               </Badge>
               <Link href={`/blogs/${post.slug}`}>

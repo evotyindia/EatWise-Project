@@ -260,7 +260,7 @@ export function AnalyzerForm() {
 
     if (hasBullets) {
         return (
-            <ul className="list-none space-y-1.5 text-sm leading-relaxed">
+            <ul className="list-none space-y-1.5 text-sm leading-relaxed break-words">
                 {lines.map((line, index) => (
                     <li key={index} className="flex items-start">
                         <span className="mr-2.5 mt-1 text-primary">&#8226;</span>
@@ -271,7 +271,7 @@ export function AnalyzerForm() {
         );
     } else {
         return (
-            <div className="text-sm leading-relaxed space-y-1.5">
+            <div className="text-sm leading-relaxed space-y-1.5 break-words">
                 {lines.map((paragraph, index) => (
                     <p key={index}>{paragraph}</p>
                 ))}
@@ -283,7 +283,7 @@ export function AnalyzerForm() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <Card className="shadow-lg hover:shadow-xl transition-shadow rounded-xl">
+      <Card className="shadow-lg hover:shadow-xl transition-shadow rounded-xl min-w-0">
         <CardHeader>
           <CardTitle className="flex items-center text-2xl text-primary"><UploadCloud className="mr-2 h-7 w-7" /> Input Food Label Data</CardTitle>
           <CardDescription>Upload an image of the food label or enter details manually for AI analysis.</CardDescription>
@@ -354,7 +354,7 @@ export function AnalyzerForm() {
       </Card>
       
       {isLoading && !report && (
-        <Card className="lg:col-span-1 flex items-center justify-center h-full min-h-[300px] rounded-xl shadow-lg bg-card">
+        <Card className="lg:col-span-1 flex items-center justify-center h-full min-h-[300px] rounded-xl shadow-lg bg-card min-w-0">
             <div className="text-center p-6">
                 <Sparkles className="mx-auto h-16 w-16 text-primary animate-pulse mb-5" />
                 <p className="text-xl font-semibold text-primary">Generating AI Report...</p>
@@ -364,7 +364,7 @@ export function AnalyzerForm() {
       )}
 
       {report && (
-        <Card className="shadow-xl hover:shadow-2xl transition-shadow rounded-xl">
+        <Card className="shadow-xl hover:shadow-2xl transition-shadow rounded-xl min-w-0">
           <CardHeader className="border-b border-border pb-4">
             <div className="flex justify-between items-start">
               <div>
@@ -478,7 +478,7 @@ export function AnalyzerForm() {
         </Card>
       )}
        {!isLoading && !report && (
-        <Card className="lg:col-span-1 flex items-center justify-center h-full min-h-[300px] bg-muted/20 rounded-xl border-2 border-dashed border-border">
+        <Card className="lg:col-span-1 flex items-center justify-center h-full min-h-[300px] bg-muted/20 rounded-xl border-2 border-dashed border-border min-w-0">
             <div className="text-center p-8"><Sparkles className="mx-auto h-16 w-16 text-muted-foreground/70 mb-5" /><p className="text-xl font-semibold text-muted-foreground">Your AI report will appear here.</p><p className="text-sm text-muted-foreground/80 mt-1">Submit a food label to get started.</p></div>
         </Card>
       )}

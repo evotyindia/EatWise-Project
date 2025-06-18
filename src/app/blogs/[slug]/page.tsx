@@ -145,7 +145,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
               Back to Blogs
             </Link>
           </Button>
-          <Badge variant="secondary" className="mb-3 text-sm bg-accent/10 text-accent-foreground hover:bg-accent/20 py-1 px-3">
+          <Badge variant="secondary" className="mb-3 text-sm bg-accent/10 text-accent hover:bg-accent/20 py-1 px-3">
             <Tag className="mr-1.5 h-3.5 w-3.5" />{post.category}
           </Badge>
           <h1 className="text-4xl lg:text-5xl font-bold tracking-tight mb-4 text-primary">{post.title}</h1>
