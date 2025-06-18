@@ -29,10 +29,10 @@ export function BlogList({ initialPosts, categories }: BlogListProps) {
     <div>
       <div className="mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
         <h2 className="text-2xl font-semibold">Latest Articles</h2>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <Filter className="h-5 w-5 text-muted-foreground" />
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-[180px] transition-transform duration-300 ease-in-out hover:scale-105">
+            <SelectTrigger className="w-full sm:w-48 md:w-56 transition-transform duration-300 ease-in-out hover:scale-105">
               <SelectValue placeholder="Filter by category" />
             </SelectTrigger>
             <SelectContent>
