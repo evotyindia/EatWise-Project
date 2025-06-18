@@ -25,27 +25,29 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
     reportHeader: { textAlign: 'center', marginBottom: '10mm', display: 'flex', flexDirection: 'column', alignItems: 'center' },
     reportHeaderLogo: { width: '100px', height: 'auto', marginBottom: '5mm'},
     reportTitle: { fontSize: '20pt', fontWeight: 'bold', color: '#0f172a', marginBottom: '2mm' },
-    foodItemName: { fontSize: '14pt', fontWeight: 'normal', marginBottom: '8mm', color: '#2D3748' },
+    foodItemName: { fontSize: '12pt', fontWeight: 'normal', color: '#4A5568', marginBottom: '4mm', fontStyle: 'italic' },
+    servingSizeText: { fontSize: '10pt', fontWeight: 'normal', color: '#4A5568', marginBottom: '8mm', fontStyle: 'italic' },
 
     section: { marginBottom: '7mm', padding: '5mm', border: '1px solid #E2E8F0', borderRadius: '6px', backgroundColor: '#F7FAFC' },
     sectionTitle: { fontSize: '14pt', fontWeight: 'bold', color: '#1A202C', marginTop: '0', marginBottom: '5mm', borderBottom: '2px solid #10b981', paddingBottom: '3mm' },
-    subSectionTitle: { fontSize: '12pt', fontWeight: 'bold', color: '#2D3748', marginTop: '5mm', marginBottom: '4mm' }, // Increased marginBottom
+    subSectionTitle: { fontSize: '12pt', fontWeight: 'bold', color: '#2D3748', marginTop: '6mm', marginBottom: '4mm', borderTop: '1px dashed #E2E8F0', paddingTop: '4mm' },
     
     paragraph: { marginBottom: '4mm', textAlign: 'justify' as 'justify', whiteSpace: 'pre-wrap' as 'pre-wrap', paddingLeft: '2mm', paddingRight: '2mm', color: '#4A5568'},
     
-    ratingBlock: { border: '1px solid #CBD5E0', padding: '4mm', borderRadius: '4px', marginBottom: '6mm', backgroundColor: '#FFFFFF', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' },
-    ratingTitle: { fontWeight: 'bold', marginBottom: '2mm', fontSize: '10pt', color: '#4A5568' },
-    ratingValue: { fontSize: '10pt', color: '#1A202C', display: 'flex', alignItems: 'center' },
+    highlightRatingBlock: { border: '1px solid #10b981', padding: '4mm', borderRadius: '4px', marginBottom: '6mm', backgroundColor: '#E6FFFA', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' },
+    highlightRatingTitle: { fontWeight: 'bold', marginBottom: '2mm', fontSize: '11pt', color: '#047857' },
+    ratingValue: { fontSize: '10pt', color: '#065F46', display: 'flex', alignItems: 'center' },
     star: { color: '#FBBF24', marginRight: '1px', fontSize: '12pt' },
+    ratingScaleDesc: { fontSize: '8.5pt', color: '#047857', marginLeft: '5px', marginTop: '2px'},
     
     inputDataSection: { marginBottom: '7mm', padding: '5mm', border: '1px dashed #CBD5E0', borderRadius: '6px', backgroundColor: '#F0F8FF' },
     inputDataTitle: { fontSize: '12pt', fontWeight: 'bold', color: '#0f172a', marginBottom: '4mm' },
     inputDataGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5mm 7mm' },
     inputDataItem: { fontSize: '9pt', color: '#2D3748', paddingBottom: '1.5mm' },
     
-    listContainer: { paddingLeft: '0', margin: '0' }, // Removed default padding
+    listContainer: { paddingLeft: '0', margin: '0' }, 
     listItem: { display: 'flex', alignItems: 'flex-start', marginBottom: '2mm', color: '#4A5568' },
-    bullet: { marginRight: '2.5mm', minWidth: '2.5mm', textAlign: 'left', lineHeight: '1.4' },
+    bullet: { marginRight: '2.5mm', minWidth: '2.5mm', textAlign: 'left', lineHeight: '1.4', color: '#10b981' },
     listItemText: { flex: 1, textAlign: 'justify' as 'justify' },
   };
 
@@ -55,12 +57,12 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
     for (let i = 0; i < maxRating; i++) {
       stars.push(<span key={i} style={{...styles.star, opacity: i < roundedRating ? 1 : 0.3}}>★</span>);
     }
-    return <>{stars} ({rating}/{maxRating})</>;
+    return <>{stars} ({rating}/{maxRating} Stars)</>;
   };
 
   const renderUserInput = () => {
     if (!userInput || Object.keys(userInput).filter(key => key !== 'nutritionDataUri' && key !== 'foodItemDescription' && userInput[key as keyof AnalyzeNutritionInput] !== undefined && userInput[key as keyof AnalyzeNutritionInput] !== null && String(userInput[key as keyof AnalyzeNutritionInput]).trim() !== "").length === 0) {
-      if (userInput?.nutritionDataUri && userInput.nutritionDataUri === "Image Uploaded") { // Check for marker
+      if (userInput?.nutritionDataUri && userInput.nutritionDataUri === "Image Uploaded") { 
         return (
           <div style={styles.inputDataSection}>
             <div style={styles.inputDataTitle}>Nutritional Data Source:</div>
@@ -104,7 +106,7 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
     );
   };
   
-  const renderFormattedAnalysisText = (text?: string): JSX.Element[] | JSX.Element | null => {
+  const renderFormattedAnalysisText = (text?: string, sectionTitle?: string): JSX.Element[] | JSX.Element | null => {
     if (!text || text.trim().toLowerCase() === 'n/a' || text.trim() === '') {
       return (
          <div style={styles.listItem}>
@@ -114,6 +116,9 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
       );
     }
     const elements: JSX.Element[] = [];
+    if (sectionTitle) {
+        elements.push(<div key={`${sectionTitle}-title`} style={styles.subSectionTitle}>{sectionTitle}</div>);
+    }
     text.split('\n').forEach((line, index) => {
       const trimmedLine = line.trim();
       if (trimmedLine.match(/^(\*|-)\s/)) {
@@ -124,7 +129,6 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
           </div>
         );
       } else if (trimmedLine) {
-        // For non-bullet lines, render them as paragraphs but within the list context if needed
         elements.push(
           <div key={`para-${index}`} style={{...styles.listItem, alignItems: 'baseline' }}>
             <span style={{...styles.bullet, opacity: 0}}>{/* Invisible bullet for alignment */}•</span>
@@ -133,7 +137,7 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
         );
       }
     });
-    return elements.length > 0 ? <>{elements}</> : null;
+    return elements.length > (sectionTitle ? 1 : 0) ? <div style={styles.listContainer}>{elements}</div> : null;
   };
 
 
@@ -190,54 +194,34 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
                 <text x="82" y="48" fontFamily="Inter, Arial, sans-serif" fontSize="10" fill="#0f172a">India</text>
               </svg>
             <div style={styles.reportTitle}>AI Nutrition Analysis</div>
-            {userInput?.foodItemDescription && <div style={styles.foodItemName}>For: {userInput.foodItemDescription}</div>}
+            {userInput?.foodItemDescription && userInput.foodItemDescription !== "IGNORE_VALIDATION_FOR_IMAGE_SUBMIT_INTERNAL_MARKER" && <div style={styles.foodItemName}>For: {userInput.foodItemDescription.trim()}</div>}
+            {userInput?.servingSize && <div style={styles.servingSizeText}>Serving Size: {userInput.servingSize}</div>}
         </div>
         
         {renderUserInput()}
         
         <div style={styles.section}>
-          <div style={styles.sectionTitle}>Overall Assessment</div>
-          <div style={styles.ratingBlock}>
-            <div style={styles.ratingTitle}>Nutrition Density Rating:</div>
-            <div style={styles.ratingValue}>{renderStars(analysisResult.nutritionDensityRating)}</div>
-          </div>
-          <div style={styles.subSectionTitle}>Overall Analysis:</div>
-          <div style={styles.listContainer}>{renderFormattedAnalysisText(analysisResult.overallAnalysis)}</div>
+            <div style={styles.highlightRatingBlock}>
+                <div style={styles.highlightRatingTitle}>Nutrition Density Rating:</div>
+                <div style={styles.ratingValue}>{renderStars(analysisResult.nutritionDensityRating)}</div>
+                <div style={styles.ratingScaleDesc}>Higher stars indicate better nutrient density.</div>
+            </div>
+            {renderFormattedAnalysisText(analysisResult.overallAnalysis, "Overall Analysis Summary")}
         </div>
 
-        {analysisResult.macronutrientBalance && (
-          <div style={styles.section}>
-            <div style={styles.subSectionTitle}>Macronutrient Balance:</div>
-            <div style={styles.listContainer}>{renderFormattedAnalysisText(analysisResult.macronutrientBalance)}</div>
-          </div>
-        )}
-        {analysisResult.micronutrientHighlights && (
-          <div style={styles.section}>
-            <div style={styles.subSectionTitle}>Micronutrient Highlights:</div>
-            <div style={styles.listContainer}>{renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}</div>
-          </div>
-        )}
-        {analysisResult.processingLevelAssessment && (
-          <div style={styles.section}>
-            <div style={styles.subSectionTitle}>Processing Level Assessment:</div>
-            <div style={styles.listContainer}>{renderFormattedAnalysisText(analysisResult.processingLevelAssessment)}</div>
-          </div>
-        )}
+        <div style={styles.section}>
+            <div style={styles.sectionTitle}>Detailed Breakdown</div>
+            {renderFormattedAnalysisText(analysisResult.macronutrientBalance, "Macronutrient Balance")}
+            {renderFormattedAnalysisText(analysisResult.micronutrientHighlights, "Micronutrient Highlights")}
+            {renderFormattedAnalysisText(analysisResult.processingLevelAssessment, "Processing Level Assessment")}
+        </div>
         
         <div style={styles.section}>
-          <div style={styles.sectionTitle}>Dietary Suitability</div>
-          <div style={styles.listContainer}>{renderFormattedAnalysisText(analysisResult.dietarySuitability)}</div>
+            <div style={styles.sectionTitle}>Dietary Considerations</div>
+            {renderFormattedAnalysisText(analysisResult.dietarySuitability, "Dietary Suitability")}
+            {renderFormattedAnalysisText(analysisResult.servingSizeContext, "Comments on Serving Size")}
         </div>
-
-        {analysisResult.servingSizeContext && (
-          <div style={styles.section}>
-            <div style={styles.subSectionTitle}>Comments on Serving Size:</div>
-            <div style={styles.listContainer}>{renderFormattedAnalysisText(analysisResult.servingSizeContext)}</div>
-          </div>
-        )}
       </div>
     </div>
   );
 };
-
-    
