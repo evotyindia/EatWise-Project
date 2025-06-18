@@ -3,7 +3,7 @@ import { AnalyzerForm } from "@/app/analyze/analyzer-form";
 import { ScanLine, Lightbulb } from "lucide-react";
 import type { NextPage, Metadata } from 'next';
 
-const BASE_URL = 'https://eatwise.evotyindia.me';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://eatwise.evotyindia.me';
 
 export const metadata: Metadata = {
   title: "AI Food Label Analyzer | EatWise India",
@@ -31,7 +31,7 @@ const AnalyzePage: NextPage = () => {
           <Lightbulb className="w-6 h-6 mr-2" />
           <h2 className="text-xl font-semibold">Understanding Your Report</h2>
         </div>
-        <p className="text-sm text-accent-foreground/80">
+        <p className="text-sm text-muted-foreground">
           Our AI analyzes ingredients for potential health impacts, assesses nutrient balance (if data is available), and provides an overall health rating from 1 (least healthy) to 5 (most healthy). 
           We also suggest healthier Indian alternatives. Use the chat feature to ask specific questions about the report. This tool is for informational purposes and not a substitute for professional dietary advice.
         </p>
@@ -40,3 +40,4 @@ const AnalyzePage: NextPage = () => {
   );
 }
 export default AnalyzePage;
+

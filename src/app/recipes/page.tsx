@@ -3,7 +3,7 @@ import { RecipeForm } from "./recipe-form";
 import { CookingPot, Utensils } from "lucide-react";
 import type { NextPage, Metadata } from 'next';
 
-const BASE_URL = 'https://eatwise.evotyindia.me';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://eatwise.evotyindia.me';
 
 export const metadata: Metadata = {
   title: "AI Recipe Suggestions | EatWise India",
@@ -31,7 +31,7 @@ const RecipesPage: NextPage = () => {
           <Utensils className="w-6 h-6 mr-2" />
           <h2 className="text-xl font-semibold">How It Works</h2>
         </div>
-        <p className="text-sm text-accent-foreground/80">
+        <p className="text-sm text-muted-foreground">
           List your available ingredients, specify any dietary concerns (like diabetes or gluten-free) and your household size. 
           Our AI will first suggest a few dish names. Click on a dish to get a detailed recipe including ingredients, step-by-step instructions, and health notes. 
           You can then chat with our AI chef about substitutions or cooking techniques for the selected recipe.
@@ -41,3 +41,4 @@ const RecipesPage: NextPage = () => {
   );
 }
 export default RecipesPage;
+

@@ -4,7 +4,7 @@ import { BookOpen, Feather } from "lucide-react";
 import { blogPosts, getBlogCategories } from "@/lib/blog-data";
 import type { NextPage, Metadata } from 'next';
 
-const BASE_URL = 'https://eatwise.evotyindia.me';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://eatwise.evotyindia.me';
 
 export const metadata: Metadata = {
   title: "Nutrition & Wellness Blogs | EatWise India",
@@ -34,7 +34,7 @@ const BlogPage: NextPage = () => {
           <Feather className="w-6 h-6 mr-2" />
           <h2 className="text-xl font-semibold">Stay Curious, Stay Healthy</h2>
         </div>
-        <p className="text-sm text-accent-foreground/80 max-w-xl mx-auto">
+        <p className="text-sm text-muted-foreground max-w-xl mx-auto">
           Our blog is regularly updated with new articles. Explore different categories to find topics that interest you, from decoding food labels to healthy recipes and kid's nutrition.
         </p>
       </div>
@@ -42,3 +42,4 @@ const BlogPage: NextPage = () => {
   );
 }
 export default BlogPage;
+

@@ -3,7 +3,7 @@ import { NutritionForm } from "./nutrition-form";
 import { BarChart3, PieChart } from "lucide-react";
 import type { NextPage, Metadata } from 'next';
 
-const BASE_URL = 'https://eatwise.evotyindia.me';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://eatwise.evotyindia.me';
 
 export const metadata: Metadata = {
   title: "AI Nutrition Analyzer | EatWise India",
@@ -31,7 +31,7 @@ const NutritionCheckPage: NextPage = () => {
           <PieChart className="w-6 h-6 mr-2" />
           <h2 className="text-xl font-semibold">Understanding Your Analysis</h2>
         </div>
-        <p className="text-sm text-accent-foreground/80">
+        <p className="text-sm text-muted-foreground">
           Provide nutritional data (calories, fat, protein, etc.) either by uploading an image of a nutrition table or by manual entry. 
           Our AI evaluates macronutrient balance, micronutrient highlights (if available), dietary suitability for different needs, and gives a nutrition density score from 1 (low) to 5 (high). 
           This helps you understand the quality of the food item. Remember to consider serving sizes.
@@ -42,3 +42,4 @@ const NutritionCheckPage: NextPage = () => {
 }
 
 export default NutritionCheckPage;
+
