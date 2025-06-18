@@ -110,7 +110,7 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
   return (
-    <html lang="en" suppressHydrationWarning className="overflow-x-hidden">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -133,7 +133,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationStructuredData) }}
         />
       </head>
-      <body className="font-body antialiased min-h-screen bg-background text-foreground flex flex-col overflow-x-hidden">
+      <body className="font-body antialiased min-h-screen bg-background text-foreground flex flex-col">
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-K396ETRNRR"
           strategy="afterInteractive"
