@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -81,7 +82,7 @@ export default {
       keyframes: {
         'accordion-down': {
           from: {
-            height: '0',
+            height: '0px',
           },
           to: {
             height: 'var(--radix-accordion-content-height)',
@@ -92,7 +93,7 @@ export default {
             height: 'var(--radix-accordion-content-height)',
           },
           to: {
-            height: '0',
+            height: '0px',
           },
         },
       },
@@ -104,3 +105,4 @@ export default {
   },
   plugins: [require('tailwindcss-animate')],
 } satisfies Config;
+

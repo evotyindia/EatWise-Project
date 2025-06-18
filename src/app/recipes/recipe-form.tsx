@@ -9,9 +9,6 @@ import type { GetDetailedRecipeInput, GetDetailedRecipeOutput } from "@/ai/flows
 import { getDetailedRecipe } from "@/ai/flows/get-detailed-recipe";
 import type { ContextAwareAIChatInput, ContextAwareAIChatOutput, ChatMessage } from "@/ai/flows/context-aware-ai-chat";
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
-// Removed imports for ingredient suggestions:
-// import type { SuggestIngredientsOutput } from "@/ai/flows/ingredient-suggestions-flow";
-// import { suggestIngredients } from "@/ai/flows/ingredient-suggestions-flow";
 
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,8 +32,6 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PrintableDetailedRecipe } from "@/components/common/PrintableDetailedRecipe";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-// Removed Popover imports as it's no longer used for suggestions
-// import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 
@@ -84,13 +79,7 @@ export function RecipeForm() {
   const [currentFormInputs, setCurrentFormInputs] = useState<RecipePageFormValues | null>(null);
   const [selectedQuickAddIngredients, setSelectedQuickAddIngredients] = useState<Set<string>>(new Set());
 
-  // Removed state related to AI ingredient suggestions
-  // const [aiIngredientSuggestions, setAiIngredientSuggestions] = useState<string[]>([]);
-  // const [isSuggestingIngredients, setIsSuggestingIngredients] = useState(false);
-  // const [showSuggestionsPopover, setShowSuggestionsPopover] = useState(false);
   const ingredientsTextareaRef = useRef<HTMLTextAreaElement>(null);
-  // const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
 
   const { toast } = useToast();
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
@@ -122,16 +111,12 @@ export function RecipeForm() {
     }
   }, [ingredientsValueFromForm, selectedQuickAddIngredients]);
 
-  // Removed fetchIngredientSuggestions useCallback
 
   const handleIngredientsTextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = event.target.value;
     form.setValue("ingredients", value, { shouldValidate: true, shouldDirty: true });
-    // AI suggestion logic removed
   };
   
-  // Removed handleSuggestionClick
-
   const toggleIngredientQuickAdd = (ingredient: string) => {
     const currentIngredientsStr = form.getValues("ingredients") || "";
     let currentIngredientsArray = currentIngredientsStr
@@ -157,7 +142,6 @@ export function RecipeForm() {
     setDetailedRecipe(null);
     setChatHistory([]);
     setCurrentFormInputs(data); 
-    // setShowSuggestionsPopover(false); // No longer needed
     try {
       const diseases = data.diseaseConcerns?.length ? data.diseaseConcerns : [DiseaseEnum.enum.none];
       const input: GetRecipeSuggestionsInput = {
@@ -357,26 +341,23 @@ export function RecipeForm() {
             <FormField control={form.control} name="ingredients" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Available Ingredients</FormLabel>
-                  {/* Popover for AI suggestions removed */}
                   <FormControl>
                     <Textarea
                       placeholder="e.g., Onions, Tomatoes, Paneer, Rice..."
                       {...field}
                       ref={ingredientsTextareaRef}
                       onChange={handleIngredientsTextChange}
-                      // onBlurCapture and onFocus removed
                       rows={4}
                       className="bg-background"
                     />
                   </FormControl>
-                  <FormDescription>Separate ingredients with commas.</FormDescription> {/* Updated description */}
+                  <FormDescription>Separate ingredients with commas.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )} />
 
-              {/* Quick Add Ingredients Section - SCROLL AREA UNCHANGED */}
               <div className="space-y-3">
-                <h3 className="text-sm font-medium text-foreground mb-3 py-1 z-10">Or tap to add common ingredients:</h3>
+                <h3 className="text-sm font-medium text-foreground mb-3 py-1">Or tap to add common ingredients:</h3>
                 <ScrollArea className="max-h-80"> 
                   <Accordion type="multiple" className="w-full">
                     {ingredientCategories.map((category, index) => {
@@ -417,9 +398,7 @@ export function RecipeForm() {
                   </Accordion>
                 </ScrollArea>
               </div>
-              <Separator className="my-6" /> {/* Separator kept as per working state */}
-              {/* END OF SCROLL AREA UNCHANGED */}
-
+              <Separator className="my-6" />
 
               <div>
                 <FormLabel>Health Considerations (Optional)</FormLabel>
