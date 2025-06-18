@@ -2,6 +2,7 @@
 'use server';
 /**
  * @fileOverview AI agent to suggest ingredients as the user types.
+ * This flow is currently NOT USED in the application after feature removal.
  *
  * - suggestIngredients - A function that handles ingredient suggestion.
  * - SuggestIngredientsInput - The input type for the suggestIngredients function.
@@ -73,3 +74,5 @@ const ingredientSuggestionsFlow = ai.defineFlow(
     return output;
   }
 );
+
+    
