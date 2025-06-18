@@ -7,7 +7,7 @@ import type { ContextAwareAIChatInput, ContextAwareAIChatOutput, ChatMessage } f
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadCloud, Sparkles, MessageCircle, Send, Download, Zap, HeartPulse, Wheat, Info, FileText, AlertOctagon, CheckCircle2, GitFork } from "lucide-react";
+import { UploadCloud, Sparkles, MessageCircle, Send, Download, Zap, HeartPulse, Wheat, Info, FileText, AlertOctagon, CheckCircle2, GitFork, ThumbsUp, ThumbsDown, FlaskConical } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import { createRoot } from 'react-dom/client';
@@ -420,44 +420,47 @@ export function AnalyzerForm() {
                 </Alert>
                )}
             </div>
-            <Separator />
-            <Alert variant="default" className="bg-card rounded-lg border-border shadow-sm">
-                <Info className="h-5 w-5 text-primary" />
-                 <AlertTitle className="font-semibold text-lg mb-1.5 text-primary">Summary:</AlertTitle>
-                <AlertDescription className="text-foreground/80">{renderFormattedText(report.detailedAnalysis.summary)}</AlertDescription>
-            </Alert>
+            <Separator className="my-4 border-border" />
             
-            {renderFormattedText(report.detailedAnalysis.positiveAspects) && (
-                <Alert variant="default" className="bg-green-50 dark:bg-green-900/30 border-green-500/30 rounded-lg shadow-sm">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                    <AlertTitle className="font-semibold text-lg mb-1.5 text-green-700 dark:text-green-300">Positive Aspects:</AlertTitle>
-                    <AlertDescription className="text-green-800 dark:text-green-300/90">{renderFormattedText(report.detailedAnalysis.positiveAspects)}</AlertDescription>
-                </Alert>
-            )}
-            
-            {renderFormattedText(report.detailedAnalysis.potentialConcerns) && (
-                <Alert variant="destructive" className="bg-red-50 dark:bg-red-900/30 border-red-500/40 rounded-lg shadow-sm">
-                    <AlertOctagon className="h-5 w-5 text-red-600 dark:text-red-400" />
-                    <AlertTitle className="font-semibold text-lg mb-1.5 text-red-700 dark:text-red-300">Potential Concerns:</AlertTitle>
-                    <AlertDescription className="text-red-800 dark:text-red-300/90">{renderFormattedText(report.detailedAnalysis.potentialConcerns)}</AlertDescription>
-                </Alert>
-            )}
-            
-            {renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown) && (
-                 <Alert variant="default" className="bg-card rounded-lg border-border shadow-sm">
+            <div className="space-y-4">
+                <Alert variant="default" className="bg-card rounded-lg border-border shadow-sm">
                     <Info className="h-5 w-5 text-primary" />
-                    <AlertTitle className="font-semibold text-lg mb-1.5 text-primary">Key Nutrients Breakdown:</AlertTitle>
-                    <AlertDescription className="text-foreground/80">{renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown)}</AlertDescription>
+                    <AlertTitle className="font-semibold text-lg mb-1.5 text-primary">Summary</AlertTitle>
+                    <AlertDescription className="text-foreground/80">{renderFormattedText(report.detailedAnalysis.summary)}</AlertDescription>
                 </Alert>
-            )}
+                
+                {renderFormattedText(report.detailedAnalysis.positiveAspects) && (
+                    <Alert variant="default" className="bg-green-50 dark:bg-green-900/30 border-green-500/30 rounded-lg shadow-sm">
+                        <ThumbsUp className="h-5 w-5 text-green-600 dark:text-green-400" />
+                        <AlertTitle className="font-semibold text-lg mb-1.5 text-green-700 dark:text-green-300">Positive Aspects</AlertTitle>
+                        <AlertDescription className="text-green-800 dark:text-green-300/90">{renderFormattedText(report.detailedAnalysis.positiveAspects)}</AlertDescription>
+                    </Alert>
+                )}
+                
+                {renderFormattedText(report.detailedAnalysis.potentialConcerns) && (
+                    <Alert variant="destructive" className="bg-red-50 dark:bg-red-900/30 border-red-500/40 rounded-lg shadow-sm">
+                        <ThumbsDown className="h-5 w-5 text-red-600 dark:text-red-400" />
+                        <AlertTitle className="font-semibold text-lg mb-1.5 text-red-700 dark:text-red-300">Potential Concerns</AlertTitle>
+                        <AlertDescription className="text-red-800 dark:text-red-300/90">{renderFormattedText(report.detailedAnalysis.potentialConcerns)}</AlertDescription>
+                    </Alert>
+                )}
+                
+                {renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown) && (
+                     <Alert variant="default" className="bg-card rounded-lg border-border shadow-sm">
+                        <FlaskConical className="h-5 w-5 text-primary" />
+                        <AlertTitle className="font-semibold text-lg mb-1.5 text-primary">Key Nutrients Breakdown</AlertTitle>
+                        <AlertDescription className="text-foreground/80">{renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown)}</AlertDescription>
+                    </Alert>
+                )}
 
-            {renderFormattedText(report.alternatives) && (
-                <Alert variant="default" className="bg-sky-50 dark:bg-sky-900/30 border-sky-500/30 rounded-lg shadow-sm">
-                    <GitFork className="h-5 w-5 text-sky-600 dark:text-sky-400" />
-                    <AlertTitle className="font-semibold text-lg mb-1.5 text-sky-700 dark:text-sky-300">Healthier Indian Alternatives:</AlertTitle>
-                    <AlertDescription className="text-sky-800 dark:text-sky-300/90">{renderFormattedText(report.alternatives)}</AlertDescription>
-                </Alert>
-            )}
+                {renderFormattedText(report.alternatives) && (
+                    <Alert variant="default" className="bg-sky-50 dark:bg-sky-900/30 border-sky-500/30 rounded-lg shadow-sm">
+                        <GitFork className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+                        <AlertTitle className="font-semibold text-lg mb-1.5 text-sky-700 dark:text-sky-300">Healthier Indian Alternatives</AlertTitle>
+                        <AlertDescription className="text-sky-800 dark:text-sky-300/90">{renderFormattedText(report.alternatives)}</AlertDescription>
+                    </Alert>
+                )}
+            </div>
           </CardContent>
           <CardFooter className="flex flex-col items-start pt-5 border-t border-border">
             <h3 className="font-semibold text-xl mb-2 flex items-center text-primary"><MessageCircle className="mr-2 h-5 w-5"/> Chat with AI Advisor</h3>
@@ -485,3 +488,5 @@ export function AnalyzerForm() {
     </div>
   );
 }
+
+    

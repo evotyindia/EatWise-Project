@@ -12,7 +12,7 @@ import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Leaf, Wheat, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Milk, Cookie, MinusCircle, PlusCircle, CheckCircle, Search, ListPlus } from "lucide-react";
+import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Leaf, Wheat, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Milk, Cookie, MinusCircle, PlusCircle, CheckCircle, Search, ListPlus, Clock, Users2, Bookmark, MessageSquareQuestion } from "lucide-react";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { createRoot } from 'react-dom/client';
 import html2canvas from 'html2canvas';
@@ -28,7 +28,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PrintableDetailedRecipe } from "@/components/common/PrintableDetailedRecipe";
@@ -476,7 +476,7 @@ export function RecipeForm() {
       </Card>
 
       <div className="md:col-span-2 space-y-8 min-w-0">
-        {isLoadingSuggestions && ( <Card className="flex items-center justify-center h-64 rounded-xl shadow-lg"><Sparkles className="h-12 w-12 text-primary animate-spin" /><p className="ml-3 text-lg text-muted-foreground">Finding dish ideas...</p></Card> )}
+        {isLoadingSuggestions && ( <Card className="flex items-center justify-center h-64 rounded-xl shadow-lg min-w-0"><Sparkles className="h-12 w-12 text-primary animate-spin" /><p className="ml-3 text-lg text-muted-foreground">Finding dish ideas...</p></Card> )}
         
         {dishSuggestions && !detailedRecipe && (
           <Card className="shadow-lg rounded-xl min-w-0">
@@ -500,7 +500,7 @@ export function RecipeForm() {
           </Card>
         )}
 
-        {isLoadingRecipe && ( <Card className="flex items-center justify-center h-64 rounded-xl shadow-lg"><Sparkles className="h-12 w-12 text-primary animate-spin" /><p className="ml-3 text-lg text-muted-foreground">Generating detailed recipe...</p></Card> )}
+        {isLoadingRecipe && ( <Card className="flex items-center justify-center h-64 rounded-xl shadow-lg min-w-0"><Sparkles className="h-12 w-12 text-primary animate-spin" /><p className="ml-3 text-lg text-muted-foreground">Generating detailed recipe...</p></Card> )}
 
         {detailedRecipe && (
           <Card className="shadow-xl hover:shadow-2xl transition-shadow rounded-xl min-w-0">
@@ -514,37 +514,69 @@ export function RecipeForm() {
               {detailedRecipe.description && <CardDescription className="mt-1 break-words">{detailedRecipe.description}</CardDescription>}
             </CardHeader>
             <CardContent className="space-y-5 pt-5">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm bg-muted/50 p-3 rounded-lg border border-border">
-                {detailedRecipe.prepTime && <div className="font-medium"><strong className="text-foreground/80 block">Prep Time:</strong> {detailedRecipe.prepTime}</div>}
-                {detailedRecipe.cookTime && <div className="font-medium"><strong className="text-foreground/80 block">Cook Time:</strong> {detailedRecipe.cookTime}</div>}
-                <div className="font-medium"><strong className="text-foreground/80 block">Serves:</strong> <span className="break-all">{detailedRecipe.servingsDescription}</span></div>
-              </div>
+              <Alert variant="default" className="bg-muted/50 rounded-lg border-border shadow-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-2 text-sm">
+                    {detailedRecipe.prepTime && 
+                        <div className="flex items-center">
+                            <Clock className="mr-2 h-4 w-4 text-primary/80"/>
+                            <div><strong className="text-foreground/80 block">Prep Time:</strong> {detailedRecipe.prepTime}</div>
+                        </div>
+                    }
+                    {detailedRecipe.cookTime && 
+                        <div className="flex items-center">
+                            <Clock className="mr-2 h-4 w-4 text-primary/80"/>
+                            <div><strong className="text-foreground/80 block">Cook Time:</strong> {detailedRecipe.cookTime}</div>
+                        </div>
+                    }
+                    {detailedRecipe.servingsDescription && 
+                        <div className="flex items-center">
+                            <Users2 className="mr-2 h-4 w-4 text-primary/80"/>
+                            <div><strong className="text-foreground/80 block">Serves:</strong> <span className="break-all">{detailedRecipe.servingsDescription}</span></div>
+                        </div>
+                    }
+                  </div>
+              </Alert>
+              
               <Separator className="border-border"/>
-              <div>
-                <h3 className="font-semibold text-lg mb-2 text-foreground/90">Ingredients:</h3>
-                <ul className="list-disc list-inside space-y-1.5 text-sm text-foreground/80 marker:text-primary">
-                  {detailedRecipe.adjustedIngredients.map((ing, i) => (
-                    <li key={i} className="break-words"><strong>{ing.quantity}</strong> {ing.name}{ing.notes ? <span className="text-muted-foreground text-xs"> ({ing.notes})</span> : ""}</li>
-                  ))}
-                </ul>
+              
+              <div className="p-4 border border-border rounded-lg shadow-sm bg-card hover:shadow-md transition-shadow">
+                <AlertTitle className="text-lg font-semibold mb-2.5 flex items-center text-primary"><Leaf className="mr-2.5 h-5 w-5" />Ingredients</AlertTitle>
+                <AlertDescription>
+                  <ul className="list-disc list-inside space-y-1.5 text-sm text-foreground/80 marker:text-primary">
+                    {detailedRecipe.adjustedIngredients.map((ing, i) => (
+                      <li key={i} className="break-words"><strong className="text-foreground">{ing.quantity}</strong> {ing.name}{ing.notes ? <span className="text-muted-foreground text-xs"> ({ing.notes})</span> : ""}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
               </div>
-              <Separator className="border-border"/>
-              <div>
-                <h3 className="font-semibold text-lg mb-2 text-foreground/90">Instructions:</h3>
-                <ol className="list-decimal list-inside space-y-2 text-sm text-foreground/80 marker:text-primary marker:font-semibold">
-                  {detailedRecipe.instructions.map((step, i) => <li key={i} className="pl-1 break-words">{step}</li>)}
-                </ol>
+
+              <div className="p-4 border border-border rounded-lg shadow-sm bg-card hover:shadow-md transition-shadow">
+                <AlertTitle className="text-lg font-semibold mb-2.5 flex items-center text-primary"><Utensils className="mr-2.5 h-5 w-5" />Instructions</AlertTitle>
+                <AlertDescription>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-foreground/80 marker:text-primary marker:font-semibold">
+                    {detailedRecipe.instructions.map((step, i) => <li key={i} className="pl-1 break-words">{step}</li>)}
+                  </ol>
+                </AlertDescription>
               </div>
+              
               {detailedRecipe.healthNotes && (
-                <> <Separator className="border-border"/> <div className="p-3 bg-primary/5 rounded-lg border border-primary/20"><h3 className="font-semibold text-lg mb-1.5 text-primary">Health Notes:</h3><p className="text-sm text-primary/80 whitespace-pre-line break-words">{detailedRecipe.healthNotes}</p></div></>
+                 <Alert variant="default" className="bg-green-50 dark:bg-green-900/30 border-green-500/30 rounded-lg shadow-sm">
+                    <HeartCrack className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <AlertTitle className="font-semibold text-lg mb-1.5 text-green-700 dark:text-green-300">Health & Dietary Notes</AlertTitle>
+                    <AlertDescription className="text-sm text-green-800 dark:text-green-300/90 whitespace-pre-line break-words">{detailedRecipe.healthNotes}</AlertDescription>
+                </Alert>
               )}
               {detailedRecipe.storageOrServingTips && (
-                <> <Separator className="border-border"/> <div className="p-3 bg-accent/10 rounded-lg border border-accent/20"><h3 className="font-semibold text-lg mb-1.5 text-accent">Storage & Serving Tips:</h3><p className="text-sm text-muted-foreground whitespace-pre-line break-words">{detailedRecipe.storageOrServingTips}</p></div></>
+                 <Alert variant="default" className="bg-sky-50 dark:bg-sky-900/30 border-sky-500/30 rounded-lg shadow-sm">
+                    <Bookmark className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+                    <AlertTitle className="font-semibold text-lg mb-1.5 text-sky-700 dark:text-sky-300">Storage & Serving Tips</AlertTitle>
+                    <AlertDescription className="text-sm text-sky-800 dark:text-sky-300/90 whitespace-pre-line break-words">{detailedRecipe.storageOrServingTips}</AlertDescription>
+                </Alert>
               )}
             </CardContent>
              <CardFooter className="flex flex-col items-start pt-5 border-t border-border">
-                <h3 className="font-semibold text-xl mb-2 flex items-center text-primary"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Recipe</h3>
-                <p className="text-sm text-muted-foreground mb-4">Ask about substitutions, techniques, or nutrition.</p>
+                <h3 className="font-semibold text-xl mb-2 flex items-center text-primary"><MessageSquareQuestion className="mr-2 h-5 w-5"/> Chat with AI Chef</h3>
+                <p className="text-sm text-muted-foreground mb-4">Ask about substitutions, techniques, or nutrition for this recipe.</p>
                 <ScrollArea className="h-[220px] w-full rounded-md border border-border bg-muted/40 p-3 mb-4 shadow-inner" ref={chatScrollAreaRef}>
                   {chatHistory.map((msg, index) => (
                     <div key={index} className={`mb-2.5 p-3 rounded-lg text-sm shadow-sm max-w-[90%] break-words ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto rounded-br-none' : 'bg-accent text-accent-foreground mr-auto rounded-bl-none'}`}>
@@ -574,3 +606,5 @@ export function RecipeForm() {
     </div>
   );
 }
+
+    

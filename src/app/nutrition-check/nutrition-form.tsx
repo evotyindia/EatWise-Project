@@ -7,7 +7,7 @@ import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aw
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadCloud, Sparkles, FileText, Download, MessageCircle, Send, Info, PieChart, ClipboardList, Zap, Users, Scaling, XCircle } from "lucide-react";
+import { UploadCloud, Sparkles, FileText, Download, MessageCircle, Send, Info, PieChart, ClipboardList, Zap, Users, Scaling, XCircle, Activity, Brain, Leaf, Bone } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import { createRoot } from 'react-dom/client';
@@ -29,7 +29,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { PrintableNutritionReport } from "@/components/common/PrintableNutritionReport";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 
 const numberPreprocess = (val: unknown) => (val === "" || val === null || val === undefined ? undefined : Number(val));
@@ -304,7 +303,7 @@ export function NutritionForm() {
 
 const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
     if (!text || text.trim().toLowerCase() === 'n/a' || text.trim() === '') {
-      return <p className="text-sm text-muted-foreground">Not specified / Not applicable.</p>;
+      return <p className="text-sm text-muted-foreground break-all">Not specified / Not applicable.</p>;
     }
 
     const lines = text.split('\n').filter(s => s.trim() !== "");
@@ -338,6 +337,18 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
             </div>
         );
     }
+};
+
+const ReportSection: React.FC<{title: string; icon: React.ElementType; children: React.ReactNode; className?: string; titleClassName?: string}> = ({ title, icon: Icon, children, className, titleClassName }) => {
+    if (!children && (typeof children !== 'boolean' && !React.isValidElement(children) && !(Array.isArray(children) && children.length > 0))) return null;
+    return (
+        <div className={cn("p-4 border border-border rounded-lg shadow-sm bg-card hover:shadow-md transition-shadow", className)}>
+            <AlertTitle className={cn("text-lg font-semibold mb-2.5 flex items-center text-primary", titleClassName)}>
+                <Icon className="mr-2.5 h-5 w-5" /> {title}
+            </AlertTitle>
+            <AlertDescription>{children}</AlertDescription>
+        </div>
+    );
 };
 
 
@@ -476,54 +487,31 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
             
             <Separator className="my-4 border-border" />
 
-            <Alert variant="default" className="bg-muted/50 rounded-lg border-border shadow-sm">
-                <Info className="h-5 w-5 text-primary" />
-                <AlertTitle className="font-semibold text-lg text-primary mb-1.5">Overall Analysis Summary</AlertTitle>
-                <AlertDescription>{renderFormattedAnalysisText(analysisResult.overallAnalysis)}</AlertDescription>
-            </Alert>
-            
-            <Accordion type="multiple" className="w-full space-y-3">
-                {analysisResult.macronutrientBalance && (
-                    <AccordionItem value="macro" className="border border-border rounded-lg shadow-sm bg-card hover:bg-muted/30 transition-colors">
-                        <AccordionTrigger className="px-4 py-3 text-base font-medium text-accent hover:no-underline">
-                            <div className="flex items-center"><PieChart className="mr-2.5 h-5 w-5 text-accent"/>Macronutrient Balance</div>
-                        </AccordionTrigger>
-                        <AccordionContent className="px-4 pb-4 pt-1">{renderFormattedAnalysisText(analysisResult.macronutrientBalance)}</AccordionContent>
-                    </AccordionItem>
-                )}
-                {analysisResult.micronutrientHighlights && (
-                     <AccordionItem value="micro" className="border border-border rounded-lg shadow-sm bg-card hover:bg-muted/30 transition-colors">
-                        <AccordionTrigger className="px-4 py-3 text-base font-medium text-accent hover:no-underline">
-                           <div className="flex items-center"> <ClipboardList className="mr-2.5 h-5 w-5 text-accent"/>Micronutrient Highlights</div>
-                        </AccordionTrigger>
-                        <AccordionContent className="px-4 pb-4 pt-1">{renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}</AccordionContent>
-                    </AccordionItem>
-                )}
-                {analysisResult.processingLevelAssessment && (
-                    <AccordionItem value="processing" className="border border-border rounded-lg shadow-sm bg-card hover:bg-muted/30 transition-colors">
-                        <AccordionTrigger className="px-4 py-3 text-base font-medium text-accent hover:no-underline">
-                           <div className="flex items-center"> <Zap className="mr-2.5 h-5 w-5 text-accent"/>Processing Level Assessment</div>
-                        </AccordionTrigger>
-                        <AccordionContent className="px-4 pb-4 pt-1">{renderFormattedAnalysisText(analysisResult.processingLevelAssessment)}</AccordionContent>
-                    </AccordionItem>
-                )}
-                {analysisResult.dietarySuitability && (
-                    <AccordionItem value="suitability" className="border border-border rounded-lg shadow-sm bg-card hover:bg-muted/30 transition-colors">
-                        <AccordionTrigger className="px-4 py-3 text-base font-medium text-accent hover:no-underline">
-                            <div className="flex items-center"><Users className="mr-2.5 h-5 w-5 text-accent"/>Dietary Suitability</div>
-                        </AccordionTrigger>
-                        <AccordionContent className="px-4 pb-4 pt-1">{renderFormattedAnalysisText(analysisResult.dietarySuitability)}</AccordionContent>
-                    </AccordionItem>
-                )}
-                {analysisResult.servingSizeContext && (
-                    <AccordionItem value="serving" className="border border-border rounded-lg shadow-sm bg-card hover:bg-muted/30 transition-colors">
-                        <AccordionTrigger className="px-4 py-3 text-base font-medium text-accent hover:no-underline">
-                           <div className="flex items-center"> <Scaling className="mr-2.5 h-5 w-5 text-accent"/>Serving Size Context</div>
-                        </AccordionTrigger>
-                        <AccordionContent className="px-4 pb-4 pt-1">{renderFormattedAnalysisText(analysisResult.servingSizeContext)}</AccordionContent>
-                    </AccordionItem>
-                )}
-            </Accordion>
+            <div className="space-y-4">
+                <ReportSection title="Overall Analysis Summary" icon={Info} className="bg-sky-50 dark:bg-sky-900/30 border-sky-500/30" titleClassName="text-sky-700 dark:text-sky-300">
+                    {renderFormattedAnalysisText(analysisResult.overallAnalysis)}
+                </ReportSection>
+
+                <ReportSection title="Macronutrient Balance" icon={PieChart} >
+                    {renderFormattedAnalysisText(analysisResult.macronutrientBalance)}
+                </ReportSection>
+
+                <ReportSection title="Micronutrient Highlights" icon={Activity}>
+                     {renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}
+                </ReportSection>
+                
+                <ReportSection title="Processing Level Assessment" icon={Zap} className="bg-purple-50 dark:bg-purple-900/30 border-purple-500/30" titleClassName="text-purple-700 dark:text-purple-300">
+                    {renderFormattedAnalysisText(analysisResult.processingLevelAssessment)}
+                </ReportSection>
+
+                <ReportSection title="Dietary Suitability" icon={Users}>
+                    {renderFormattedAnalysisText(analysisResult.dietarySuitability)}
+                </ReportSection>
+
+                <ReportSection title="Serving Size Context" icon={Scaling}>
+                    {renderFormattedAnalysisText(analysisResult.servingSizeContext)}
+                </ReportSection>
+            </div>
           </CardContent>
            <CardFooter className="flex flex-col items-start pt-5 border-t border-border">
                 <h3 className="font-semibold text-xl mb-2 flex items-center text-primary"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Analysis</h3>
@@ -554,3 +542,5 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
     </div>
   );
 }
+
+    
