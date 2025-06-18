@@ -121,12 +121,20 @@ export function RecipeForm() {
         if (newSetFromTextarea.size !== prevSet.size) {
           shouldUpdate = true;
         } else {
-          for (const item of Array.from(newSetFromTextarea)) {
+          for (const item of Array.from(newSetFromTextarea)) { // Convert Set to Array for iteration
             if (!prevSet.has(item)) {
               shouldUpdate = true;
               break;
             }
           }
+           if (!shouldUpdate) { // Also check if prevSet has items not in newSet (deletion case)
+             for (const item of Array.from(prevSet)) {
+                if (!newSetFromTextarea.has(item)) {
+                    shouldUpdate = true;
+                    break;
+                }
+             }
+           }
         }
         return shouldUpdate ? newSetFromTextarea : prevSet;
       });
@@ -135,7 +143,7 @@ export function RecipeForm() {
         return prevSet.size > 0 ? new Set() : prevSet;
       });
     }
-  }, [ingredientsValueFromForm, setSelectedQuickAddIngredients]);
+  }, [ingredientsValueFromForm]);
 
 
   useEffect(() => {
@@ -387,7 +395,7 @@ export function RecipeForm() {
                      <Button 
                         type="button" 
                         variant="outline" 
-                        className="w-full sm:w-fit whitespace-normal h-auto min-h-10 text-center"
+                        className="w-full md:w-fit whitespace-normal h-auto min-h-10 text-center"
                       >
                         <ListPlus className="mr-2 h-4 w-4 shrink-0" />
                         <span>Browse & Add Common Ingredients</span>
@@ -472,7 +480,7 @@ export function RecipeForm() {
 
               <div>
                 <FormLabel>Household Size (for portioning)</FormLabel>
-                <div className="grid grid-cols-3 gap-3 mt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
                   <FormField control={control} name="householdComposition.adults" render={({ field }) => (
                     <FormItem><FormLabel className="text-xs flex items-center"><User className="mr-1 h-3 w-3"/>Adults (18-60)</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
                   )} />

@@ -60,7 +60,7 @@ export function Header() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "text-sm font-medium transition-colors px-3 py-1.5 rounded-md",
+                    "text-sm font-medium transition-colors px-2.5 py-1.5 rounded-md", // Reduced px from px-3
                     isActive 
                       ? "bg-primary text-primary-foreground hover:bg-primary/90" 
                       : "text-foreground/70 hover:text-foreground hover:bg-muted/50"
@@ -111,3 +111,4 @@ export function Header() {
     </header>
   )
 }
+
