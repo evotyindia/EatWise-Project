@@ -28,7 +28,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription as UIAlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PrintableDetailedRecipe } from "@/components/common/PrintableDetailedRecipe";
@@ -87,7 +87,16 @@ export function RecipeForm() {
   const { toast } = useToast();
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const form = useForm<RecipePageFormValues>({
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    getValues,
+    watch,
+    formState: { errors },
+    reset,
+    clearErrors,
+  } = useForm<RecipePageFormValues>({
     resolver: zodResolver(recipePageInputSchema),
     defaultValues: {
       ingredients: "",
@@ -96,7 +105,7 @@ export function RecipeForm() {
     },
   });
 
-  const ingredientsValueFromForm = form.watch("ingredients");
+  const ingredientsValueFromForm = watch("ingredients");
 
   useEffect(() => {
     if (typeof ingredientsValueFromForm === 'string') {
@@ -107,18 +116,26 @@ export function RecipeForm() {
       
       const newSetFromTextarea = new Set(currentTextareaIngredientsArray);
 
-      // Only update if the Set content actually differs
-      if (newSetFromTextarea.size !== selectedQuickAddIngredients.size || 
-          !Array.from(newSetFromTextarea).every(item => selectedQuickAddIngredients.has(item))) {
-        setSelectedQuickAddIngredients(newSetFromTextarea);
-      }
+      setSelectedQuickAddIngredients(prevSet => {
+        let shouldUpdate = false;
+        if (newSetFromTextarea.size !== prevSet.size) {
+          shouldUpdate = true;
+        } else {
+          for (const item of Array.from(newSetFromTextarea)) {
+            if (!prevSet.has(item)) {
+              shouldUpdate = true;
+              break;
+            }
+          }
+        }
+        return shouldUpdate ? newSetFromTextarea : prevSet;
+      });
     } else if (ingredientsValueFromForm === undefined || ingredientsValueFromForm === null || ingredientsValueFromForm === "") {
-      // If textarea is cleared, ensure the Set is also cleared if it's not already
-      if (selectedQuickAddIngredients.size > 0) {
-        setSelectedQuickAddIngredients(new Set());
-      }
+      setSelectedQuickAddIngredients(prevSet => {
+        return prevSet.size > 0 ? new Set() : prevSet;
+      });
     }
-  }, [ingredientsValueFromForm]);
+  }, [ingredientsValueFromForm, setSelectedQuickAddIngredients]);
 
 
   useEffect(() => {
@@ -126,11 +143,12 @@ export function RecipeForm() {
       ing.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') 
     );
     const newTextareaValue = ingredientsArray.join(', ');
+    const currentFormValue = getValues("ingredients");
 
-    if (newTextareaValue !== form.getValues("ingredients")) {
-      form.setValue("ingredients", newTextareaValue, { shouldValidate: true, shouldDirty: true });
+    if (newTextareaValue !== currentFormValue) {
+      setValue("ingredients", newTextareaValue, { shouldValidate: true, shouldDirty: true });
     }
-  }, [selectedQuickAddIngredients, form.setValue, form.getValues]);
+  }, [selectedQuickAddIngredients, setValue, getValues]);
 
 
   const toggleIngredientInDialog = (ingredient: string) => {
@@ -345,9 +363,9 @@ export function RecipeForm() {
           <CardDescription>Tell us what you have and any health needs.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onGetSuggestionsSubmit)} className="space-y-6">
-            <FormField control={form.control} name="ingredients" render={({ field }) => (
+          <Form {...{ control, handleSubmit, setValue, getValues, watch, formState: { errors }, reset, clearErrors }}>
+            <form onSubmit={handleSubmit(onGetSuggestionsSubmit)} className="space-y-6">
+            <FormField control={control} name="ingredients" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Available Ingredients</FormLabel>
                   <FormControl>
@@ -366,13 +384,14 @@ export function RecipeForm() {
               <div className="flex justify-center">
                 <Dialog open={isIngredientPickerDialogOpen} onOpenChange={setIsIngredientPickerDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      className="w-full sm:w-fit whitespace-normal h-auto min-h-10 text-center"
-                    >
-                      <ListPlus className="mr-2 h-4 w-4 shrink-0" />
-                      <span>Browse & Add Common Ingredients</span>
-                    </Button>
+                     <Button 
+                        type="button" 
+                        variant="outline" 
+                        className="w-full sm:w-fit whitespace-normal h-auto min-h-10 text-center"
+                      >
+                        <ListPlus className="mr-2 h-4 w-4 shrink-0" />
+                        <span>Browse & Add Common Ingredients</span>
+                      </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[600px]">
                     <DialogHeader>
@@ -438,7 +457,7 @@ export function RecipeForm() {
                 <FormLabel>Health Considerations (Optional)</FormLabel>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   {diseaseOptions.map((item) => (
-                    <FormField key={item.id} control={form.control} name="diseaseConcerns" render={({ field }) => (
+                    <FormField key={item.id} control={control} name="diseaseConcerns" render={({ field }) => (
                       <FormItem className="flex flex-row items-start space-x-2 space-y-0 p-2 border rounded-md hover:bg-muted/50">
                         <FormControl><Checkbox checked={field.value?.includes(item.id)} 
                           onCheckedChange={(checked) => {
@@ -454,17 +473,17 @@ export function RecipeForm() {
               <div>
                 <FormLabel>Household Size (for portioning)</FormLabel>
                 <div className="grid grid-cols-3 gap-3 mt-2">
-                  <FormField control={form.control} name="householdComposition.adults" render={({ field }) => (
+                  <FormField control={control} name="householdComposition.adults" render={({ field }) => (
                     <FormItem><FormLabel className="text-xs flex items-center"><User className="mr-1 h-3 w-3"/>Adults (18-60)</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
                   )} />
-                  <FormField control={form.control} name="householdComposition.seniors" render={({ field }) => (
+                  <FormField control={control} name="householdComposition.seniors" render={({ field }) => (
                     <FormItem><FormLabel className="text-xs flex items-center"><UserCog className="mr-1 h-3 w-3"/>Seniors (60+)</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
                   )} />
-                  <FormField control={form.control} name="householdComposition.kids" render={({ field }) => (
+                  <FormField control={control} name="householdComposition.kids" render={({ field }) => (
                     <FormItem><FormLabel className="text-xs flex items-center"><Baby className="mr-1 h-3 w-3"/>Kids (2-17)</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
                   )} />
                 </div>
-                 {form.formState.errors.householdComposition && <FormMessage>{form.formState.errors.householdComposition.message}</FormMessage>}
+                 {errors.householdComposition && <FormMessage>{errors.householdComposition.message}</FormMessage>}
               </div>
 
               <Button type="submit" disabled={isLoadingSuggestions} className="w-full">
@@ -575,3 +594,5 @@ export function RecipeForm() {
     </div>
   );
 }
+
+    
