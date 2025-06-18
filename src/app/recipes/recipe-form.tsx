@@ -99,31 +99,48 @@ export function RecipeForm() {
   const ingredientsValueFromForm = form.watch("ingredients");
 
   useEffect(() => {
+    // This effect synchronizes the ingredients from the textarea (ingredientsValueFromForm)
+    // to the Set used by the dialog (selectedQuickAddIngredients).
+    // It primarily reacts to manual user input in the textarea.
     if (typeof ingredientsValueFromForm === 'string') {
       const currentTextareaIngredientsArray = ingredientsValueFromForm
         .split(',')
         .map(ing => ing.trim().toLowerCase())
         .filter(Boolean);
-      const newSelectedIngredients = new Set(currentTextareaIngredientsArray);
+      const newSetFromTextarea = new Set(currentTextareaIngredientsArray);
 
-      if (newSelectedIngredients.size !== selectedQuickAddIngredients.size || 
-          ![...newSelectedIngredients].every(ing => selectedQuickAddIngredients.has(ing))) {
-        setSelectedQuickAddIngredients(newSelectedIngredients);
+      let setsAreEqual = newSetFromTextarea.size === selectedQuickAddIngredients.size;
+      if (setsAreEqual && newSetFromTextarea.size > 0) {
+        for (const item of newSetFromTextarea) {
+          if (!selectedQuickAddIngredients.has(item)) {
+            setsAreEqual = false;
+            break;
+          }
+        }
       }
-    } else if (selectedQuickAddIngredients.size > 0) { 
+      
+      if (!setsAreEqual) {
+        setSelectedQuickAddIngredients(newSetFromTextarea);
+      }
+    } else if (!ingredientsValueFromForm && selectedQuickAddIngredients.size > 0) {
+      // If textarea is cleared (becomes undefined, null, or empty string) and set is not empty
       setSelectedQuickAddIngredients(new Set());
     }
-  }, [ingredientsValueFromForm, selectedQuickAddIngredients]); 
+  }, [ingredientsValueFromForm]); // Only depends on ingredientsValueFromForm to avoid loop
 
   useEffect(() => {
+    // This effect synchronizes ingredients from the dialog's Set (selectedQuickAddIngredients)
+    // back to the textarea (form's "ingredients" field).
     const ingredientsArray = Array.from(selectedQuickAddIngredients).map(ing => 
       ing.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') 
     );
     const newTextareaValue = ingredientsArray.join(', ');
+
     if (newTextareaValue !== form.getValues("ingredients")) {
       form.setValue("ingredients", newTextareaValue, { shouldValidate: true, shouldDirty: true });
     }
   }, [selectedQuickAddIngredients, form]);
+
 
   const toggleIngredientInDialog = (ingredient: string) => {
     const ingredientLower = ingredient.toLowerCase();
@@ -358,7 +375,7 @@ export function RecipeForm() {
 
               <Dialog open={isIngredientPickerDialogOpen} onOpenChange={setIsIngredientPickerDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full" onClick={() => setIsIngredientPickerDialogOpen(true)}>
+                  <Button variant="outline" className="w-full">
                     <ListPlus className="mr-2 h-4 w-4" /> Browse & Add Common Ingredients
                   </Button>
                 </DialogTrigger>
@@ -369,49 +386,48 @@ export function RecipeForm() {
                       Tap ingredients to add or remove them from your list. Selected items will appear in the textarea above.
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="py-4 max-h-[60vh] overflow-y-auto">
-                    <Accordion type="multiple" className="w-full" defaultValue={ingredientCategories.map((_, index) => `category-${index}`)}>
-                      {ingredientCategories.map((category, index) => {
-                        const CategoryIcon = category.icon;
-                        return (
-                          <AccordionItem value={`category-${index}`} key={category.name}>
-                            <AccordionTrigger className="text-base font-semibold py-3 hover:no-underline [&[data-state=open]>svg]:text-primary">
-                              <div className="flex items-center">
-                                <CategoryIcon className="mr-2 h-5 w-5 text-primary/80" /> {category.name}
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent>
-                              <div className="flex flex-wrap gap-2 p-2">
-                                {category.items.map(item => {
-                                  const isSelected = selectedQuickAddIngredients.has(item.toLowerCase());
-                                  return (
-                                    <Button
-                                      key={item}
-                                      type="button"
-                                      variant="outline"
-                                      onClick={() => toggleIngredientInDialog(item)}
-                                      className={cn(
-                                        "px-3 py-1.5 text-sm h-auto rounded-full",
-                                        "transition-all duration-150 ease-in-out",
-                                        "flex items-center active:scale-95",
-                                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-background",
-                                        isSelected
-                                          ? "bg-primary text-primary-foreground hover:bg-primary/90 border-primary font-semibold"
-                                          : "border-input bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground"
-                                      )}
-                                    >
-                                      {isSelected ? <CheckCircle className="mr-1.5 h-4 w-4" /> : <PlusCircle className="mr-1.5 h-4 w-4 opacity-70" />}
-                                      {item}
-                                    </Button>
-                                  );
-                                })}
-                              </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        );
-                      })}
-                    </Accordion>
-                  </div>
+                    <ScrollArea className="max-h-[60vh] py-4">
+                      <Accordion type="multiple" className="w-full" defaultValue={ingredientCategories.map((_, index) => `category-${index}`)}>
+                        {ingredientCategories.map((category, index) => {
+                          const CategoryIcon = category.icon;
+                          return (
+                            <AccordionItem value={`category-${index}`} key={category.name}>
+                              <AccordionTrigger className="text-base font-semibold py-3 hover:no-underline [&[data-state=open]>svg]:text-primary">
+                                <div className="flex items-center">
+                                  <CategoryIcon className="mr-2 h-5 w-5 text-primary/80" /> {category.name}
+                                </div>
+                              </AccordionTrigger>
+                              <AccordionContent>
+                                <div className="flex flex-wrap gap-2 p-2">
+                                  {category.items.map(item => {
+                                    const isSelected = selectedQuickAddIngredients.has(item.toLowerCase());
+                                    return (
+                                      <Button
+                                        key={item}
+                                        type="button"
+                                        variant={isSelected ? "default" : "outline"}
+                                        onClick={() => toggleIngredientInDialog(item)}
+                                        className={cn(
+                                          "px-3 py-1.5 text-sm h-auto rounded-full",
+                                          "transition-all duration-150 ease-in-out",
+                                          "flex items-center active:scale-95",
+                                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-background",
+                                          isSelected && "bg-primary text-primary-foreground hover:bg-primary/90 border-primary font-semibold",
+                                          !isSelected && "border-input bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground"
+                                        )}
+                                      >
+                                        {isSelected ? <CheckCircle className="mr-1.5 h-4 w-4" /> : <PlusCircle className="mr-1.5 h-4 w-4 opacity-70" />}
+                                        {item}
+                                      </Button>
+                                    );
+                                  })}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          );
+                        })}
+                      </Accordion>
+                    </ScrollArea>
                   <DialogFooter>
                     <DialogClose asChild>
                       <Button type="button">Done</Button>
@@ -563,3 +579,4 @@ export function RecipeForm() {
     </div>
   );
 }
+
