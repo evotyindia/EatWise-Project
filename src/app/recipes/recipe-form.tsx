@@ -98,39 +98,25 @@ export function RecipeForm() {
 
   const ingredientsValueFromForm = form.watch("ingredients");
 
-  useEffect(() => {
-    // This effect synchronizes the ingredients from the textarea (ingredientsValueFromForm)
-    // to the Set used by the dialog (selectedQuickAddIngredients).
-    // It primarily reacts to manual user input in the textarea.
+ useEffect(() => {
     if (typeof ingredientsValueFromForm === 'string') {
-      const currentTextareaIngredientsArray = ingredientsValueFromForm
-        .split(',')
-        .map(ing => ing.trim().toLowerCase())
-        .filter(Boolean);
-      const newSetFromTextarea = new Set(currentTextareaIngredientsArray);
+        const currentTextareaIngredientsArray = ingredientsValueFromForm
+            .split(',')
+            .map(ing => ing.trim().toLowerCase())
+            .filter(Boolean);
+        const newSetFromTextarea = new Set(currentTextareaIngredientsArray);
 
-      let setsAreEqual = newSetFromTextarea.size === selectedQuickAddIngredients.size;
-      if (setsAreEqual && newSetFromTextarea.size > 0) {
-        for (const item of newSetFromTextarea) {
-          if (!selectedQuickAddIngredients.has(item)) {
-            setsAreEqual = false;
-            break;
-          }
+        if (newSetFromTextarea.size !== selectedQuickAddIngredients.size || 
+            !Array.from(newSetFromTextarea).every(item => selectedQuickAddIngredients.has(item))) {
+            setSelectedQuickAddIngredients(newSetFromTextarea);
         }
-      }
-      
-      if (!setsAreEqual) {
-        setSelectedQuickAddIngredients(newSetFromTextarea);
-      }
     } else if (!ingredientsValueFromForm && selectedQuickAddIngredients.size > 0) {
-      // If textarea is cleared (becomes undefined, null, or empty string) and set is not empty
-      setSelectedQuickAddIngredients(new Set());
+        setSelectedQuickAddIngredients(new Set());
     }
-  }, [ingredientsValueFromForm]); // Only depends on ingredientsValueFromForm to avoid loop
+  }, [ingredientsValueFromForm]); // Removed selectedQuickAddIngredients
+
 
   useEffect(() => {
-    // This effect synchronizes ingredients from the dialog's Set (selectedQuickAddIngredients)
-    // back to the textarea (form's "ingredients" field).
     const ingredientsArray = Array.from(selectedQuickAddIngredients).map(ing => 
       ing.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') 
     );
@@ -375,7 +361,7 @@ export function RecipeForm() {
 
               <Dialog open={isIngredientPickerDialogOpen} onOpenChange={setIsIngredientPickerDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full sm:w-auto">
                     <ListPlus className="mr-2 h-4 w-4" /> Browse & Add Common Ingredients
                   </Button>
                 </DialogTrigger>
@@ -579,4 +565,3 @@ export function RecipeForm() {
     </div>
   );
 }
-
