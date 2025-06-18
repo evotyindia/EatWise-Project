@@ -17,7 +17,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { createRoot } from 'react-dom/client';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { useForm, type SubmitHandler, Controller } from "react-hook-form";
+import { useForm, type SubmitHandler, Controller, FormProvider } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -87,16 +87,7 @@ export function RecipeForm() {
   const { toast } = useToast();
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    getValues,
-    watch,
-    formState: { errors },
-    reset,
-    clearErrors,
-  } = useForm<RecipePageFormValues>({
+  const formMethods = useForm<RecipePageFormValues>({
     resolver: zodResolver(recipePageInputSchema),
     defaultValues: {
       ingredients: "",
@@ -104,45 +95,24 @@ export function RecipeForm() {
       householdComposition: { adults: "1", seniors: "0", kids: "0" },
     },
   });
+  const { control, handleSubmit, setValue, getValues, watch, formState: { errors }, reset, clearErrors } = formMethods;
+
 
   const ingredientsValueFromForm = watch("ingredients");
 
   useEffect(() => {
-    if (typeof ingredientsValueFromForm === 'string') {
-      const currentTextareaIngredientsArray = ingredientsValueFromForm
-        .split(',')
-        .map(ing => ing.trim().toLowerCase())
-        .filter(Boolean);
-      
-      const newSetFromTextarea = new Set(currentTextareaIngredientsArray);
+    const currentTextareaVal = ingredientsValueFromForm || "";
+    const ingredientsFromTextarea = new Set(
+      currentTextareaVal.split(',').map(ing => ing.trim().toLowerCase()).filter(Boolean)
+    );
 
-      setSelectedQuickAddIngredients(prevSet => {
-        let shouldUpdate = false;
-        if (newSetFromTextarea.size !== prevSet.size) {
-          shouldUpdate = true;
-        } else {
-          for (const item of Array.from(newSetFromTextarea)) { // Convert Set to Array for iteration
-            if (!prevSet.has(item)) {
-              shouldUpdate = true;
-              break;
-            }
-          }
-           if (!shouldUpdate) { // Also check if prevSet has items not in newSet (deletion case)
-             for (const item of Array.from(prevSet)) {
-                if (!newSetFromTextarea.has(item)) {
-                    shouldUpdate = true;
-                    break;
-                }
-             }
-           }
-        }
-        return shouldUpdate ? newSetFromTextarea : prevSet;
-      });
-    } else if (ingredientsValueFromForm === undefined || ingredientsValueFromForm === null || ingredientsValueFromForm === "") {
-      setSelectedQuickAddIngredients(prevSet => {
-        return prevSet.size > 0 ? new Set() : prevSet;
-      });
-    }
+    setSelectedQuickAddIngredients(prevSet => {
+      if (ingredientsFromTextarea.size === prevSet.size && 
+          Array.from(ingredientsFromTextarea).every(item => prevSet.has(item))) {
+        return prevSet; // No change, return previous set to avoid re-render
+      }
+      return ingredientsFromTextarea;
+    });
   }, [ingredientsValueFromForm]);
 
 
@@ -371,7 +341,7 @@ export function RecipeForm() {
           <CardDescription>Tell us what you have and any health needs.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...{ control, handleSubmit, setValue, getValues, watch, formState: { errors }, reset, clearErrors }}>
+          <Form {...formMethods}>
             <form onSubmit={handleSubmit(onGetSuggestionsSubmit)} className="space-y-6">
             <FormField control={control} name="ingredients" render={({ field }) => (
                 <FormItem>
@@ -395,7 +365,7 @@ export function RecipeForm() {
                      <Button 
                         type="button" 
                         variant="outline" 
-                        className="w-full md:w-fit whitespace-normal h-auto min-h-10 text-center"
+                        className="w-full sm:w-auto md:w-full whitespace-normal h-auto min-h-10 text-center"
                       >
                         <ListPlus className="mr-2 h-4 w-4 shrink-0" />
                         <span>Browse & Add Common Ingredients</span>
@@ -491,7 +461,7 @@ export function RecipeForm() {
                     <FormItem><FormLabel className="text-xs flex items-center"><Baby className="mr-1 h-3 w-3"/>Kids (2-17)</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
                   )} />
                 </div>
-                 {errors.householdComposition && <FormMessage>{errors.householdComposition.message}</FormMessage>}
+                 {errors.householdComposition && <FormMessage>{(errors.householdComposition as any).message || errors.householdComposition.adults?.message || errors.householdComposition.seniors?.message || errors.householdComposition.kids?.message}</FormMessage>}
               </div>
 
               <Button type="submit" disabled={isLoadingSuggestions} className="w-full">
@@ -581,7 +551,7 @@ export function RecipeForm() {
                   ))}
                   {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Chef is typing...</div>}
                 </ScrollArea>
-                <form onSubmit={handleChatSubmit} className="w-full flex gap-2">
+                <form onSubmit={handleSubmit(handleChatSubmit)} className="w-full flex gap-2">
                   <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background"/>
                   <Button type="submit" disabled={isChatLoading || !chatInput.trim()}><Send className="h-4 w-4" /></Button>
                 </form>
@@ -602,5 +572,3 @@ export function RecipeForm() {
     </div>
   );
 }
-
-    
