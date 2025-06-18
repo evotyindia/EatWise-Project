@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 const AnalyzePage: NextPage = () => {
   return (
-    <div className="container mx-auto py-10 px-4 md:px-6 overflow-x-hidden">
+    <div className="container mx-auto py-10 px-4 md:px-6">
       <div className="flex flex-col items-center mb-10 text-center">
         <div className="p-4 bg-primary/10 rounded-full mb-5 inline-block">
             <ScanLine className="w-16 h-16 text-primary" />
@@ -40,4 +40,3 @@ const AnalyzePage: NextPage = () => {
   );
 }
 export default AnalyzePage;
-

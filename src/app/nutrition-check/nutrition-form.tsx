@@ -353,194 +353,194 @@ const ReportSection: React.FC<{title: string; icon: React.ElementType; children:
 
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <Card className="shadow-lg hover:shadow-xl transition-shadow rounded-xl min-w-0">
-        <CardHeader>
-          <CardTitle className="flex items-center text-2xl text-primary"><UploadCloud className="mr-2 h-7 w-7" /> Input Nutritional Data</CardTitle>
-          <CardDescription>Upload an image of the nutrition table or enter values manually. Provide serving size and item name for better context.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <Form {...formMethods}>
-            <form onSubmit={handleFormSubmit(onManualSubmit)} className="space-y-5">
-                <FormField control={control} name="foodItemDescription" render={({ field }) => (
-                  <FormItem><HookFormLabel className="font-semibold text-foreground/90">Food Item Name/Description (Optional)</HookFormLabel><FormControl><Input placeholder="e.g., Packaged Biscuits, Homemade Dal" {...field} value={field.value?.replace("IGNORE_VALIDATION_FOR_IMAGE_SUBMIT_INTERNAL_MARKER","")}/></FormControl><FormDescription>Helps AI provide more specific context in chat and PDF.</FormDescription><FormMessage /></FormItem>
-                )} />
-               <FormField control={control} name="servingSize" render={({ field }) => (
-                  <FormItem><HookFormLabel className="font-semibold text-foreground/90">Serving Size (Important for Context)</HookFormLabel><FormControl><Input placeholder="e.g., 1 cup (240ml), 30g, 1 packet" {...field} /></FormControl><FormDescription>Used for both image and manual analysis to provide context.</FormDescription><FormMessage /></FormItem>
-                )} />
-              <Separator className="border-border" />
-              <div>
-                 <Label htmlFor="nutrition-image-upload" className="font-semibold text-foreground/90 block mb-2">Upload Nutrition Table Image (Optional)</Label>
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                    <Label
-                      htmlFor="nutrition-image-upload-trigger"
-                      className={cn(
-                        buttonVariants({ variant: "outline" }),
-                        "cursor-pointer flex-grow w-full sm:w-auto justify-center truncate text-sm py-2.5"
-                      )}
-                    >
-                      <UploadCloud className="mr-2 h-4 w-4" />
-                      <span className="truncate max-w-[150px] sm:max-w-xs">
-                         {imageFile ? imageFile.name : "Choose File"}
-                      </span>
-                    </Label>
-                    <Input
-                      id="nutrition-image-upload-trigger"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="sr-only"
-                    />
-                    <Button
-                      type="button"
-                      onClick={onImageSubmit}
-                      disabled={isLoading || !imageFile}
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground text-base py-2.5 w-full sm:w-auto shrink-0"
-                    >
-                      {isProcessingImage ? <Sparkles className="mr-2 h-5 w-5 animate-spin" /> : <Sparkles className="mr-2 h-5 w-5" />}
-                      Analyze Image
-                    </Button>
-                  </div>
-
-                {uploadedImage && (
-                  <div className="mt-4 relative border border-border rounded-lg p-2 shadow-inner bg-muted/30">
-                    <Image src={uploadedImage} alt="Uploaded nutrition table" width={300} height={200} className="rounded-md object-contain mx-auto" data-ai-hint="nutrition facts" />
-                    <Button type="button" onClick={() => { setUploadedImage(null); setImageFile(null); clearErrors(); }} variant="ghost" size="icon" className="absolute top-1 right-1 text-xs hover:bg-destructive/10 hover:text-destructive h-7 w-7"><XCircle className="h-4 w-4"/></Button>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center my-6"><div className="flex-grow border-t border-muted-foreground/30"></div><span className="mx-4 text-sm font-semibold text-muted-foreground">OR ENTER MANUALLY BELOW</span><div className="flex-grow border-t border-muted-foreground/30"></div></div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-4">
-                <FormField control={control} name="calories" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Calories (kcal)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 250" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="fat" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Total Fat (g)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 10" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="saturatedFat" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Saturated Fat (g)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 3" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="transFat" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Trans Fat (g)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 0" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="cholesterol" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Cholesterol (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 5" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="sodium" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Sodium (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 500" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="carbohydrates" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Total Carbs (g)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 30" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="fiber" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Fiber (g)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 4" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="sugar" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Total Sugars (g)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 15" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="addedSugar" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Added Sugars (g)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 10" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="protein" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Protein (g)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 5" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="vitaminD" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Vitamin D (mcg/IU)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 10" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="calcium" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Calcium (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 200" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="iron" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Iron (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 2" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="potassium" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Potassium (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 300" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="vitaminC" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Vitamin C (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 60" {...field} /></FormControl><FormMessage /></FormItem>)} />
-              </div>
-              {errors.calories && !imageFile && !isSubmittingImage && <FormMessage>{errors.calories.message}</FormMessage>}
-              <Button type="submit" disabled={isLoading} className="w-full mt-6 bg-accent hover:bg-accent/90 text-accent-foreground text-base py-2.5">
-                {isProcessingManually ? <Sparkles className="mr-2 h-5 w-5 animate-spin" /> : <Sparkles className="mr-2 h-5 w-5" />}
-                Analyze Manual Data
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-
-      {isLoading && !analysisResult && (
-         <Card className="lg:col-span-1 flex items-center justify-center h-full min-h-[300px] rounded-xl shadow-lg min-w-0">
-            <div className="text-center p-6">
-                <Sparkles className="mx-auto h-16 w-16 text-primary animate-pulse mb-5" />
-                <p className="text-xl font-semibold text-primary">Generating Nutrition Analysis...</p>
-                <p className="text-sm text-muted-foreground mt-1">The AI is performing a detailed nutritional breakdown. Please be patient.</p>
-            </div>
-        </Card>
-      )}
-
-      {analysisResult && (
-        <Card className="shadow-xl hover:shadow-2xl transition-shadow rounded-xl min-w-0">
-          <CardHeader className="border-b border-border pb-4">
-            <div className="flex justify-between items-start">
-                <div className="flex-1">
-                    <CardTitle className="flex items-center text-2xl text-primary">
-                        <FileText className="mr-2 h-7 w-7" />
-                         AI Nutrition Analysis
-                    </CardTitle>
-                    <CardDescription className="mt-1 text-sm">
-                        {currentInputDataForPdf?.foodItemDescription && currentInputDataForPdf.foodItemDescription !== "IGNORE_VALIDATION_FOR_IMAGE_SUBMIT_INTERNAL_MARKER"
-                            ? `Analysis for: ${currentInputDataForPdf.foodItemDescription.trim()}`
-                            : currentInputDataForPdf?.nutritionDataUri === "Image Uploaded" 
-                                ? "Analysis for scanned food item"
-                                : "Analysis for manually entered data"
-                        }
-                        {currentInputDataForPdf?.servingSize && ` (Serving Size: ${currentInputDataForPdf.servingSize})`}
-                    </CardDescription>
-                </div>
-              <Button type="button" onClick={handleDownloadReport} variant="outline" size="sm" disabled={isPdfDownloading} className="ml-4 hover:bg-primary/5 hover:text-primary">
-                 {isPdfDownloading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Download PDF
-              </Button>
-            </div>
+    <div className="w-full overflow-x-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card className="shadow-lg hover:shadow-xl transition-shadow rounded-xl min-w-0">
+          <CardHeader>
+            <CardTitle className="flex items-center text-2xl text-primary"><UploadCloud className="mr-2 h-7 w-7" /> Input Nutritional Data</CardTitle>
+            <CardDescription>Upload an image of the nutrition table or enter values manually. Provide serving size and item name for better context.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-5 pt-6">
-            <Alert variant="default" className="bg-green-50 dark:bg-green-900/20 border-green-500/30 rounded-lg shadow">
-                <Sparkles className="h-5 w-5 text-green-600 dark:text-green-400" />
-                <AlertTitle className="font-semibold text-lg text-green-700 dark:text-green-300">Nutrition Density Rating</AlertTitle>
-                <AlertDescription className="flex items-center gap-2 mt-1">
-                    <StarRating rating={analysisResult.nutritionDensityRating} size={22} />
-                    <span className="text-base font-medium text-green-700 dark:text-green-300">({analysisResult.nutritionDensityRating}/5 Stars)</span>
-                </AlertDescription>
-                 <p className="text-xs text-muted-foreground mt-1 pl-7">Higher stars indicate better nutrient density relative to calories and less desirable components.</p>
-            </Alert>
-            
-            <Separator className="my-4 border-border" />
-
-            <div className="space-y-4">
-                <ReportSection title="Overall Analysis Summary" icon={Info} className="bg-sky-50 dark:bg-sky-900/30 border-sky-500/30" titleClassName="text-sky-700 dark:text-sky-300">
-                    {renderFormattedAnalysisText(analysisResult.overallAnalysis)}
-                </ReportSection>
-
-                <ReportSection title="Macronutrient Balance" icon={PieChart} >
-                    {renderFormattedAnalysisText(analysisResult.macronutrientBalance)}
-                </ReportSection>
-
-                <ReportSection title="Micronutrient Highlights" icon={Activity}>
-                     {renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}
-                </ReportSection>
-                
-                <ReportSection title="Processing Level Assessment" icon={Zap} className="bg-purple-50 dark:bg-purple-900/30 border-purple-500/30" titleClassName="text-purple-700 dark:text-purple-300">
-                    {renderFormattedAnalysisText(analysisResult.processingLevelAssessment)}
-                </ReportSection>
-
-                <ReportSection title="Dietary Suitability" icon={Users}>
-                    {renderFormattedAnalysisText(analysisResult.dietarySuitability)}
-                </ReportSection>
-
-                <ReportSection title="Serving Size Context" icon={Scaling}>
-                    {renderFormattedAnalysisText(analysisResult.servingSizeContext)}
-                </ReportSection>
-            </div>
-          </CardContent>
-           <CardFooter className="flex flex-col items-start pt-5 border-t border-border">
-                <h3 className="font-semibold text-xl mb-2 flex items-center text-primary"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Analysis</h3>
-                <p className="text-sm text-muted-foreground mb-4">Ask about specific nutrients, comparisons, etc. For example, "Is this good for a diabetic person?" or "How can I make this healthier?"</p>
-                <ScrollArea className="h-[220px] w-full rounded-md border border-border bg-muted/40 p-3 mb-4 shadow-inner" ref={chatScrollAreaRef}>
-                  {chatHistory.map((msg, index) => (
-                    <div key={index} className={`mb-2.5 p-3 rounded-lg text-sm shadow-sm max-w-[90%] break-words ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto rounded-br-none' : 'bg-accent text-accent-foreground mr-auto rounded-bl-none'}`}>
-                      <span className="font-semibold capitalize block mb-0.5">{msg.role === 'user' ? 'You' : 'AI Advisor'}: </span>{msg.content}
+          <CardContent className="space-y-6">
+            <Form {...formMethods}>
+              <form onSubmit={handleFormSubmit(onManualSubmit)} className="space-y-5">
+                  <FormField control={control} name="foodItemDescription" render={({ field }) => (
+                    <FormItem><HookFormLabel className="font-semibold text-foreground/90">Food Item Name/Description (Optional)</HookFormLabel><FormControl><Input placeholder="e.g., Packaged Biscuits, Homemade Dal" {...field} value={field.value?.replace("IGNORE_VALIDATION_FOR_IMAGE_SUBMIT_INTERNAL_MARKER","")}/></FormControl><FormDescription>Helps AI provide more specific context in chat and PDF.</FormDescription><FormMessage /></FormItem>
+                  )} />
+                 <FormField control={control} name="servingSize" render={({ field }) => (
+                    <FormItem><HookFormLabel className="font-semibold text-foreground/90">Serving Size (Important for Context)</HookFormLabel><FormControl><Input placeholder="e.g., 1 cup (240ml), 30g, 1 packet" {...field} /></FormControl><FormDescription>Used for both image and manual analysis to provide context.</FormDescription><FormMessage /></FormItem>
+                  )} />
+                <Separator className="border-border" />
+                <div>
+                   <Label htmlFor="nutrition-image-upload" className="font-semibold text-foreground/90 block mb-2">Upload Nutrition Table Image (Optional)</Label>
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                      <Label
+                        htmlFor="nutrition-image-upload-trigger"
+                        className={cn(
+                          buttonVariants({ variant: "outline" }),
+                          "cursor-pointer flex-grow w-full sm:w-auto justify-center truncate text-sm py-2.5"
+                        )}
+                      >
+                        <UploadCloud className="mr-2 h-4 w-4" />
+                        <span className="truncate max-w-[150px] sm:max-w-xs">
+                           {imageFile ? imageFile.name : "Choose File"}
+                        </span>
+                      </Label>
+                      <Input
+                        id="nutrition-image-upload-trigger"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="sr-only"
+                      />
+                      <Button
+                        type="button"
+                        onClick={onImageSubmit}
+                        disabled={isLoading || !imageFile}
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground text-base py-2.5 w-full sm:w-auto shrink-0"
+                      >
+                        {isProcessingImage ? <Sparkles className="mr-2 h-5 w-5 animate-spin" /> : <Sparkles className="mr-2 h-5 w-5" />}
+                        Analyze Image
+                      </Button>
                     </div>
-                  ))}
-                  {isChatLoading && <div className="text-sm text-muted-foreground p-2.5 flex items-center"><Sparkles className="h-4 w-4 mr-2 animate-pulse" />AI Advisor is typing...</div>}
-                </ScrollArea>
-                <form onSubmit={handleChatSubmit} className="w-full flex gap-2">
-                  <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background flex-grow"/>
-                  <Button type="submit" disabled={isChatLoading || !chatInput.trim()} className="bg-primary hover:bg-primary/90 text-primary-foreground"><Send className="h-4 w-4" /></Button>
-                </form>
-                 <p className="text-xs text-muted-foreground mt-4">
-                    This AI analysis is for informational purposes only and not a substitute for professional medical or dietary advice.
-                </p>
-            </CardFooter>
+
+                  {uploadedImage && (
+                    <div className="mt-4 relative border border-border rounded-lg p-2 shadow-inner bg-muted/30">
+                      <Image src={uploadedImage} alt="Uploaded nutrition table" width={300} height={200} className="rounded-md object-contain mx-auto" data-ai-hint="nutrition facts" />
+                      <Button type="button" onClick={() => { setUploadedImage(null); setImageFile(null); clearErrors(); }} variant="ghost" size="icon" className="absolute top-1 right-1 text-xs hover:bg-destructive/10 hover:text-destructive h-7 w-7"><XCircle className="h-4 w-4"/></Button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center my-6"><div className="flex-grow border-t border-muted-foreground/30"></div><span className="mx-4 text-sm font-semibold text-muted-foreground">OR ENTER MANUALLY BELOW</span><div className="flex-grow border-t border-muted-foreground/30"></div></div>
+                
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-4">
+                  <FormField control={control} name="calories" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Calories (kcal)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 250" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={control} name="fat" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Total Fat (g)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 10" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={control} name="saturatedFat" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Saturated Fat (g)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 3" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={control} name="transFat" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Trans Fat (g)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 0" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={control} name="cholesterol" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Cholesterol (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 5" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={control} name="sodium" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Sodium (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 500" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={control} name="carbohydrates" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Total Carbs (g)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 30" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={control} name="fiber" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Fiber (g)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 4" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={control} name="sugar" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Total Sugars (g)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 15" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={control} name="addedSugar" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Added Sugars (g)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 10" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={control} name="protein" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Protein (g)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 5" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={control} name="vitaminD" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Vitamin D (mcg/IU)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 10" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={control} name="calcium" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Calcium (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 200" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={control} name="iron" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Iron (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 2" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={control} name="potassium" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Potassium (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 300" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={control} name="vitaminC" render={({ field }) => (<FormItem><HookFormLabel className="text-sm font-medium text-foreground/80">Vitamin C (mg)</HookFormLabel><FormControl><Input type="number" placeholder="e.g., 60" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                </div>
+                {errors.calories && !imageFile && !isSubmittingImage && <FormMessage>{errors.calories.message}</FormMessage>}
+                <Button type="submit" disabled={isLoading} className="w-full mt-6 bg-accent hover:bg-accent/90 text-accent-foreground text-base py-2.5">
+                  {isProcessingManually ? <Sparkles className="mr-2 h-5 w-5 animate-spin" /> : <Sparkles className="mr-2 h-5 w-5" />}
+                  Analyze Manual Data
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
         </Card>
-      )}
-       {!isLoading && !analysisResult && (
-        <Card className="lg:col-span-1 flex items-center justify-center h-full min-h-[300px] bg-muted/20 rounded-xl border-2 border-dashed border-border min-w-0">
-            <div className="text-center p-8"><FileText className="mx-auto h-16 w-16 text-muted-foreground/70 mb-5" /><p className="text-xl font-semibold text-muted-foreground">Your nutrition analysis will appear here.</p><p className="text-sm text-muted-foreground/80 mt-1">Submit nutritional data to get started.</p></div>
-        </Card>
-      )}
+
+        {isLoading && !analysisResult && (
+           <Card className="lg:col-span-1 flex items-center justify-center h-full min-h-[300px] rounded-xl shadow-lg min-w-0">
+              <div className="text-center p-6">
+                  <Sparkles className="mx-auto h-16 w-16 text-primary animate-pulse mb-5" />
+                  <p className="text-xl font-semibold text-primary">Generating Nutrition Analysis...</p>
+                  <p className="text-sm text-muted-foreground mt-1">The AI is performing a detailed nutritional breakdown. Please be patient.</p>
+              </div>
+          </Card>
+        )}
+
+        {analysisResult && (
+          <Card className="shadow-xl hover:shadow-2xl transition-shadow rounded-xl min-w-0">
+            <CardHeader className="border-b border-border pb-4">
+              <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                      <CardTitle className="flex items-center text-2xl text-primary">
+                          <FileText className="mr-2 h-7 w-7" />
+                           AI Nutrition Analysis
+                      </CardTitle>
+                      <CardDescription className="mt-1 text-sm">
+                          {currentInputDataForPdf?.foodItemDescription && currentInputDataForPdf.foodItemDescription !== "IGNORE_VALIDATION_FOR_IMAGE_SUBMIT_INTERNAL_MARKER"
+                              ? `Analysis for: ${currentInputDataForPdf.foodItemDescription.trim()}`
+                              : currentInputDataForPdf?.nutritionDataUri === "Image Uploaded" 
+                                  ? "Analysis for scanned food item"
+                                  : "Analysis for manually entered data"
+                          }
+                          {currentInputDataForPdf?.servingSize && ` (Serving Size: ${currentInputDataForPdf.servingSize})`}
+                      </CardDescription>
+                  </div>
+                <Button type="button" onClick={handleDownloadReport} variant="outline" size="sm" disabled={isPdfDownloading} className="ml-4 hover:bg-primary/5 hover:text-primary">
+                   {isPdfDownloading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Download PDF
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-5 pt-6">
+              <Alert variant="default" className="bg-green-50 dark:bg-green-900/20 border-green-500/30 rounded-lg shadow">
+                  <Sparkles className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <AlertTitle className="font-semibold text-lg text-green-700 dark:text-green-300">Nutrition Density Rating</AlertTitle>
+                  <AlertDescription className="flex items-center gap-2 mt-1">
+                      <StarRating rating={analysisResult.nutritionDensityRating} size={22} />
+                      <span className="text-base font-medium text-green-700 dark:text-green-300">({analysisResult.nutritionDensityRating}/5 Stars)</span>
+                  </AlertDescription>
+                   <p className="text-xs text-muted-foreground mt-1 pl-7">Higher stars indicate better nutrient density relative to calories and less desirable components.</p>
+              </Alert>
+              
+              <Separator className="my-4 border-border" />
+
+              <div className="space-y-4">
+                  <ReportSection title="Overall Analysis Summary" icon={Info} className="bg-sky-50 dark:bg-sky-900/30 border-sky-500/30" titleClassName="text-sky-700 dark:text-sky-300">
+                      {renderFormattedAnalysisText(analysisResult.overallAnalysis)}
+                  </ReportSection>
+
+                  <ReportSection title="Macronutrient Balance" icon={PieChart} >
+                      {renderFormattedAnalysisText(analysisResult.macronutrientBalance)}
+                  </ReportSection>
+
+                  <ReportSection title="Micronutrient Highlights" icon={Activity}>
+                       {renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}
+                  </ReportSection>
+                  
+                  <ReportSection title="Processing Level Assessment" icon={Zap} className="bg-purple-50 dark:bg-purple-900/30 border-purple-500/30" titleClassName="text-purple-700 dark:text-purple-300">
+                      {renderFormattedAnalysisText(analysisResult.processingLevelAssessment)}
+                  </ReportSection>
+
+                  <ReportSection title="Dietary Suitability" icon={Users}>
+                      {renderFormattedAnalysisText(analysisResult.dietarySuitability)}
+                  </ReportSection>
+
+                  <ReportSection title="Serving Size Context" icon={Scaling}>
+                      {renderFormattedAnalysisText(analysisResult.servingSizeContext)}
+                  </ReportSection>
+              </div>
+            </CardContent>
+             <CardFooter className="flex flex-col items-start pt-5 border-t border-border">
+                  <h3 className="font-semibold text-xl mb-2 flex items-center text-primary"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Analysis</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Ask about specific nutrients, comparisons, etc. For example, "Is this good for a diabetic person?" or "How can I make this healthier?"</p>
+                  <ScrollArea className="h-[220px] w-full rounded-md border border-border bg-muted/40 p-3 mb-4 shadow-inner" ref={chatScrollAreaRef}>
+                    {chatHistory.map((msg, index) => (
+                      <div key={index} className={`mb-2.5 p-3 rounded-lg text-sm shadow-sm max-w-[90%] break-words ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto rounded-br-none' : 'bg-accent text-accent-foreground mr-auto rounded-bl-none'}`}>
+                        <span className="font-semibold capitalize block mb-0.5">{msg.role === 'user' ? 'You' : 'AI Advisor'}: </span>{msg.content}
+                      </div>
+                    ))}
+                    {isChatLoading && <div className="text-sm text-muted-foreground p-2.5 flex items-center"><Sparkles className="h-4 w-4 mr-2 animate-pulse" />AI Advisor is typing...</div>}
+                  </ScrollArea>
+                  <form onSubmit={handleChatSubmit} className="w-full flex gap-2">
+                    <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background flex-grow"/>
+                    <Button type="submit" disabled={isChatLoading || !chatInput.trim()} className="bg-primary hover:bg-primary/90 text-primary-foreground"><Send className="h-4 w-4" /></Button>
+                  </form>
+                   <p className="text-xs text-muted-foreground mt-4">
+                      This AI analysis is for informational purposes only and not a substitute for professional medical or dietary advice.
+                  </p>
+              </CardFooter>
+          </Card>
+        )}
+         {!isLoading && !analysisResult && (
+          <Card className="lg:col-span-1 flex items-center justify-center h-full min-h-[300px] bg-muted/20 rounded-xl border-2 border-dashed border-border min-w-0">
+              <div className="text-center p-8"><FileText className="mx-auto h-16 w-16 text-muted-foreground/70 mb-5" /><p className="text-xl font-semibold text-muted-foreground">Your nutrition analysis will appear here.</p><p className="text-sm text-muted-foreground/80 mt-1">Submit nutritional data to get started.</p></div>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
-
-    

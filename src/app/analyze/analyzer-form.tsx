@@ -7,7 +7,7 @@ import type { ContextAwareAIChatInput, ContextAwareAIChatOutput, ChatMessage } f
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadCloud, Sparkles, MessageCircle, Send, Download, Zap, HeartPulse, Wheat, Info, FileText, AlertOctagon, CheckCircle2, GitFork, ThumbsUp, ThumbsDown, FlaskConical } from "lucide-react";
+import { UploadCloud, Sparkles, MessageCircle, Send, Download, Zap, HeartPulse, Wheat, Info, FileText, AlertOctagon, CheckCircle2, GitFork, ThumbsUp, ThumbsDown, FlaskConical, XCircle } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import { createRoot } from 'react-dom/client';
@@ -282,211 +282,211 @@ export function AnalyzerForm() {
 
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <Card className="shadow-lg hover:shadow-xl transition-shadow rounded-xl min-w-0">
-        <CardHeader>
-          <CardTitle className="flex items-center text-2xl text-primary"><UploadCloud className="mr-2 h-7 w-7" /> Input Food Label Data</CardTitle>
-          <CardDescription>Upload an image of the food label or enter details manually for AI analysis.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <Label htmlFor="image-upload-main" className="font-semibold text-foreground/90 block mb-1">Upload Label Image</Label>
-             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <Label
-                  htmlFor="image-upload"
-                  className={cn(
-                    buttonVariants({ variant: "outline" }),
-                    "cursor-pointer flex-grow w-full sm:w-auto justify-center truncate text-sm py-2.5" 
-                  )}
-                >
-                  <UploadCloud className="mr-2 h-4 w-4" />
-                  <span className="truncate max-w-[150px] sm:max-w-xs">
-                     {imageFile ? imageFile.name : "Choose File"}
-                  </span>
-                </Label>
-                <Input
-                  id="image-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="sr-only"
-                />
-                <Button
-                  type="button"
-                  onClick={onImageSubmit}
-                  disabled={isLoading || !imageFile}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground text-base py-2.5 w-full sm:w-auto shrink-0"
-                >
-                  {isProcessingImage ? <Sparkles className="mr-2 h-5 w-5 animate-spin" /> : <Sparkles className="mr-2 h-5 w-5" />}
-                  Analyze Image
+    <div className="w-full overflow-x-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card className="shadow-lg hover:shadow-xl transition-shadow rounded-xl min-w-0">
+          <CardHeader>
+            <CardTitle className="flex items-center text-2xl text-primary"><UploadCloud className="mr-2 h-7 w-7" /> Input Food Label Data</CardTitle>
+            <CardDescription>Upload an image of the food label or enter details manually for AI analysis.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div>
+              <Label htmlFor="image-upload-main" className="font-semibold text-foreground/90 block mb-1">Upload Label Image</Label>
+               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <Label
+                    htmlFor="image-upload"
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "cursor-pointer flex-grow w-full sm:w-auto justify-center truncate text-sm py-2.5" 
+                    )}
+                  >
+                    <UploadCloud className="mr-2 h-4 w-4" />
+                    <span className="truncate max-w-[150px] sm:max-w-xs">
+                       {imageFile ? imageFile.name : "Choose File"}
+                    </span>
+                  </Label>
+                  <Input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="sr-only"
+                  />
+                  <Button
+                    type="button"
+                    onClick={onImageSubmit}
+                    disabled={isLoading || !imageFile}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground text-base py-2.5 w-full sm:w-auto shrink-0"
+                  >
+                    {isProcessingImage ? <Sparkles className="mr-2 h-5 w-5 animate-spin" /> : <Sparkles className="mr-2 h-5 w-5" />}
+                    Analyze Image
+                  </Button>
+                </div>
+              {uploadedImage && (
+                <div className="mt-4 relative border border-border rounded-lg p-2 shadow-inner bg-muted/30">
+                  <Image src={uploadedImage} alt="Uploaded label" width={300} height={200} className="rounded-md object-contain mx-auto" data-ai-hint="food label"/>
+                  <Button type="button" onClick={() => { setUploadedImage(null); setImageFile(null); }} variant="ghost" size="icon" className="absolute top-1 right-1 text-xs hover:bg-destructive/10 hover:text-destructive h-7 w-7"><XCircle className="h-4 w-4"/></Button>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center my-6">
+              <div className="flex-grow border-t border-border"></div><span className="mx-4 text-sm text-muted-foreground font-medium">OR</span><div className="flex-grow border-t border-border"></div>
+            </div>
+
+            <Form {...formMethods}>
+              <form onSubmit={handleSubmit(onManualSubmit)} className="space-y-5">
+                <FormField control={control} name="productName" render={({ field }) => (
+                  <FormItem><HookFormLabel className="font-semibold text-foreground/90">Product Name (Optional)</HookFormLabel><FormControl><Input placeholder="e.g., Instant Noodles, Whole Wheat Biscuits" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={control} name="ingredients" render={({ field }) => (
+                  <FormItem><HookFormLabel className="font-semibold text-foreground/90">Ingredients List</HookFormLabel><FormControl><Textarea placeholder="e.g., Wheat flour, Palm oil, Salt, Sugar, Spices..." {...field} rows={4}/></FormControl><FormDescription>Enter ingredients separated by commas.</FormDescription><FormMessage /></FormItem>
+                )} />
+                <FormField control={control} name="nutritionFacts" render={({ field }) => (
+                  <FormItem><HookFormLabel className="font-semibold text-foreground/90">Nutrition Facts (Optional)</HookFormLabel><FormControl><Textarea placeholder="e.g., Energy: 450kcal per 100g, Protein: 8g, Fat: 20g..." {...field} rows={3}/></FormControl><FormMessage /></FormItem>
+                )} />
+                <Button type="submit" disabled={isLoading} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground text-base py-2.5">
+                   {isProcessingManually ? <Sparkles className="mr-2 h-5 w-5 animate-spin" /> : <Sparkles className="mr-2 h-5 w-5" />}
+                  Analyze Manually
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+        
+        {isLoading && !report && (
+          <Card className="lg:col-span-1 flex items-center justify-center h-full min-h-[300px] rounded-xl shadow-lg bg-card min-w-0">
+              <div className="text-center p-6">
+                  <Sparkles className="mx-auto h-16 w-16 text-primary animate-pulse mb-5" />
+                  <p className="text-xl font-semibold text-primary">Generating AI Report...</p>
+                  <p className="text-sm text-muted-foreground mt-2">Our AI is carefully analyzing the data. This may take a few moments, especially for images. Please wait.</p>
+              </div>
+          </Card>
+        )}
+
+        {report && (
+          <Card className="shadow-xl hover:shadow-2xl transition-shadow rounded-xl min-w-0">
+            <CardHeader className="border-b border-border pb-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="flex items-center text-2xl text-primary"><FileText className="mr-2 h-7 w-7" /> AI Health Report</CardTitle>
+                  {report.productType && (<CardDescription className="mt-1">Product Type: <span className="font-semibold text-foreground">{report.productType}</span></CardDescription>)}
+                </div>
+                <Button onClick={handleDownloadReport} variant="outline" size="sm" disabled={isPdfDownloading} className="ml-auto hover:bg-primary/5 hover:text-primary">
+                  {isPdfDownloading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Download PDF
                 </Button>
               </div>
-            {uploadedImage && (
-              <div className="mt-4 relative border border-border rounded-lg p-2 shadow-inner bg-muted/30">
-                <Image src={uploadedImage} alt="Uploaded label" width={300} height={200} className="rounded-md object-contain mx-auto" data-ai-hint="food label"/>
-                <Button onClick={() => { setUploadedImage(null); setImageFile(null); }} variant="ghost" size="sm" className="absolute top-1 right-1 text-xs hover:bg-destructive/10 hover:text-destructive">Clear</Button>
+            </CardHeader>
+            <CardContent className="space-y-5 pt-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Alert variant="default" className="bg-muted/50 rounded-lg border-primary/30">
+                  <HeartPulse className="h-5 w-5 text-red-500" />
+                  <AlertTitle className="font-semibold text-primary">Overall Health Rating</AlertTitle>
+                  <AlertDescription className="flex items-center gap-1 flex-wrap">
+                      <StarRating rating={report.healthRating} size={22} /> 
+                      <span className="text-sm">({report.healthRating}/5 Stars). <i className="text-xs text-muted-foreground">Higher stars = better health.</i></span>
+                  </AlertDescription>
+                </Alert>
+                 {report.processingLevelRating?.rating !== undefined && (
+                  <Alert variant="default" className="bg-muted/50 rounded-lg border-border">
+                      <Zap className="h-5 w-5 text-purple-500" />
+                      <AlertTitle className="font-semibold text-purple-600 dark:text-purple-400">Processing Level</AlertTitle>
+                      <AlertDescription className="flex items-center gap-1 flex-wrap">
+                          <StarRating rating={report.processingLevelRating.rating} size={22}/> 
+                          <span className="text-sm">({report.processingLevelRating.rating}/5). <i className="text-xs text-muted-foreground">Generally, less processed (fewer stars) is better.</i></span>
+                      </AlertDescription>
+                      {report.processingLevelRating.justification && <p className="text-xs text-muted-foreground mt-1 pl-7 break-all">{report.processingLevelRating.justification}</p>}
+                  </Alert>
+                 )}
+                 {report.sugarContentRating?.rating !== undefined && (
+                  <Alert variant="default" className="bg-muted/50 rounded-lg border-border">
+                      <Wheat className="h-5 w-5 text-amber-600" /> 
+                      <AlertTitle className="font-semibold text-amber-700 dark:text-amber-500">Sugar Content</AlertTitle>
+                      <AlertDescription className="flex items-center gap-1 flex-wrap">
+                          <StarRating rating={report.sugarContentRating.rating} size={22}/> 
+                          <span className="text-sm">({report.sugarContentRating.rating}/5). <i className="text-xs text-muted-foreground">Generally, lower sugar (fewer stars) is better.</i></span>
+                      </AlertDescription>
+                      {report.sugarContentRating.justification && <p className="text-xs text-muted-foreground mt-1 pl-7 break-all">{report.sugarContentRating.justification}</p>}
+                  </Alert>
+                 )}
+                 {report.nutrientDensityRating?.rating !== undefined && (
+                  <Alert variant="default" className="bg-muted/50 rounded-lg border-border">
+                      <Sparkles className="h-5 w-5 text-green-500" />
+                      <AlertTitle className="font-semibold text-green-600 dark:text-green-400">Nutrient Density</AlertTitle>
+                      <AlertDescription className="flex items-center gap-1 flex-wrap">
+                          <StarRating rating={report.nutrientDensityRating.rating} size={22}/> 
+                          <span className="text-sm">({report.nutrientDensityRating.rating}/5). <i className="text-xs text-muted-foreground">Higher stars = more nutrient dense.</i></span>
+                      </AlertDescription>
+                      {report.nutrientDensityRating.justification && <p className="text-xs text-muted-foreground mt-1 pl-7 break-all">{report.nutrientDensityRating.justification}</p>}
+                  </Alert>
+                 )}
               </div>
-            )}
-          </div>
+              <Separator className="my-4 border-border" />
+              
+              <div className="space-y-4">
+                  <Alert variant="default" className="bg-card rounded-lg border-border shadow-sm">
+                      <Info className="h-5 w-5 text-primary" />
+                      <AlertTitle className="font-semibold text-lg mb-1.5 text-primary">Summary</AlertTitle>
+                      <AlertDescription className="text-foreground/80">{renderFormattedText(report.detailedAnalysis.summary)}</AlertDescription>
+                  </Alert>
+                  
+                  {renderFormattedText(report.detailedAnalysis.positiveAspects) && (
+                      <Alert variant="default" className="bg-green-50 dark:bg-green-900/30 border-green-500/30 rounded-lg shadow-sm">
+                          <ThumbsUp className="h-5 w-5 text-green-600 dark:text-green-400" />
+                          <AlertTitle className="font-semibold text-lg mb-1.5 text-green-700 dark:text-green-300">Positive Aspects</AlertTitle>
+                          <AlertDescription className="text-green-800 dark:text-green-300/90">{renderFormattedText(report.detailedAnalysis.positiveAspects)}</AlertDescription>
+                      </Alert>
+                  )}
+                  
+                  {renderFormattedText(report.detailedAnalysis.potentialConcerns) && (
+                      <Alert variant="destructive" className="bg-red-50 dark:bg-red-900/30 border-red-500/40 rounded-lg shadow-sm">
+                          <ThumbsDown className="h-5 w-5 text-red-600 dark:text-red-400" />
+                          <AlertTitle className="font-semibold text-lg mb-1.5 text-red-700 dark:text-red-300">Potential Concerns</AlertTitle>
+                          <AlertDescription className="text-red-800 dark:text-red-300/90">{renderFormattedText(report.detailedAnalysis.potentialConcerns)}</AlertDescription>
+                      </Alert>
+                  )}
+                  
+                  {renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown) && (
+                       <Alert variant="default" className="bg-card rounded-lg border-border shadow-sm">
+                          <FlaskConical className="h-5 w-5 text-primary" />
+                          <AlertTitle className="font-semibold text-lg mb-1.5 text-primary">Key Nutrients Breakdown</AlertTitle>
+                          <AlertDescription className="text-foreground/80">{renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown)}</AlertDescription>
+                      </Alert>
+                  )}
 
-          <div className="flex items-center my-6">
-            <div className="flex-grow border-t border-border"></div><span className="mx-4 text-sm text-muted-foreground font-medium">OR</span><div className="flex-grow border-t border-border"></div>
-          </div>
-
-          <Form {...formMethods}>
-            <form onSubmit={handleSubmit(onManualSubmit)} className="space-y-5">
-              <FormField control={control} name="productName" render={({ field }) => (
-                <FormItem><HookFormLabel className="font-semibold text-foreground/90">Product Name (Optional)</HookFormLabel><FormControl><Input placeholder="e.g., Instant Noodles, Whole Wheat Biscuits" {...field} /></FormControl><FormMessage /></FormItem>
-              )} />
-              <FormField control={control} name="ingredients" render={({ field }) => (
-                <FormItem><HookFormLabel className="font-semibold text-foreground/90">Ingredients List</HookFormLabel><FormControl><Textarea placeholder="e.g., Wheat flour, Palm oil, Salt, Sugar, Spices..." {...field} rows={4}/></FormControl><FormDescription>Enter ingredients separated by commas.</FormDescription><FormMessage /></FormItem>
-              )} />
-              <FormField control={control} name="nutritionFacts" render={({ field }) => (
-                <FormItem><HookFormLabel className="font-semibold text-foreground/90">Nutrition Facts (Optional)</HookFormLabel><FormControl><Textarea placeholder="e.g., Energy: 450kcal per 100g, Protein: 8g, Fat: 20g..." {...field} rows={3}/></FormControl><FormMessage /></FormItem>
-              )} />
-              <Button type="submit" disabled={isLoading} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground text-base py-2.5">
-                 {isProcessingManually ? <Sparkles className="mr-2 h-5 w-5 animate-spin" /> : <Sparkles className="mr-2 h-5 w-5" />}
-                Analyze Manually
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-      
-      {isLoading && !report && (
-        <Card className="lg:col-span-1 flex items-center justify-center h-full min-h-[300px] rounded-xl shadow-lg bg-card min-w-0">
-            <div className="text-center p-6">
-                <Sparkles className="mx-auto h-16 w-16 text-primary animate-pulse mb-5" />
-                <p className="text-xl font-semibold text-primary">Generating AI Report...</p>
-                <p className="text-sm text-muted-foreground mt-2">Our AI is carefully analyzing the data. This may take a few moments, especially for images. Please wait.</p>
-            </div>
-        </Card>
-      )}
-
-      {report && (
-        <Card className="shadow-xl hover:shadow-2xl transition-shadow rounded-xl min-w-0">
-          <CardHeader className="border-b border-border pb-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <CardTitle className="flex items-center text-2xl text-primary"><FileText className="mr-2 h-7 w-7" /> AI Health Report</CardTitle>
-                {report.productType && (<CardDescription className="mt-1">Product Type: <span className="font-semibold text-foreground">{report.productType}</span></CardDescription>)}
+                  {renderFormattedText(report.alternatives) && (
+                      <Alert variant="default" className="bg-sky-50 dark:bg-sky-900/30 border-sky-500/30 rounded-lg shadow-sm">
+                          <GitFork className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+                          <AlertTitle className="font-semibold text-lg mb-1.5 text-sky-700 dark:text-sky-300">Healthier Indian Alternatives</AlertTitle>
+                          <AlertDescription className="text-sky-800 dark:text-sky-300/90">{renderFormattedText(report.alternatives)}</AlertDescription>
+                      </Alert>
+                  )}
               </div>
-              <Button onClick={handleDownloadReport} variant="outline" size="sm" disabled={isPdfDownloading} className="ml-auto hover:bg-primary/5 hover:text-primary">
-                {isPdfDownloading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Download PDF
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-5 pt-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Alert variant="default" className="bg-muted/50 rounded-lg border-primary/30">
-                <HeartPulse className="h-5 w-5 text-red-500" />
-                <AlertTitle className="font-semibold text-primary">Overall Health Rating</AlertTitle>
-                <AlertDescription className="flex items-center gap-1 flex-wrap">
-                    <StarRating rating={report.healthRating} size={22} /> 
-                    <span className="text-sm">({report.healthRating}/5 Stars). <i className="text-xs text-muted-foreground">Higher stars = better health.</i></span>
-                </AlertDescription>
-              </Alert>
-               {report.processingLevelRating?.rating !== undefined && (
-                <Alert variant="default" className="bg-muted/50 rounded-lg border-border">
-                    <Zap className="h-5 w-5 text-purple-500" />
-                    <AlertTitle className="font-semibold text-purple-600 dark:text-purple-400">Processing Level</AlertTitle>
-                    <AlertDescription className="flex items-center gap-1 flex-wrap">
-                        <StarRating rating={report.processingLevelRating.rating} size={22}/> 
-                        <span className="text-sm">({report.processingLevelRating.rating}/5). <i className="text-xs text-muted-foreground">Generally, less processed (fewer stars) is better.</i></span>
-                    </AlertDescription>
-                    {report.processingLevelRating.justification && <p className="text-xs text-muted-foreground mt-1 pl-7">{report.processingLevelRating.justification}</p>}
-                </Alert>
-               )}
-               {report.sugarContentRating?.rating !== undefined && (
-                <Alert variant="default" className="bg-muted/50 rounded-lg border-border">
-                    <Wheat className="h-5 w-5 text-amber-600" /> 
-                    <AlertTitle className="font-semibold text-amber-700 dark:text-amber-500">Sugar Content</AlertTitle>
-                    <AlertDescription className="flex items-center gap-1 flex-wrap">
-                        <StarRating rating={report.sugarContentRating.rating} size={22}/> 
-                        <span className="text-sm">({report.sugarContentRating.rating}/5). <i className="text-xs text-muted-foreground">Generally, lower sugar (fewer stars) is better.</i></span>
-                    </AlertDescription>
-                    {report.sugarContentRating.justification && <p className="text-xs text-muted-foreground mt-1 pl-7">{report.sugarContentRating.justification}</p>}
-                </Alert>
-               )}
-               {report.nutrientDensityRating?.rating !== undefined && (
-                <Alert variant="default" className="bg-muted/50 rounded-lg border-border">
-                    <Sparkles className="h-5 w-5 text-green-500" />
-                    <AlertTitle className="font-semibold text-green-600 dark:text-green-400">Nutrient Density</AlertTitle>
-                    <AlertDescription className="flex items-center gap-1 flex-wrap">
-                        <StarRating rating={report.nutrientDensityRating.rating} size={22}/> 
-                        <span className="text-sm">({report.nutrientDensityRating.rating}/5). <i className="text-xs text-muted-foreground">Higher stars = more nutrient dense.</i></span>
-                    </AlertDescription>
-                    {report.nutrientDensityRating.justification && <p className="text-xs text-muted-foreground mt-1 pl-7">{report.nutrientDensityRating.justification}</p>}
-                </Alert>
-               )}
-            </div>
-            <Separator className="my-4 border-border" />
-            
-            <div className="space-y-4">
-                <Alert variant="default" className="bg-card rounded-lg border-border shadow-sm">
-                    <Info className="h-5 w-5 text-primary" />
-                    <AlertTitle className="font-semibold text-lg mb-1.5 text-primary">Summary</AlertTitle>
-                    <AlertDescription className="text-foreground/80">{renderFormattedText(report.detailedAnalysis.summary)}</AlertDescription>
-                </Alert>
-                
-                {renderFormattedText(report.detailedAnalysis.positiveAspects) && (
-                    <Alert variant="default" className="bg-green-50 dark:bg-green-900/30 border-green-500/30 rounded-lg shadow-sm">
-                        <ThumbsUp className="h-5 w-5 text-green-600 dark:text-green-400" />
-                        <AlertTitle className="font-semibold text-lg mb-1.5 text-green-700 dark:text-green-300">Positive Aspects</AlertTitle>
-                        <AlertDescription className="text-green-800 dark:text-green-300/90">{renderFormattedText(report.detailedAnalysis.positiveAspects)}</AlertDescription>
-                    </Alert>
-                )}
-                
-                {renderFormattedText(report.detailedAnalysis.potentialConcerns) && (
-                    <Alert variant="destructive" className="bg-red-50 dark:bg-red-900/30 border-red-500/40 rounded-lg shadow-sm">
-                        <ThumbsDown className="h-5 w-5 text-red-600 dark:text-red-400" />
-                        <AlertTitle className="font-semibold text-lg mb-1.5 text-red-700 dark:text-red-300">Potential Concerns</AlertTitle>
-                        <AlertDescription className="text-red-800 dark:text-red-300/90">{renderFormattedText(report.detailedAnalysis.potentialConcerns)}</AlertDescription>
-                    </Alert>
-                )}
-                
-                {renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown) && (
-                     <Alert variant="default" className="bg-card rounded-lg border-border shadow-sm">
-                        <FlaskConical className="h-5 w-5 text-primary" />
-                        <AlertTitle className="font-semibold text-lg mb-1.5 text-primary">Key Nutrients Breakdown</AlertTitle>
-                        <AlertDescription className="text-foreground/80">{renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown)}</AlertDescription>
-                    </Alert>
-                )}
-
-                {renderFormattedText(report.alternatives) && (
-                    <Alert variant="default" className="bg-sky-50 dark:bg-sky-900/30 border-sky-500/30 rounded-lg shadow-sm">
-                        <GitFork className="h-5 w-5 text-sky-600 dark:text-sky-400" />
-                        <AlertTitle className="font-semibold text-lg mb-1.5 text-sky-700 dark:text-sky-300">Healthier Indian Alternatives</AlertTitle>
-                        <AlertDescription className="text-sky-800 dark:text-sky-300/90">{renderFormattedText(report.alternatives)}</AlertDescription>
-                    </Alert>
-                )}
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col items-start pt-5 border-t border-border">
-            <h3 className="font-semibold text-xl mb-2 flex items-center text-primary"><MessageCircle className="mr-2 h-5 w-5"/> Chat with AI Advisor</h3>
-            <p className="text-sm text-muted-foreground mb-4">Ask questions about this report. For example: "Can kids eat this daily?" or "Suggest a low-sodium alternative."</p>
-            <ScrollArea className="h-[220px] w-full rounded-md border border-border bg-muted/40 p-3 mb-4 shadow-inner" ref={chatScrollAreaRef}>
-              {chatHistory.map((msg, index) => (
-                <div key={index} className={`mb-2.5 p-3 rounded-lg text-sm shadow-sm max-w-[90%] break-words ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto rounded-br-none' : 'bg-accent text-accent-foreground mr-auto rounded-bl-none'}`}>
-                  <span className="font-semibold capitalize block mb-0.5">{msg.role === 'user' ? 'You' : 'AI Advisor'}:</span>{msg.content}
-                </div>
-              ))}
-               {isChatLoading && <div className="text-sm text-muted-foreground p-2.5 flex items-center"><Sparkles className="h-4 w-4 mr-2 animate-pulse" /> AI Advisor is typing...</div>}
-            </ScrollArea>
-            <form onSubmit={handleChatSubmit} className="w-full flex gap-2">
-              <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading || !report} className="bg-background flex-grow" />
-              <Button type="submit" disabled={isChatLoading || !chatInput.trim() || !report} className="bg-primary hover:bg-primary/90 text-primary-foreground"><Send className="h-4 w-4" /></Button>
-            </form>
-          </CardFooter>
-        </Card>
-      )}
-       {!isLoading && !report && (
-        <Card className="lg:col-span-1 flex items-center justify-center h-full min-h-[300px] bg-muted/20 rounded-xl border-2 border-dashed border-border min-w-0">
-            <div className="text-center p-8"><Sparkles className="mx-auto h-16 w-16 text-muted-foreground/70 mb-5" /><p className="text-xl font-semibold text-muted-foreground">Your AI report will appear here.</p><p className="text-sm text-muted-foreground/80 mt-1">Submit a food label to get started.</p></div>
-        </Card>
-      )}
+            </CardContent>
+            <CardFooter className="flex flex-col items-start pt-5 border-t border-border">
+              <h3 className="font-semibold text-xl mb-2 flex items-center text-primary"><MessageCircle className="mr-2 h-5 w-5"/> Chat with AI Advisor</h3>
+              <p className="text-sm text-muted-foreground mb-4">Ask questions about this report. For example: "Can kids eat this daily?" or "Suggest a low-sodium alternative."</p>
+              <ScrollArea className="h-[220px] w-full rounded-md border border-border bg-muted/40 p-3 mb-4 shadow-inner" ref={chatScrollAreaRef}>
+                {chatHistory.map((msg, index) => (
+                  <div key={index} className={`mb-2.5 p-3 rounded-lg text-sm shadow-sm max-w-[90%] break-words ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto rounded-br-none' : 'bg-accent text-accent-foreground mr-auto rounded-bl-none'}`}>
+                    <span className="font-semibold capitalize block mb-0.5">{msg.role === 'user' ? 'You' : 'AI Advisor'}:</span>{msg.content}
+                  </div>
+                ))}
+                 {isChatLoading && <div className="text-sm text-muted-foreground p-2.5 flex items-center"><Sparkles className="h-4 w-4 mr-2 animate-pulse" /> AI Advisor is typing...</div>}
+              </ScrollArea>
+              <form onSubmit={handleChatSubmit} className="w-full flex gap-2">
+                <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading || !report} className="bg-background flex-grow" />
+                <Button type="submit" disabled={isChatLoading || !chatInput.trim() || !report} className="bg-primary hover:bg-primary/90 text-primary-foreground"><Send className="h-4 w-4" /></Button>
+              </form>
+            </CardFooter>
+          </Card>
+        )}
+         {!isLoading && !report && (
+          <Card className="lg:col-span-1 flex items-center justify-center h-full min-h-[300px] bg-muted/20 rounded-xl border-2 border-dashed border-border min-w-0">
+              <div className="text-center p-8"><Sparkles className="mx-auto h-16 w-16 text-muted-foreground/70 mb-5" /><p className="text-xl font-semibold text-muted-foreground">Your AI report will appear here.</p><p className="text-sm text-muted-foreground/80 mt-1">Submit a food label to get started.</p></div>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
-
-    
