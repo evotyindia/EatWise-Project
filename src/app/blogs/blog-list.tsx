@@ -28,15 +28,15 @@ export function BlogList({ initialPosts, categories }: BlogListProps) {
 
   return (
     <div>
-      <div className="mb-10 flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-card border border-border rounded-lg shadow-sm">
+      <div className="mb-10 flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-card border border-border rounded-xl shadow-sm">
         <h2 className="text-2xl font-semibold text-primary">Latest Articles</h2>
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Filter className="h-5 w-5 text-muted-foreground" />
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-full sm:w-48 md:w-56 transition-all duration-300 ease-in-out hover:border-primary focus:ring-primary text-base py-2.5">
+            <SelectTrigger className="w-full sm:w-48 md:w-56 transition-all duration-300 ease-in-out hover:border-primary focus:ring-primary text-base py-2.5 rounded-lg">
               <SelectValue placeholder="Filter by category" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-lg">
               {categories.map(category => (
                 <SelectItem key={category} value={category} className="text-base py-2">
                   {category}

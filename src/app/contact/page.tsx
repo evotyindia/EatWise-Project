@@ -81,7 +81,7 @@ const ContactPage: NextPage = () => {
         </Card>
       </div>
 
-      <Separator className="my-16 max-w-4xl mx-auto" />
+      <Separator className="my-16 max-w-4xl mx-auto border-border" />
 
       <Card className="max-w-4xl mx-auto shadow-xl transition-shadow duration-300 rounded-xl border border-border">
         <CardHeader className="pb-4">
@@ -110,7 +110,7 @@ const ContactPage: NextPage = () => {
         </CardContent>
       </Card>
 
-       <Separator className="my-16 max-w-4xl mx-auto" />
+       <Separator className="my-16 max-w-4xl mx-auto border-border" />
 
        <div className="text-center max-w-3xl mx-auto">
             <div className="flex items-center justify-center text-primary mb-4">

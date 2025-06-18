@@ -105,11 +105,13 @@ export function RecipeForm() {
     const ingredientsFromTextarea = new Set(
       currentTextareaVal.split(',').map(ing => ing.trim().toLowerCase()).filter(Boolean)
     );
-
+  
     setSelectedQuickAddIngredients(prevSet => {
-      if (ingredientsFromTextarea.size === prevSet.size && 
-          Array.from(ingredientsFromTextarea).every(item => prevSet.has(item))) {
-        return prevSet; // No change, return previous set to avoid re-render
+      const currentSetArray = Array.from(prevSet);
+      const newSetArray = Array.from(ingredientsFromTextarea);
+  
+      if (currentSetArray.length === newSetArray.length && currentSetArray.every(item => newSetArray.includes(item))) {
+        return prevSet; 
       }
       return ingredientsFromTextarea;
     });
@@ -335,17 +337,17 @@ export function RecipeForm() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <Card className="md:col-span-1 shadow-lg hover:shadow-xl transition-shadow">
+      <Card className="md:col-span-1 shadow-lg hover:shadow-xl transition-shadow rounded-xl">
         <CardHeader>
-          <CardTitle className="flex items-center text-2xl"><ChefHat className="mr-2 h-6 w-6" /> Recipe Finder</CardTitle>
-          <CardDescription>Tell us what you have and any health needs.</CardDescription>
+          <CardTitle className="flex items-center text-2xl text-primary"><ChefHat className="mr-2 h-7 w-7" /> Recipe Finder</CardTitle>
+          <CardDescription>Tell us what you have and any health needs. We'll suggest some healthy Indian dishes!</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...formMethods}>
             <form onSubmit={handleSubmit(onGetSuggestionsSubmit)} className="space-y-6">
             <FormField control={control} name="ingredients" render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Available Ingredients</FormLabel>
+                  <FormLabel className="font-semibold text-foreground/90">Available Ingredients</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="e.g., Onions, Tomatoes, Paneer, Rice..."
@@ -365,15 +367,15 @@ export function RecipeForm() {
                      <Button 
                         type="button" 
                         variant="outline" 
-                        className="w-full sm:w-auto md:w-full whitespace-normal h-auto min-h-10 text-center"
+                        className="w-full md:w-auto whitespace-normal h-auto min-h-10 text-center"
                       >
                         <ListPlus className="mr-2 h-4 w-4 shrink-0" />
                         <span>Browse & Add Common Ingredients</span>
                       </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[600px]">
+                  <DialogContent className="sm:max-w-[600px] rounded-xl">
                     <DialogHeader>
-                      <DialogTitle>Select Common Ingredients</DialogTitle>
+                      <DialogTitle className="text-primary">Select Common Ingredients</DialogTitle>
                       <DialogDescription>
                         Tap ingredients to add or remove them from your list. Selected items will appear in the textarea above.
                       </DialogDescription>
@@ -383,14 +385,14 @@ export function RecipeForm() {
                           {ingredientCategories.map((category, index) => {
                             const CategoryIcon = category.icon;
                             return (
-                              <AccordionItem value={`category-${index}`} key={category.name}>
-                                <AccordionTrigger className="text-base font-semibold py-3 hover:no-underline [&[data-state=open]>svg]:text-primary">
+                              <AccordionItem value={`category-${index}`} key={category.name} className="border-border">
+                                <AccordionTrigger className="text-base font-semibold py-3 hover:no-underline [&[data-state=open]>svg]:text-primary text-foreground/90">
                                   <div className="flex items-center">
                                     <CategoryIcon className="mr-2 h-5 w-5 text-primary/80" /> {category.name}
                                   </div>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                  <div className="flex flex-wrap gap-2 p-2">
+                                  <div className="flex flex-wrap gap-2 p-2 bg-muted/30 rounded-md">
                                     {category.items.map(item => {
                                       const isSelected = selectedQuickAddIngredients.has(item.toLowerCase());
                                       return (
@@ -420,28 +422,28 @@ export function RecipeForm() {
                           })}
                         </Accordion>
                       </ScrollArea>
-                    <DialogFooter>
+                    <DialogFooter className="pt-4">
                       <DialogClose asChild>
-                        <Button type="button">Done</Button>
+                        <Button type="button" className="bg-primary hover:bg-primary/90 text-primary-foreground">Done</Button>
                       </DialogClose>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
               </div>
               
-              <Separator className="my-6" />
+              <Separator className="my-6 border-border" />
 
               <div>
-                <FormLabel>Health Considerations (Optional)</FormLabel>
-                <div className="grid grid-cols-2 gap-2 mt-2">
+                <FormLabel className="font-semibold text-foreground/90">Health Considerations (Optional)</FormLabel>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                   {diseaseOptions.map((item) => (
                     <FormField key={item.id} control={control} name="diseaseConcerns" render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-2 space-y-0 p-2 border rounded-md hover:bg-muted/50">
+                      <FormItem className="flex flex-row items-center space-x-2 space-y-0 p-2.5 border rounded-md hover:bg-muted/50 transition-colors bg-card">
                         <FormControl><Checkbox checked={field.value?.includes(item.id)} 
                           onCheckedChange={(checked) => {
                             return checked ? field.onChange([...(field.value || []), item.id]) : field.onChange(field.value?.filter((value) => value !== item.id));
                           }} /></FormControl>
-                        <FormLabel className="text-sm font-normal cursor-pointer flex items-center"><item.icon className="mr-1.5 h-4 w-4 text-muted-foreground"/>{item.label}</FormLabel>
+                        <FormLabel className="text-sm font-normal cursor-pointer flex items-center text-foreground/80"><item.icon className="mr-1.5 h-4 w-4 text-primary/70"/>{item.label}</FormLabel>
                       </FormItem>
                     )} />
                   ))}
@@ -449,24 +451,24 @@ export function RecipeForm() {
               </div>
 
               <div>
-                <FormLabel>Household Size (for portioning)</FormLabel>
+                <FormLabel className="font-semibold text-foreground/90">Household Size (for portioning)</FormLabel>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
                   <FormField control={control} name="householdComposition.adults" render={({ field }) => (
-                    <FormItem><FormLabel className="text-xs flex items-center"><User className="mr-1 h-3 w-3"/>Adults (18-60)</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel className="text-xs flex items-center text-muted-foreground"><User className="mr-1 h-3 w-3"/>Adults (18-60)</FormLabel><FormControl><Input type="number" min="0" {...field} className="bg-background" /></FormControl><FormMessage /></FormItem>
                   )} />
                   <FormField control={control} name="householdComposition.seniors" render={({ field }) => (
-                    <FormItem><FormLabel className="text-xs flex items-center"><UserCog className="mr-1 h-3 w-3"/>Seniors (60+)</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel className="text-xs flex items-center text-muted-foreground"><UserCog className="mr-1 h-3 w-3"/>Seniors (60+)</FormLabel><FormControl><Input type="number" min="0" {...field} className="bg-background" /></FormControl><FormMessage /></FormItem>
                   )} />
                   <FormField control={control} name="householdComposition.kids" render={({ field }) => (
-                    <FormItem><FormLabel className="text-xs flex items-center"><Baby className="mr-1 h-3 w-3"/>Kids (2-17)</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel className="text-xs flex items-center text-muted-foreground"><Baby className="mr-1 h-3 w-3"/>Kids (2-17)</FormLabel><FormControl><Input type="number" min="0" {...field} className="bg-background" /></FormControl><FormMessage /></FormItem>
                   )} />
                 </div>
                  {errors.householdComposition && <FormMessage>{(errors.householdComposition as any).message || errors.householdComposition.adults?.message || errors.householdComposition.seniors?.message || errors.householdComposition.kids?.message}</FormMessage>}
               </div>
 
-              <Button type="submit" disabled={isLoadingSuggestions} className="w-full">
+              <Button type="submit" disabled={isLoadingSuggestions} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-base py-2.5">
                 {isLoadingSuggestions ? "Finding Ideas..." : "Get Dish Ideas"}
-                <Sparkles className="ml-2 h-4 w-4" />
+                <Sparkles className="ml-2 h-5 w-5" />
               </Button>
             </form>
           </Form>
@@ -474,12 +476,12 @@ export function RecipeForm() {
       </Card>
 
       <div className="md:col-span-2 space-y-8">
-        {isLoadingSuggestions && ( <Card className="flex items-center justify-center h-64"><Sparkles className="h-12 w-12 text-primary animate-spin" /><p className="ml-3">Finding dish ideas...</p></Card> )}
+        {isLoadingSuggestions && ( <Card className="flex items-center justify-center h-64 rounded-xl shadow-lg"><Sparkles className="h-12 w-12 text-primary animate-spin" /><p className="ml-3 text-lg text-muted-foreground">Finding dish ideas...</p></Card> )}
         
         {dishSuggestions && !detailedRecipe && (
-          <Card className="shadow-lg">
+          <Card className="shadow-lg rounded-xl">
             <CardHeader>
-              <CardTitle className="text-xl flex items-center"><Lightbulb className="mr-2 h-5 w-5 text-accent"/> Suggested Dishes</CardTitle>
+              <CardTitle className="text-xl flex items-center text-primary"><Lightbulb className="mr-2 h-6 w-6"/> Suggested Dishes</CardTitle>
               {dishSuggestions.initialContextualGuidance && <CardDescription>{dishSuggestions.initialContextualGuidance}</CardDescription>}
             </CardHeader>
             <CardContent>
@@ -487,84 +489,84 @@ export function RecipeForm() {
                 <ul className="space-y-2">
                   {dishSuggestions.suggestions.map((dish, index) => (
                     <li key={index}>
-                      <Button variant="link" onClick={() => handleSelectDish(dish)} className="text-lg p-0 h-auto hover:text-primary" disabled={isLoadingRecipe}>
+                      <Button variant="link" onClick={() => handleSelectDish(dish)} className="text-lg p-0 h-auto hover:text-accent font-medium" disabled={isLoadingRecipe}>
                         {dish}
                       </Button>
                     </li>
                   ))}
                 </ul>
-              ) : <p>No specific dish suggestions found. Try adjusting your ingredients or health concerns.</p>}
+              ) : <p className="text-muted-foreground">No specific dish suggestions found. Try adjusting your ingredients or health concerns.</p>}
             </CardContent>
           </Card>
         )}
 
-        {isLoadingRecipe && ( <Card className="flex items-center justify-center h-64"><Sparkles className="h-12 w-12 text-primary animate-spin" /><p className="ml-3">Generating detailed recipe...</p></Card> )}
+        {isLoadingRecipe && ( <Card className="flex items-center justify-center h-64 rounded-xl shadow-lg"><Sparkles className="h-12 w-12 text-primary animate-spin" /><p className="ml-3 text-lg text-muted-foreground">Generating detailed recipe...</p></Card> )}
 
         {detailedRecipe && (
-          <Card className="shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-2xl flex items-center"><FileText className="mr-2 h-6 w-6 text-primary"/> {detailedRecipe.recipeTitle}</CardTitle>
-                <Button onClick={handleDownloadRecipePdf} variant="outline" size="sm" disabled={isPdfDownloading}>
+          <Card className="shadow-xl hover:shadow-2xl transition-shadow rounded-xl">
+            <CardHeader className="border-b border-border pb-4">
+              <div className="flex justify-between items-start">
+                <CardTitle className="text-2xl flex items-center text-primary"><FileText className="mr-2 h-7 w-7"/> {detailedRecipe.recipeTitle}</CardTitle>
+                <Button onClick={handleDownloadRecipePdf} variant="outline" size="sm" disabled={isPdfDownloading} className="hover:bg-primary/5 hover:text-primary">
                   {isPdfDownloading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Download PDF
                 </Button>
               </div>
-              {detailedRecipe.description && <CardDescription>{detailedRecipe.description}</CardDescription>}
+              {detailedRecipe.description && <CardDescription className="mt-1">{detailedRecipe.description}</CardDescription>}
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
-                {detailedRecipe.prepTime && <div><strong>Prep:</strong> {detailedRecipe.prepTime}</div>}
-                {detailedRecipe.cookTime && <div><strong>Cook:</strong> {detailedRecipe.cookTime}</div>}
-                <div><strong>Serves:</strong> {detailedRecipe.servingsDescription}</div>
+            <CardContent className="space-y-5 pt-5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm bg-muted/50 p-3 rounded-lg border border-border">
+                {detailedRecipe.prepTime && <div className="font-medium"><strong className="text-foreground/80 block">Prep Time:</strong> {detailedRecipe.prepTime}</div>}
+                {detailedRecipe.cookTime && <div className="font-medium"><strong className="text-foreground/80 block">Cook Time:</strong> {detailedRecipe.cookTime}</div>}
+                <div className="font-medium"><strong className="text-foreground/80 block">Serves:</strong> {detailedRecipe.servingsDescription}</div>
               </div>
-              <Separator/>
+              <Separator className="border-border"/>
               <div>
-                <h3 className="font-semibold text-lg mb-2">Ingredients:</h3>
-                <ul className="list-disc list-inside space-y-1 text-sm">
+                <h3 className="font-semibold text-lg mb-2 text-foreground/90">Ingredients:</h3>
+                <ul className="list-disc list-inside space-y-1.5 text-sm text-foreground/80 marker:text-primary">
                   {detailedRecipe.adjustedIngredients.map((ing, i) => (
                     <li key={i}><strong>{ing.quantity}</strong> {ing.name}{ing.notes ? <span className="text-muted-foreground text-xs"> ({ing.notes})</span> : ""}</li>
                   ))}
                 </ul>
               </div>
-              <Separator/>
+              <Separator className="border-border"/>
               <div>
-                <h3 className="font-semibold text-lg mb-2">Instructions:</h3>
-                <ol className="list-decimal list-inside space-y-2 text-sm">
-                  {detailedRecipe.instructions.map((step, i) => <li key={i}>{step}</li>)}
+                <h3 className="font-semibold text-lg mb-2 text-foreground/90">Instructions:</h3>
+                <ol className="list-decimal list-inside space-y-2 text-sm text-foreground/80 marker:text-primary marker:font-semibold">
+                  {detailedRecipe.instructions.map((step, i) => <li key={i} className="pl-1">{step}</li>)}
                 </ol>
               </div>
               {detailedRecipe.healthNotes && (
-                <> <Separator/> <div><h3 className="font-semibold text-lg mb-2">Health Notes:</h3><p className="text-sm text-muted-foreground whitespace-pre-line">{detailedRecipe.healthNotes}</p></div></>
+                <> <Separator className="border-border"/> <div className="p-3 bg-primary/5 rounded-lg border border-primary/20"><h3 className="font-semibold text-lg mb-1.5 text-primary/90">Health Notes:</h3><p className="text-sm text-primary/80 whitespace-pre-line">{detailedRecipe.healthNotes}</p></div></>
               )}
               {detailedRecipe.storageOrServingTips && (
-                <> <Separator/> <div><h3 className="font-semibold text-lg mb-2">Tips:</h3><p className="text-sm text-muted-foreground whitespace-pre-line">{detailedRecipe.storageOrServingTips}</p></div></>
+                <> <Separator className="border-border"/> <div className="p-3 bg-accent/5 rounded-lg border border-accent/20"><h3 className="font-semibold text-lg mb-1.5 text-accent-foreground/90">Storage & Serving Tips:</h3><p className="text-sm text-accent-foreground/80 whitespace-pre-line">{detailedRecipe.storageOrServingTips}</p></div></>
               )}
             </CardContent>
-             <CardFooter className="flex flex-col items-start pt-4 border-t">
-                <h3 className="font-semibold text-xl mb-2 flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Recipe</h3>
-                <p className="text-sm text-muted-foreground mb-3">Ask about substitutions, techniques, or nutrition.</p>
-                <ScrollArea className="h-[200px] w-full rounded-md border p-3 mb-3 bg-muted/50" ref={chatScrollAreaRef}>
+             <CardFooter className="flex flex-col items-start pt-5 border-t border-border">
+                <h3 className="font-semibold text-xl mb-2 flex items-center text-primary"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Recipe</h3>
+                <p className="text-sm text-muted-foreground mb-4">Ask about substitutions, techniques, or nutrition.</p>
+                <ScrollArea className="h-[220px] w-full rounded-md border border-border bg-muted/40 p-3 mb-4 shadow-inner" ref={chatScrollAreaRef}>
                   {chatHistory.map((msg, index) => (
-                    <div key={index} className={`mb-2 p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-accent text-accent-foreground mr-auto'}`}>
-                      <span className="font-semibold capitalize">{msg.role === 'user' ? 'You' : 'AI Chef'}: </span>{msg.content}
+                    <div key={index} className={`mb-2.5 p-3 rounded-lg text-sm shadow-sm max-w-[90%] break-words ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto rounded-br-none' : 'bg-accent text-accent-foreground mr-auto rounded-bl-none'}`}>
+                      <span className="font-semibold capitalize block mb-0.5">{msg.role === 'user' ? 'You' : 'AI Chef'}: </span>{msg.content}
                     </div>
                   ))}
-                  {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Chef is typing...</div>}
+                  {isChatLoading && <div className="text-sm text-muted-foreground p-2.5 flex items-center"><Sparkles className="h-4 w-4 mr-2 animate-pulse" /> AI Chef is typing...</div>}
                 </ScrollArea>
                 <form onSubmit={handleSubmit(handleChatSubmit)} className="w-full flex gap-2">
-                  <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background"/>
-                  <Button type="submit" disabled={isChatLoading || !chatInput.trim()}><Send className="h-4 w-4" /></Button>
+                  <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background flex-grow"/>
+                  <Button type="submit" disabled={isChatLoading || !chatInput.trim()} className="bg-primary hover:bg-primary/90 text-primary-foreground"><Send className="h-4 w-4" /></Button>
                 </form>
             </CardFooter>
           </Card>
         )}
         
         {!isLoadingSuggestions && !dishSuggestions && !detailedRecipe && !isLoadingRecipe &&(
-           <Card className="flex items-center justify-center h-full min-h-[300px] bg-muted/30 md:col-span-2">
+           <Card className="flex items-center justify-center h-full min-h-[300px] bg-muted/30 md:col-span-2 rounded-xl border-2 border-dashed border-border">
             <div className="text-center p-8">
-                <ChefHat className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+                <ChefHat className="mx-auto h-16 w-16 text-muted-foreground/70 mb-5" />
                 <p className="text-xl font-semibold text-muted-foreground">Let's find some recipes!</p>
-                <p className="text-md text-muted-foreground">Enter your ingredients and preferences to get started.</p>
+                <p className="text-md text-muted-foreground/80 mt-1">Enter your ingredients and preferences to get started.</p>
             </div>
           </Card>
         )}

@@ -189,7 +189,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 gap-8 mt-12 md:grid-cols-2 lg:grid-cols-2">
             {features.map((feature) => (
-              <Card key={feature.title} className={`group transform transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2 flex flex-col bg-card border border-border hover:border-primary/50 animate-in fade-in slide-in-from-bottom-12 duration-700 ease-out ${feature.animationDelay}`}>
+              <Card key={feature.title} className={`group transform transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2 flex flex-col bg-card border-border hover:border-primary/50 animate-in fade-in slide-in-from-bottom-12 duration-700 ease-out ${feature.animationDelay} rounded-xl`}>
                 <CardHeader className="flex flex-row items-start gap-4 pb-3">
                   {feature.icon}
                   <CardTitle className="text-xl font-semibold group-hover:text-primary transition-colors">{feature.title}</CardTitle>

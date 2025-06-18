@@ -15,8 +15,9 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
+import { cn } from "@/lib/utils";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel as HookFormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -289,18 +290,43 @@ export function AnalyzerForm() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <Label htmlFor="image-upload" className="font-semibold text-foreground/90">Upload Label Image</Label>
-            <Input id="image-upload" type="file" accept="image/*" onChange={handleImageUpload} className="mt-1 file:text-primary file:font-semibold hover:file:bg-primary/10 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm" />
+            <Label htmlFor="image-upload-main" className="font-semibold text-foreground/90 block mb-1">Upload Label Image</Label>
+             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <Label
+                  htmlFor="image-upload"
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "cursor-pointer flex-grow w-full sm:w-auto justify-center truncate text-sm"
+                  )}
+                >
+                  <UploadCloud className="mr-2 h-4 w-4" />
+                  <span className="truncate max-w-[150px] sm:max-w-xs">
+                     {imageFile ? imageFile.name : "Choose File"}
+                  </span>
+                </Label>
+                <Input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="sr-only"
+                />
+                <Button
+                  type="button"
+                  onClick={onImageSubmit}
+                  disabled={isLoading || !imageFile}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground text-base py-2.5 w-full sm:w-auto shrink-0"
+                >
+                  {isProcessingImage ? <Sparkles className="mr-2 h-5 w-5 animate-spin" /> : <Sparkles className="mr-2 h-5 w-5" />}
+                  Analyze Image
+                </Button>
+              </div>
             {uploadedImage && (
               <div className="mt-4 relative border border-border rounded-lg p-2 shadow-inner bg-muted/30">
                 <Image src={uploadedImage} alt="Uploaded label" width={300} height={200} className="rounded-md object-contain mx-auto" data-ai-hint="food label"/>
                 <Button onClick={() => { setUploadedImage(null); setImageFile(null); }} variant="ghost" size="sm" className="absolute top-1 right-1 text-xs hover:bg-destructive/10 hover:text-destructive">Clear</Button>
               </div>
             )}
-            <Button type="button" onClick={onImageSubmit} disabled={isLoading || !imageFile} className="mt-4 w-full bg-primary hover:bg-primary/90 text-primary-foreground text-base py-2.5">
-              {isProcessingImage ? <Sparkles className="mr-2 h-5 w-5 animate-spin" /> : <Sparkles className="mr-2 h-5 w-5" />}
-              Analyze Image
-            </Button>
           </div>
 
           <div className="flex items-center my-6">
