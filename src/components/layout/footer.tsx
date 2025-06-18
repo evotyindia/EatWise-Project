@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Link from 'next/link';
 import { Facebook, Twitter, Instagram, Linkedin, Youtube, Leaf } from 'lucide-react';
@@ -56,7 +57,7 @@ export function Footer() {
 
             {/* Quick Links Section */}
             <div className="md:col-span-6 lg:col-span-3 lg:col-start-7"> {/* Adjusted col-start for wider screens */}
-              <h3 className="text-lg font-semibold mb-5 font-headline text-primary dark:text-primary-foreground/90">Quick Links</h3>
+              <h3 className="text-lg font-semibold mb-5 font-headline text-primary dark:text-primary">Quick Links</h3>
               <ul className="space-y-3">
                 <li><Link href="/analyze" className={footerLinkClass}>Analyze Label</Link></li>
                 <li><Link href="/recipes" className={footerLinkClass}>Recipe Suggestions</Link></li>
@@ -68,7 +69,7 @@ export function Footer() {
 
             {/* Resources Section */}
             <div className="md:col-span-6 lg:col-span-3">
-              <h3 className="text-lg font-semibold mb-5 font-headline text-primary dark:text-primary-foreground/90">Resources</h3>
+              <h3 className="text-lg font-semibold mb-5 font-headline text-primary dark:text-primary">Resources</h3>
               <ul className="space-y-3">
                  <li><Link href="/#features" className={footerLinkClass}>Features</Link></li>
                  <li><Link href="/#how-it-works" className={footerLinkClass}>How It Works</Link></li>
