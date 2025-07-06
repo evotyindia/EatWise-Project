@@ -73,11 +73,36 @@
   }
   body {
     @apply bg-background text-foreground;
+    @apply relative;
   }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: 
+      radial-gradient(circle at 15% 50%, hsl(var(--accent) / 0.2), transparent 35%),
+      radial-gradient(circle at 85% 30%, hsl(var(--primary) / 0.2), transparent 35%),
+      radial-gradient(circle at 50% 80%, hsla(245, 32%, 60%, 0.2), transparent 35%);
+    background-color: hsl(var(--background));
+    z-index: -1;
+    animation: smoky-aurora 25s ease-in-out infinite alternate;
+    will-change: transform;
+    overflow-x: hidden;
+  }
+
+  .dark body::before {
+     background-image: 
+      radial-gradient(circle at 15% 50%, hsl(var(--accent) / 0.15), transparent 40%),
+      radial-gradient(circle at 85% 30%, hsl(var(--primary) / 0.15), transparent 40%),
+      radial-gradient(circle at 50% 80%, hsla(245, 32%, 60%, 0.15), transparent 40%);
+     background-color: hsl(var(--background));
+  }
+  
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline;
-  }
-  html, body {
-    @apply overflow-x-hidden;
   }
 }

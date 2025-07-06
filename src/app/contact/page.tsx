@@ -18,7 +18,7 @@ export default function ContactPage() {
   ];
 
   return (
-    <div className="container mx-auto py-12">
+    <div className="container mx-auto py-12 animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
       <div className="flex flex-col items-center mb-12 text-center">
         <Share2 className="w-16 h-16 text-accent mb-4" />
         <h1 className="text-4xl font-bold tracking-tight">Contact Us</h1>
@@ -28,7 +28,7 @@ export default function ContactPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <Card className="transition-shadow duration-300">
           <CardHeader>
             <CardTitle className="flex items-center text-2xl">
               <Mail className="mr-3 h-7 w-7 text-accent" /> General Inquiries
@@ -45,7 +45,7 @@ export default function ContactPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <Card className="transition-shadow duration-300">
           <CardHeader>
             <CardTitle className="flex items-center text-2xl">
               <Phone className="mr-3 h-7 w-7 text-accent" /> Phone Support
@@ -65,7 +65,7 @@ export default function ContactPage() {
 
       <Separator className="my-12 max-w-4xl mx-auto" />
 
-      <Card className="max-w-4xl mx-auto shadow-lg hover:shadow-xl transition-shadow duration-300">
+      <Card className="max-w-4xl mx-auto transition-shadow duration-300">
         <CardHeader>
           <CardTitle className="flex items-center text-2xl justify-center">
             <Share2 className="mr-3 h-7 w-7 text-accent" /> Connect With Us

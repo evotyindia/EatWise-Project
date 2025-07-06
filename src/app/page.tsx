@@ -53,8 +53,8 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <section className="w-full py-20 md:py-28 lg:py-32 bg-gradient-to-br from-blue-100 via-white to-cyan-100 dark:from-blue-900/20 dark:via-background dark:to-cyan-900/20">
-        <div className="container px-4 md:px-6 text-center">
+      <section className="w-full py-20 md:py-28 lg:py-32 bg-transparent">
+        <div className="container px-4 md:px-6 text-center animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-primary">
             EatWise India
           </h1>
@@ -76,7 +76,7 @@ export default function Home() {
       </section>
 
       <section id="features" className="w-full py-12 md:py-24 lg:py-32">
-        <div className="container px-4 md:px-6">
+        <div className="container px-4 md:px-6 animate-fade-in-up opacity-0" style={{animationDelay: '0.2s', animationFillMode: 'forwards'}}>
           <div className="text-center mb-12">
             <Lightbulb className="mx-auto h-12 w-12 text-accent mb-4" />
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
@@ -88,7 +88,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 gap-6 mt-12 md:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => (
-              <Card key={feature.title} className="transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col text-center items-center p-4 bg-card">
+              <Card key={feature.title} className="transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 flex flex-col text-center items-center p-4">
                 <CardHeader className="items-center pb-2">
                   {feature.icon}
                   <CardTitle className="text-xl font-semibold mt-4">{feature.title}</CardTitle>
@@ -107,8 +107,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32 bg-secondary">
-        <div className="container px-4 md:px-6">
+      <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/50">
+        <div className="container px-4 md:px-6 animate-fade-in-up opacity-0" style={{animationDelay: '0.4s', animationFillMode: 'forwards'}}>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               How It Works
@@ -150,7 +150,7 @@ export default function Home() {
       </section>
 
       <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32">
-        <div className="container px-4 md:px-6">
+        <div className="container px-4 md:px-6 animate-fade-in-up opacity-0" style={{animationDelay: '0.6s', animationFillMode: 'forwards'}}>
           <div className="text-center mb-12">
             <Users className="mx-auto h-12 w-12 text-accent mb-4" />
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
@@ -159,7 +159,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {testimonials.map((testimonial, idx) => (
-              <Card key={idx} className="bg-card flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <Card key={idx} className="flex flex-col transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2">
                 <CardContent className="pt-6 pb-4 flex-grow">
                   <blockquote className="text-lg italic text-foreground/90">
                     &quot;{testimonial.quote}&quot;
@@ -181,7 +181,7 @@ export default function Home() {
       </section>
 
       <section id="call-to-action" className="w-full py-16 md:py-24 bg-primary text-primary-foreground">
-        <div className="container px-4 md:px-6 text-center">
+        <div className="container px-4 md:px-6 text-center animate-fade-in-up opacity-0" style={{animationDelay: '0.8s', animationFillMode: 'forwards'}}>
           <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-6">
             Ready to Make Healthier Choices?
           </h2>
