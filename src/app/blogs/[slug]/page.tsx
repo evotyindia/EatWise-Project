@@ -1,7 +1,7 @@
 
 import { getBlogPostBySlug, blogPosts } from "@/lib/blog-data";
 import Image from "next/image";
-import { Link } from "@/navigation"; 
+import Link from "next/link"; 
 import { notFound } from "next/navigation";
 import { CalendarDays, Tag, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -39,9 +39,9 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
   }
 
   return (
-    <article className="container mx-auto max-w-3xl py-8 px-4 md:px-6">
+    <article className="container mx-auto max-w-3xl py-8">
       <div className="mb-8">
-        <Button variant="outline" asChild size="sm" className="mb-6 group transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
+        <Button variant="outline" asChild size="sm" className="mb-6 group">
           <Link href="/blogs">
             <ArrowLeft className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
             Back to Blog
@@ -75,10 +75,10 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
 
       <div
         className="prose prose-lg dark:prose-invert max-w-none 
-                   prose-headings:font-headline prose-headings:text-primary dark:prose-headings:text-primary-foreground/90
-                   prose-p:text-foreground/90 dark:prose-p:text-foreground/80
-                   prose-a:text-accent hover:prose-a:text-accent/80 dark:prose-a:text-accent dark:hover:prose-a:text-accent/80
-                   prose-strong:text-foreground dark:prose-strong:text-primary-foreground/90
+                   prose-headings:font-headline prose-headings:text-primary
+                   prose-p:text-foreground/90
+                   prose-a:text-accent hover:prose-a:text-accent/80
+                   prose-strong:text-foreground
                    prose-ul:list-disc prose-ul:pl-6 prose-li:marker:text-accent
                    prose-ol:list-decimal prose-ol:pl-6 prose-li:marker:text-accent"
         dangerouslySetInnerHTML={{ __html: post.content }}
@@ -87,7 +87,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
       <Separator className="my-12" />
 
       <div className="text-center">
-        <Button asChild className="transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
+        <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
           <Link href="/analyze">Analyze Your Food Label Now</Link>
         </Button>
       </div>
