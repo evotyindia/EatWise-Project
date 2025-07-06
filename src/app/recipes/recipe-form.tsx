@@ -234,7 +234,7 @@ export function RecipeForm() {
       </div>
     
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <Card className="lg:col-span-1 shadow-lg hover:shadow-xl transition-shadow">
+        <Card className="lg:col-span-1 transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center text-2xl"><ChefHat className="mr-2 h-6 w-6 text-primary" /> Recipe Finder</CardTitle>
             <CardDescription>Tell us what you have and any health needs.</CardDescription>
@@ -245,7 +245,7 @@ export function RecipeForm() {
                 <FormField control={form.control} name="ingredients" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Available Ingredients</FormLabel>
-                    <FormControl><Textarea placeholder="e.g., Onions, Tomatoes, Paneer, Rice..." {...field} rows={4} className="bg-background" /></FormControl>
+                    <FormControl><Textarea placeholder="e.g., Onions, Tomatoes, Paneer, Rice..." {...field} rows={4} className="bg-background/50" /></FormControl>
                     <FormDescription>Separate ingredients with commas.</FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -332,7 +332,7 @@ export function RecipeForm() {
           {isLoadingSuggestions && ( <Card className="flex items-center justify-center h-64"><Sparkles className="h-12 w-12 text-accent animate-spin" /><p className="ml-3 text-lg">Finding dish ideas...</p></Card> )}
           
           {dishSuggestions && !detailedRecipe && (
-            <Card className="shadow-lg">
+            <Card className="animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
               <CardHeader>
                 <CardTitle className="text-xl flex items-center"><Lightbulb className="mr-2 h-5 w-5 text-accent"/> Suggested Dishes</CardTitle>
                 {dishSuggestions.initialContextualGuidance && <CardDescription>{dishSuggestions.initialContextualGuidance}</CardDescription>}
@@ -354,7 +354,7 @@ export function RecipeForm() {
           {isLoadingRecipe && ( <Card className="flex items-center justify-center h-96"><Sparkles className="h-12 w-12 text-accent animate-spin" /><p className="ml-3 text-lg">Generating detailed recipe...</p></Card> )}
           
           {detailedRecipe && (
-            <Card className="shadow-lg hover:shadow-xl transition-shadow">
+            <Card className="transition-shadow animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
@@ -367,7 +367,7 @@ export function RecipeForm() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm p-3 bg-muted rounded-lg">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm p-3 bg-muted/60 rounded-lg">
                   {detailedRecipe.prepTime && <div><strong>Prep:</strong> {detailedRecipe.prepTime}</div>}
                   {detailedRecipe.cookTime && <div><strong>Cook:</strong> {detailedRecipe.cookTime}</div>}
                   <div className="col-span-2 sm:col-span-1"><strong>Serves:</strong> {detailedRecipe.servingsDescription}</div>
@@ -392,7 +392,7 @@ export function RecipeForm() {
                   <> <Separator/> <div><h3 className="font-semibold text-lg mb-2">Health Notes:</h3><p className="text-sm text-muted-foreground whitespace-pre-line">{detailedRecipe.healthNotes}</p></div></>
                 )}
               </CardContent>
-              <CardFooter className="flex flex-col items-start pt-4 border-t">
+              <CardFooter className="flex flex-col items-start pt-4 border-t border-white/10">
                   <h3 className="font-semibold text-xl mb-2 flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Recipe</h3>
                   <p className="text-sm text-muted-foreground mb-3">Ask about substitutions, techniques, or nutrition.</p>
                   <ScrollArea className="h-[200px] w-full rounded-md border p-3 mb-3 bg-muted/50" ref={chatScrollAreaRef}>
@@ -404,7 +404,7 @@ export function RecipeForm() {
                     {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Chef is typing...</div>}
                   </ScrollArea>
                   <form onSubmit={handleChatSubmit} className="w-full flex gap-2">
-                    <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background"/>
+                    <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background/50"/>
                     <Button type="submit" disabled={isChatLoading || !chatInput.trim()}><Send className="h-4 w-4" /></Button>
                   </form>
               </CardFooter>

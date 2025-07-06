@@ -219,7 +219,7 @@ export function AnalyzerForm() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="shadow-lg hover:shadow-xl transition-shadow">
+        <Card className="transition-shadow duration-300">
           <CardHeader>
             <CardTitle className="flex items-center text-2xl"><UploadCloud className="mr-2 h-6 w-6 text-primary" /> Input Food Label Data</CardTitle>
             <CardDescription>Upload an image of the food label or enter details manually.</CardDescription>
@@ -275,7 +275,7 @@ export function AnalyzerForm() {
         )}
 
         {report && (
-          <Card className="shadow-lg hover:shadow-xl transition-shadow">
+          <Card className="transition-shadow duration-300 animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
@@ -331,37 +331,37 @@ export function AnalyzerForm() {
               </div>
               <Separator />
               
-              <Alert variant="default" className="bg-background">
+              <Alert variant="default" className="bg-background/30">
                   <Info className="h-4 w-4 text-primary" />
                   <AlertTitle className="font-semibold text-lg mb-1">Summary</AlertTitle>
                   <AlertDescription>{renderFormattedText(report.detailedAnalysis.summary)}</AlertDescription>
               </Alert>
               
               {renderFormattedText(report.detailedAnalysis.positiveAspects) && (
-                  <Alert variant="default" className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700">
-                      <Info className="h-4 w-4 text-green-600 dark:text-green-400" />
-                      <AlertTitle className="font-semibold text-lg mb-1 text-green-800 dark:text-green-300">Positive Aspects</AlertTitle>
+                  <Alert variant="default" className="bg-green-500/10 border-green-500/20">
+                      <Info className="h-4 w-4 text-green-500" />
+                      <AlertTitle className="font-semibold text-lg mb-1 text-green-700 dark:text-green-300">Positive Aspects</AlertTitle>
                       <AlertDescription className="text-green-800/90 dark:text-green-300/90">{renderFormattedText(report.detailedAnalysis.positiveAspects)}</AlertDescription>
                   </Alert>
               )}
               
               {renderFormattedText(report.detailedAnalysis.potentialConcerns) && (
-                  <Alert variant="destructive" className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700">
-                      <Info className="h-4 w-4 text-red-600 dark:text-red-400" />
-                      <AlertTitle className="font-semibold text-lg mb-1 text-red-800 dark:text-red-300">Potential Concerns</AlertTitle>
+                  <Alert variant="destructive" className="bg-red-500/10 border-red-500/20">
+                      <Info className="h-4 w-4 text-red-500" />
+                      <AlertTitle className="font-semibold text-lg mb-1 text-red-700 dark:text-red-300">Potential Concerns</AlertTitle>
                       <AlertDescription className="text-red-800/90 dark:text-red-300/90">{renderFormattedText(report.detailedAnalysis.potentialConcerns)}</AlertDescription>
                   </Alert>
               )}
 
               {renderFormattedText(report.alternatives) && (
-                  <Alert variant="default" className="bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-700">
-                      <Info className="h-4 w-4 text-sky-600 dark:text-sky-400" />
-                      <AlertTitle className="font-semibold text-lg mb-1 text-sky-800 dark:text-sky-300">Healthier Indian Alternatives</AlertTitle>
+                  <Alert variant="default" className="bg-sky-500/10 border-sky-500/20">
+                      <Info className="h-4 w-4 text-sky-500" />
+                      <AlertTitle className="font-semibold text-lg mb-1 text-sky-700 dark:text-sky-300">Healthier Indian Alternatives</AlertTitle>
                       <AlertDescription className="text-sky-800/90 dark:text-sky-300/90">{renderFormattedText(report.alternatives)}</AlertDescription>
                   </Alert>
               )}
             </CardContent>
-            <CardFooter className="flex flex-col items-start pt-4 border-t">
+            <CardFooter className="flex flex-col items-start pt-4 border-t border-white/10">
               <h3 className="font-semibold text-xl mb-2 flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat with AI Advisor</h3>
               <p className="text-sm text-muted-foreground mb-4">Ask questions about this report.</p>
               <ScrollArea className="h-[200px] w-full rounded-md border p-3 mb-4 bg-muted/50" ref={chatScrollAreaRef}>
@@ -373,7 +373,7 @@ export function AnalyzerForm() {
                 {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Advisor is typing...</div>}
               </ScrollArea>
               <form onSubmit={handleChatSubmit} className="w-full flex gap-2">
-                <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background" />
+                <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background/50" />
                 <Button type="submit" disabled={isChatLoading || !chatInput.trim()}><Send className="h-4 w-4" /></Button>
               </form>
             </CardFooter>
