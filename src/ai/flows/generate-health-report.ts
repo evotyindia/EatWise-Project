@@ -6,7 +6,7 @@
  *
  * - generateHealthReport - A function that handles the health report generation process.
  * - GenerateHealthReportInput - The input type for the generateHealthReport function.
- * - GenerateHealthReportOutput - The return type for the generateHealthReport function.
+ * - GenerateHealthReportOutput - The return type for the generateHealth-report function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -71,7 +71,7 @@ const prompt = ai.definePrompt({
   name: 'generateHealthReportPrompt',
   input: {schema: GenerateHealthReportInputSchema},
   output: {schema: GenerateHealthReportOutputSchema},
-  prompt: `You are an AI assistant specialized in analyzing food products and generating detailed health reports for an Indian audience.
+  prompt: `You are an expert AI nutritionist, specializing in analyzing food products for an Indian audience. Your primary goal is to generate a comprehensive, in-depth, and well-structured health report. Do not be brief; provide detailed explanations and insights.
 
   Analyze the following food product based on the provided information (product name, ingredients list, nutrition facts, and/or a photo of the label).
 
@@ -94,9 +94,7 @@ const prompt = ai.definePrompt({
   {{~#if photoDataUri}}
   Photo: {{media url=photoDataUri}}
   {{/if}}
-
-  Generate a detailed health report. Ensure all output fields are addressed and strictly adhere to the JSON schema.
-
+  
   If you are unsure about the product due to lack of clear information (e.g., blurry photo, missing ingredients, or inability to extract from photo):
   - Set 'healthRating' to 1.
   - Set 'detailedAnalysis.summary' to 'Sorry, I am not sure about this product. The provided information (e.g., photo, ingredients list) may be unclear or insufficient for a complete analysis. Please try uploading a clearer label or provide more details.'.
@@ -107,22 +105,22 @@ const prompt = ai.definePrompt({
   - Set 'productType' to 'Unknown due to unclear input.'.
   Ensure the output strictly adheres to the defined JSON schema even in this case. Do not output any text outside of the JSON structure.
 
-  For successful analysis:
-  1.  **Product Type**: Identify the type of product (e.g., Snack, Beverage, Breakfast Cereal).
-  2.  **Overall Health Rating**: Assign an overall health rating (number) from 1 (least healthy) to 5 (most healthy) stars.
+  For a successful and detailed analysis:
+  1.  **Product Type**: Identify the specific type of product (e.g., Snack, Beverage, Breakfast Cereal, Ready-to-eat meal).
+  2.  **Overall Health Rating**: Assign an overall health rating (number) from 1 (least healthy) to 5 (most healthy) stars, based on your complete analysis.
   3.  **Detailed Analysis** (use bullet points starting with '*' or '-' for each sub-section of detailedAnalysis):
-      *   **Summary**: Provide a concise overall summary of the product's healthiness.
-      *   **Positive Aspects**: List any key positive aspects (e.g., "Good source of whole grains", "Low in saturated fat"). If none, state that or return "N/A".
-      *   **Potential Concerns**: List potential health concerns or ingredients to watch out for (e.g., "High sodium content", "Contains palm oil", "Added sugars are high"). If none, state that or return "N/A".
-      *   **Key Nutrients Breakdown**: Briefly comment on key nutrients if identifiable and noteworthy (e.g., "Provides Xg of protein per serving", "Mainly refined carbohydrates"). If none, return "N/A".
-  4.  **Healthier Indian Alternatives** (use bullet points starting with '*' or '-'): Suggest 2-3 healthier Indian alternatives, explaining briefly why they are better choices.
+      *   **Summary**: Provide a comprehensive and detailed overall summary of the product's health profile. Elaborate on why it receives its rating. This should be a well-explained paragraph, followed by key bullet points.
+      *   **Positive Aspects**: Elaborate on any key positive aspects (e.g., "Good source of whole grains which aids digestion", "Low in saturated fat, which is beneficial for heart health"). If none, state "No significant positive aspects identified."
+      *   **Potential Concerns**: Provide a detailed explanation of potential health concerns or ingredients to watch out for (e.g., "High sodium content can contribute to high blood pressure", "Contains palm oil, a saturated fat linked to cholesterol issues"). If none, state "No major concerns identified based on the provided information."
+      *   **Key Nutrients Breakdown**: Provide a detailed commentary on key nutrients (e.g., "Provides 10g of protein per serving, which supports muscle maintenance, but also contains 15g of added sugar, exceeding daily recommendations."). Do not be brief.
+  4.  **Healthier Indian Alternatives** (use bullet points starting with '*' or '-'): Suggest 2-3 healthier Indian alternatives, providing detailed explanations for why each is a better choice (e.g., "Instead of packaged noodles, consider homemade vegetable Poha. Poha is made from flattened rice, is lighter on the stomach, and you can control the amount of oil and load it with fresh vegetables for more vitamins.").
   5.  **Additional Ratings**: For each of the following, provide an object with a 'rating' (number 1-5) and a 'justification' (string). If a rating cannot be determined, and the field is optional, it can be omitted. Otherwise, provide a default rating of 1 and justification 'Cannot be determined'.
       *   **Processing Level Rating**: (1=unprocessed to 5=ultra-processed). Justification should be short.
       *   **Sugar Content Rating**: (1=low to 5=high). Justification should be short.
       *   **Nutrient Density Rating**: (1=low to 5=high). Justification should be short.
-  6.  **Ingredient-by-Ingredient Analysis**: This is a crucial new section. For each major ingredient identified, provide a detailed analysis. Focus especially on additives, preservatives, sweeteners, and processed items. For very common/simple ingredients like Water or Salt, a brief neutral entry is fine.
+  6.  **Ingredient-by-Ingredient Analysis**: This is a crucial section. For each major ingredient identified, provide a detailed analysis. Focus especially on additives, preservatives, sweeteners, and processed items. For very common/simple ingredients like Water or Salt, a brief neutral entry is fine.
       *   Create an object for each ingredient with fields: 'ingredientName', 'description', 'riskLevel' ('Low', 'Medium', 'High', 'Neutral'), and 'riskReason'.
-      *   The 'description' should explain what the ingredient is and its purpose.
+      *   The 'description' should be thorough, explaining what the ingredient is, its common uses in food manufacturing, and its direct impact on health in detail.
       *   'riskLevel' should be based on current nutritional science for an average consumer.
       *   'riskReason' must concisely justify the risk level.
       *   Populate this into the 'ingredientAnalysis' array. If no ingredients can be clearly identified, this can be an empty array.
