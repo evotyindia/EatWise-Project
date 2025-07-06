@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { GenerateHealthReportInput, GenerateHealthReportOutput } from "@/ai/flows/generate-health-report";
@@ -216,7 +217,7 @@ const riskBadgeVariantMap: Record<string, "default" | "secondary" | "destructive
 
 
   return (
-    <>
+    <div className="relative">
       <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
         {report && <div ref={printableReportRef}>
           <PrintableHealthReport
@@ -371,37 +372,34 @@ const riskBadgeVariantMap: Record<string, "default" | "secondary" | "destructive
               )}
 
               {report.ingredientAnalysis && report.ingredientAnalysis.length > 0 && (
-                <>
-                  <Separator />
-                  <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="ingredient-breakdown">
-                      <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                        <div className="flex items-center">
-                          <Microscope className="mr-2 h-5 w-5 text-primary" />
-                          <span>Ingredient Breakdown</span>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <Accordion type="single" collapsible className="w-full">
-                          {report.ingredientAnalysis.map((item, index) => (
-                            <AccordionItem key={index} value={`item-${index}`}>
-                              <AccordionTrigger>
-                                <div className="flex items-center justify-between w-full pr-2">
-                                  <span className="font-medium">{item.ingredientName}</span>
-                                  <Badge variant={riskBadgeVariantMap[item.riskLevel] || 'outline'}>{item.riskLevel}</Badge>
-                                </div>
-                              </AccordionTrigger>
-                              <AccordionContent className="space-y-2 px-1">
-                                <p className="text-sm text-muted-foreground">{item.description}</p>
-                                <p className="text-xs"><strong className="font-semibold">Justification:</strong> {item.riskReason}</p>
-                              </AccordionContent>
-                            </AccordionItem>
-                          ))}
-                        </Accordion>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                </>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="ingredient-breakdown">
+                    <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                      <div className="flex items-center">
+                        <Microscope className="mr-2 h-5 w-5 text-primary" />
+                        <span>Ingredient Breakdown</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <Accordion type="single" collapsible className="w-full">
+                        {report.ingredientAnalysis.map((item, index) => (
+                          <AccordionItem key={index} value={`item-${index}`}>
+                            <AccordionTrigger>
+                              <div className="flex items-center justify-between w-full pr-2">
+                                <span className="font-medium">{item.ingredientName}</span>
+                                <Badge variant={riskBadgeVariantMap[item.riskLevel] || 'outline'}>{item.riskLevel}</Badge>
+                              </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="space-y-2 px-1">
+                              <p className="text-sm text-muted-foreground">{item.description}</p>
+                              <p className="text-xs"><strong className="font-semibold">Justification:</strong> {item.riskReason}</p>
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))}
+                      </Accordion>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               )}
             </CardContent>
             <CardFooter className="flex flex-col items-start pt-4 border-t border-white/10">
@@ -428,6 +426,6 @@ const riskBadgeVariantMap: Record<string, "default" | "secondary" | "destructive
           </Card>
         )}
       </div>
-    </>
+    </div>
   );
 }
