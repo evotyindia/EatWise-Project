@@ -53,8 +53,8 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <section className="w-full py-20 md:py-28 lg:py-32 bg-gradient-to-br from-primary to-accent dark:from-[hsl(245,32%,60%)] dark:to-[hsl(187,68%,36%)]">
-        <div className="container px-4 md:px-6 text-center animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
+      <section className="hero-section w-full bg-blue-munsell/80 dark:bg-gray-900/80">
+        <div className="relative z-10 container px-4 md:px-6 text-center animate-fade-in-up opacity-0 backdrop-blur-sm py-20 md:py-28 lg:py-32" style={{animationFillMode: 'forwards'}}>
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-white">
             EatWise India
           </h1>
@@ -65,10 +65,10 @@ export default function Home() {
             Your personal AI-powered nutrition guide.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-            <Button asChild size="lg" className="bg-white text-blue-munsell hover:bg-white/90 transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 dark:text-tropical-indigo">
+            <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
               <Link href="/analyze">Analyze a Food Label</Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 border-white/80 text-white hover:bg-white/10">
+            <Button asChild variant="outline" size="lg" className="transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 border-white/80 text-white hover:bg-white/20">
               <Link href="/recipes">Get Recipe Ideas</Link>
             </Button>
           </div>
@@ -95,6 +95,7 @@ export default function Home() {
                 </CardHeader>
                 <CardContent className="flex-grow">
                   <p className="text-muted-foreground text-sm">{feature.description}</p>
+
                 </CardContent>
                 <CardFooter>
                   <Button variant="link" asChild className="px-0 mt-2 text-accent group">
