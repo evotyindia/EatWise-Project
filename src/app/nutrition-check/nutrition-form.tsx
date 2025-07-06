@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { AnalyzeNutritionInput, AnalyzeNutritionOutput } from "@/ai/flows/nutrition-analysis";
@@ -7,12 +6,9 @@ import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aw
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadCloud, Sparkles, FileText, Download, MessageCircle, Send } from "lucide-react";
+import { UploadCloud, Sparkles, FileText, MessageCircle, Send } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
-import { createRoot } from 'react-dom/client';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 
@@ -26,7 +22,6 @@ import { StarRating } from "@/components/common/star-rating";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { PrintableNutritionReport } from "@/components/common/PrintableNutritionReport";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 
@@ -78,13 +73,11 @@ export function NutritionForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
   const [isProcessingManually, setIsProcessingManually] = useState(false);
-  const [isPdfDownloading, setIsPdfDownloading] = useState(false);
-  const [currentInputDataForPdf, setCurrentInputDataForPdf] = useState<AnalyzeNutritionInput | null>(null);
+  const [currentInputContext, setCurrentInputContext] = useState<AnalyzeNutritionInput | null>(null);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
-  const pdfRef = useRef<HTMLDivElement>(null);
   const [isSubmittingImage, setIsSubmittingImage] = useState(false); 
 
   const { toast } = useToast();
@@ -110,19 +103,19 @@ export function NutritionForm() {
       };
       reader.readAsDataURL(file);
       setAnalysisResult(null);
-      setCurrentInputDataForPdf(null); 
+      setCurrentInputContext(null); 
       setChatHistory([]);
       form.clearErrors(); 
     }
   };
 
-  const generateAnalysisSharedLogic = async (inputForAI: AnalyzeNutritionInput, inputForPdfAndContext: AnalyzeNutritionInput, processingType: 'image' | 'manual') => {
+  const generateAnalysisSharedLogic = async (inputForAI: AnalyzeNutritionInput, inputForContext: AnalyzeNutritionInput, processingType: 'image' | 'manual') => {
     setIsLoading(true);
     if (processingType === 'image') setIsProcessingImage(true);
     if (processingType === 'manual') setIsProcessingManually(true);
 
     setAnalysisResult(null);
-    setCurrentInputDataForPdf(inputForPdfAndContext); 
+    setCurrentInputContext(inputForContext); 
     setChatHistory([]);
     try {
       const result = await analyzeNutrition(inputForAI);
@@ -131,7 +124,7 @@ export function NutritionForm() {
       if (result) {
         initiateChatWithWelcome("nutritionAnalysis", {
           nutritionReportSummary: result.overallAnalysis,
-          foodItemDescription: inputForPdfAndContext.foodItemDescription || (inputForAI.nutritionDataUri ? "Scanned food item" : "Manually entered data")
+          foodItemDescription: inputForContext.foodItemDescription || (inputForAI.nutritionDataUri ? "Scanned food item" : "Manually entered data")
         });
       }
     } catch (error) {
@@ -172,12 +165,12 @@ export function NutritionForm() {
       }
     });
 
-    const inputForPdfAndContext: AnalyzeNutritionInput = { 
+    const inputForContext: AnalyzeNutritionInput = { 
         servingSize: form.getValues("servingSize"), 
         foodItemDescription: form.getValues("foodItemDescription") || "Scanned Food Item", 
         nutritionDataUri: "Image Uploaded" 
     }; 
-    await generateAnalysisSharedLogic(aiInputFromFormData, inputForPdfAndContext, 'image');
+    await generateAnalysisSharedLogic(aiInputFromFormData, inputForContext, 'image');
     setIsSubmittingImage(false);
   };
 
@@ -218,7 +211,7 @@ export function NutritionForm() {
         contextType: "nutritionAnalysis",
         nutritionContext: {
           nutritionReportSummary: analysisResult.overallAnalysis,
-          foodItemDescription: currentInputDataForPdf?.foodItemDescription?.replace("IGNORE_VALIDATION_FOR_IMAGE_SUBMIT_INTERNAL_MARKER", "").trim() || (currentInputDataForPdf?.nutritionDataUri === "Image Uploaded" ? "Scanned food item" : "Manually entered data")
+          foodItemDescription: currentInputContext?.foodItemDescription?.replace("IGNORE_VALIDATION_FOR_IMAGE_SUBMIT_INTERNAL_MARKER", "").trim() || (currentInputContext?.nutritionDataUri === "Image Uploaded" ? "Scanned food item" : "Manually entered data")
         },
       };
       const aiResponse = await contextAwareAIChat(chatContextInput);
@@ -236,55 +229,6 @@ export function NutritionForm() {
       chatScrollAreaRef.current.scrollTop = chatScrollAreaRef.current.scrollHeight;
     }
   }, [chatHistory]);
-
-  const handleDownloadReport = async () => {
-    const elementToPrint = pdfRef.current;
-    if (!elementToPrint) {
-        toast({ title: "Error", description: "Could not find report content to print.", variant: "destructive" });
-        return;
-    }
-    setIsPdfDownloading(true);
-    
-    try {
-        const canvas = await html2canvas(elementToPrint, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: null, 
-        });
-
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-        
-        const pdfPageWidth = pdf.internal.pageSize.getWidth();
-        const pdfPageHeight = pdf.internal.pageSize.getHeight();
-        const imgProps = pdf.getImageProperties(imgData);
-        const imgAspectRatio = imgProps.width / imgProps.height;
-        const scaledImgHeight = pdfPageWidth / imgAspectRatio;
-
-        let heightLeft = scaledImgHeight;
-        let position = 0;
-
-        pdf.addImage(imgData, 'PNG', 0, position, pdfPageWidth, scaledImgHeight);
-        heightLeft -= pdfPageHeight;
-
-        while (heightLeft > 0) {
-            position = heightLeft - scaledImgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, pdfPageWidth, scaledImgHeight);
-            heightLeft -= pdfPageHeight;
-        }
-
-        const safeFoodItemName = (currentInputDataForPdf?.foodItemDescription || 'nutrition-data').replace(/[^a-z0-9]/gi, '_').toLowerCase();
-        pdf.save(`${safeFoodItemName}_analysis_report.pdf`);
-        toast({ title: "Report Downloaded", description: "The PDF analysis has been saved." });
-
-    } catch (error) {
-        console.error("Error generating PDF:", error);
-        toast({ title: "PDF Error", description: "Could not generate PDF report. " + (error instanceof Error ? error.message : ""), variant: "destructive" });
-    } finally {
-        setIsPdfDownloading(false);
-    }
-  };
 
 const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
     if (!text || text.trim().toLowerCase() === 'n/a' || text.trim() === '') {
@@ -375,10 +319,8 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
 
       {analysisResult && (
         <>
-        <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
-            <div ref={pdfRef} style={{ width: '800px', padding: '20px', backgroundColor: 'white' }}>
-              <PrintableNutritionReport analysisResult={analysisResult} userInput={currentInputDataForPdf || undefined} />
-            </div>
+        <div className="hidden">
+            {/* This div is for holding elements that should not affect layout, like print components. */}
         </div>
         <Card className="shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader>
@@ -387,12 +329,9 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
                     <CardTitle className="flex items-center text-2xl"><FileText className="mr-2 h-6 w-6 text-accent" /> AI Nutrition Analysis</CardTitle>
                     <CardDescription>
                         Understanding your food&apos;s nutritional profile
-                        {currentInputDataForPdf?.foodItemDescription ? ` for: ${currentInputDataForPdf.foodItemDescription.replace("IGNORE_VALIDATION_FOR_IMAGE_SUBMIT_INTERNAL_MARKER", "").trim()}` : "."}
+                        {currentInputContext?.foodItemDescription ? ` for: ${currentInputContext.foodItemDescription.replace("IGNORE_VALIDATION_FOR_IMAGE_SUBMIT_INTERNAL_MARKER", "").trim()}` : "."}
                     </CardDescription>
                 </div>
-              <Button type="button" onClick={handleDownloadReport} variant="outline" size="sm" disabled={isPdfDownloading}>
-                 {isPdfDownloading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} PDF
-              </Button>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
