@@ -53,22 +53,22 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <section className="w-full py-20 md:py-28 lg:py-32 bg-transparent">
+      <section className="w-full py-20 md:py-28 lg:py-32 bg-gradient-to-br from-primary to-accent dark:from-[hsl(245,32%,60%)] dark:to-[hsl(187,68%,36%)]">
         <div className="container px-4 md:px-6 text-center animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
-          <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-primary">
+          <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-white">
             EatWise India
           </h1>
-          <p className="mx-auto max-w-[700px] text-foreground/80 md:text-xl mt-4">
+          <p className="mx-auto max-w-[700px] text-white/90 md:text-xl mt-4">
             Empowering India to Eat Smarter with AI
           </p>
-          <p className="mx-auto max-w-[600px] text-muted-foreground md:text-lg mt-2">
-            Understand food labels, analyze ingredients, and get healthy Indian recipe suggestions. Your personal AI-powered nutrition guide.
+          <p className="mx-auto max-w-[600px] text-white/80 md:text-lg mt-2">
+            Your personal AI-powered nutrition guide.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-            <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
+            <Button asChild size="lg" className="bg-white text-blue-munsell hover:bg-white/90 transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 dark:text-tropical-indigo">
               <Link href="/analyze">Analyze a Food Label</Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 border-primary/20 text-primary hover:bg-primary/5">
+            <Button asChild variant="outline" size="lg" className="transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 border-white/80 text-white hover:bg-white/10">
               <Link href="/recipes">Get Recipe Ideas</Link>
             </Button>
           </div>
