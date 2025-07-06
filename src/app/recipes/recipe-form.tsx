@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { GetRecipeSuggestionsInput, GetRecipeSuggestionsOutput } from "@/ai/flows/recipe-suggestions";
@@ -10,11 +9,10 @@ import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aw
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles, Download, ChefHat, Utensils, Leaf, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Milk, MinusCircle } from "lucide-react";
+import { Lightbulb, Sparkles, ChefHat, Utensils, Leaf, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Milk, MinusCircle } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
-import { useReactToPrint } from "react-to-print";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +23,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { PrintableDetailedRecipe } from "@/components/common/PrintableDetailedRecipe";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 
@@ -73,16 +70,6 @@ export function RecipeForm() {
 
   const { toast } = useToast();
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
-  const printableRecipeRef = useRef<HTMLDivElement>(null);
-
-  const handlePrint = useReactToPrint({
-    content: () => printableRecipeRef.current,
-    documentTitle: `eatwise-recipe-${Date.now()}`,
-    onBeforePrint: () => toast({ title: "Preparing PDF..." }),
-    onAfterPrint: () => toast({ title: "PDF ready for download." }),
-    onPrintError: () => toast({ title: "Error", description: "Failed to generate PDF.", variant: "destructive" }),
-  });
-
 
   const form = useForm<RecipePageFormValues>({
     resolver: zodResolver(recipePageInputSchema),
@@ -216,21 +203,8 @@ export function RecipeForm() {
 
   return (
     <>
-      <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
-        {detailedRecipe && <div ref={printableRecipeRef}>
-          <PrintableDetailedRecipe
-              recipe={detailedRecipe}
-              userInput={currentFormInputs ? {
-                  availableIngredients: currentFormInputs.ingredients,
-                  diseaseConcerns: currentFormInputs.diseaseConcerns || [],
-                  householdComposition: {
-                      adults: Number(currentFormInputs.householdComposition.adults),
-                      seniors: Number(currentFormInputs.householdComposition.seniors),
-                      kids: Number(currentFormInputs.householdComposition.kids)
-                  }
-              } : undefined}
-          />
-        </div>}
+      <div className="hidden">
+        {/* This div is for holding elements that should not affect layout, like print components. */}
       </div>
     
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -361,9 +335,6 @@ export function RecipeForm() {
                       <CardTitle className="text-2xl flex items-center"><FileText className="mr-2 h-6 w-6 text-primary"/> {detailedRecipe.recipeTitle}</CardTitle>
                       {detailedRecipe.description && <CardDescription className="mt-1">{detailedRecipe.description}</CardDescription>}
                   </div>
-                  <Button onClick={handlePrint} variant="outline" size="sm">
-                    <Download className="mr-2 h-4 w-4" /> PDF
-                  </Button>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">

@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { GenerateHealthReportInput, GenerateHealthReportOutput } from "@/ai/flows/generate-health-report";
@@ -7,10 +6,9 @@ import type { ContextAwareAIChatInput, ContextAwareAIChatOutput, ChatMessage } f
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadCloud, Sparkles, MessageCircle, Send, Download, Zap, HeartPulse, Wheat, Info, FileText, Microscope } from "lucide-react";
+import { UploadCloud, Sparkles, MessageCircle, Send, Zap, HeartPulse, Wheat, Info, FileText, Microscope } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
-import { useReactToPrint } from "react-to-print";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 
@@ -26,7 +24,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
-import { PrintableHealthReport } from '@/components/common/PrintableHealthReport';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 
@@ -59,12 +56,6 @@ export function AnalyzerForm() {
       ingredients: "",
       nutritionFacts: "",
     },
-  });
-
-  const printableReportRef = useRef<HTMLDivElement>(null);
-  const handlePrint = useReactToPrint({
-    content: () => printableReportRef.current,
-    documentTitle: `eatwise-health-report-${Date.now()}`,
   });
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -211,18 +202,9 @@ export function AnalyzerForm() {
   };
 
   return (
-    <div>
-      {/* This hidden div contains the content for PDF printing. 'hidden' class ensures it does not affect the layout. */}
+    <div className="relative">
       <div className="hidden">
-        {report && (
-          <div ref={printableReportRef}>
-            <PrintableHealthReport
-              report={report}
-              chatHistory={chatHistory}
-              productNameContext={manualForm.getValues("productName")}
-            />
-          </div>
-        )}
+        {/* This div is for holding elements that should not affect layout, like print components. */}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -289,10 +271,6 @@ export function AnalyzerForm() {
                   <CardTitle className="flex items-center text-2xl"><FileText className="mr-2 h-6 w-6 text-primary" /> AI Health Report</CardTitle>
                   {report.productType && (<CardDescription>Product Type: <span className="font-semibold">{report.productType}</span></CardDescription>)}
                 </div>
-                <Button onClick={handlePrint} variant="outline" size="sm">
-                  <Download className="mr-2 h-4 w-4" />
-                  <span>PDF</span>
-                </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
