@@ -55,7 +55,7 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
     
-    --accent: 181 90% 42%; /* Robin Egg Blue */
+    --accent: 204 57% 72%; /* Carolina Blue */
     --accent-foreground: 224 71% 4%;
 
     --destructive: 0 62.8% 30.6%;
@@ -73,36 +73,36 @@
   }
   body {
     @apply bg-background text-foreground;
-    @apply relative;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-image: 
-      radial-gradient(circle at 15% 50%, hsl(var(--accent) / 0.2), transparent 35%),
-      radial-gradient(circle at 85% 30%, hsl(var(--primary) / 0.2), transparent 35%),
-      radial-gradient(circle at 50% 80%, hsla(245, 32%, 60%, 0.2), transparent 35%);
-    background-color: hsl(var(--background));
-    z-index: -1;
-    animation: smoky-aurora 25s ease-in-out infinite alternate;
-    will-change: transform;
-    overflow-x: hidden;
-  }
-
-  .dark body::before {
-     background-image: 
-      radial-gradient(circle at 15% 50%, hsl(var(--accent) / 0.15), transparent 40%),
-      radial-gradient(circle at 85% 30%, hsl(var(--primary) / 0.15), transparent 40%),
-      radial-gradient(circle at 50% 80%, hsla(245, 32%, 60%, 0.15), transparent 40%);
-     background-color: hsl(var(--background));
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline;
+  }
+}
+
+@layer components {
+  .hero-section {
+    @apply relative overflow-hidden;
+  }
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(circle at 15% 50%, hsl(var(--accent) / 0.3), transparent 40%),
+      radial-gradient(circle at 85% 30%, hsl(var(--primary) / 0.3), transparent 40%),
+      radial-gradient(circle at 50% 80%, hsla(245, 32%, 60%, 0.2), transparent 40%);
+    z-index: 1;
+    animation: smoky-aurora 25s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+  .dark .hero-section::before {
+     background-image: 
+      radial-gradient(circle at 15% 50%, hsl(var(--accent) / 0.2), transparent 45%),
+      radial-gradient(circle at 85% 30%, hsl(var(--primary) / 0.2), transparent 45%),
+      radial-gradient(circle at 50% 80%, hsla(245, 32%, 60%, 0.15), transparent 45%);
   }
 }
