@@ -47,7 +47,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             Back to Blog
           </Link>
         </Button>
-        <h1 className="text-4xl font-bold tracking-tight mb-3">{post.title}</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-3 text-primary">{post.title}</h1>
         <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-4">
           <div className="flex items-center">
             <CalendarDays className="mr-1.5 h-4 w-4" />
