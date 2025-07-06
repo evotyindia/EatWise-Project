@@ -158,4 +158,3 @@ export const getBlogCategories = (): string[] => {
   const categories = new Set(blogPosts.map(post => post.category));
   return ["All", ...Array.from(categories)];
 }
-

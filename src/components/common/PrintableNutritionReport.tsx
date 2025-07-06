@@ -239,5 +239,3 @@ export const PrintableNutritionReport: React.FC<PrintableNutritionReportProps> =
     </div>
   );
 };
-
-    
