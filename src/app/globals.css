@@ -24,7 +24,7 @@
     --muted-foreground: 215 20.2% 65.1%;
     
     --accent: 181 90% 42%; /* Robin Egg Blue */
-    --accent-foreground: 0 0% 100%;
+    --accent-foreground: 224 71% 4%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -92,17 +92,17 @@
     width: 100%;
     height: 100%;
     background-image: 
-      radial-gradient(circle at 15% 50%, hsl(var(--accent) / 0.3), transparent 40%),
-      radial-gradient(circle at 85% 30%, hsl(var(--primary) / 0.3), transparent 40%),
-      radial-gradient(circle at 50% 80%, hsla(245, 32%, 60%, 0.2), transparent 40%);
+      radial-gradient(circle at 15% 50%, hsl(var(--accent) / 0.4), transparent 50%),
+      radial-gradient(circle at 85% 30%, hsl(var(--primary) / 0.4), transparent 50%),
+      radial-gradient(circle at 50% 80%, hsla(245, 32%, 60%, 0.3), transparent 50%);
     z-index: 1;
     animation: smoky-aurora 25s ease-in-out infinite alternate;
     will-change: transform;
   }
   .dark .hero-section::before {
      background-image: 
-      radial-gradient(circle at 15% 50%, hsl(var(--accent) / 0.2), transparent 45%),
-      radial-gradient(circle at 85% 30%, hsl(var(--primary) / 0.2), transparent 45%),
-      radial-gradient(circle at 50% 80%, hsla(245, 32%, 60%, 0.15), transparent 45%);
+      radial-gradient(circle at 15% 50%, hsl(var(--accent) / 0.25), transparent 45%),
+      radial-gradient(circle at 85% 30%, hsl(var(--primary) / 0.25), transparent 45%),
+      radial-gradient(circle at 50% 80%, hsla(245, 32%, 60%, 0.2), transparent 45%);
   }
 }
