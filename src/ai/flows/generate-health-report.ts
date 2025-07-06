@@ -33,6 +33,13 @@ const RatingObjectSchema = z.object({
   justification: z.string().optional().describe('A short justification for the rating.'),
 });
 
+const IngredientAnalysisItemSchema = z.object({
+  ingredientName: z.string().describe("The name of the ingredient."),
+  description: z.string().describe("A brief explanation of what this ingredient is, its purpose in the food, and any health effects (positive or negative)."),
+  riskLevel: z.enum(['Low', 'Medium', 'High', 'Neutral']).describe("A risk assessment for the ingredient. 'Low' for generally safe/healthy, 'Medium' for 'consume in moderation' or if it's controversial, 'High' for ingredients with known significant health risks (like trans fats, certain artificial additives), 'Neutral' for common safe items like salt, water."),
+  riskReason: z.string().describe("A concise justification for the assigned risk level.")
+});
+
 const GenerateHealthReportOutputSchema = z.object({
   healthRating: z
     .number()
@@ -49,7 +56,8 @@ const GenerateHealthReportOutputSchema = z.object({
   productType: z.string().optional().describe('The product type (e.g., Snack, Beverage, Ready-to-eat meal).'),
   processingLevelRating: RatingObjectSchema.optional().describe('Rating (1-5) and justification for food processing level (1=unprocessed, 5=ultra-processed).'),
   sugarContentRating: RatingObjectSchema.optional().describe('Rating (1-5) and justification for sugar content (1=low, 5=high).'),
-  nutrientDensityRating: RatingObjectSchema.optional().describe('Rating (1-5) and justification for nutrient density (1=low, 5=high).')
+  nutrientDensityRating: RatingObjectSchema.optional().describe('Rating (1-5) and justification for nutrient density (1=low, 5=high).'),
+  ingredientAnalysis: z.array(IngredientAnalysisItemSchema).optional().describe("A detailed breakdown of each major ingredient identified, especially processed or chemical ones.")
 });
 export type GenerateHealthReportOutput = z.infer<typeof GenerateHealthReportOutputSchema>;
 
@@ -94,6 +102,7 @@ const prompt = ai.definePrompt({
   - Set 'detailedAnalysis.summary' to 'Sorry, I am not sure about this product. The provided information (e.g., photo, ingredients list) may be unclear or insufficient for a complete analysis. Please try uploading a clearer label or provide more details.'.
   - Set 'detailedAnalysis.positiveAspects', 'detailedAnalysis.potentialConcerns', and 'detailedAnalysis.keyNutrientsBreakdown' to 'N/A due to unclear input.'.
   - Set 'alternatives' to 'N/A due to unclear input.'.
+  - Omit 'ingredientAnalysis' or provide an empty array [].
   - For 'processingLevelRating', 'sugarContentRating', and 'nutrientDensityRating': set their 'rating' to 1 and 'justification' to 'Analysis not possible due to unclear input.'. If the entire rating object is optional and cannot be formed, omit it if the schema allows, otherwise provide default values as specified.
   - Set 'productType' to 'Unknown due to unclear input.'.
   Ensure the output strictly adheres to the defined JSON schema even in this case. Do not output any text outside of the JSON structure.
@@ -111,7 +120,13 @@ const prompt = ai.definePrompt({
       *   **Processing Level Rating**: (1=unprocessed to 5=ultra-processed). Justification should be short.
       *   **Sugar Content Rating**: (1=low to 5=high). Justification should be short.
       *   **Nutrient Density Rating**: (1=low to 5=high). Justification should be short.
-  
+  6.  **Ingredient-by-Ingredient Analysis**: This is a crucial new section. For each major ingredient identified, provide a detailed analysis. Focus especially on additives, preservatives, sweeteners, and processed items. For very common/simple ingredients like Water or Salt, a brief neutral entry is fine.
+      *   Create an object for each ingredient with fields: 'ingredientName', 'description', 'riskLevel' ('Low', 'Medium', 'High', 'Neutral'), and 'riskReason'.
+      *   The 'description' should explain what the ingredient is and its purpose.
+      *   'riskLevel' should be based on current nutritional science for an average consumer.
+      *   'riskReason' must concisely justify the risk level.
+      *   Populate this into the 'ingredientAnalysis' array. If no ingredients can be clearly identified, this can be an empty array.
+
   Present all lists (summary, positive aspects, potential concerns, key nutrients breakdown, alternatives) as bullet points using '*' or '-' as prefixes where specified.
 
   IMPORTANT: Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
@@ -141,6 +156,7 @@ const generateHealthReportFlow = ai.defineFlow(
         processingLevelRating: { rating: 1, justification: "Error in analysis" },
         sugarContentRating: { rating: 1, justification: "Error in analysis" },
         nutrientDensityRating: { rating: 1, justification: "Error in analysis" },
+        ingredientAnalysis: [],
       };
     }
     return output;

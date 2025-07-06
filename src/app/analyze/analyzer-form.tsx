@@ -7,7 +7,7 @@ import type { ContextAwareAIChatInput, ContextAwareAIChatOutput, ChatMessage } f
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadCloud, Sparkles, MessageCircle, Send, Download, Zap, HeartPulse, Wheat, Info, FileText } from "lucide-react";
+import { UploadCloud, Sparkles, MessageCircle, Send, Download, Zap, HeartPulse, Wheat, Info, FileText, Microscope } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import { useReactToPrint } from "react-to-print";
@@ -27,6 +27,9 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { PrintableHealthReport } from '@/components/common/PrintableHealthReport';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 
 const manualInputSchema = z.object({
@@ -205,6 +208,13 @@ export function AnalyzerForm() {
     );
 };
 
+const riskBadgeVariantMap: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+    High: 'destructive',
+    Medium: 'secondary',
+    Low: 'default', // Default is primary color (accent)
+    Neutral: 'outline',
+};
+
 
   return (
     <>
@@ -351,6 +361,31 @@ export function AnalyzerForm() {
                       <AlertTitle className="font-semibold text-lg mb-1 text-red-700 dark:text-red-300">Potential Concerns</AlertTitle>
                       <AlertDescription className="text-red-800/90 dark:text-red-300/90">{renderFormattedText(report.detailedAnalysis.potentialConcerns)}</AlertDescription>
                   </Alert>
+              )}
+
+              {report.ingredientAnalysis && report.ingredientAnalysis.length > 0 && (
+                <>
+                  <Separator />
+                  <div className="space-y-2">
+                     <h3 className="font-semibold text-lg flex items-center mb-1"><Microscope className="mr-2 h-5 w-5 text-primary" /> Ingredient Breakdown</h3>
+                     <Accordion type="single" collapsible className="w-full">
+                        {report.ingredientAnalysis.map((item, index) => (
+                          <AccordionItem key={index} value={`item-${index}`}>
+                            <AccordionTrigger>
+                               <div className="flex items-center justify-between w-full pr-2">
+                                  <span className="font-medium">{item.ingredientName}</span>
+                                  <Badge variant={riskBadgeVariantMap[item.riskLevel] || 'outline'}>{item.riskLevel}</Badge>
+                               </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="space-y-2 px-1">
+                                <p className="text-sm text-muted-foreground">{item.description}</p>
+                                <p className="text-xs"><strong className="font-semibold">Justification:</strong> {item.riskReason}</p>
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))}
+                     </Accordion>
+                  </div>
+                </>
               )}
 
               {renderFormattedText(report.alternatives) && (
