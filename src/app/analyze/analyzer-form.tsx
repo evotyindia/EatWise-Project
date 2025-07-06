@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { GenerateHealthReportInput, GenerateHealthReportOutput } from "@/ai/flows/generate-health-report";
@@ -26,7 +27,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const manualInputSchema = z.object({
   productName: z.string().optional(),
@@ -277,79 +277,61 @@ export function AnalyzerForm() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <TooltipProvider delayDuration={100}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Alert variant="default" className="bg-muted/60 cursor-help">
-                        <HeartPulse className="h-5 w-5 text-accent" />
-                        <AlertTitle className="font-semibold">Overall Health Rating</AlertTitle>
-                        <AlertDescription className="flex items-center gap-1 flex-wrap">
-                          <StarRating rating={report.healthRating} />
-                          <span>({report.healthRating}/5)</span>
-                        </AlertDescription>
-                      </Alert>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Overall health score. Higher is better.</p>
-                    </TooltipContent>
-                  </Tooltip>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Alert variant="default" className="bg-muted/60">
+                  <HeartPulse className="h-5 w-5 text-accent" />
+                  <AlertTitle className="font-semibold flex justify-between items-center">
+                    <span>Overall Health Rating</span>
+                    <span className="text-xs font-normal text-muted-foreground">(Higher is better)</span>
+                  </AlertTitle>
+                  <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
+                    <StarRating rating={report.healthRating} />
+                    <span>({report.healthRating}/5)</span>
+                  </AlertDescription>
+                </Alert>
 
-                  {report.processingLevelRating?.rating !== undefined && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Alert variant="default" className="bg-muted/60 cursor-help">
-                          <Zap className="h-5 w-5 text-accent" />
-                          <AlertTitle className="font-semibold">Processing Level</AlertTitle>
-                          <AlertDescription className="flex items-center gap-1 flex-wrap">
-                            <StarRating rating={6 - report.processingLevelRating.rating} />
-                            <span>({report.processingLevelRating.rating}/5)</span>
-                          </AlertDescription>
-                        </Alert>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Lower numerical score is better. More stars indicate a less processed product.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
+                {report.processingLevelRating?.rating !== undefined && (
+                  <Alert variant="default" className="bg-muted/60">
+                    <Zap className="h-5 w-5 text-accent" />
+                    <AlertTitle className="font-semibold flex justify-between items-center">
+                      <span>Processing Level</span>
+                      <span className="text-xs font-normal text-muted-foreground">(Lower is better)</span>
+                    </AlertTitle>
+                    <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
+                      <StarRating rating={6 - report.processingLevelRating.rating} />
+                      <span>({report.processingLevelRating.rating}/5)</span>
+                    </AlertDescription>
+                  </Alert>
+                )}
 
-                  {report.sugarContentRating?.rating !== undefined && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Alert variant="default" className="bg-muted/60 cursor-help">
-                          <Wheat className="h-5 w-5 text-accent" />
-                          <AlertTitle className="font-semibold">Sugar Content</AlertTitle>
-                          <AlertDescription className="flex items-center gap-1 flex-wrap">
-                            <StarRating rating={6 - report.sugarContentRating.rating} />
-                            <span>({report.sugarContentRating.rating}/5)</span>
-                          </AlertDescription>
-                        </Alert>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Lower numerical score is better. More stars indicate lower sugar content.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
+                {report.sugarContentRating?.rating !== undefined && (
+                  <Alert variant="default" className="bg-muted/60">
+                    <Wheat className="h-5 w-5 text-accent" />
+                    <AlertTitle className="font-semibold flex justify-between items-center">
+                      <span>Sugar Content</span>
+                      <span className="text-xs font-normal text-muted-foreground">(Lower is better)</span>
+                    </AlertTitle>
+                    <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
+                      <StarRating rating={6 - report.sugarContentRating.rating} />
+                      <span>({report.sugarContentRating.rating}/5)</span>
+                    </AlertDescription>
+                  </Alert>
+                )}
 
-                  {report.nutrientDensityRating?.rating !== undefined && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Alert variant="default" className="bg-muted/60 cursor-help">
-                          <Sparkles className="h-5 w-5 text-accent" />
-                          <AlertTitle className="font-semibold">Nutrient Density</AlertTitle>
-                          <AlertDescription className="flex items-center gap-1 flex-wrap">
-                            <StarRating rating={report.nutrientDensityRating.rating} />
-                            <span>({report.nutrientDensityRating.rating}/5)</span>
-                          </AlertDescription>
-                        </Alert>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Higher score is better. More stars indicate a more nutrient-dense product.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </div>
-              </TooltipProvider>
+                {report.nutrientDensityRating?.rating !== undefined && (
+                  <Alert variant="default" className="bg-muted/60">
+                    <Sparkles className="h-5 w-5 text-accent" />
+                     <AlertTitle className="font-semibold flex justify-between items-center">
+                      <span>Nutrient Density</span>
+                      <span className="text-xs font-normal text-muted-foreground">(Higher is better)</span>
+                    </AlertTitle>
+                    <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
+                      <StarRating rating={report.nutrientDensityRating.rating} />
+                      <span>({report.nutrientDensityRating.rating}/5)</span>
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
               <Separator />
 
               <Alert variant="default" className="bg-background/30">
