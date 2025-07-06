@@ -3,13 +3,13 @@
 
 import type { GenerateHealthReportInput, GenerateHealthReportOutput } from "@/ai/flows/generate-health-report";
 import { generateHealthReport } from "@/ai/flows/generate-health-report";
-import type { ContextAwareAIChatInput, ContextAwareAIChatOutput, ChatMessage } from "@/ai/flows/context-aware-ai-chat"; // Updated import
+import type { ContextAwareAIChatInput, ContextAwareAIChatOutput, ChatMessage } from "@/ai/flows/context-aware-ai-chat";
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UploadCloud, Sparkles, MessageCircle, Send, Download, Zap, HeartPulse, Wheat, Info } from "lucide-react";
 import Image from "next/image";
-import React, { useState, useRef, useEffect } from "react"; // Added useEffect
+import React, { useState, useRef, useEffect } from "react";
 import { createRoot } from 'react-dom/client';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -51,6 +51,7 @@ export function AnalyzerForm() {
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
+  const pdfRef = useRef<HTMLDivElement>(null);
 
   const { toast } = useToast();
 
@@ -127,13 +128,13 @@ export function AnalyzerForm() {
     await generateReportSharedLogic({ photoDataUri }, 'image');
   };
   
-  const initiateChatWithWelcome = async (contextType: "labelAnalysis" | "recipe" | "nutritionAnalysis" | "general", contextData: any) => {
+  const initiateChatWithWelcome = async (contextType: "labelAnalysis", contextData: any) => {
     setIsChatLoading(true);
     setChatHistory([]);
     const input: ContextAwareAIChatInput = {
         userQuestion: "INIT_CHAT_WELCOME", 
         contextType: contextType,
-        labelContext: contextType === "labelAnalysis" ? contextData : undefined,
+        labelContext: contextData,
     };
     try {
         const aiResponse = await contextAwareAIChat(input);
@@ -150,8 +151,7 @@ export function AnalyzerForm() {
     if (!chatInput.trim() || !report) return;
 
     const userMessage: ChatMessage = { role: "user", content: chatInput };
-    const newChatHistory = [...chatHistory, userMessage];
-    setChatHistory(newChatHistory);
+    setChatHistory(prev => [...prev, userMessage]);
     setChatInput("");
     setIsChatLoading(true);
 
@@ -182,70 +182,55 @@ export function AnalyzerForm() {
     }
   }, [chatHistory]);
 
-
   const handleDownloadReport = async () => {
-    if (!report) return;
+    const elementToPrint = pdfRef.current;
+    if (!elementToPrint) {
+        toast({ title: "Error", description: "Could not find report content to print.", variant: "destructive" });
+        return;
+    }
     setIsPdfDownloading(true);
-
-    const tempDiv = document.createElement('div');
-    tempDiv.id = 'pdf-render-source-analyzer-form-' + Date.now(); 
-    tempDiv.style.position = 'absolute'; tempDiv.style.left = '-9999px'; tempDiv.style.top = '0px';
-    tempDiv.style.width = '210mm'; tempDiv.style.backgroundColor = 'white'; tempDiv.style.padding = '0'; tempDiv.style.margin = '0';
-    document.body.appendChild(tempDiv);
-
-    const root = createRoot(tempDiv);
-    root.render(
-      <PrintableHealthReport
-        report={report}
-        chatHistory={chatHistory}
-        productNameContext={manualForm.getValues("productName")}
-      />
-    );
     
-    await new Promise(resolve => setTimeout(resolve, 1500)); 
-
     try {
-      const canvas = await html2canvas(tempDiv, {
-        scale: 2, useCORS: true, logging: false, 
-        width: tempDiv.scrollWidth, height: tempDiv.scrollHeight, 
-        windowWidth: tempDiv.scrollWidth, windowHeight: tempDiv.scrollHeight,
-      });
+        const canvas = await html2canvas(elementToPrint, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: null, 
+        });
 
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const pdfPageWidth = pdf.internal.pageSize.getWidth();
-      const pdfPageHeight = pdf.internal.pageSize.getHeight();
-      const imgProps = pdf.getImageProperties(imgData);
-      const imgAspectRatio = imgProps.width / imgProps.height;
-      const scaledImgHeight = pdfPageWidth / imgAspectRatio;
-      let numPages = Math.ceil(scaledImgHeight / pdfPageHeight);
-      if (numPages === 0) numPages = 1;
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        
+        const pdfPageWidth = pdf.internal.pageSize.getWidth();
+        const pdfPageHeight = pdf.internal.pageSize.getHeight();
+        const imgProps = pdf.getImageProperties(imgData);
+        const imgAspectRatio = imgProps.width / imgProps.height;
+        const scaledImgHeight = pdfPageWidth / imgAspectRatio;
 
-      for (let i = 0; i < numPages; i++) {
-        if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, - (i * pdfPageHeight), pdfPageWidth, scaledImgHeight);
-      }
-      
-      const totalPages = pdf.getNumberOfPages();
-      for (let i = 1; i <= totalPages; i++) {
-        pdf.setPage(i); pdf.setFontSize(8); pdf.setTextColor(100);
-        const footerText = `Page ${i} of ${totalPages} | Generated by EatWise India on ${new Date().toLocaleDateString('en-GB')}`;
-        pdf.text(footerText, pdfPageWidth / 2, pdfPageHeight - 10, { align: 'center' });
-      }
-      const safeProductName = (report.productType || manualForm.getValues("productName") || 'food-label').replace(/[^a-z0-9]/gi, '_').toLowerCase();
-      pdf.save(`${safeProductName}_health_report.pdf`);
-      toast({ title: "Report Downloaded", description: "The PDF health report has been saved." });
+        let heightLeft = scaledImgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, pdfPageWidth, scaledImgHeight);
+        heightLeft -= pdfPageHeight;
+
+        while (heightLeft > 0) {
+            position = heightLeft - scaledImgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, pdfPageWidth, scaledImgHeight);
+            heightLeft -= pdfPageHeight;
+        }
+
+        const safeProductName = (report?.productType || manualForm.getValues("productName") || 'food-label').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        pdf.save(`${safeProductName}_health_report.pdf`);
+        toast({ title: "Report Downloaded", description: "The PDF health report has been saved." });
+
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast({ title: "PDF Error", description: "Could not generate PDF report. " + (error as Error).message, variant: "destructive" });
+        console.error("Error generating PDF:", error);
+        toast({ title: "PDF Error", description: "Could not generate PDF report. " + (error instanceof Error ? error.message : ""), variant: "destructive" });
     } finally {
-      root.unmount(); 
-      if (document.body.contains(tempDiv)) {
-        document.body.removeChild(tempDiv);
-      }
-      setIsPdfDownloading(false);
+        setIsPdfDownloading(false);
     }
   };
+
 
  const renderFormattedText = (text?: string): JSX.Element | null => {
     if (!text || text.trim() === "" || text.trim().toLowerCase() === "n/a") return null;
@@ -253,28 +238,16 @@ export function AnalyzerForm() {
     const lines = text.split('\n').map(line => line.trim()).filter(line => line !== "");
     if (lines.length === 0) return null;
 
-    const hasBullets = lines.some(line => line.startsWith('* ') || line.startsWith('- '));
-
-    if (hasBullets) {
-        return (
-            <ul className="list-none space-y-1 text-sm leading-relaxed">
-                {lines.map((line, index) => (
-                    <li key={index} className="flex items-start">
-                        <span className="mr-2 mt-1 text-primary">&#8226;</span>
-                        <span>{line.replace(/^(\*|-)\s*/, '')}</span>
-                    </li>
-                ))}
-            </ul>
-        );
-    } else {
-        return (
-            <div className="text-sm leading-relaxed space-y-1">
-                {lines.map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
-                ))}
-            </div>
-        );
-    }
+    return (
+        <ul className="list-none space-y-1 text-sm leading-relaxed">
+            {lines.map((line, index) => (
+                <li key={index} className="flex items-start">
+                    <span className="mr-2 mt-1 text-accent">&#8226;</span>
+                    <span className="break-words">{line.replace(/^(\*|-)\s*/, '')}</span>
+                </li>
+            ))}
+        </ul>
+    );
 };
 
 
@@ -295,7 +268,7 @@ export function AnalyzerForm() {
                 <Button onClick={() => { setUploadedImage(null); setImageFile(null); }} variant="ghost" size="sm" className="absolute top-1 right-1 text-xs">Clear</Button>
               </div>
             )}
-            <Button type="button" onClick={onImageSubmit} disabled={isLoading || !imageFile} className="mt-4 w-full">
+            <Button type="button" onClick={onImageSubmit} disabled={isLoading || !imageFile} className="mt-4 w-full bg-accent text-accent-foreground hover:bg-accent/90">
               {isProcessingImage ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
               Analyze Image
             </Button>
@@ -326,25 +299,38 @@ export function AnalyzerForm() {
       </Card>
       
       {isLoading && !report && (
-        <Card className="lg:col-span-1 flex items-center justify-center h-full min-h-[300px]">
+        <Card className="flex items-center justify-center h-full min-h-[300px]">
             <div className="text-center">
-                <Sparkles className="mx-auto h-12 w-12 text-primary animate-spin mb-4" />
+                <Sparkles className="mx-auto h-12 w-12 text-accent animate-spin mb-4" />
                 <p className="text-lg font-semibold">Generating AI Report...</p>
-                <p className="text-sm text-muted-foreground mt-1">Our AI is carefully analyzing the data. This may take a few moments, especially for images.</p>
+                <p className="text-sm text-muted-foreground mt-1">Our AI is carefully analyzing the data. This may take a few moments.</p>
             </div>
         </Card>
       )}
 
       {report && (
+        <>
+        <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+            <div ref={pdfRef} style={{ width: '800px', padding: '20px', backgroundColor: 'white' }}>
+                <PrintableHealthReport
+                    report={report}
+                    chatHistory={chatHistory}
+                    productNameContext={manualForm.getValues("productName")}
+                />
+            </div>
+        </div>
         <Card className="shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle className="flex items-center text-2xl"><Sparkles className="mr-2 h-6 w-6 text-primary" /> AI Health Report</CardTitle>
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle className="flex items-center text-2xl"><Sparkles className="mr-2 h-6 w-6 text-accent" /> AI Health Report</CardTitle>
+                {report.productType && (<CardDescription>Product Type: <span className="font-semibold">{report.productType}</span></CardDescription>)}
+              </div>
               <Button onClick={handleDownloadReport} variant="outline" size="sm" disabled={isPdfDownloading}>
-                {isPdfDownloading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Download PDF
+                {isPdfDownloading ? <Sparkles className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                <span>PDF</span>
               </Button>
             </div>
-            {report.productType && (<CardDescription>Product Type: <span className="font-semibold">{report.productType}</span></CardDescription>)}
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -353,7 +339,7 @@ export function AnalyzerForm() {
                 <AlertTitle className="font-semibold">Overall Health Rating</AlertTitle>
                 <AlertDescription className="flex items-center gap-1 flex-wrap">
                     <StarRating rating={report.healthRating} /> 
-                    <span>({report.healthRating}/5). <i className="text-xs">Higher stars = better health.</i></span>
+                    <span>({report.healthRating}/5).</span>
                 </AlertDescription>
               </Alert>
                {report.processingLevelRating?.rating !== undefined && (
@@ -362,9 +348,8 @@ export function AnalyzerForm() {
                     <AlertTitle className="font-semibold">Processing Level</AlertTitle>
                     <AlertDescription className="flex items-center gap-1 flex-wrap">
                         <StarRating rating={report.processingLevelRating.rating} /> 
-                        <span>({report.processingLevelRating.rating}/5). <i className="text-xs">Generally, less processed (fewer stars) is better.</i></span>
+                        <span>({report.processingLevelRating.rating}/5).</span>
                     </AlertDescription>
-                    {report.processingLevelRating.justification && <p className="text-xs text-muted-foreground mt-1 pl-7">{report.processingLevelRating.justification}</p>}
                 </Alert>
                )}
                {report.sugarContentRating?.rating !== undefined && (
@@ -373,9 +358,8 @@ export function AnalyzerForm() {
                     <AlertTitle className="font-semibold">Sugar Content</AlertTitle>
                     <AlertDescription className="flex items-center gap-1 flex-wrap">
                         <StarRating rating={report.sugarContentRating.rating} /> 
-                        <span>({report.sugarContentRating.rating}/5). <i className="text-xs">Generally, lower sugar (fewer stars) is better.</i></span>
+                        <span>({report.sugarContentRating.rating}/5).</span>
                     </AlertDescription>
-                    {report.sugarContentRating.justification && <p className="text-xs text-muted-foreground mt-1 pl-7">{report.sugarContentRating.justification}</p>}
                 </Alert>
                )}
                {report.nutrientDensityRating?.rating !== undefined && (
@@ -384,68 +368,49 @@ export function AnalyzerForm() {
                     <AlertTitle className="font-semibold">Nutrient Density</AlertTitle>
                     <AlertDescription className="flex items-center gap-1 flex-wrap">
                         <StarRating rating={report.nutrientDensityRating.rating} /> 
-                        <span>({report.nutrientDensityRating.rating}/5). <i className="text-xs">Higher stars = more nutrient dense.</i></span>
+                        <span>({report.nutrientDensityRating.rating}/5).</span>
                     </AlertDescription>
-                    {report.nutrientDensityRating.justification && <p className="text-xs text-muted-foreground mt-1 pl-7">{report.nutrientDensityRating.justification}</p>}
                 </Alert>
                )}
             </div>
             <Separator />
-            <div>
-                <Alert variant="default" className="bg-background">
-                    <Info className="h-4 w-4 text-primary" />
-                     <AlertTitle className="font-semibold text-lg mb-1">Summary:</AlertTitle>
-                    <AlertDescription>{renderFormattedText(report.detailedAnalysis.summary)}</AlertDescription>
-                </Alert>
-            </div>
+            
+            <Alert variant="default" className="bg-background">
+                <Info className="h-4 w-4 text-primary" />
+                 <AlertTitle className="font-semibold text-lg mb-1">Summary</AlertTitle>
+                <AlertDescription>{renderFormattedText(report.detailedAnalysis.summary)}</AlertDescription>
+            </Alert>
             
             {renderFormattedText(report.detailedAnalysis.positiveAspects) && (
-                <div>
-                    <Alert variant="default" className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700">
-                        <Info className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        <AlertTitle className="font-semibold text-lg mb-1 text-green-700 dark:text-green-300">Positive Aspects:</AlertTitle>
-                        <AlertDescription className="text-green-700 dark:text-green-300">{renderFormattedText(report.detailedAnalysis.positiveAspects)}</AlertDescription>
-                    </Alert>
-                </div>
+                <Alert variant="default" className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700">
+                    <Info className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    <AlertTitle className="font-semibold text-lg mb-1 text-green-800 dark:text-green-300">Positive Aspects</AlertTitle>
+                    <AlertDescription className="text-green-800/90 dark:text-green-300/90">{renderFormattedText(report.detailedAnalysis.positiveAspects)}</AlertDescription>
+                </Alert>
             )}
             
             {renderFormattedText(report.detailedAnalysis.potentialConcerns) && (
-                <div>
-                    <Alert variant="destructive" className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700">
-                        <Info className="h-4 w-4 text-red-600 dark:text-red-400" />
-                        <AlertTitle className="font-semibold text-lg mb-1 text-red-700 dark:text-red-300">Potential Concerns:</AlertTitle>
-                        <AlertDescription className="text-red-700 dark:text-red-300">{renderFormattedText(report.detailedAnalysis.potentialConcerns)}</AlertDescription>
-                    </Alert>
-                </div>
-            )}
-            
-            {renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown) && (
-                <div>
-                    <Alert variant="default" className="bg-background">
-                        <Info className="h-4 w-4 text-primary" />
-                        <AlertTitle className="font-semibold text-lg mb-1">Key Nutrients Breakdown:</AlertTitle>
-                        <AlertDescription>{renderFormattedText(report.detailedAnalysis.keyNutrientsBreakdown)}</AlertDescription>
-                    </Alert>
-                </div>
+                <Alert variant="destructive" className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700">
+                    <Info className="h-4 w-4 text-red-600 dark:text-red-400" />
+                    <AlertTitle className="font-semibold text-lg mb-1 text-red-800 dark:text-red-300">Potential Concerns</AlertTitle>
+                    <AlertDescription className="text-red-800/90 dark:text-red-300/90">{renderFormattedText(report.detailedAnalysis.potentialConcerns)}</AlertDescription>
+                </Alert>
             )}
 
             {renderFormattedText(report.alternatives) && (
-                <div>
-                    <Alert variant="default" className="bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-700">
-                        <Info className="h-4 w-4 text-sky-600 dark:text-sky-400" />
-                        <AlertTitle className="font-semibold text-lg mb-1 text-sky-700 dark:text-sky-300">Healthier Indian Alternatives:</AlertTitle>
-                        <AlertDescription className="text-sky-700 dark:text-sky-300">{renderFormattedText(report.alternatives)}</AlertDescription>
-                    </Alert>
-                </div>
+                <Alert variant="default" className="bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-700">
+                    <Info className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                    <AlertTitle className="font-semibold text-lg mb-1 text-sky-800 dark:text-sky-300">Healthier Indian Alternatives</AlertTitle>
+                    <AlertDescription className="text-sky-800/90 dark:text-sky-300/90">{renderFormattedText(report.alternatives)}</AlertDescription>
+                </Alert>
             )}
           </CardContent>
           <CardFooter className="flex flex-col items-start pt-4 border-t">
-            <Separator className="my-4"/>
             <h3 className="font-semibold text-xl mb-2 flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat with AI Advisor</h3>
-            <p className="text-sm text-muted-foreground mb-4">Ask questions about this report. For example: "Can kids eat this daily?"</p>
+            <p className="text-sm text-muted-foreground mb-4">Ask questions about this report.</p>
             <ScrollArea className="h-[200px] w-full rounded-md border p-3 mb-4 bg-muted/50" ref={chatScrollAreaRef}>
               {chatHistory.map((msg, index) => (
-                <div key={index} className={`mb-2 p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-accent text-accent-foreground mr-auto'}`}>
+                <div key={index} className={`mb-2 p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
                   <span className="font-semibold capitalize">{msg.role === 'user' ? 'You' : 'AI Advisor'}: </span>{msg.content}
                 </div>
               ))}
@@ -457,10 +422,11 @@ export function AnalyzerForm() {
             </form>
           </CardFooter>
         </Card>
+        </>
       )}
        {!isLoading && !report && (
-        <Card className="lg:col-span-1 flex items-center justify-center h-full min-h-[300px] bg-muted/30">
-            <div className="text-center p-8"><Sparkles className="mx-auto h-12 w-12 text-muted-foreground mb-4" /><p className="text-lg font-semibold text-muted-foreground">Your AI report will appear here.</p><p className="text-sm text-muted-foreground">Submit a food label to get started.</p></div>
+        <Card className="flex items-center justify-center h-full min-h-[300px] bg-muted/30">
+            <div className="text-center p-8"><Sparkles className="mx-auto h-12 w-12 text-muted-foreground mb-4" /><p className="text-lg font-semibold text-muted-foreground">Your AI report will appear here.</p><p className="text-sm text-muted-foreground mt-1">Submit a food label to get started.</p></div>
         </Card>
       )}
     </div>

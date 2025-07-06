@@ -5,78 +5,58 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --background: 210 20% 98%; /* Light off-white */
+    --foreground: 222 47% 11%; /* Dark blue */
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 142.1 76.2% 36.3%;
-    --primary-foreground: 355.7 100% 97.3%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 222 47% 11%; /* Dark blue */
+    --primary-foreground: 210 20% 98%;
     --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary-foreground: 222 47% 11%;
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 200 70% 60%; /* Updated light mode accent */
-    --accent-foreground: 222.2 47.4% 11.2%; /* Should still contrast well */
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 160 84% 39%; /* Emerald */
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 142.1 76.2% 36.3%;
+    --ring: 160 84% 39%;
     --radius: 0.5rem;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-
-    /* Sidebar light theme adjustments */
-    --sidebar-background: 0 0% 100%; 
-    --sidebar-foreground: 240 10% 3.9%; 
-    --sidebar-primary: 142.1 76.2% 36.3%; 
-    --sidebar-primary-foreground: 355.7 100% 97.3%;
-    --sidebar-accent: 200 70% 90%; /* Lighter version of the main accent for sidebar hover */
-    --sidebar-accent-foreground: 222.2 47.4% 11.2%; 
-    --sidebar-border: 214.3 31.8% 91.4%; 
-    --sidebar-ring: 142.1 76.2% 36.3%;
   }
-
+ 
   .dark {
-    --background: 20 14.3% 4.1%;
-    --foreground: 0 0% 95%;
-    --card: 24 9.8% 10%;
-    --card-foreground: 0 0% 95%;
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 142.1 70.6% 45.3%;
-    --primary-foreground: 144.9 80.4% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 200 60% 35%; /* Dark mode accent - visible blue */
-    --accent-foreground: 0 0% 98%; 
+    --background: 222 47% 11%; /* Dark blue */
+    --foreground: 210 20% 98%;
+    --card: 222 47% 14%;
+    --card-foreground: 210 20% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 210 20% 98%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 160 84% 39%; /* Emerald */
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 85.7% 97.3%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 142.1 70.6% 45.3%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 160 84% 39%;
     --chart-1: 206 90% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-
-    /* Sidebar dark theme adjustments */
-    --sidebar-background: 20 14.3% 4.1%; 
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 142.1 70.6% 45.3%;  
-    --sidebar-primary-foreground: 144.9 80.4% 10%;
-    --sidebar-accent: 240 3.7% 15.9%; 
-    --sidebar-accent-foreground: 0 0% 98%; 
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 142.1 70.6% 45.3%;
   }
 }
 
@@ -90,16 +70,7 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline;
   }
-}
-
-/* PDF specific structural hints */
-.pdf-page-break-before {
-  margin-top: 15mm; /* Provides a visual gap in the continuous canvas, might influence perceived breaks */
-  /* html2canvas does not directly support page-break-before. This is more for structural clarity. */
-}
-
-/* Ensure a minimum height for PDF pages if needed, though scrollHeight usually captures content */
-.pdf-page {
-  /* min-height: 277mm; /* A4 height minus typical margins */
-  /* box-sizing: border-box; */
+  html, body {
+    @apply overflow-x-hidden;
+  }
 }

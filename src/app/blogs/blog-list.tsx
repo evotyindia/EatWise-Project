@@ -1,7 +1,7 @@
 
 "use client";
 
-import type { BlogPost } from "@/lib/blog-data";
+import { blogPosts, getBlogCategories, type BlogPost } from "@/lib/blog-data";
 import Link from "next/link";
 import Image from "next/image";
 import React, { useState, useMemo } from "react";
@@ -10,20 +10,17 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Filter } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-interface BlogListProps {
-  initialPosts: BlogPost[];
-  categories: string[];
-}
-
-export function BlogList({ initialPosts, categories }: BlogListProps) {
+export function BlogList() {
+  const allPosts = blogPosts;
+  const allCategories = getBlogCategories();
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
 
   const filteredPosts = useMemo(() => {
     if (selectedCategory === "All") {
-      return initialPosts;
+      return allPosts;
     }
-    return initialPosts.filter(post => post.category === selectedCategory);
-  }, [initialPosts, selectedCategory]);
+    return allPosts.filter(post => post.category === selectedCategory);
+  }, [allPosts, selectedCategory]);
 
   return (
     <div>
@@ -36,7 +33,7 @@ export function BlogList({ initialPosts, categories }: BlogListProps) {
               <SelectValue placeholder="Filter by category" />
             </SelectTrigger>
             <SelectContent>
-              {categories.map(category => (
+              {allCategories.map(category => (
                 <SelectItem key={category} value={category}>
                   {category}
                 </SelectItem>
@@ -75,7 +72,7 @@ export function BlogList({ initialPosts, categories }: BlogListProps) {
               <CardDescription className="mt-2 text-sm line-clamp-3">{post.preview}</CardDescription>
             </CardContent>
             <CardFooter className="p-6 pt-0">
-              <Button variant="link" asChild className="px-0 text-primary group transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
+              <Button variant="link" asChild className="px-0 text-accent group">
                 <Link href={`/blogs/${post.slug}`}>
                   Read More <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
