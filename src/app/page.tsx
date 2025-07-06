@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { CheckCircle, ScanLine, MessageCircle, CookingPot, BarChart3, Users, Target, Lightbulb, User, UploadCloud, Cpu, ClipboardCheck, Utensils, Smile, ShieldCheck } from "lucide-react";
+import { CheckCircle, ScanLine, MessageCircle, CookingPot, BarChart3, Users, Lightbulb, User, UploadCloud, Cpu, ClipboardCheck } from "lucide-react";
 
 export default function Home() {
   const features = [
@@ -33,24 +33,6 @@ export default function Home() {
     },
   ];
 
-  const whyChoosePoints = [
-    {
-      icon: <Cpu className="h-8 w-8 text-primary" />,
-      title: "AI-Powered Precision",
-      description: "Harness advanced AI to decode complex food labels and nutritional data in seconds."
-    },
-    {
-      icon: <CookingPot className="h-8 w-8 text-primary" />,
-      title: "Culturally Relevant Advice",
-      description: "Discover healthier Indian food alternatives and recipes tailored to local tastes."
-    },
-    {
-      icon: <ClipboardCheck className="h-8 w-8 text-primary" />,
-      title: "Clear & Actionable Guidance",
-      description: "Receive straightforward health ratings and practical suggestions."
-    },
-  ];
-
   const testimonials = [
     {
       quote: "This app has changed how my family eats! Understanding labels is so much easier now, and the Indian alternatives are fantastic.",
@@ -71,12 +53,12 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <section className="w-full py-20 md:py-28 lg:py-32 bg-secondary">
+      <section className="w-full py-20 md:py-28 lg:py-32 bg-gradient-to-br from-blue-100 via-white to-cyan-100 dark:from-blue-900/20 dark:via-background dark:to-cyan-900/20">
         <div className="container px-4 md:px-6 text-center">
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-primary">
             EatWise India
           </h1>
-          <p className="mx-auto max-w-[700px] text-primary/80 md:text-xl mt-4">
+          <p className="mx-auto max-w-[700px] text-foreground/80 md:text-xl mt-4">
             Empowering India to Eat Smarter with AI
           </p>
           <p className="mx-auto max-w-[600px] text-muted-foreground md:text-lg mt-2">
