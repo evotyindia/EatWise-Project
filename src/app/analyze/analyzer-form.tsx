@@ -363,6 +363,14 @@ const riskBadgeVariantMap: Record<string, "default" | "secondary" | "destructive
                   </Alert>
               )}
 
+              {renderFormattedText(report.alternatives) && (
+                  <Alert variant="default" className="bg-sky-500/10 border-sky-500/20">
+                      <Info className="h-4 w-4 text-sky-500" />
+                      <AlertTitle className="font-semibold text-lg mb-1 text-sky-700 dark:text-sky-300">Healthier Indian Alternatives</AlertTitle>
+                      <AlertDescription className="text-sky-800/90 dark:text-sky-300/90">{renderFormattedText(report.alternatives)}</AlertDescription>
+                  </Alert>
+              )}
+
               {report.ingredientAnalysis && report.ingredientAnalysis.length > 0 && (
                 <>
                   <Separator />
@@ -386,14 +394,6 @@ const riskBadgeVariantMap: Record<string, "default" | "secondary" | "destructive
                      </Accordion>
                   </div>
                 </>
-              )}
-
-              {renderFormattedText(report.alternatives) && (
-                  <Alert variant="default" className="bg-sky-500/10 border-sky-500/20">
-                      <Info className="h-4 w-4 text-sky-500" />
-                      <AlertTitle className="font-semibold text-lg mb-1 text-sky-700 dark:text-sky-300">Healthier Indian Alternatives</AlertTitle>
-                      <AlertDescription className="text-sky-800/90 dark:text-sky-300/90">{renderFormattedText(report.alternatives)}</AlertDescription>
-                  </Alert>
               )}
             </CardContent>
             <CardFooter className="flex flex-col items-start pt-4 border-t border-white/10">
