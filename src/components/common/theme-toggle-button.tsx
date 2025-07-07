@@ -7,40 +7,35 @@ import { Button } from "@/components/ui/button"
 
 export function ThemeToggleButton() {
   const { theme, setTheme } = useTheme()
-
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light")
-  }
-
   const [mounted, setMounted] = useState(false)
+
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  if (!mounted) {
-    // A placeholder to prevent layout shift and hydration errors.
-    // It's a disabled button that is structurally identical to the final one.
-    // It defaults to showing the "Light" mode toggle state.
-    // A fixed width prevents content shift between "Light" and "Dark".
-    return (
-        <Button variant="outline" size="sm" disabled className="w-[88px]">
-            <>
-                <Sun />
-                <span>Light</span>
-            </>
-            <span className="sr-only">Toggle theme</span>
-        </Button>
-    );
+  const toggleTheme = () => {
+    // The button is disabled until mounted, so this only runs on the client
+    setTheme(theme === "light" ? "dark" : "light")
   }
 
+  // To fix hydration errors, we render a disabled button on the server and during
+  // the initial client render. After the component mounts on the client, it becomes
+  // enabled and its content dynamically reflects the current theme.
   return (
-    <Button variant="outline" size="sm" onClick={toggleTheme} className="w-[88px]">
-      {theme === "light" ? (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={toggleTheme}
+      disabled={!mounted}
+      className="w-[88px]"
+    >
+      {mounted && theme === "light" ? (
         <>
           <Moon />
           <span>Dark</span>
         </>
       ) : (
+        // This is the default state shown on server and initial client render
         <>
           <Sun />
           <span>Light</span>
