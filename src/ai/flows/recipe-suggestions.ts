@@ -21,7 +21,7 @@ const GetRecipeSuggestionsInputSchema = z.object({
 export type GetRecipeSuggestionsInput = z.infer<typeof GetRecipeSuggestionsInputSchema>;
 
 const GetRecipeSuggestionsOutputSchema = z.object({
-  suggestions: z.array(z.string()).describe('An array of 2-5 healthy Indian dish names that can be made with the ingredients, considering health concerns and household composition.'),
+  suggestions: z.array(z.string()).describe('An array of up to 8 healthy Indian dish names that can be made with the ingredients, considering health concerns and household composition.'),
   initialContextualGuidance: z.string().optional().describe("A brief message to the user after suggestions are shown, e.g., 'Here are some ideas. Click one for a detailed recipe.'")
 });
 export type GetRecipeSuggestionsOutput = z.infer<typeof GetRecipeSuggestionsOutputSchema>;
@@ -57,7 +57,7 @@ User's Special Request: {{userSuggestions}}
 Please try to accommodate this request in your suggestions. For example, if they ask for a "quick meal", suggest dishes that are fast to cook.
 {{/if}}
 
-Based on all the available information, suggest 2-5 healthy Indian dish NAMES.
+Based on all the available information, suggest up to 8 healthy Indian dish NAMES, if possible.
 These should be just the names of the dishes, not full recipes.
 The dishes should be practical to make with the listed ingredients. Prioritize using the provided ingredients.
 Suggest diverse options if possible (e.g., a dal, a sabzi, a rice dish).
