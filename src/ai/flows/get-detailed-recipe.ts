@@ -47,7 +47,7 @@ const prompt = ai.definePrompt({
   name: 'getDetailedRecipePrompt',
   input: {schema: GetDetailedRecipeInputSchema},
   output: {schema: GetDetailedRecipeOutputSchema},
-  prompt: `You are an expert Indian chef and nutritionist. Generate a detailed, delicious, and healthy recipe for the dish: "{{dishName}}".
+  prompt: `You are an expert Indian chef and nutritionist. Generate a detailed, delicious, and healthy Indian recipe for the dish: "{{dishName}}". Use common Indian names for ingredients where appropriate (e.g., 'Palak' for Spinach, 'Dhaniya' for Coriander).
 
 User's Available Ingredients: {{availableIngredients}}
 Household Composition:
@@ -58,27 +58,29 @@ Household Composition:
 {{#if diseaseConcerns.length}}
 Health Considerations/Dietary Restrictions: {{#each diseaseConcerns}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}.
 {{else}}
-Health Considerations/Dietary Restrictions: Focus on general healthy preparation (user may have selected 'none' or no specific concerns).
+Health Considerations/Dietary Restrictions: Focus on general healthy preparation.
 {{/if}}
 
-Your task is to provide a complete and easy-to-follow recipe. Pay close attention to the following details:
-1.  **Recipe Title**: Full title for "{{dishName}}".
+Your task is to provide a complete, easy-to-follow recipe. Pay close attention to the following details:
+
+1.  **Recipe Title**: A full, appealing title for "{{dishName}}".
 2.  **Description**: A brief 2-3 sentence description, highlighting its healthiness, taste, and key features.
 3.  **Servings, Prep & Cook Time**: Provide a practical servings description based on the household size, along with estimated prep and cook times.
 4.  **Adjusted Ingredients List**:
-    *   List all necessary ingredients with quantities *carefully and realistically adjusted* to be sufficient for the specified household.
+    *   List all necessary ingredients with quantities *carefully and realistically adjusted* to be sufficient for the specified household and any health considerations.
     *   Your primary source of ingredients MUST be the 'availableIngredients' list provided by the user.
-    *   If, and only if, *essential* common Indian pantry staples (e.g., cooking oil, salt, turmeric powder) are *missing* from the user's list BUT are *absolutely critical*, you may add a maximum of 2-3 such items.
-    *   **Crucially, use the 'notes' field to distinguish between mandatory and optional items.** For example: "Essential for this dish; add if available" for staples, or "optional, for extra flavor" for things like kasuri methi or cream.
+    *   If, and only if, *absolutely essential* common Indian pantry staples (e.g., cooking oil, salt) are missing, you may add them, marking them in the 'notes' as "Essential staple: add if available".
+    *   **Crucially, use the 'notes' field to clearly distinguish between mandatory and optional items.**
+    *   **Spices for Flavor:** Common Indian spices (like turmeric, cumin, garam masala) are for flavor enhancement. List them, but mark them as optional in the 'notes' field (e.g., "Optional, for flavor"). The core recipe should be viable even without these.
 5.  **Step-by-Step Instructions**:
-    *   Provide clear, sequential cooking instructions. Each step should be a separate string in the array.
-    *   Where applicable, indicate optional steps, for example, by starting a step with "(Optional)".
+    *   Provide clear, sequential cooking instructions. Each step must be a separate string in the array.
+    *   **Clearly indicate optional steps**, for example, by starting a step with "(Optional)" or "(For extra flavor)".
     *   Incorporate professional cooking tips to enhance flavor and texture while maintaining healthiness (e.g., "Sauté onions until translucent, not brown, for a sweeter base.").
 6.  **Health Notes**: Provide specific advice or modifications based on 'diseaseConcerns'. If no concerns, give general health benefits or tips for making it even healthier (e.g., "For a heart-healthy version, use only 1 tsp of oil and add a tablespoon of ground flaxseed.").
 7.  **Storage or Serving Tips**: (Optional) Any useful tips on how to serve or store the dish.
 
 IMPORTANT:
-*   The recipe must be healthy and suitable for an Indian palate, tailoring spice levels for the household (e.g., milder for kids/seniors).
+*   The recipe must be healthy and suitable for an Indian palate. Tailor spice levels for the household (e.g., milder for kids/seniors).
 *   If 'gluten_free' is a concern, ensure all ingredients and instructions align (e.g., specify gluten-free asafoetida if used).
 *   Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
 `,
