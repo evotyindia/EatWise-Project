@@ -52,53 +52,39 @@ const prompt = ai.definePrompt({
   name: 'getDetailedRecipePrompt',
   input: {schema: InternalGetDetailedRecipeInputSchema}, // Use internal schema
   output: {schema: GetDetailedRecipeOutputSchema},
-  prompt: `You are an expert Indian chef and nutritionist generating a recipe for "{{dishName}}".
-Your most important task is to meticulously scale the recipe for a household of **{{totalPeople}} people**.
+  prompt: `
+  SYSTEM: You are a recipe generation engine. Your ONLY purpose is to generate a JSON object matching the output schema. Adhere to all instructions precisely.
 
-**Household Details:**
-- Total People: {{totalPeople}}
-- Adults (18-60): {{householdComposition.adults}}
-- Seniors (60+): {{householdComposition.seniors}}
-- Kids (2-17): {{householdComposition.kids}}
+  TASK: Generate a detailed Indian recipe for "{{dishName}}".
 
-**User's Available Ingredients:** {{availableIngredients}}
+  **CRITICAL MANDATE: RECIPE SCALING**
+  This is your most important instruction. All ingredient quantities and times MUST be scaled for a household of **{{totalPeople}} people**.
+  - Household Composition: {{householdComposition.adults}} Adults, {{householdComposition.seniors}} Seniors, {{householdComposition.kids}} Kids.
+  - Your baseline for calculation is a standard 2-person recipe.
+  - You must calculate a scaling multiplier: **Multiplier = {{totalPeople}} / 2**.
+  - Example: If a 2-person recipe needs 1 cup of dal, a 4-person household (Multiplier=2) requires 2 cups of dal. A 1-person household (Multiplier=0.5) requires 1/2 cup of dal.
+  - This scaling is **NON-NEGOTIABLE**. Failure to scale every single ingredient quantity and the cooking times correctly means you have failed the entire task.
 
-{{#if diseaseConcerns.length}}
-**Health Considerations:** {{#each diseaseConcerns}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}.
-{{else}}
-**Health Considerations:** General healthy preparation.
-{{/if}}
+  **USER-PROVIDED CONTEXT:**
+  - Available Ingredients: {{availableIngredients}}
+  {{#if diseaseConcerns.length}}
+  - Health Concerns: {{#each diseaseConcerns}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}.
+  {{else}}
+  - Health Concerns: General healthy preparation.
+  {{/if}}
 
-**STRICT RECIPE GENERATION RULES:**
+  **ADDITIONAL RULES:**
+  1.  **Servings Description:** The 'servingsDescription' field MUST *exactly* match the household composition (e.g., "Serves 2 adults, 1 senior, and 1 child").
+  2.  **Ingredient Sourcing & Notes:**
+      *   Prioritize using the 'availableIngredients'.
+      *   Only add *absolutely essential* Indian pantry staples (e.g., cooking oil, salt, turmeric) if they are missing. In the 'notes' for these, you MUST write: "Essential staple: add if available".
+      *   Common Indian spices for flavor (e.g., garam masala, cumin powder) are NOT essential. If you suggest them, the 'notes' field MUST say: "Optional, for flavor".
+  3.  **Instructions:** Provide clear, step-by-step instructions with professional cooking tips. Label optional steps clearly (e.g., start with "(Optional)").
+  4.  **Health Notes:** Provide specific advice tailored to the 'diseaseConcerns'. If none, give general health benefits.
+  5.  **Language:** Use common Indian names for ingredients (e.g., 'Palak' for Spinach).
+  6.  **JSON Format:** Your entire response MUST be a single, valid JSON object that conforms to the output schema. No extra text or explanations.
 
-1.  **QUANTITY SCALING (MANDATORY):**
-    *   You MUST accurately scale all ingredient quantities for the **{{totalPeople}}-person** household.
-    *   Assume a standard recipe serves 2 people. Your baseline for calculation must be a 2-person recipe.
-    *   **Example:** If the household has 4 people, ingredients must be doubled. If it has 1 person, ingredients must be halved. This is a critical, non-negotiable instruction. Failure to scale correctly will result in an incorrect recipe.
-
-2.  **TIME SCALING (MANDATORY):**
-    *   Prep and cook times MUST be realistically adjusted for the calculated ingredient quantities. Cooking for more people takes longer. Provide practical estimates.
-
-3.  **SERVINGS DESCRIPTION (MANDATORY):**
-    *   The 'servingsDescription' field MUST *exactly* reflect the household composition (e.g., "Serves 2 adults, 1 senior, and 1 child").
-
-4.  **INGREDIENTS LIST:**
-    *   Prioritize using the 'availableIngredients' from the user.
-    *   Only add *absolutely essential* Indian pantry staples (e.g., cooking oil, salt, turmeric) if they are missing. In the 'notes' field for these items, you must write: "Essential staple: add if available".
-    *   Common Indian spices for flavor (e.g., garam masala, cumin powder) MUST be listed with the note "Optional, for flavor".
-
-5.  **INSTRUCTIONS:**
-    *   Provide clear, step-by-step instructions.
-    *   Clearly label optional steps, for instance, by starting a step with "(Optional)".
-    *   Include professional cooking tips (e.g., "Sauté onions until translucent, not brown, for a sweeter base.").
-
-6.  **HEALTH NOTES:**
-    *   Provide specific advice tailored to the 'diseaseConcerns'. If none, give general health benefits.
-
-7.  **OUTPUT FORMAT:**
-    *   Use common Indian names for ingredients (e.g., 'Palak' for Spinach).
-    *   Tailor spice levels for the household (milder for kids/seniors).
-    *   Your entire response MUST be a single, valid JSON object conforming to the output schema. No extra text.
+  Now, generate the JSON output based on these strict instructions.
 `,
 });
 
