@@ -47,7 +47,7 @@ const prompt = ai.definePrompt({
   name: 'getDetailedRecipePrompt',
   input: {schema: GetDetailedRecipeInputSchema},
   output: {schema: GetDetailedRecipeOutputSchema},
-  prompt: `You are an expert Indian chef and nutritionist. Generate a detailed, healthy recipe for the dish: "{{dishName}}".
+  prompt: `You are an expert Indian chef and nutritionist. Generate a detailed, delicious, and healthy recipe for the dish: "{{dishName}}".
 
 User's Available Ingredients: {{availableIngredients}}
 Household Composition:
@@ -61,27 +61,25 @@ Health Considerations/Dietary Restrictions: {{#each diseaseConcerns}}{{{this}}}{
 Health Considerations/Dietary Restrictions: Focus on general healthy preparation (user may have selected 'none' or no specific concerns).
 {{/if}}
 
-Your task is to provide a complete recipe with the following details:
+Your task is to provide a complete and easy-to-follow recipe. Pay close attention to the following details:
 1.  **Recipe Title**: Full title for "{{dishName}}".
-2.  **Description**: A brief 2-3 sentence description.
-3.  **Servings Description**: Clearly state who it serves based on 'householdComposition'. Crucially, ensure the quantities are genuinely sufficient and practical for this number of people. Indicate if portions are generous or average. (e.g., "Serves 2 adults, 1 senior, and 1 child. Portions are average.").
-4.  **Prep Time**: Estimated preparation time.
-5.  **Cook Time**: Estimated cooking time.
-6.  **Adjusted Ingredients**:
-    *   List all necessary ingredients with quantities *carefully and realistically adjusted* to be sufficient for the specified 'householdComposition'. Quantities must be practical and sufficient for the number of people indicated.
+2.  **Description**: A brief 2-3 sentence description, highlighting its healthiness, taste, and key features.
+3.  **Servings, Prep & Cook Time**: Provide a practical servings description based on the household size, along with estimated prep and cook times.
+4.  **Adjusted Ingredients List**:
+    *   List all necessary ingredients with quantities *carefully and realistically adjusted* to be sufficient for the specified household.
     *   Your primary source of ingredients MUST be the 'availableIngredients' list provided by the user.
-    *   If, and only if, *essential* common Indian pantry staples (e.g., cooking oil, salt, turmeric powder, cumin seeds, mustard seeds, asafoetida) are *missing* from 'availableIngredients' BUT are *absolutely critical* for preparing "{{dishName}}", you may include a maximum of 2-3 such staples.
-    *   For these *added essential staples*, the 'notes' field for the ingredient MUST clearly state something like "Essential for this dish; add if available" or "Commonly used staple, recommended for authenticity". Do NOT add optional flavor enhancers unless they are in the user's list.
-    *   For each ingredient, provide its name, quantity (e.g., "1 cup", "200g", "1 medium onion"), and any prep notes (e.g., "finely chopped", "soaked").
-7.  **Instructions**: Clear, step-by-step cooking instructions.
-8.  **Health Notes**: Provide specific advice or modifications based on 'diseaseConcerns'. If no concerns, give general health benefits or tips for making it even healthier. For example, suggest alternative grains, low-sodium options, or cooking methods.
-9.  **Storage or Serving Tips**: (Optional) Any useful tips.
+    *   If, and only if, *essential* common Indian pantry staples (e.g., cooking oil, salt, turmeric powder) are *missing* from the user's list BUT are *absolutely critical*, you may add a maximum of 2-3 such items.
+    *   **Crucially, use the 'notes' field to distinguish between mandatory and optional items.** For example: "Essential for this dish; add if available" for staples, or "optional, for extra flavor" for things like kasuri methi or cream.
+5.  **Step-by-Step Instructions**:
+    *   Provide clear, sequential cooking instructions. Each step should be a separate string in the array.
+    *   Where applicable, indicate optional steps, for example, by starting a step with "(Optional)".
+    *   Incorporate professional cooking tips to enhance flavor and texture while maintaining healthiness (e.g., "Sauté onions until translucent, not brown, for a sweeter base.").
+6.  **Health Notes**: Provide specific advice or modifications based on 'diseaseConcerns'. If no concerns, give general health benefits or tips for making it even healthier (e.g., "For a heart-healthy version, use only 1 tsp of oil and add a tablespoon of ground flaxseed.").
+7.  **Storage or Serving Tips**: (Optional) Any useful tips on how to serve or store the dish.
 
 IMPORTANT:
-*   The recipe must be healthy and suitable for an Indian palate.
-*   Pay close attention to the 'diseaseConcerns' and 'householdComposition' to tailor the recipe (e.g. spiciness for kids/seniors, ingredient choices for diabetics like using less sugar/specific carbs). Quantities must be appropriate and sufficient.
-*   If 'gluten_free' is a concern, ensure all ingredients and instructions align (e.g., specify gluten-free asafoetida if used, suggest gluten-free flour alternatives).
-*   If 'dairy_free' is a concern, suggest dairy-free alternatives (e.g., plant-based milk/yogurt, oil instead of ghee).
+*   The recipe must be healthy and suitable for an Indian palate, tailoring spice levels for the household (e.g., milder for kids/seniors).
+*   If 'gluten_free' is a concern, ensure all ingredients and instructions align (e.g., specify gluten-free asafoetida if used).
 *   Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
 `,
 });
@@ -118,4 +116,3 @@ const getDetailedRecipeFlow = ai.defineFlow(
     return output;
   }
 );
-
