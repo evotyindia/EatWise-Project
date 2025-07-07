@@ -4,7 +4,7 @@
 import { Leaf, Menu } from "lucide-react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { ThemeToggleButton } from "@/components/common/theme-toggle-button"
 import { Button } from "@/components/ui/button"
@@ -22,10 +22,24 @@ const navItems = [
 
 export function Header() {
   const pathname = usePathname();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   return (
     <header className={cn(
-      "sticky top-0 z-50 w-full border-b border-border bg-[#f1f1ff] dark:bg-background shadow-sm"
+      "sticky top-0 z-50 w-full border-b transition-all duration-300",
+      isScrolled 
+        ? "border-border bg-[#f1f1ff]/90 dark:bg-background/80 shadow-md backdrop-blur-lg"
+        : "border-transparent bg-transparent"
     )}>
       <div className="container flex h-16 max-w-screen-xl items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
@@ -65,7 +79,7 @@ export function Header() {
                   <span className="sr-only">Toggle Menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[280px] bg-[#f1f1ff] dark:bg-background">
+              <SheetContent side="right" className="w-[280px] bg-[#f1f1ff]/90 dark:bg-background/80 backdrop-blur-lg">
                 <nav className="flex flex-col space-y-4 pt-8">
                   {navItems.map((item) => (
                     <SheetClose asChild key={item.href}>
