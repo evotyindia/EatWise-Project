@@ -10,7 +10,7 @@ import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aw
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles, ChefHat, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, MinusCircle, Check, Clock, Soup, Users } from "lucide-react";
+import { Lightbulb, Sparkles, ChefHat, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Check, Clock, Soup, Users, PlusCircle } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
@@ -28,6 +28,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 
 
 const diseaseOptions: { id: Disease; label: string; icon: React.ElementType }[] = [
@@ -35,7 +36,7 @@ const diseaseOptions: { id: Disease; label: string; icon: React.ElementType }[] 
   { id: "high_blood_pressure", label: "High BP", icon: HeartCrack },
   { id: "heart_condition", label: "Heart Condition", icon: HeartCrack },
   { id: "gluten_free", label: "Gluten-Free", icon: WheatIcon },
-  { id: "dairy_free", label: "Dairy-Free", icon: MinusCircle },
+  { id: "dairy_free", label: "Dairy-Free", icon: WheatIcon },
 ];
 
 const recipePageInputSchema = z.object({
@@ -53,12 +54,13 @@ const recipePageInputSchema = z.object({
 
 type RecipePageFormValues = z.infer<typeof recipePageInputSchema>;
 
-const quickAddIngredients = [
-    "Onion", "Tomato", "Potato", "Spinach", "Carrot", "Capsicum", "Ginger", "Garlic", "Cauliflower", "Peas", "Coriander Leaves", "Green Chili", "Lemon",
-    "Turmeric Powder", "Cumin Powder", "Coriander Powder", "Garam Masala", "Red Chili Powder", "Mustard Seeds", "Salt",
-    "Moong Dal", "Toor Dal", "Chana Dal", "Masoor Dal", "Rajma", "Chickpeas (Chole)",
-    "Rice", "Wheat Flour (Atta)", "Besan (Gram Flour)", "Suji (Semolina)",
-    "Paneer", "Curd (Yogurt)", "Milk", "Ghee", "Cooking Oil"
+const categorizedIngredients = [
+    { category: "Vegetables", items: ["Onion", "Tomato", "Potato", "Spinach", "Carrot", "Capsicum", "Ginger", "Garlic", "Cauliflower", "Peas", "Coriander Leaves", "Green Chili", "Lemon"] },
+    { category: "Spices", items: ["Turmeric Powder", "Cumin Powder", "Coriander Powder", "Garam Masala", "Red Chili Powder", "Mustard Seeds", "Salt"] },
+    { category: "Dals & Legumes", items: ["Moong Dal", "Toor Dal", "Chana Dal", "Masoor Dal", "Rajma", "Chickpeas (Chole)"] },
+    { category: "Grains & Flours", items: ["Rice", "Wheat Flour (Atta)", "Besan (Gram Flour)", "Suji (Semolina)"] },
+    { category: "Dairy & Proteins", items: ["Paneer", "Curd (Yogurt)", "Milk", "Ghee"] },
+    { category: "Pantry Staples", items: ["Cooking Oil"] }
 ];
 
 export function RecipeForm() {
@@ -226,34 +228,63 @@ export function RecipeForm() {
                 <FormItem>
                   <FormLabel className="font-semibold">Available Ingredients</FormLabel>
                   <FormControl><Textarea placeholder="e.g., Onions, Tomatoes, Paneer, Rice..." {...field} rows={4} className="bg-background/50" /></FormControl>
-                  <FormDescription>Separate ingredients with commas.</FormDescription>
+                  <FormDescription>Type your ingredients separated by commas, or use the helper below.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )} />
               
-              <div className="space-y-2">
-                  <FormLabel>Or tap to add common ingredients:</FormLabel>
-                  <div className="flex flex-wrap gap-2">
-                      {quickAddIngredients.map(ingredient => {
-                          const isSelected = (watchedIngredients || "").split(/, ?/).includes(ingredient);
-                          return (
-                              <Button
-                                  key={ingredient}
-                                  type="button"
-                                  variant={isSelected ? 'default' : 'outline'}
-                                  size="sm"
-                                  className={cn(
-                                      "rounded-full h-auto px-3 py-1 text-xs font-medium transition-all duration-200 ease-in-out hover:scale-105 active:scale-100",
-                                      isSelected && "bg-accent text-accent-foreground shadow"
-                                  )}
-                                  onClick={() => toggleIngredient(ingredient)}
-                              >
-                                  {isSelected && <Check className="mr-1.5 h-3 w-3" />}
-                                  {ingredient}
-                              </Button>
-                          );
-                      })}
-                  </div>
+               <div className="space-y-2">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                        <Button variant="outline" className="w-full justify-start text-muted-foreground font-normal">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Browse & Add Common Ingredients...
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[625px]">
+                        <DialogHeader>
+                          <DialogTitle>Add Common Ingredients</DialogTitle>
+                          <DialogDescription>
+                            Click to add or remove ingredients from your list.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <ScrollArea className="h-[400px] -mx-6 px-6">
+                            <div className="space-y-4">
+                                {categorizedIngredients.map(category => (
+                                    <div key={category.category}>
+                                        <h4 className="font-semibold mb-2 text-primary">{category.category}</h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {category.items.map(ingredient => {
+                                                const isSelected = (watchedIngredients || "").split(/, ?/).map(i => i.trim()).includes(ingredient);
+                                                return (
+                                                    <Button
+                                                        key={ingredient}
+                                                        type="button"
+                                                        variant={isSelected ? 'default' : 'outline'}
+                                                        size="sm"
+                                                        className={cn(
+                                                            "rounded-full h-auto px-3 py-1 text-xs font-medium transition-all duration-200 ease-in-out hover:scale-105 active:scale-100",
+                                                            isSelected && "bg-accent text-accent-foreground shadow-md"
+                                                        )}
+                                                        onClick={() => toggleIngredient(ingredient)}
+                                                    >
+                                                        {isSelected && <Check className="mr-1.5 h-3 w-3" />}
+                                                        {ingredient}
+                                                    </Button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </ScrollArea>
+                        <DialogFooter>
+                            <DialogClose asChild>
+                                <Button type="button">Done</Button>
+                            </DialogClose>
+                        </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
               </div>
 
               <Accordion type="single" collapsible className="w-full">
@@ -423,6 +454,7 @@ export function RecipeForm() {
                 <h3 className="font-semibold text-xl mb-2 flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Recipe</h3>
                 <p className="text-sm text-muted-foreground mb-4">Ask about substitutions, techniques, or nutrition.</p>
                 <ScrollArea className="h-[200px] w-full rounded-md border p-4 mb-4 bg-muted/50">
+                  <div ref={messagesEndRef} />
                   {chatHistory.map((msg, index) => (
                     <div key={index} className={`mb-3 p-3 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
                       <span className="font-semibold capitalize block mb-1">{msg.role === 'user' ? 'You' : 'AI Chef'}:</span>
@@ -430,7 +462,6 @@ export function RecipeForm() {
                     </div>
                   ))}
                   {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Chef is typing...</div>}
-                  <div ref={messagesEndRef} />
                 </ScrollArea>
                 <form onSubmit={handleChatSubmit} className="w-full flex gap-2">
                   <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background/50"/>
@@ -453,5 +484,3 @@ export function RecipeForm() {
     </div>
   );
 }
-
-    
