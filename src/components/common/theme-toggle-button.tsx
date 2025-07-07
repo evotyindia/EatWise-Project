@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from "react";
@@ -19,15 +18,22 @@ export function ThemeToggleButton() {
   }, [])
 
   if (!mounted) {
-    return <div className="h-9 w-9" />; 
+    // A placeholder to prevent layout shift.
+    return <div className="h-9 w-20 rounded-md" />;
   }
 
   return (
-    <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9">
+    <Button variant="outline" size="sm" onClick={toggleTheme}>
       {theme === "light" ? (
-        <Sun className="h-[1.2rem] w-[1.2rem]" />
+        <>
+          <Moon />
+          <span>Dark</span>
+        </>
       ) : (
-        <Moon className="h-[1.2rem] w-[1.2rem]" />
+        <>
+          <Sun />
+          <span>Light</span>
+        </>
       )}
       <span className="sr-only">Toggle theme</span>
     </Button>
