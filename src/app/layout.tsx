@@ -38,6 +38,24 @@ export default function RootLayout({
           fontPoppins.variable,
           fontInter.variable
       )}>
+        {/* This script runs before React hydrates to prevent the flash of light theme */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+(function() {
+  try {
+    var theme = localStorage.getItem('theme') || 'dark';
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  } catch (e) {
+    // Fallback to dark if localStorage is disabled
+    document.documentElement.classList.add('dark');
+  }
+})();
+            `,
+          }}
+        />
         <CustomThemeProvider>
           <Header />
           <main className="flex-grow">
