@@ -18,12 +18,14 @@ export function ThemeToggleButton() {
   }, [])
 
   if (!mounted) {
-    // A placeholder to prevent layout shift.
-    return <div className="h-9 w-20 rounded-md" />;
+    // A placeholder to prevent layout shift and hydration errors.
+    // It's a disabled button that is structurally similar to the final one.
+    // A fixed width prevents content shift between "Light" and "Dark".
+    return <Button variant="outline" size="sm" disabled className="w-[88px]" />;
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={toggleTheme}>
+    <Button variant="outline" size="sm" onClick={toggleTheme} className="w-[88px]">
       {theme === "light" ? (
         <>
           <Moon />
