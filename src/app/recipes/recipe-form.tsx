@@ -10,7 +10,7 @@ import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aw
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles, ChefHat, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Check, Clock, Soup, Users, PlusCircle } from "lucide-react";
+import { Lightbulb, Sparkles, ChefHat, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Check, Clock, Soup, Users, PlusCircle, BookOpen, ListChecks, ArrowRight } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
@@ -214,135 +214,141 @@ export function RecipeForm() {
 
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-      <Card className="lg:col-span-1 lg:sticky top-20">
-        <CardHeader>
-          <CardTitle className="flex items-center text-2xl"><ChefHat className="mr-2 h-6 w-6 text-primary" /> Recipe Finder</CardTitle>
-          <CardDescription>Tell us what you have and any health needs.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onGetSuggestionsSubmit)} className="space-y-6">
-              <FormField control={form.control} name="ingredients" render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-semibold">Available Ingredients</FormLabel>
-                  <FormControl><Textarea placeholder="e.g., Onions, Tomatoes, Paneer, Rice..." {...field} rows={4} className="bg-background/50" /></FormControl>
-                  <FormDescription>Type your ingredients separated by commas.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              
-               <div className="space-y-2">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                        <Button variant="outline" className="w-full justify-center text-muted-foreground font-medium border-2 border-dashed hover:border-solid hover:bg-accent/10 hover:text-accent transition-all duration-300 ease-in-out group">
-                            <PlusCircle className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
-                            Browse & Add Ingredients
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[625px]">
-                        <DialogHeader>
-                          <DialogTitle>Add Common Ingredients</DialogTitle>
-                          <DialogDescription>
-                            Click to add or remove ingredients from your list.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <ScrollArea className="h-[400px] -mx-6 px-6">
-                            <div className="space-y-4">
-                                {categorizedIngredients.map(category => (
-                                    <div key={category.category}>
-                                        <h4 className="font-semibold mb-2 text-primary">{category.category}</h4>
-                                        <div className="flex flex-wrap gap-2">
-                                            {category.items.map(ingredient => {
-                                                const isSelected = (watchedIngredients || "").split(/, ?/).map(i => i.trim()).includes(ingredient);
-                                                return (
-                                                    <Button
-                                                        key={ingredient}
-                                                        type="button"
-                                                        variant={isSelected ? 'default' : 'outline'}
-                                                        size="sm"
-                                                        className={cn(
-                                                            "rounded-full h-auto px-3 py-1 text-xs font-medium transition-all duration-200 ease-in-out hover:scale-105 active:scale-100",
-                                                            isSelected && "bg-accent text-accent-foreground shadow-md"
-                                                        )}
-                                                        onClick={() => toggleIngredient(ingredient)}
-                                                    >
-                                                        {isSelected && <Check className="mr-1.5 h-3 w-3" />}
-                                                        {ingredient}
-                                                    </Button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </ScrollArea>
-                        <DialogFooter>
-                            <DialogClose asChild>
-                                <Button type="button">Done</Button>
-                            </DialogClose>
-                        </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-              </div>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="lg:col-span-4 lg:sticky top-24">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center text-2xl"><ChefHat className="mr-2 h-6 w-6 text-primary" /> Find a Recipe</CardTitle>
+            <CardDescription>Tell us what you have and any health needs.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onGetSuggestionsSubmit)} className="space-y-6">
+                <FormField control={form.control} name="ingredients" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-semibold">Available Ingredients</FormLabel>
+                    <FormControl><Textarea placeholder="e.g., Onions, Tomatoes, Paneer, Rice..." {...field} rows={4} className="bg-background/50" /></FormControl>
+                    <FormDescription>Type your ingredients separated by commas.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                
+                 <div className="space-y-2">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                          <Button variant="outline" className="w-full justify-center text-muted-foreground font-medium border-2 border-dashed hover:border-solid hover:bg-accent/10 hover:text-accent transition-all duration-300 ease-in-out group">
+                              <PlusCircle className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+                              Browse & Add Common Ingredients
+                          </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle>Add Common Ingredients</DialogTitle>
+                            <DialogDescription>
+                              Click to add or remove ingredients from your list.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <ScrollArea className="h-[400px] -mx-6 px-6">
+                              <div className="space-y-4">
+                                  {categorizedIngredients.map(category => (
+                                      <div key={category.category}>
+                                          <h4 className="font-semibold mb-2 text-primary">{category.category}</h4>
+                                          <div className="flex flex-wrap gap-2">
+                                              {category.items.map(ingredient => {
+                                                  const isSelected = (watchedIngredients || "").split(/, ?/).map(i => i.trim()).includes(ingredient);
+                                                  return (
+                                                      <Button
+                                                          key={ingredient}
+                                                          type="button"
+                                                          variant={isSelected ? 'default' : 'outline'}
+                                                          size="sm"
+                                                          className={cn(
+                                                              "rounded-full h-auto px-3 py-1.5 text-xs font-medium transition-colors duration-200 ease-in-out",
+                                                              isSelected 
+                                                                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                                                                  : "hover:bg-muted/70"
+                                                          )}
+                                                          onClick={() => toggleIngredient(ingredient)}
+                                                      >
+                                                          {isSelected && <Check className="mr-1.5 h-3 w-3" />}
+                                                          {ingredient}
+                                                      </Button>
+                                                  );
+                                              })}
+                                          </div>
+                                      </div>
+                                  ))}
+                              </div>
+                          </ScrollArea>
+                          <DialogFooter>
+                              <DialogClose asChild>
+                                  <Button type="button">Done</Button>
+                              </DialogClose>
+                          </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                </div>
 
-              <Separator className="my-6" />
+                <div className="space-y-4 rounded-lg border p-4">
+                  <div>
+                    <FormLabel className="font-semibold text-base">Health & Household</FormLabel>
+                    <FormDescription className="text-xs">Select dietary needs and household size for tailored recipes.</FormDescription>
+                  </div>
 
-              <div className="space-y-6">
-                <div>
-                  <FormLabel className="font-semibold">Health Considerations (Optional)</FormLabel>
-                  <FormDescription className="text-xs">Select any dietary needs for the recipe.</FormDescription>
-                  <div className="grid grid-cols-2 gap-2 mt-2">
-                    {diseaseOptions.map((item) => (
-                      <FormField key={item.id} control={form.control} name="diseaseConcerns" render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0 p-2 border rounded-md hover:bg-muted/50 transition-colors">
-                          <FormControl><Checkbox checked={field.value?.includes(item.id)}
-                            onCheckedChange={(checked) => {
-                              return checked ? field.onChange([...(field.value || []), item.id]) : field.onChange(field.value?.filter((value) => value !== item.id));
-                            }} /></FormControl>
-                          <FormLabel className="text-sm font-normal cursor-pointer flex items-center gap-1.5"><item.icon className="h-4 w-4 text-muted-foreground" />{item.label}</FormLabel>
-                        </FormItem>
+                  <div className="space-y-3">
+                    <FormLabel className="font-medium text-sm">Health Considerations</FormLabel>
+                    <div className="grid grid-cols-2 gap-2">
+                      {diseaseOptions.map((item) => (
+                        <FormField key={item.id} control={form.control} name="diseaseConcerns" render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2 space-y-0 p-2 border rounded-md hover:bg-muted/50 transition-colors has-[:checked]:bg-muted/80">
+                            <FormControl><Checkbox checked={field.value?.includes(item.id)}
+                              onCheckedChange={(checked) => {
+                                return checked ? field.onChange([...(field.value || []), item.id]) : field.onChange(field.value?.filter((value) => value !== item.id));
+                              }} /></FormControl>
+                            <FormLabel className="text-sm font-normal cursor-pointer flex items-center gap-1.5 w-full"><item.icon className="h-4 w-4 text-muted-foreground" />{item.label}</FormLabel>
+                          </FormItem>
+                        )} />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                     <FormLabel className="font-medium text-sm">Household Size</FormLabel>
+                    <div className="grid grid-cols-3 gap-3">
+                      <FormField control={form.control} name="householdComposition.adults" render={({ field }) => (
+                        <FormItem><FormLabel className="text-xs flex items-center gap-1"><User className="h-3 w-3" />Adults</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
                       )} />
-                    ))}
+                      <FormField control={form.control} name="householdComposition.seniors" render={({ field }) => (
+                        <FormItem><FormLabel className="text-xs flex items-center gap-1"><UserCog className="h-3 w-3" />Seniors</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
+                      )} />
+                      <FormField control={form.control} name="householdComposition.kids" render={({ field }) => (
+                        <FormItem><FormLabel className="text-xs flex items-center gap-1"><Baby className="h-3 w-3" />Kids</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
+                      )} />
+                    </div>
+                    {form.formState.errors.householdComposition && <FormMessage className="col-span-3">{form.formState.errors.householdComposition.message}</FormMessage>}
                   </div>
                 </div>
+                
+                <Button type="submit" disabled={isLoadingSuggestions} className="w-full bg-accent text-accent-foreground hover:bg-accent/90 mt-6 !">
+                  {isLoadingSuggestions ? "Finding Ideas..." : "Get Dish Ideas"}
+                  <Sparkles className="ml-2 h-4 w-4" />
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
 
-                <div>
-                  <FormLabel className="font-semibold">Household Size (for portioning)</FormLabel>
-                  <FormDescription className="text-xs">Adjusts ingredient quantities.</FormDescription>
-                  <div className="grid grid-cols-3 gap-3 mt-2">
-                    <FormField control={form.control} name="householdComposition.adults" render={({ field }) => (
-                      <FormItem><FormLabel className="text-xs flex items-center gap-1"><User className="h-3 w-3" />Adults</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField control={form.control} name="householdComposition.seniors" render={({ field }) => (
-                      <FormItem><FormLabel className="text-xs flex items-center gap-1"><UserCog className="h-3 w-3" />Seniors</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField control={form.control} name="householdComposition.kids" render={({ field }) => (
-                      <FormItem><FormLabel className="text-xs flex items-center gap-1"><Baby className="h-3 w-3" />Kids</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                  </div>
-                  {form.formState.errors.householdComposition && <FormMessage className="col-span-3">{form.formState.errors.householdComposition.message}</FormMessage>}
-                </div>
-              </div>
-              
-              <Button type="submit" disabled={isLoadingSuggestions} className="w-full bg-accent text-accent-foreground hover:bg-accent/90 mt-6 !">
-                {isLoadingSuggestions ? "Finding Ideas..." : "Get Dish Ideas"}
-                <Sparkles className="ml-2 h-4 w-4" />
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
 
-      <div className="lg:col-span-2 space-y-8">
+      <div className="lg:col-span-8 space-y-8">
         {isLoadingSuggestions && (
           <Card>
             <CardHeader><CardTitle>Finding recipe ideas...</CardTitle><CardDescription>Our AI chef is checking the pantry.</CardDescription></CardHeader>
             <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Skeleton className="h-32 rounded-lg" />
-              <Skeleton className="h-32 rounded-lg" />
-              <Skeleton className="h-32 rounded-lg" />
-              <Skeleton className="h-32 rounded-lg" />
+              <Skeleton className="h-28 rounded-lg" />
+              <Skeleton className="h-28 rounded-lg" />
+              <Skeleton className="h-28 rounded-lg" />
+              <Skeleton className="h-28 rounded-lg" />
             </CardContent>
           </Card>
         )}
@@ -357,20 +363,21 @@ export function RecipeForm() {
               {dishSuggestions.suggestions.length > 0 && !dishSuggestions.suggestions[0].toLowerCase().includes("sorry") ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {dishSuggestions.suggestions.map((dish, index) => (
-                    <button
-                      key={index}
-                      disabled={isLoadingRecipe}
-                      onClick={() => handleSelectDish(dish)}
-                      className="text-left p-4 border rounded-lg hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                     <Card 
+                        key={index}
+                        as="button"
+                        disabled={isLoadingRecipe}
+                        onClick={() => handleSelectDish(dish)}
+                        className="text-left p-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     >
                         <h3 className="font-semibold text-lg flex items-center">
                           <ChefHat className="mr-2 h-5 w-5 text-primary group-hover:text-accent transition-colors"/>
                           {dish}
                         </h3>
-                        <p className="text-sm font-semibold text-accent mt-4 group-hover:underline">
-                          View Full Recipe &rarr;
+                        <p className="text-sm font-semibold text-accent mt-4 flex items-center gap-1 group-hover:underline">
+                          View Full Recipe <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                         </p>
-                    </button>
+                    </Card>
                   ))}
                 </div>
               ) : <p className="text-muted-foreground">No specific dish suggestions found. Try adjusting your ingredients or health concerns.</p>}
@@ -390,14 +397,14 @@ export function RecipeForm() {
                 <Skeleton className="h-12 rounded-md" />
                 <Skeleton className="h-12 rounded-md" />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <Skeleton className="h-6 w-1/3 mb-4 rounded-md" />
-                  <Skeleton className="h-28 w-full rounded-md" />
-                </div>
-                <div>
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                <div className="lg:col-span-2">
                   <Skeleton className="h-6 w-1/3 mb-4 rounded-md" />
                   <Skeleton className="h-40 w-full rounded-md" />
+                </div>
+                <div className="lg:col-span-3">
+                  <Skeleton className="h-6 w-1/3 mb-4 rounded-md" />
+                  <Skeleton className="h-56 w-full rounded-md" />
                 </div>
               </div>
             </CardContent>
@@ -416,13 +423,13 @@ export function RecipeForm() {
                 <div className="flex items-center gap-2"><Soup className="h-5 w-5 text-accent"/><div><div className="font-semibold">Cook Time</div><div>{detailedRecipe.cookTime || 'N/A'}</div></div></div>
                 <div className="flex items-center gap-2"><Users className="h-5 w-5 text-accent"/><div><div className="font-semibold">Servings</div><div>{detailedRecipe.servingsDescription}</div></div></div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-x-8 gap-y-6 pt-4">
-                  <div className="md:col-span-2">
-                    <h3 className="font-semibold text-xl mb-3 border-b pb-2">Ingredients</h3>
-                    <ul className="space-y-2 text-sm">
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-x-8 gap-y-6 pt-4">
+                  <div className="lg:col-span-2">
+                    <h3 className="font-semibold text-xl mb-3 border-b pb-2 flex items-center gap-2"><ListChecks /> Ingredients</h3>
+                    <ul className="space-y-2.5 text-sm">
                       {detailedRecipe.adjustedIngredients.map((ing, i) => (
                         <li key={i} className="flex items-start">
-                          <Check className="h-4 w-4 text-green-500 mr-2 mt-1 shrink-0" />
+                          <Check className="h-4 w-4 text-green-500 mr-2.5 mt-1 shrink-0" />
                           <div>
                             <span className="font-medium">{ing.name}</span>: <span>{ing.quantity}</span>
                             {ing.notes && <div className="text-xs text-muted-foreground">({ing.notes})</div>}
@@ -431,10 +438,10 @@ export function RecipeForm() {
                       ))}
                     </ul>
                   </div>
-                  <div className="md:col-span-3">
-                    <h3 className="font-semibold text-xl mb-3 border-b pb-2">Instructions</h3>
-                    <ol className="list-decimal list-outside space-y-3 text-sm pl-5">
-                      {detailedRecipe.instructions.map((step, i) => <li key={i} className="pl-1 leading-relaxed">{step}</li>)}
+                  <div className="lg:col-span-3">
+                    <h3 className="font-semibold text-xl mb-3 border-b pb-2 flex items-center gap-2"><BookOpen /> Instructions</h3>
+                    <ol className="list-decimal list-outside space-y-3.5 text-sm pl-5 marker:text-primary marker:font-semibold">
+                      {detailedRecipe.instructions.map((step, i) => <li key={i} className="pl-2 leading-relaxed">{step}</li>)}
                     </ol>
                   </div>
               </div>

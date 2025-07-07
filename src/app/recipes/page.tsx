@@ -7,9 +7,9 @@ export default function RecipesPage() {
     <div className="container mx-auto py-8 animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
       <div className="flex flex-col items-center mb-8 text-center">
         <CookingPot className="w-16 h-16 text-accent mb-4" />
-        <h1 className="text-4xl font-bold tracking-tight">Recipe Suggestions</h1>
+        <h1 className="text-4xl font-bold tracking-tight">AI Recipe Finder</h1>
         <p className="mt-2 text-lg text-muted-foreground max-w-2xl">
-          Enter the ingredients you have at home, select any health concerns, and our AI chef will suggest healthy Indian meal ideas.
+         Unlock delicious and healthy Indian meals with the ingredients you already have. Our AI chef is ready to inspire you.
         </p>
       </div>
       <RecipeForm />
