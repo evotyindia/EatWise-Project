@@ -10,7 +10,7 @@ import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aw
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles, ChefHat, Utensils, Leaf, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Milk, MinusCircle } from "lucide-react";
+import { Lightbulb, Sparkles, ChefHat, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, MinusCircle, Check } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
@@ -52,12 +52,12 @@ const recipePageInputSchema = z.object({
 
 type RecipePageFormValues = z.infer<typeof recipePageInputSchema>;
 
-const ingredientCategories = [
-    { name: "Vegetables", icon: <Leaf className="text-green-500" />, items: ["Onion", "Tomato", "Potato", "Spinach", "Carrot", "Capsicum", "Ginger", "Garlic", "Cauliflower", "Peas", "Coriander Leaves", "Green Chili", "Lemon"] },
-    { name: "Spices & Herbs", icon: <Sparkles className="text-yellow-500" />, items: ["Turmeric Powder", "Cumin Powder", "Coriander Powder", "Garam Masala", "Red Chili Powder", "Mustard Seeds", "Salt"] },
-    { name: "Dals & Legumes", icon: <Utensils className="text-orange-500" />, items: ["Moong Dal", "Toor Dal", "Chana Dal", "Masoor Dal", "Rajma", "Chickpeas (Chole)"] },
-    { name: "Grains & Flours", icon: <WheatIcon className="text-amber-700" />, items: ["Rice", "Wheat Flour (Atta)", "Besan (Gram Flour)", "Suji (Semolina)"] },
-    { name: "Dairy & Fats", icon: <Milk className="text-blue-400" />, items: ["Paneer", "Curd (Yogurt)", "Milk", "Ghee", "Cooking Oil"] },
+const quickAddIngredients = [
+    "Onion", "Tomato", "Potato", "Spinach", "Carrot", "Capsicum", "Ginger", "Garlic", "Cauliflower", "Peas", "Coriander Leaves", "Green Chili", "Lemon",
+    "Turmeric Powder", "Cumin Powder", "Coriander Powder", "Garam Masala", "Red Chili Powder", "Mustard Seeds", "Salt",
+    "Moong Dal", "Toor Dal", "Chana Dal", "Masoor Dal", "Rajma", "Chickpeas (Chole)",
+    "Rice", "Wheat Flour (Atta)", "Besan (Gram Flour)", "Suji (Semolina)",
+    "Paneer", "Curd (Yogurt)", "Milk", "Ghee", "Cooking Oil"
 ];
 
 export function RecipeForm() {
@@ -82,11 +82,17 @@ export function RecipeForm() {
     },
   });
 
-  const addIngredientToForm = (ingredient: string) => {
+  const watchedIngredients = form.watch("ingredients");
+
+  const toggleIngredient = (ingredient: string) => {
     const currentIngredients = form.getValues("ingredients");
     const ingredientsSet = new Set(currentIngredients.split(/, ?/).filter(i => i.trim() !== ""));
-    ingredientsSet.add(ingredient);
-    form.setValue("ingredients", Array.from(ingredientsSet).join(", "), { shouldValidate: true });
+    if (ingredientsSet.has(ingredient)) {
+      ingredientsSet.delete(ingredient);
+    } else {
+      ingredientsSet.add(ingredient);
+    }
+    form.setValue("ingredients", Array.from(ingredientsSet).join(", "), { shouldValidate: true, shouldDirty: true });
   };
 
   const onGetSuggestionsSubmit: SubmitHandler<RecipePageFormValues> = async (data) => {
@@ -224,6 +230,33 @@ export function RecipeForm() {
                 </FormItem>
               )} />
               
+              <div className="space-y-2">
+                  <FormLabel>Or tap to add common ingredients:</FormLabel>
+                  <div className="flex flex-wrap gap-2">
+                      {quickAddIngredients.map(ingredient => {
+                          const isSelected = (watchedIngredients || "").split(/, ?/).includes(ingredient);
+                          return (
+                              <Button
+                                  key={ingredient}
+                                  type="button"
+                                  variant={isSelected ? "default" : "outline"}
+                                  size="sm"
+                                  className={cn(
+                                      "rounded-full h-auto px-3 py-1.5 text-xs transition-colors duration-200",
+                                      isSelected 
+                                          ? "bg-accent text-accent-foreground hover:bg-accent/90 border-transparent"
+                                          : "bg-muted/50 text-muted-foreground hover:bg-muted border-gray-200 dark:border-gray-700 border"
+                                  )}
+                                  onClick={() => toggleIngredient(ingredient)}
+                              >
+                                  {isSelected && <Check className="mr-1.5 h-4 w-4" />}
+                                  {ingredient}
+                              </Button>
+                          );
+                      })}
+                  </div>
+              </div>
+
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="item-1">
                   <AccordionTrigger>Health & Household Options</AccordionTrigger>
@@ -260,34 +293,6 @@ export function RecipeForm() {
                       </div>
                       {form.formState.errors.householdComposition && <FormMessage className="col-span-3">{form.formState.errors.householdComposition.message}</FormMessage>}
                     </div>
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-2">
-                  <AccordionTrigger>Quick Add Ingredients</AccordionTrigger>
-                  <AccordionContent className="pt-2">
-                    <ScrollArea className="h-60">
-                        <div className="space-y-4 pr-3">
-                        {ingredientCategories.map((category) => (
-                            <div key={category.name}>
-                            <h4 className="text-sm font-semibold flex items-center mb-2">{React.cloneElement(category.icon, { className: cn(category.icon.props.className, "mr-2 h-4 w-4") })} {category.name}</h4>
-                            <div className="flex flex-wrap gap-1.5">
-                                {category.items.map(item => (
-                                <Button 
-                                    key={item} 
-                                    type="button"
-                                    variant="outline" 
-                                    size="sm" 
-                                    onClick={() => addIngredientToForm(item)} 
-                                    className="text-xs px-2 py-1 h-auto rounded-full"
-                                >
-                                    {item}
-                                </Button>
-                                ))}
-                            </div>
-                            </div>
-                        ))}
-                        </div>
-                    </ScrollArea>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
