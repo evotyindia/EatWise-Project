@@ -54,13 +54,50 @@ const recipePageInputSchema = z.object({
 type RecipePageFormValues = z.infer<typeof recipePageInputSchema>;
 
 const categorizedIngredients = [
-    { category: "Vegetables", items: ["Onion", "Tomato", "Potato", "Spinach", "Carrot", "Capsicum", "Ginger", "Garlic", "Cauliflower", "Peas", "Coriander Leaves", "Green Chili", "Lemon", "Cucumber", "Cabbage", "Brinjal (Eggplant)", "Okra (Bhindi)", "Radish (Mooli)", "Beetroot", "Mint Leaves", "Curry Leaves", "Bottle Gourd (Lauki)"] },
-    { category: "Spices", items: ["Salt", "Turmeric Powder", "Cumin Powder", "Coriander Powder", "Garam Masala", "Red Chili Powder", "Mustard Seeds", "Cumin Seeds", "Cloves", "Cinnamon", "Cardamom", "Black Pepper", "Asafoetida (Hing)", "Fenugreek Seeds (Methi)", "Bay Leaf", "Dry Red Chilies"] },
-    { category: "Dals & Legumes", items: ["Toor Dal", "Moong Dal", "Chana Dal", "Masoor Dal", "Urad Dal", "Rajma (Kidney Beans)", "Chole (Chickpeas)", "Black Eyed Peas (Lobia)", "Green Moong (Whole)"] },
-    { category: "Grains & Flours", items: ["Rice", "Basmati Rice", "Wheat Flour (Atta)", "Besan (Gram Flour)", "Suji (Semolina)", "Poha (Flattened Rice)", "Maida (All-purpose flour)", "Ragi Flour"] },
-    { category: "Dairy & Proteins", items: ["Paneer", "Curd (Yogurt)", "Milk", "Ghee", "Butter", "Cream (Malai)", "Tofu"] },
-    { category: "Nuts & Seeds", items: ["Peanuts", "Cashews", "Almonds", "Sesame Seeds", "Poppy Seeds"] },
-    { category: "Pantry Staples", items: ["Cooking Oil", "Sugar", "Jaggery", "Tamarind", "Vinegar", "Soy Sauce"] }
+    { 
+        category: "Vegetables (Sabziyan)", 
+        items: ["Onion", "Tomato", "Potato", "Garlic", "Ginger", "Green Chili", "Lemon", "Carrot", "Capsicum (Shimla Mirch)", "Cauliflower (Gobi)", "Cabbage (Patta Gobi)", "Peas (Matar)", "Brinjal (Baingan)", "Okra (Bhindi)", "Cucumber (Kheera)", "Radish (Mooli)", "Beetroot (Chukandar)", "Bottle Gourd (Lauki)", "Ridge Gourd (Turai)", "Bitter Gourd (Karela)", "Pumpkin (Kaddu)", "Sweet Potato (Shakarkandi)", "French Beans", "Cluster Beans (Gawar)", "Drumstick (Sahjan)", "Pointed Gourd (Parwal)", "Tinda (Apple Gourd)", "Colocasia (Arbi)", "Yam (Jimikand)", "Raw Banana", "Raw Papaya", "Mushroom", "Corn", "Baby Corn", "Bell Peppers (Red/Yellow)"] 
+    },
+    { 
+        category: "Leafy Greens (Hari Sabziyan)", 
+        items: ["Spinach (Palak)", "Coriander Leaves (Dhaniya)", "Mint Leaves (Pudina)", "Fenugreek Leaves (Methi)", "Mustard Greens (Sarson ka Saag)", "Dill Leaves (Suva)", "Curry Leaves (Kadi Patta)", "Amaranth Leaves (Chaulai)", "Spring Onion"]
+    },
+    { 
+        category: "Spices (Masale) - Ground", 
+        items: ["Salt (Namak)", "Turmeric Powder (Haldi)", "Red Chili Powder (Lal Mirch)", "Coriander Powder (Dhaniya)", "Cumin Powder (Jeera)", "Garam Masala", "Black Pepper Powder", "Chaat Masala", "Amchur (Dry Mango Powder)", "Asafoetida (Hing)", "Kashmiri Red Chili", "Kitchen King Masala", "Sambar Masala", "Pav Bhaji Masala", "Chana Masala", "Dry Ginger Powder (Saunth)"] 
+    },
+    { 
+        category: "Spices (Masale) - Whole", 
+        items: ["Cumin Seeds (Jeera)", "Mustard Seeds (Rai/Sarson)", "Cloves (Laung)", "Cinnamon (Dalchini)", "Green Cardamom (Elaichi)", "Black Cardamom (Badi Elaichi)", "Bay Leaf (Tej Patta)", "Black Peppercorns (Kali Mirch)", "Fenugreek Seeds (Methi Dana)", "Fennel Seeds (Saunf)", "Carom Seeds (Ajwain)", "Dry Red Chilies", "Star Anise", "Nutmeg (Jaiphal)", "Mace (Javitri)", "Poppy Seeds (Khas Khas)", "Sesame Seeds (Til)"] 
+    },
+    { 
+        category: "Dals & Legumes (Dal aur Phaliyan)", 
+        items: ["Toor Dal (Arhar)", "Moong Dal (Split)", "Moong Dal (Whole)", "Masoor Dal (Red Lentil)", "Urad Dal (Split/Whole)", "Chana Dal (Bengal Gram)", "Kabuli Chana (Chickpeas)", "Kala Chana (Black Chickpeas)", "Rajma (Kidney Beans)", "Lobia (Black-eyed Peas)", "Soya Beans", "Moth Beans (Matki)", "Horse Gram (Kulthi)"] 
+    },
+    { 
+        category: "Grains & Flours (Anaaj aur Aata)", 
+        items: ["Basmati Rice", "Sona Masoori Rice", "Brown Rice", "Poha (Flattened Rice)", "Murmura (Puffed Rice)", "Wheat Flour (Atta)", "Maida (All-purpose Flour)", "Besan (Gram Flour)", "Suji (Semolina/Rava)", "Rice Flour", "Corn Flour", "Ragi Flour (Finger Millet)", "Jowar Flour (Sorghum)", "Bajra Flour (Pearl Millet)", "Oats", "Quinoa", "Sabudana (Tapioca Pearls)", "Bread"]
+    },
+    { 
+        category: "Dairy & Alternatives", 
+        items: ["Milk", "Curd (Yogurt/Dahi)", "Paneer (Cottage Cheese)", "Ghee", "Butter", "Cream (Malai)", "Khoya (Mawa)", "Cheese", "Condensed Milk", "Buttermilk (Chaas)", "Tofu", "Soy Milk", "Almond Milk", "Coconut Milk"] 
+    },
+    { 
+        category: "Nuts & Dried Fruits (Mewe)", 
+        items: ["Almonds (Badam)", "Cashews (Kaju)", "Walnuts (Akhrot)", "Pistachios (Pista)", "Peanuts (Moongphali)", "Raisins (Kishmish)", "Dates (Khajoor)", "Dried Figs (Anjeer)", "Dry Coconut"] 
+    },
+    { 
+        category: "Oils & Fats (Tel)", 
+        items: ["Mustard Oil", "Sunflower Oil", "Groundnut Oil", "Coconut Oil", "Sesame Oil", "Vegetable Oil", "Olive Oil"] 
+    },
+    { 
+        category: "Sweeteners (Mithas)", 
+        items: ["Sugar (Cheeni)", "Jaggery (Gud)", "Honey (Shahad)", "Brown Sugar"]
+    },
+    { 
+        category: "Pantry Staples & Condiments", 
+        items: ["Tamarind (Imli)", "Vinegar", "Soy Sauce", "Green Chili Sauce", "Red Chili Sauce", "Tomato Ketchup", "Papad", "Pickle (Achar)", "Baking Soda", "Baking Powder", "Yeast", "Rose Water", "Kewra Water"]
+    }
 ];
 
 export function RecipeForm() {
@@ -490,3 +527,5 @@ export function RecipeForm() {
     </div>
   );
 }
+
+    
