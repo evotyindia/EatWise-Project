@@ -25,7 +25,7 @@ export function Header() {
 
   return (
     <header className={cn(
-      "sticky top-0 z-50 w-full border-b border-border bg-[#f1f1ff]/95 dark:bg-background/95 backdrop-blur-lg shadow-sm"
+      "sticky top-0 z-50 w-full border-b border-border bg-[#f1f1ff] dark:bg-background shadow-sm"
     )}>
       <div className="container flex h-16 max-w-screen-xl items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
@@ -65,7 +65,7 @@ export function Header() {
                   <span className="sr-only">Toggle Menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[280px] bg-[#f1f1ff]/95 dark:bg-background/95 backdrop-blur-xl">
+              <SheetContent side="right" className="w-[280px] bg-[#f1f1ff] dark:bg-background">
                 <nav className="flex flex-col space-y-4 pt-8">
                   {navItems.map((item) => (
                     <SheetClose asChild key={item.href}>
