@@ -230,7 +230,10 @@ export function NutritionForm() {
   };
 
   useEffect(() => {
-    scrollToBottom();
+    // Only scroll if the chat has started, not on the initial welcome message.
+    if (chatHistory.length > 1) {
+      scrollToBottom();
+    }
   }, [chatHistory]);
 
 const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {

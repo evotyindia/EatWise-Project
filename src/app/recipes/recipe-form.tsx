@@ -10,8 +10,8 @@ import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aw
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles, ChefHat, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Check, Clock, Soup, Users, PlusCircle, BookOpen, ListChecks, ArrowRight } from "lucide-react";
-import React, { useState, useEffect, useRef } from "react";
+import { Lightbulb, Sparkles, ChefHat, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Check, Clock, Soup, Users, PlusCircle, BookOpen, ListChecks, ArrowRight, Search } from "lucide-react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 
@@ -56,47 +56,47 @@ type RecipePageFormValues = z.infer<typeof recipePageInputSchema>;
 const categorizedIngredients = [
     { 
         category: "Vegetables (Sabziyan)", 
-        items: ["Onion", "Tomato", "Potato", "Garlic", "Ginger", "Green Chili", "Lemon", "Carrot", "Capsicum (Shimla Mirch)", "Cauliflower (Gobi)", "Cabbage (Patta Gobi)", "Peas (Matar)", "Brinjal (Baingan)", "Okra (Bhindi)", "Cucumber (Kheera)", "Radish (Mooli)", "Beetroot (Chukandar)", "Bottle Gourd (Lauki)", "Ridge Gourd (Turai)", "Bitter Gourd (Karela)", "Pumpkin (Kaddu)", "Sweet Potato (Shakarkandi)", "French Beans", "Cluster Beans (Gawar)", "Drumstick (Sahjan)", "Pointed Gourd (Parwal)", "Tinda (Apple Gourd)", "Colocasia (Arbi)", "Yam (Jimikand)", "Raw Banana", "Raw Papaya", "Mushroom", "Corn", "Baby Corn", "Bell Peppers (Red/Yellow)"] 
+        items: ["Onion (Pyaaz)", "Tomato (Tamatar)", "Potato (Aloo)", "Garlic (Lehsun)", "Ginger (Adrak)", "Green Chili (Hari Mirch)", "Lemon (Nimbu)", "Carrot (Gajar)", "Capsicum (Shimla Mirch)", "Cauliflower (Gobi)", "Cabbage (Patta Gobi)", "Peas (Matar)", "Brinjal (Baingan)", "Okra (Bhindi)", "Cucumber (Kheera)", "Radish (Mooli)", "Beetroot (Chukandar)", "Bottle Gourd (Lauki)", "Ridge Gourd (Turai)", "Bitter Gourd (Karela)", "Pumpkin (Kaddu)", "Sweet Potato (Shakarkandi)", "French Beans", "Cluster Beans (Gawar)", "Drumstick (Sahjan)", "Pointed Gourd (Parwal)", "Tinda (Apple Gourd)", "Colocasia (Arbi)", "Yam (Jimikand)", "Raw Banana (Kachha Kela)", "Raw Papaya (Kachha Papita)", "Mushroom (Khumb)", "Corn (Bhutta)", "Baby Corn", "Bell Peppers (Red/Yellow)", "Turnip (Shalgam)", "Jackfruit (Kathal)", "Green Papaya"] 
     },
     { 
         category: "Leafy Greens (Hari Sabziyan)", 
-        items: ["Spinach (Palak)", "Coriander Leaves (Dhaniya)", "Mint Leaves (Pudina)", "Fenugreek Leaves (Methi)", "Mustard Greens (Sarson ka Saag)", "Dill Leaves (Suva)", "Curry Leaves (Kadi Patta)", "Amaranth Leaves (Chaulai)", "Spring Onion"]
+        items: ["Spinach (Palak)", "Coriander Leaves (Dhaniya)", "Mint Leaves (Pudina)", "Fenugreek Leaves (Methi)", "Mustard Greens (Sarson ka Saag)", "Dill Leaves (Suva)", "Curry Leaves (Kadi Patta)", "Amaranth Leaves (Chaulai)", "Spring Onion (Hari Pyaaz)", "Bathua (Chenopodium)", "Gongura (Sorrel Leaves)"]
     },
     { 
         category: "Spices (Masale) - Ground", 
-        items: ["Salt (Namak)", "Turmeric Powder (Haldi)", "Red Chili Powder (Lal Mirch)", "Coriander Powder (Dhaniya)", "Cumin Powder (Jeera)", "Garam Masala", "Black Pepper Powder", "Chaat Masala", "Amchur (Dry Mango Powder)", "Asafoetida (Hing)", "Kashmiri Red Chili", "Kitchen King Masala", "Sambar Masala", "Pav Bhaji Masala", "Chana Masala", "Dry Ginger Powder (Saunth)"] 
+        items: ["Salt (Namak)", "Turmeric Powder (Haldi)", "Red Chili Powder (Lal Mirch)", "Coriander Powder (Dhaniya)", "Cumin Powder (Jeera)", "Garam Masala", "Black Pepper Powder (Kali Mirch)", "Chaat Masala", "Amchur (Dry Mango Powder)", "Asafoetida (Hing)", "Kashmiri Red Chili", "Kitchen King Masala", "Sambar Masala", "Pav Bhaji Masala", "Chana Masala", "Dry Ginger Powder (Saunth)", "Black Salt (Kala Namak)", "Kasuri Methi (Dried Fenugreek)", "Cinnamon Powder", "Cardamom Powder", "Nutmeg Powder"] 
     },
     { 
         category: "Spices (Masale) - Whole", 
-        items: ["Cumin Seeds (Jeera)", "Mustard Seeds (Rai/Sarson)", "Cloves (Laung)", "Cinnamon (Dalchini)", "Green Cardamom (Elaichi)", "Black Cardamom (Badi Elaichi)", "Bay Leaf (Tej Patta)", "Black Peppercorns (Kali Mirch)", "Fenugreek Seeds (Methi Dana)", "Fennel Seeds (Saunf)", "Carom Seeds (Ajwain)", "Dry Red Chilies", "Star Anise", "Nutmeg (Jaiphal)", "Mace (Javitri)", "Poppy Seeds (Khas Khas)", "Sesame Seeds (Til)"] 
+        items: ["Cumin Seeds (Jeera)", "Mustard Seeds (Rai/Sarson)", "Cloves (Laung)", "Cinnamon (Dalchini)", "Green Cardamom (Elaichi)", "Black Cardamom (Badi Elaichi)", "Bay Leaf (Tej Patta)", "Black Peppercorns (Kali Mirch)", "Fenugreek Seeds (Methi Dana)", "Fennel Seeds (Saunf)", "Carom Seeds (Ajwain)", "Dry Red Chilies (Sukhi Lal Mirch)", "Star Anise (Chakra Phool)", "Nutmeg (Jaiphal)", "Mace (Javitri)", "Poppy Seeds (Khas Khas)", "Sesame Seeds (Til)", "Saffron (Kesar)", "Caraway Seeds (Shahi Jeera)"] 
     },
     { 
         category: "Dals & Legumes (Dal aur Phaliyan)", 
-        items: ["Toor Dal (Arhar)", "Moong Dal (Split)", "Moong Dal (Whole)", "Masoor Dal (Red Lentil)", "Urad Dal (Split/Whole)", "Chana Dal (Bengal Gram)", "Kabuli Chana (Chickpeas)", "Kala Chana (Black Chickpeas)", "Rajma (Kidney Beans)", "Lobia (Black-eyed Peas)", "Soya Beans", "Moth Beans (Matki)", "Horse Gram (Kulthi)"] 
+        items: ["Toor Dal (Arhar)", "Moong Dal (Split)", "Moong Dal (Whole/Sabut)", "Masoor Dal (Red Lentil)", "Urad Dal (Split/Whole)", "Chana Dal (Bengal Gram)", "Kabuli Chana (Chickpeas)", "Kala Chana (Black Chickpeas)", "Rajma (Kidney Beans)", "Lobia (Black-eyed Peas)", "Soya Beans", "Moth Beans (Matki)", "Horse Gram (Kulthi)", "Green Peas (Dry)", "White Peas (Safed Vatana)"] 
     },
     { 
         category: "Grains & Flours (Anaaj aur Aata)", 
-        items: ["Basmati Rice", "Sona Masoori Rice", "Brown Rice", "Poha (Flattened Rice)", "Murmura (Puffed Rice)", "Wheat Flour (Atta)", "Maida (All-purpose Flour)", "Besan (Gram Flour)", "Suji (Semolina/Rava)", "Rice Flour", "Corn Flour", "Ragi Flour (Finger Millet)", "Jowar Flour (Sorghum)", "Bajra Flour (Pearl Millet)", "Oats", "Quinoa", "Sabudana (Tapioca Pearls)", "Bread"]
+        items: ["Basmati Rice", "Sona Masoori Rice", "Brown Rice", "Poha (Flattened Rice)", "Murmura (Puffed Rice)", "Wheat Flour (Atta)", "Maida (All-purpose Flour)", "Besan (Gram Flour)", "Suji (Semolina/Rava)", "Rice Flour (Chawal ka Atta)", "Corn Flour (Makki ka Atta)", "Ragi Flour (Finger Millet)", "Jowar Flour (Sorghum)", "Bajra Flour (Pearl Millet)", "Oats", "Quinoa", "Sabudana (Tapioca Pearls)", "Bread (White/Brown)", "Vermicelli (Seviyan)", "Barley (Jau)", "Millet (Kodo/Foxtail)"]
     },
     { 
         category: "Dairy & Alternatives", 
-        items: ["Milk", "Curd (Yogurt/Dahi)", "Paneer (Cottage Cheese)", "Ghee", "Butter", "Cream (Malai)", "Khoya (Mawa)", "Cheese", "Condensed Milk", "Buttermilk (Chaas)", "Tofu", "Soy Milk", "Almond Milk", "Coconut Milk"] 
+        items: ["Milk (Doodh)", "Curd (Yogurt/Dahi)", "Paneer (Cottage Cheese)", "Ghee", "Butter (Makhan)", "Cream (Malai)", "Khoya (Mawa)", "Cheese", "Condensed Milk", "Buttermilk (Chaas)", "Tofu", "Soy Milk", "Almond Milk", "Coconut Milk", "Cashew Cream"] 
     },
     { 
         category: "Nuts & Dried Fruits (Mewe)", 
-        items: ["Almonds (Badam)", "Cashews (Kaju)", "Walnuts (Akhrot)", "Pistachios (Pista)", "Peanuts (Moongphali)", "Raisins (Kishmish)", "Dates (Khajoor)", "Dried Figs (Anjeer)", "Dry Coconut"] 
+        items: ["Almonds (Badam)", "Cashews (Kaju)", "Walnuts (Akhrot)", "Pistachios (Pista)", "Peanuts (Moongphali)", "Raisins (Kishmish)", "Dates (Khajoor)", "Dried Figs (Anjeer)", "Dry Coconut (Nariyal)", "Fox Nuts (Makhana)", "Apricots (Khumani)"] 
     },
     { 
         category: "Oils & Fats (Tel)", 
-        items: ["Mustard Oil", "Sunflower Oil", "Groundnut Oil", "Coconut Oil", "Sesame Oil", "Vegetable Oil", "Olive Oil"] 
+        items: ["Mustard Oil", "Sunflower Oil", "Groundnut Oil", "Coconut Oil", "Sesame Oil (Til ka Tel)", "Vegetable Oil", "Olive Oil", "Vanaspati"] 
     },
     { 
         category: "Sweeteners (Mithas)", 
-        items: ["Sugar (Cheeni)", "Jaggery (Gud)", "Honey (Shahad)", "Brown Sugar"]
+        items: ["Sugar (Cheeni)", "Jaggery (Gud)", "Honey (Shahad)", "Brown Sugar", "Stevia", "Palm Sugar"]
     },
     { 
-        category: "Pantry Staples & Condiments", 
-        items: ["Tamarind (Imli)", "Vinegar", "Soy Sauce", "Green Chili Sauce", "Red Chili Sauce", "Tomato Ketchup", "Papad", "Pickle (Achar)", "Baking Soda", "Baking Powder", "Yeast", "Rose Water", "Kewra Water"]
+        category: "Pantry Staples, Pastes & Condiments", 
+        items: ["Tamarind (Imli)", "Vinegar (Sirka)", "Soy Sauce", "Green Chili Sauce", "Red Chili Sauce", "Tomato Ketchup", "Papad", "Pickle (Achar)", "Baking Soda", "Baking Powder", "Yeast", "Rose Water", "Kewra Water", "Ginger-Garlic Paste", "Tamarind Paste", "Mustard Paste"]
     }
 ];
 
@@ -110,6 +110,8 @@ export function RecipeForm() {
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [currentFormInputs, setCurrentFormInputs] = useState<RecipePageFormValues | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
 
   const { toast } = useToast();
 
@@ -134,6 +136,27 @@ export function RecipeForm() {
     }
     form.setValue("ingredients", Array.from(ingredientsSet).join(", "), { shouldValidate: true, shouldDirty: true });
   };
+  
+  const filteredIngredients = useMemo(() => {
+    if (!searchTerm) {
+        return categorizedIngredients;
+    }
+    const lowercasedFilter = searchTerm.toLowerCase();
+    return categorizedIngredients
+        .map(category => {
+            const filteredItems = category.items.filter(item =>
+                item.toLowerCase().includes(lowercasedFilter)
+            );
+            if (category.category.toLowerCase().includes(lowercasedFilter)) {
+                return category;
+            }
+            if (filteredItems.length > 0) {
+                return { ...category, items: filteredItems };
+            }
+            return null;
+        })
+        .filter((c): c is NonNullable<typeof c> => c !== null);
+  }, [searchTerm]);
 
   const onGetSuggestionsSubmit: SubmitHandler<RecipePageFormValues> = async (data) => {
     setIsLoadingSuggestions(true);
@@ -247,7 +270,10 @@ export function RecipeForm() {
   };
 
   useEffect(() => {
-    scrollToBottom();
+    // Only scroll if the chat has started, not on the initial welcome message.
+    if (chatHistory.length > 1) {
+      scrollToBottom();
+    }
   }, [chatHistory]);
 
 
@@ -283,12 +309,21 @@ export function RecipeForm() {
                           <DialogHeader>
                             <DialogTitle>Add Common Ingredients</DialogTitle>
                             <DialogDescription>
-                              Click to add or remove ingredients from your list.
+                              Click to add or remove ingredients from your list. Use the search to filter.
                             </DialogDescription>
                           </DialogHeader>
+                           <div className="relative mt-2 mb-2">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              placeholder="Search for ingredients..."
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                              className="pl-10"
+                            />
+                          </div>
                           <ScrollArea className="h-[400px] -mx-6 px-6">
                               <div className="space-y-4">
-                                  {categorizedIngredients.map(category => (
+                                  {filteredIngredients.length > 0 ? filteredIngredients.map(category => (
                                       <div key={category.category}>
                                           <h4 className="font-semibold mb-2 text-primary">{category.category}</h4>
                                           <div className="flex flex-wrap gap-2">
@@ -315,7 +350,7 @@ export function RecipeForm() {
                                               })}
                                           </div>
                                       </div>
-                                  ))}
+                                  )) : <p className="text-center text-muted-foreground py-4">No ingredients found for &quot;{searchTerm}&quot;.</p>}
                               </div>
                           </ScrollArea>
                           <DialogFooter>
