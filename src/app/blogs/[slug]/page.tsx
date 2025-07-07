@@ -1,6 +1,5 @@
 
 import { getBlogPostBySlug, blogPosts } from "@/lib/blog-data";
-import Image from "next/image";
 import Link from "next/link"; 
 import { notFound } from "next/navigation";
 import { CalendarDays, Tag, ArrowLeft } from "lucide-react";
@@ -58,17 +57,6 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             <Badge variant="secondary">{post.category}</Badge>
           </div>
         </div>
-        <div className="overflow-hidden rounded-lg shadow-md mb-8">
-          <Image
-            src={post.featuredImage}
-            alt={post.title}
-            width={1200}
-            height={675}
-            className="w-full object-cover aspect-video transition-transform duration-300 hover:scale-105"
-            priority
-            data-ai-hint={post.dataAiHint}
-          />
-        </div>
       </div>
       
       <Separator className="my-8" />
@@ -94,3 +82,5 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
     </article>
   );
 }
+
+    
