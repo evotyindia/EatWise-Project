@@ -215,7 +215,7 @@ export function RecipeForm() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-      <Card className="lg:col-span-1 sticky top-20">
+      <Card className="lg:col-span-1 lg:sticky top-20">
         <CardHeader>
           <CardTitle className="flex items-center text-2xl"><ChefHat className="mr-2 h-6 w-6 text-primary" /> Recipe Finder</CardTitle>
           <CardDescription>Tell us what you have and any health needs.</CardDescription>
