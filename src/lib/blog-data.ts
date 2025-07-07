@@ -138,7 +138,7 @@ export const blogPosts: BlogPost[] = [
 <p class="mt-4">By choosing local, seasonal, and traditional foods, you can enjoy the benefits of superfoods without straining your budget.</p>
     `,
   },
-   {
+  {
     slug: "magic-of-millets",
     title: "The Magic of Millets: A Guide to India's Ancient Grains",
     category: "Healthy Eating",
@@ -200,6 +200,136 @@ export const blogPosts: BlogPost[] = [
 <p class="mt-4">A balanced approach to fats is crucial for overall health. Focus on incorporating good fats while minimizing the bad ones.</p>
     `,
   },
+  {
+    slug: "vegetarian-protein-power",
+    title: "Vegetarian Protein Power: Top Sources for a Strong Indian Diet",
+    category: "Nutrition Basics",
+    date: "2024-07-01",
+    preview: "Think you can't get enough protein on a vegetarian diet? Think again! Explore top plant-based protein sources available in India.",
+    content: `
+      <p>A common myth is that vegetarian diets lack sufficient protein. However, an Indian vegetarian diet can be rich in protein if you know which foods to include. Protein is essential for muscle repair, immune function, and overall health.</p>
+      <h2 class="text-xl font-semibold mt-4 mb-2">Top Vegetarian Protein Sources:</h2>
+      <ul class="list-disc list-inside space-y-2">
+        <li><strong>Lentils and Legumes (Dals and Chanas):</strong> From moong and masoor to chickpeas and rajma, these are staples for a reason. They are packed with protein and fiber.</li>
+        <li><strong>Paneer (Indian Cottage Cheese):</strong> An excellent source of slow-digesting casein protein, making you feel full for longer.</li>
+        <li><strong>Tofu and Soya Chunks:</strong> Made from soybeans, these are complete proteins, meaning they contain all nine essential amino acids.</li>
+        <li><strong>Greek Yogurt and Curd:</strong> Especially Greek yogurt, which is strained to remove whey, resulting in higher protein content.</li>
+        <li><strong>Nuts and Seeds:</strong> Almonds, walnuts, peanuts, pumpkin seeds, and chia seeds are great for a protein boost.</li>
+        <li><strong>Millets:</strong> Grains like quinoa and amaranth (rajgira) are complete proteins.</li>
+      </ul>
+      <p class="mt-4">By combining different sources, for example, dal with rice or roti, you can ensure you get a complete amino acid profile. A well-planned vegetarian diet is more than capable of meeting your protein needs.</p>
+    `,
+  },
+  {
+    slug: "hydration-is-key",
+    title: "Beyond Water: Creative Ways to Stay Hydrated in the Indian Climate",
+    category: "Healthy Living",
+    date: "2024-06-28",
+    preview: "Staying hydrated is more than just drinking water. Discover delicious and refreshing Indian drinks and foods that help you beat the heat.",
+    content: `
+      <p>In the heat and humidity of the Indian climate, staying hydrated is crucial for health. Dehydration can lead to fatigue, headaches, and serious health issues. While drinking plain water is essential, there are many other traditional and tasty ways to maintain your fluid balance.</p>
+      <h2 class="text-xl font-semibold mt-4 mb-2">Refreshing Hydration Options:</h2>
+      <ul class="list-disc list-inside space-y-2">
+        <li><strong>Coconut Water (Nariyal Pani):</strong> Nature's sports drink. It's rich in electrolytes like potassium, making it excellent for rehydration.</li>
+        <li><strong>Buttermilk (Chaas):</strong> A cooling probiotic drink that aids digestion and replenishes fluids and electrolytes.</li>
+        <li><strong>Lemon Water (Nimbu Pani):</strong> A simple and effective way to get Vitamin C and stay hydrated. Can be made sweet or salty.</li>
+        <li><strong>Water-Rich Fruits:</strong> Watermelon, cucumber, oranges, and muskmelon have high water content and help you stay hydrated while providing essential vitamins.</li>
+        <li><strong>Herbal Teas:</strong> Unsweetened herbal teas like hibiscus or mint can be a refreshing alternative to plain water.</li>
+        <li><strong>Aam Panna:</strong> A traditional summer drink made from raw mangoes that helps prevent heat stroke.</li>
+      </ul>
+      <p class="mt-4">Listen to your body's thirst signals and make hydration a delicious part of your daily routine.</p>
+    `,
+  },
+  {
+    slug: "mastering-nutrition-tables",
+    title: "Mastering the Nutrition Table: From Calories to Vitamins",
+    category: "Nutrition Basics",
+    date: "2024-06-25",
+    preview: "Go beyond the ingredients list. This guide helps you understand the numbers on the nutrition facts table to make truly healthy choices.",
+    content: `
+      <p>The nutrition facts table on packaged foods can look intimidating, but it's a powerful tool for managing your health. Learning to read it correctly allows you to compare products and make informed decisions.</p>
+      <h2 class="text-xl font-semibold mt-4 mb-2">Breaking Down the Table:</h2>
+      <ul class="list-disc list-inside space-y-2">
+        <li><strong>Serving Size:</strong> This is the first thing to check. All the numbers on the label apply to this amount. Is it realistic? Often, a small package contains multiple servings.</li>
+        <li><strong>Calories (Energy):</strong> This tells you how much energy you get from a serving.</li>
+        <li><strong>Macronutrients:</strong>
+          <ul class="list-inside list-[circle] ml-4">
+            <li><strong>Fat:</strong> Look at the breakdown. Limit Saturated and Trans Fats.</li>
+            <li><strong>Carbohydrates:</strong> Check the amount of Dietary Fiber (aim for more) and Total Sugars. Pay close attention to "Added Sugars" if available.</li>
+            <li><strong>Protein:</strong> An essential nutrient for building and repairing tissues.</li>
+          </ul>
+        </li>
+        <li><strong>Sodium:</strong> High sodium intake is linked to high blood pressure. Compare products to choose the one with lower sodium.</li>
+        <li><strong>Micronutrients (Vitamins & Minerals):</strong> This section lists key vitamins and minerals. It can help you choose more nutrient-dense foods.</li>
+      </ul>
+      <p class="mt-4">Using the nutrition table helps you see beyond marketing claims and understand what you are truly eating.</p>
+    `,
+  },
+  {
+    slug: "art-of-mindful-eating",
+    title: "The Art of Mindful Eating: Connecting with Your Food",
+    category: "Healthy Living",
+    date: "2024-06-20",
+    preview: "Improve your digestion, satisfaction, and relationship with food. Learn the simple practice of mindful eating.",
+    content: `
+      <p>In our fast-paced lives, we often eat while distracted—watching TV, working, or scrolling on our phones. Mindful eating is the practice of paying full attention to the experience of eating and drinking, both inside and outside the body.</p>
+      <h2 class="text-xl font-semibold mt-4 mb-2">Benefits of Mindful Eating:</h2>
+      <ul class="list-disc list-inside space-y-1">
+        <li>Better digestion by eating more slowly.</li>
+        <li>Increased recognition of your body's hunger and fullness cues, which can help with weight management.</li>
+        <li>Greater satisfaction from your food.</li>
+        <li>Reduced stress and anxiety around food.</li>
+      </ul>
+      <h2 class="text-xl font-semibold mt-4 mb-2">How to Practice Mindful Eating:</h2>
+      <ul class="list-disc list-inside space-y-2">
+        <li><strong>Remove Distractions:</strong> Sit at a table and put away your phone and turn off the TV.</li>
+        <li><strong>Engage Your Senses:</strong> Look at the colors on your plate, smell the aromas, notice the textures in your mouth, and savor the flavors.</li>
+        <li><strong>Chew Thoroughly:</strong> Put your fork down between bites and chew your food slowly and completely.</li>
+        <li><strong>Listen to Your Body:</strong> Eat when you're hungry and stop when you're full. It's okay to leave food on your plate.</li>
+      </ul>
+      <p class="mt-4">Mindful eating isn't a diet; it's a shift in mindset that can lead to a healthier and more enjoyable relationship with food.</p>
+    `,
+  },
+  {
+    slug: "spice-up-your-health",
+    title: "Spice Up Your Health: The Medicinal Power of Indian Masalas",
+    category: "Healthy Eating",
+    date: "2024-06-15",
+    preview: "Your masala dabba is a treasure chest of health benefits. Learn about the powerful medicinal properties of common Indian spices.",
+    content: `
+      <p>Indian spices do more than just add flavor and aroma to our food; they are packed with potent health benefits and have been used in Ayurvedic medicine for centuries. Your everyday masala box is a powerhouse of medicinal compounds.</p>
+      <h2 class="text-xl font-semibold mt-4 mb-2">The Power in Your Spice Box:</h2>
+      <ul class="list-disc list-inside space-y-2">
+        <li><strong>Turmeric (Haldi):</strong> Contains curcumin, a strong anti-inflammatory and antioxidant. It's good for joint health and immunity.</li>
+        <li><strong>Cumin (Jeera):</strong> Aids digestion, is a good source of iron, and has antioxidant properties.</li>
+        <li><strong>Coriander (Dhaniya):</strong> Both seeds and leaves are beneficial. They can help lower blood sugar and are rich in antioxidants.</li>
+        <li><strong>Ginger (Adrak):</strong> A powerful remedy for nausea and indigestion. It also has strong anti-inflammatory effects.</li>
+        <li><strong>Cinnamon (Dalchini):</strong> Known to lower blood sugar levels and has powerful antioxidant and anti-inflammatory properties.</li>
+        <li><strong>Fenugreek (Methi):</strong> Helps control blood sugar levels and can improve cholesterol.</li>
+      </ul>
+      <p class="mt-4">Incorporating a variety of these spices into your daily cooking is a simple and delicious way to boost your overall health.</p>
+    `,
+  },
+  {
+    slug: "healthy-indian-breakfasts",
+    title: "Power Your Morning: Healthy Indian Breakfast Ideas",
+    category: "Healthy Eating",
+    date: "2024-06-10",
+    preview: "Ditch the unhealthy options and start your day right. Explore a variety of nutritious and easy-to-make Indian breakfast recipes.",
+    content: `
+      <p>Breakfast is often called the most important meal of the day. A nutritious breakfast can kickstart your metabolism, improve your focus, and set the tone for healthier choices all day. Here are some healthy and popular Indian breakfast options.</p>
+      <h2 class="text-xl font-semibold mt-4 mb-2">Nutritious Breakfast Choices:</h2>
+      <ul class="list-disc list-inside space-y-2">
+        <li><strong>Poha:</strong> Made from flattened rice, it's light on the stomach and a good source of carbohydrates and iron. Load it with vegetables and peanuts to make it more nutritious.</li>
+        <li><strong>Upma:</strong> A thick porridge made from semolina (suji). It's a quick and filling option. Again, add plenty of veggies.</li>
+        <li><strong>Idli:</strong> Steamed, fermented rice and lentil cakes. They are low in calories and easy to digest. Serve with sambar for a protein boost.</li>
+        <li><strong>Dosa:</strong> A fermented crepe made from rice and lentils. Opt for plain or minimally stuffed dosas instead of those loaded with butter and cheese.</li>
+        <li><strong>Moong Dal Cheela:</strong> A savory pancake made from moong dal batter. It's an excellent source of protein.</li>
+        <li><strong>Oats:</strong> A versatile option. You can make savory masala oats or sweet porridge with fruits and nuts.</li>
+      </ul>
+      <p class="mt-4">Starting your day with a balanced breakfast that includes carbohydrates, protein, and fiber will keep you energized and full until your next meal.</p>
+    `,
+  },
 ];
 
 export const getBlogPostBySlug = (slug: string): BlogPost | undefined => {
@@ -210,5 +340,3 @@ export const getBlogCategories = (): string[] => {
   const categories = new Set(blogPosts.map(post => post.category));
   return ["All", ...Array.from(categories)];
 }
-
-    
