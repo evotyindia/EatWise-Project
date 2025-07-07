@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { GetRecipeSuggestionsInput, GetRecipeSuggestionsOutput } from "@/ai/flows/recipe-suggestions";
@@ -303,32 +302,12 @@ export function RecipeForm() {
                   </FormItem>
                 )} />
 
-                <FormField
-                  control={form.control}
-                  name="userSuggestions"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-semibold">Any Specific Requests? (Optional)</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="e.g., 'Make it extra spicy', 'use less oil', 'I prefer a gravy dish', 'quick 30-minute meal'..."
-                          {...field}
-                          rows={3}
-                          className="bg-background/50"
-                        />
-                      </FormControl>
-                      <FormDescription>Let the AI chef know your preferences.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
                  <div className="space-y-2">
                     <Dialog>
                       <DialogTrigger asChild>
                           <Button variant="outline" className="w-full justify-center text-muted-foreground font-medium border-2 border-dashed hover:border-solid hover:bg-accent/10 hover:text-accent transition-all duration-300 ease-in-out group">
                               <PlusCircle className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
-                              Browse & Add Common Ingredients
+                              Browse &amp; Add Common Ingredients
                           </Button>
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-2xl">
@@ -388,9 +367,29 @@ export function RecipeForm() {
                     </Dialog>
                 </div>
 
+                <FormField
+                  control={form.control}
+                  name="userSuggestions"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-semibold">Any Specific Requests? (Optional)</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="e.g., 'Make it extra spicy', 'use less oil', 'I prefer a gravy dish', 'quick 30-minute meal'..."
+                          {...field}
+                          rows={3}
+                          className="bg-background/50"
+                        />
+                      </FormControl>
+                      <FormDescription>Let the AI chef know your preferences.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <div className="space-y-4 rounded-lg border p-4">
                   <div>
-                    <FormLabel className="font-semibold text-base">Health & Household</FormLabel>
+                    <FormLabel className="font-semibold text-base">Health &amp; Household</FormLabel>
                     <FormDescription className="text-xs">Select dietary needs and household size for tailored recipes.</FormDescription>
                   </div>
 
@@ -443,7 +442,9 @@ export function RecipeForm() {
         {isLoadingSuggestions && (
           <Card>
             <CardHeader><CardTitle>Finding recipe ideas...</CardTitle><CardDescription>Our AI chef is checking the pantry.</CardDescription></CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <Skeleton className="h-28 rounded-lg" />
+              <Skeleton className="h-28 rounded-lg" />
               <Skeleton className="h-28 rounded-lg" />
               <Skeleton className="h-28 rounded-lg" />
               <Skeleton className="h-28 rounded-lg" />
@@ -462,7 +463,7 @@ export function RecipeForm() {
             </CardHeader>
             <CardContent>
               {dishSuggestions.suggestions.length > 0 && !dishSuggestions.suggestions[0].toLowerCase().includes("sorry") ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {dishSuggestions.suggestions.map((dish, index) => (
                      <Card 
                         key={index}
@@ -549,7 +550,7 @@ export function RecipeForm() {
               {detailedRecipe.healthNotes && (
                 <Alert variant="default" className="bg-sky-500/10 border-sky-500/20">
                     <Lightbulb className="h-5 w-5 text-sky-600" />
-                    <AlertTitle className="font-semibold text-sky-800 dark:text-sky-300">Health Notes & Tips</AlertTitle>
+                    <AlertTitle className="font-semibold text-sky-800 dark:text-sky-300">Health Notes &amp; Tips</AlertTitle>
                     <AlertDescription className="text-sky-700/90 dark:text-sky-300/90 whitespace-pre-line text-sm">
                       {detailedRecipe.healthNotes}
                     </AlertDescription>
