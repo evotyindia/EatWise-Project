@@ -221,9 +221,6 @@ export function RecipeForm() {
   };
   
   const initiateChatWithWelcome = async (contextType: "recipe", contextData: any) => {
-    if (chatHistory.length > 1) { // Only scroll if chat is ongoing
-        scrollToBottom();
-    }
     
     // Welcome message logic...
     setIsChatLoading(true);
@@ -311,7 +308,7 @@ export function RecipeForm() {
                   name="userSuggestions"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="font-semibold">Any Specific Requests?</FormLabel>
+                      <FormLabel className="font-semibold">Any Specific Requests? (Optional)</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="e.g., 'Make it extra spicy', 'use less oil', 'I prefer a gravy dish', 'quick 30-minute meal'..."
