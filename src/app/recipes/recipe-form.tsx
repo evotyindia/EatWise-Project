@@ -24,7 +24,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -228,7 +227,7 @@ export function RecipeForm() {
                 <FormItem>
                   <FormLabel className="font-semibold">Available Ingredients</FormLabel>
                   <FormControl><Textarea placeholder="e.g., Onions, Tomatoes, Paneer, Rice..." {...field} rows={4} className="bg-background/50" /></FormControl>
-                  <FormDescription>Type your ingredients separated by commas, or use the helper below.</FormDescription>
+                  <FormDescription>Type your ingredients separated by commas.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )} />
@@ -287,47 +286,46 @@ export function RecipeForm() {
                   </Dialog>
               </div>
 
-              <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="item-1">
-                  <AccordionTrigger className="font-semibold">Health & Household Options</AccordionTrigger>
-                  <AccordionContent className="space-y-6 pt-4">
-                    <div>
-                      <FormLabel>Health Considerations (Optional)</FormLabel>
-                      <div className="grid grid-cols-2 gap-2 mt-2">
-                        {diseaseOptions.map((item) => (
-                          <FormField key={item.id} control={form.control} name="diseaseConcerns" render={({ field }) => (
-                            <FormItem className="flex flex-row items-center space-x-2 space-y-0 p-2 border rounded-md hover:bg-muted/50 transition-colors">
-                              <FormControl><Checkbox checked={field.value?.includes(item.id)} 
-                                onCheckedChange={(checked) => {
-                                  return checked ? field.onChange([...(field.value || []), item.id]) : field.onChange(field.value?.filter((value) => value !== item.id));
-                                }} /></FormControl>
-                              <FormLabel className="text-sm font-normal cursor-pointer flex items-center gap-1.5"><item.icon className="h-4 w-4 text-muted-foreground"/>{item.label}</FormLabel>
-                            </FormItem>
-                          )} />
-                        ))}
-                      </div>
-                    </div>
+              <Separator className="my-6" />
 
-                    <div>
-                      <FormLabel>Household Size (for portioning)</FormLabel>
-                      <div className="grid grid-cols-3 gap-3 mt-2">
-                        <FormField control={form.control} name="householdComposition.adults" render={({ field }) => (
-                          <FormItem><FormLabel className="text-xs flex items-center gap-1"><User className="h-3 w-3"/>Adults</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="householdComposition.seniors" render={({ field }) => (
-                          <FormItem><FormLabel className="text-xs flex items-center gap-1"><UserCog className="h-3 w-3"/>Seniors</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="householdComposition.kids" render={({ field }) => (
-                          <FormItem><FormLabel className="text-xs flex items-center gap-1"><Baby className="h-3 w-3"/>Kids</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                      </div>
-                      {form.formState.errors.householdComposition && <FormMessage className="col-span-3">{form.formState.errors.householdComposition.message}</FormMessage>}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+              <div className="space-y-6">
+                <div>
+                  <FormLabel className="font-semibold">Health Considerations (Optional)</FormLabel>
+                  <FormDescription className="text-xs">Select any dietary needs for the recipe.</FormDescription>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {diseaseOptions.map((item) => (
+                      <FormField key={item.id} control={form.control} name="diseaseConcerns" render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0 p-2 border rounded-md hover:bg-muted/50 transition-colors">
+                          <FormControl><Checkbox checked={field.value?.includes(item.id)}
+                            onCheckedChange={(checked) => {
+                              return checked ? field.onChange([...(field.value || []), item.id]) : field.onChange(field.value?.filter((value) => value !== item.id));
+                            }} /></FormControl>
+                          <FormLabel className="text-sm font-normal cursor-pointer flex items-center gap-1.5"><item.icon className="h-4 w-4 text-muted-foreground" />{item.label}</FormLabel>
+                        </FormItem>
+                      )} />
+                    ))}
+                  </div>
+                </div>
 
-              <Button type="submit" disabled={isLoadingSuggestions} className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
+                <div>
+                  <FormLabel className="font-semibold">Household Size (for portioning)</FormLabel>
+                  <FormDescription className="text-xs">Adjusts ingredient quantities.</FormDescription>
+                  <div className="grid grid-cols-3 gap-3 mt-2">
+                    <FormField control={form.control} name="householdComposition.adults" render={({ field }) => (
+                      <FormItem><FormLabel className="text-xs flex items-center gap-1"><User className="h-3 w-3" />Adults</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="householdComposition.seniors" render={({ field }) => (
+                      <FormItem><FormLabel className="text-xs flex items-center gap-1"><UserCog className="h-3 w-3" />Seniors</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="householdComposition.kids" render={({ field }) => (
+                      <FormItem><FormLabel className="text-xs flex items-center gap-1"><Baby className="h-3 w-3" />Kids</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                  </div>
+                  {form.formState.errors.householdComposition && <FormMessage className="col-span-3">{form.formState.errors.householdComposition.message}</FormMessage>}
+                </div>
+              </div>
+              
+              <Button type="submit" disabled={isLoadingSuggestions} className="w-full bg-accent text-accent-foreground hover:bg-accent/90 mt-6 !">
                 {isLoadingSuggestions ? "Finding Ideas..." : "Get Dish Ideas"}
                 <Sparkles className="ml-2 h-4 w-4" />
               </Button>
@@ -454,7 +452,6 @@ export function RecipeForm() {
                 <h3 className="font-semibold text-xl mb-2 flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Recipe</h3>
                 <p className="text-sm text-muted-foreground mb-4">Ask about substitutions, techniques, or nutrition.</p>
                 <ScrollArea className="h-[200px] w-full rounded-md border p-4 mb-4 bg-muted/50">
-                  <div ref={messagesEndRef} />
                   {chatHistory.map((msg, index) => (
                     <div key={index} className={`mb-3 p-3 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
                       <span className="font-semibold capitalize block mb-1">{msg.role === 'user' ? 'You' : 'AI Chef'}:</span>
@@ -462,6 +459,7 @@ export function RecipeForm() {
                     </div>
                   ))}
                   {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Chef is typing...</div>}
+                  <div ref={messagesEndRef} />
                 </ScrollArea>
                 <form onSubmit={handleChatSubmit} className="w-full flex gap-2">
                   <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background/50"/>
