@@ -239,13 +239,13 @@ export function RecipeForm() {
                               <Button
                                   key={ingredient}
                                   type="button"
-                                  variant={isSelected ? "default" : "outline"}
+                                  variant="outline"
                                   size="sm"
                                   className={cn(
-                                      "rounded-full h-auto px-3 py-1.5 text-xs transition-colors duration-200",
-                                      isSelected 
-                                          ? "bg-accent text-accent-foreground hover:bg-accent/90 border-transparent"
-                                          : "bg-muted/50 text-muted-foreground hover:bg-muted border-gray-200 dark:border-gray-700 border"
+                                      "rounded-full h-auto px-3 py-1.5 text-xs font-medium transition-all duration-200 ease-in-out hover:scale-105 active:scale-100",
+                                      isSelected
+                                          ? "bg-accent text-accent-foreground border-transparent shadow hover:bg-accent/90"
+                                          : "bg-background text-muted-foreground border-border hover:bg-muted hover:text-foreground"
                                   )}
                                   onClick={() => toggleIngredient(ingredient)}
                               >
