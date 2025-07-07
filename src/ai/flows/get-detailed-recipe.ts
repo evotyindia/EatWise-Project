@@ -47,9 +47,12 @@ const prompt = ai.definePrompt({
   name: 'getDetailedRecipePrompt',
   input: {schema: GetDetailedRecipeInputSchema},
   output: {schema: GetDetailedRecipeOutputSchema},
-  prompt: `You are an expert Indian chef and nutritionist. Generate a detailed, delicious, and healthy Indian recipe for the dish: "{{dishName}}". Use common Indian names for ingredients where appropriate (e.g., 'Palak' for Spinach, 'Dhaniya' for Coriander).
+  prompt: `You are an expert Indian chef and nutritionist. Your task is to generate a detailed, delicious, and healthy Indian recipe for the dish: "{{dishName}}". Use common Indian names for ingredients where appropriate (e.g., 'Palak' for Spinach, 'Dhaniya' for Coriander).
+
+The recipe must be tailored to the user's specific needs:
 
 User's Available Ingredients: {{availableIngredients}}
+
 Household Composition:
 - Adults (18-60): {{householdComposition.adults}}
 - Seniors (60+): {{householdComposition.seniors}}
@@ -61,13 +64,15 @@ Health Considerations/Dietary Restrictions: {{#each diseaseConcerns}}{{{this}}}{
 Health Considerations/Dietary Restrictions: Focus on general healthy preparation.
 {{/if}}
 
-Your task is to provide a complete, easy-to-follow recipe. Pay close attention to the following details:
+Please provide a complete, easy-to-follow recipe with the following strict requirements:
 
 1.  **Recipe Title**: A full, appealing title for "{{dishName}}".
 2.  **Description**: A brief 2-3 sentence description, highlighting its healthiness, taste, and key features.
-3.  **Servings, Prep & Cook Time**: Provide a practical servings description based on the household size, along with estimated prep and cook times.
+3.  **Servings, Prep & Cook Time**:
+    *   **Servings Description**: Write a servings description that *exactly matches* the household composition (e.g., "Serves 2 adults, 1 senior, and 1 child"). State if quantities are generous or average.
+    *   **Prep & Cook Time**: Provide *realistic* and practical estimates for preparation and cooking time. The cooking time should logically increase with larger quantities.
 4.  **Adjusted Ingredients List**:
-    *   List all necessary ingredients with quantities *carefully and realistically adjusted* to be sufficient for the specified household and any health considerations.
+    *   **CRITICAL**: The ingredient quantities MUST be *carefully and realistically adjusted* to be sufficient for the specified household. For example, a recipe for 4 people should have roughly double the ingredients of a recipe for 2 people. This is a mandatory instruction.
     *   Your primary source of ingredients MUST be the 'availableIngredients' list provided by the user.
     *   If, and only if, *absolutely essential* common Indian pantry staples (e.g., cooking oil, salt) are missing, you may add them, marking them in the 'notes' as "Essential staple: add if available".
     *   **Crucially, use the 'notes' field to clearly distinguish between mandatory and optional items.**
