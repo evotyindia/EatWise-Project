@@ -38,7 +38,7 @@ export function Header() {
     <header className={cn(
       "sticky top-0 z-50 w-full border-b transition-all duration-300",
       isScrolled 
-        ? "border-border bg-[#f1f1ff]/90 dark:bg-background/80 shadow-md backdrop-blur-lg"
+        ? "border-border bg-[#f9f9fe]/90 dark:bg-background/80 shadow-md backdrop-blur-lg"
         : "border-transparent bg-transparent"
     )}>
       <div className="container flex h-16 max-w-screen-xl items-center justify-between">
@@ -79,7 +79,7 @@ export function Header() {
                   <span className="sr-only">Toggle Menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[280px] bg-[#f1f1ff]/90 dark:bg-background/80 backdrop-blur-lg">
+              <SheetContent side="right" className="w-[280px] bg-[#f9f9fe]/90 dark:bg-background/80 backdrop-blur-lg">
                 <nav className="flex flex-col space-y-4 pt-8">
                   {navItems.map((item) => (
                     <SheetClose asChild key={item.href}>
