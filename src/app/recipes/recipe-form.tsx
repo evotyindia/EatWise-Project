@@ -54,12 +54,13 @@ const recipePageInputSchema = z.object({
 type RecipePageFormValues = z.infer<typeof recipePageInputSchema>;
 
 const categorizedIngredients = [
-    { category: "Vegetables", items: ["Onion", "Tomato", "Potato", "Spinach", "Carrot", "Capsicum", "Ginger", "Garlic", "Cauliflower", "Peas", "Coriander Leaves", "Green Chili", "Lemon"] },
-    { category: "Spices", items: ["Turmeric Powder", "Cumin Powder", "Coriander Powder", "Garam Masala", "Red Chili Powder", "Mustard Seeds", "Salt"] },
-    { category: "Dals & Legumes", items: ["Moong Dal", "Toor Dal", "Chana Dal", "Masoor Dal", "Rajma", "Chickpeas (Chole)"] },
-    { category: "Grains & Flours", items: ["Rice", "Wheat Flour (Atta)", "Besan (Gram Flour)", "Suji (Semolina)"] },
-    { category: "Dairy & Proteins", items: ["Paneer", "Curd (Yogurt)", "Milk", "Ghee"] },
-    { category: "Pantry Staples", items: ["Cooking Oil"] }
+    { category: "Vegetables", items: ["Onion", "Tomato", "Potato", "Spinach", "Carrot", "Capsicum", "Ginger", "Garlic", "Cauliflower", "Peas", "Coriander Leaves", "Green Chili", "Lemon", "Cucumber", "Cabbage", "Brinjal (Eggplant)", "Okra (Bhindi)", "Radish (Mooli)", "Beetroot", "Mint Leaves", "Curry Leaves", "Bottle Gourd (Lauki)"] },
+    { category: "Spices", items: ["Salt", "Turmeric Powder", "Cumin Powder", "Coriander Powder", "Garam Masala", "Red Chili Powder", "Mustard Seeds", "Cumin Seeds", "Cloves", "Cinnamon", "Cardamom", "Black Pepper", "Asafoetida (Hing)", "Fenugreek Seeds (Methi)", "Bay Leaf", "Dry Red Chilies"] },
+    { category: "Dals & Legumes", items: ["Toor Dal", "Moong Dal", "Chana Dal", "Masoor Dal", "Urad Dal", "Rajma (Kidney Beans)", "Chole (Chickpeas)", "Black Eyed Peas (Lobia)", "Green Moong (Whole)"] },
+    { category: "Grains & Flours", items: ["Rice", "Basmati Rice", "Wheat Flour (Atta)", "Besan (Gram Flour)", "Suji (Semolina)", "Poha (Flattened Rice)", "Maida (All-purpose flour)", "Ragi Flour"] },
+    { category: "Dairy & Proteins", items: ["Paneer", "Curd (Yogurt)", "Milk", "Ghee", "Butter", "Cream (Malai)", "Tofu"] },
+    { category: "Nuts & Seeds", items: ["Peanuts", "Cashews", "Almonds", "Sesame Seeds", "Poppy Seeds"] },
+    { category: "Pantry Staples", items: ["Cooking Oil", "Sugar", "Jaggery", "Tamarind", "Vinegar", "Soy Sauce"] }
 ];
 
 export function RecipeForm() {
@@ -215,7 +216,7 @@ export function RecipeForm() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      <div className="lg:col-span-4 lg:sticky top-24">
+      <div className="lg:col-span-4 lg:sticky lg:top-24">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center text-2xl"><ChefHat className="mr-2 h-6 w-6 text-primary" /> Find a Recipe</CardTitle>
