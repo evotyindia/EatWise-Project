@@ -40,6 +40,7 @@ const diseaseOptions: { id: Disease; label: string; icon: React.ElementType }[] 
 
 const recipePageInputSchema = z.object({
   ingredients: z.string().min(3, "Please enter at least one ingredient (min 3 chars)."),
+  userSuggestions: z.string().optional(),
   diseaseConcerns: z.array(DiseaseEnum).optional(),
   householdComposition: HouseholdCompositionSchema.extend({
     adults: z.string().transform(v => Number(v) || 0).refine(v => v >=0, "Must be 0 or more"),
@@ -119,6 +120,7 @@ export function RecipeForm() {
     resolver: zodResolver(recipePageInputSchema),
     defaultValues: {
       ingredients: "",
+      userSuggestions: "",
       diseaseConcerns: [],
       householdComposition: { adults: "1", seniors: "0", kids: "0" },
     },
@@ -168,6 +170,7 @@ export function RecipeForm() {
       const diseases = data.diseaseConcerns?.length ? data.diseaseConcerns : [DiseaseEnum.enum.none];
       const input: GetRecipeSuggestionsInput = {
         ingredients: data.ingredients,
+        userSuggestions: data.userSuggestions,
         diseaseConcerns: diseases,
         householdComposition: {
           adults: Number(data.householdComposition.adults),
@@ -196,6 +199,7 @@ export function RecipeForm() {
       const input: GetDetailedRecipeInput = {
         dishName,
         availableIngredients: currentFormInputs.ingredients,
+        userSuggestions: currentFormInputs.userSuggestions,
         diseaseConcerns: diseases,
         householdComposition: {
           adults: Number(currentFormInputs.householdComposition.adults),
@@ -217,6 +221,11 @@ export function RecipeForm() {
   };
   
   const initiateChatWithWelcome = async (contextType: "recipe", contextData: any) => {
+    if (chatHistory.length > 1) { // Only scroll if chat is ongoing
+        scrollToBottom();
+    }
+    
+    // Welcome message logic...
     setIsChatLoading(true);
     setChatHistory([]); 
     const input: ContextAwareAIChatInput = {
@@ -296,6 +305,26 @@ export function RecipeForm() {
                     <FormMessage />
                   </FormItem>
                 )} />
+
+                <FormField
+                  control={form.control}
+                  name="userSuggestions"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-semibold">Any Specific Requests?</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="e.g., 'Make it extra spicy', 'use less oil', 'I prefer a gravy dish', 'quick 30-minute meal'..."
+                          {...field}
+                          rows={3}
+                          className="bg-background/50"
+                        />
+                      </FormControl>
+                      <FormDescription>Let the AI chef know your preferences.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 
                  <div className="space-y-2">
                     <Dialog>
@@ -562,5 +591,3 @@ export function RecipeForm() {
     </div>
   );
 }
-
-    

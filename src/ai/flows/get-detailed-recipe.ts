@@ -15,6 +15,7 @@ import { DiseaseEnum, HouseholdCompositionSchema } from '@/ai/types/recipe-share
 const GetDetailedRecipeInputSchema = z.object({
   dishName: z.string().describe("The name of the dish selected by the user."),
   availableIngredients: z.string().describe("The original list of ingredients the user has available, comma-separated."),
+  userSuggestions: z.string().optional().describe("Any specific user requests that should be reflected in the detailed recipe."),
   diseaseConcerns: z.array(DiseaseEnum).optional().describe("List of health conditions or dietary restrictions (e.g., diabetes, gluten_free). 'none' means no specific dietary disease concern."),
   householdComposition: HouseholdCompositionSchema.describe("Composition of the household for portioning (adults, seniors, kids).")
 });
@@ -72,17 +73,21 @@ const prompt = ai.definePrompt({
   {{else}}
   - Health Concerns: General healthy preparation.
   {{/if}}
+  {{#if userSuggestions}}
+  - User's Special Request: "{{userSuggestions}}"
+  {{/if}}
 
   **ADDITIONAL RULES:**
-  1.  **Servings Description:** The 'servingsDescription' field MUST *exactly* match the household composition (e.g., "Serves 2 adults, 1 senior, and 1 child").
-  2.  **Ingredient Sourcing & Notes:**
+  1.  **User Request Adherence:** You MUST strictly follow the "User's Special Request". If the user asks for "spicy", add more chilies. If they ask for "less oil", reduce the oil quantity. If they ask for a "quick meal", prioritize simple steps and reflect this in prep/cook times. This instruction is as important as recipe scaling.
+  2.  **Servings Description:** The 'servingsDescription' field MUST *exactly* match the household composition (e.g., "Serves 2 adults, 1 senior, and 1 child").
+  3.  **Ingredient Sourcing & Notes:**
       *   Prioritize using the 'availableIngredients'.
       *   Only add *absolutely essential* Indian pantry staples (e.g., cooking oil, salt, turmeric) if they are missing. In the 'notes' for these, you MUST write: "Essential staple: add if available".
       *   Common Indian spices for flavor (e.g., garam masala, cumin powder) are NOT essential. If you suggest them, the 'notes' field MUST say: "Optional, for flavor".
-  3.  **Instructions:** Provide clear, step-by-step instructions with professional cooking tips. Label optional steps clearly (e.g., start with "(Optional)").
-  4.  **Health Notes:** Provide specific advice tailored to the 'diseaseConcerns'. If none, give general health benefits.
-  5.  **Language:** Use common Indian names for ingredients (e.g., 'Palak' for Spinach).
-  6.  **JSON Format:** Your entire response MUST be a single, valid JSON object that conforms to the output schema. No extra text or explanations.
+  4.  **Instructions:** Provide clear, step-by-step instructions with professional cooking tips. Label optional steps clearly (e.g., start with "(Optional)").
+  5.  **Health Notes:** Provide specific advice tailored to the 'diseaseConcerns' and 'userSuggestions'. If none, give general health benefits.
+  6.  **Language:** Use common Indian names for ingredients (e.g., 'Palak' for Spinach).
+  7.  **JSON Format:** Your entire response MUST be a single, valid JSON object that conforms to the output schema. No extra text or explanations.
 
   Now, generate the JSON output based on these strict instructions.
 `,
@@ -98,7 +103,7 @@ const getDetailedRecipeFlow = ai.defineFlow(
     // Calculate total people before calling the prompt
     const totalPeople = input.householdComposition.adults + input.householdComposition.seniors + input.householdComposition.kids;
 
-    const processedInput = {...input, totalPeople};
+    const processedInput: InternalGetDetailedRecipeInputSchema = {...input, totalPeople};
     if (processedInput.diseaseConcerns && processedInput.diseaseConcerns.length === 1 && processedInput.diseaseConcerns[0] === 'none') {
       processedInput.diseaseConcerns = [];
     }
