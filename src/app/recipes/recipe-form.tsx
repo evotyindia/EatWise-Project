@@ -10,7 +10,7 @@ import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aw
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles, ChefHat, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, MinusCircle, Check } from "lucide-react";
+import { Lightbulb, Sparkles, ChefHat, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, MinusCircle, Check, Clock, Soup, Users } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
@@ -27,6 +27,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 const diseaseOptions: { id: Disease; label: string; icon: React.ElementType }[] = [
@@ -212,8 +213,8 @@ export function RecipeForm() {
 
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <Card className="lg:col-span-1">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      <Card className="lg:col-span-1 sticky top-20">
         <CardHeader>
           <CardTitle className="flex items-center text-2xl"><ChefHat className="mr-2 h-6 w-6 text-primary" /> Recipe Finder</CardTitle>
           <CardDescription>Tell us what you have and any health needs.</CardDescription>
@@ -223,7 +224,7 @@ export function RecipeForm() {
             <form onSubmit={form.handleSubmit(onGetSuggestionsSubmit)} className="space-y-6">
               <FormField control={form.control} name="ingredients" render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Available Ingredients</FormLabel>
+                  <FormLabel className="font-semibold">Available Ingredients</FormLabel>
                   <FormControl><Textarea placeholder="e.g., Onions, Tomatoes, Paneer, Rice..." {...field} rows={4} className="bg-background/50" /></FormControl>
                   <FormDescription>Separate ingredients with commas.</FormDescription>
                   <FormMessage />
@@ -239,17 +240,15 @@ export function RecipeForm() {
                               <Button
                                   key={ingredient}
                                   type="button"
-                                  variant="outline"
+                                  variant={isSelected ? 'default' : 'outline'}
                                   size="sm"
                                   className={cn(
-                                      "rounded-full h-auto px-3 py-1.5 text-xs font-medium transition-all duration-200 ease-in-out hover:scale-105 active:scale-100",
-                                      isSelected
-                                          ? "bg-accent text-accent-foreground border-transparent shadow hover:bg-accent/90"
-                                          : "bg-background text-muted-foreground border-border hover:bg-muted hover:text-foreground"
+                                      "rounded-full h-auto px-3 py-1 text-xs font-medium transition-all duration-200 ease-in-out hover:scale-105 active:scale-100",
+                                      isSelected && "bg-accent text-accent-foreground shadow"
                                   )}
                                   onClick={() => toggleIngredient(ingredient)}
                               >
-                                  {isSelected && <Check className="mr-1.5 h-4 w-4" />}
+                                  {isSelected && <Check className="mr-1.5 h-3 w-3" />}
                                   {ingredient}
                               </Button>
                           );
@@ -259,19 +258,19 @@ export function RecipeForm() {
 
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="item-1">
-                  <AccordionTrigger>Health & Household Options</AccordionTrigger>
+                  <AccordionTrigger className="font-semibold">Health & Household Options</AccordionTrigger>
                   <AccordionContent className="space-y-6 pt-4">
                     <div>
                       <FormLabel>Health Considerations (Optional)</FormLabel>
                       <div className="grid grid-cols-2 gap-2 mt-2">
                         {diseaseOptions.map((item) => (
                           <FormField key={item.id} control={form.control} name="diseaseConcerns" render={({ field }) => (
-                            <FormItem className="flex flex-row items-center space-x-2 space-y-0 p-2 border rounded-md hover:bg-muted/50">
+                            <FormItem className="flex flex-row items-center space-x-2 space-y-0 p-2 border rounded-md hover:bg-muted/50 transition-colors">
                               <FormControl><Checkbox checked={field.value?.includes(item.id)} 
                                 onCheckedChange={(checked) => {
                                   return checked ? field.onChange([...(field.value || []), item.id]) : field.onChange(field.value?.filter((value) => value !== item.id));
                                 }} /></FormControl>
-                              <FormLabel className="text-sm font-normal cursor-pointer flex items-center"><item.icon className="mr-1.5 h-4 w-4 text-muted-foreground"/>{item.label}</FormLabel>
+                              <FormLabel className="text-sm font-normal cursor-pointer flex items-center gap-1.5"><item.icon className="h-4 w-4 text-muted-foreground"/>{item.label}</FormLabel>
                             </FormItem>
                           )} />
                         ))}
@@ -282,13 +281,13 @@ export function RecipeForm() {
                       <FormLabel>Household Size (for portioning)</FormLabel>
                       <div className="grid grid-cols-3 gap-3 mt-2">
                         <FormField control={form.control} name="householdComposition.adults" render={({ field }) => (
-                          <FormItem><FormLabel className="text-xs flex items-center"><User className="mr-1 h-3 w-3"/>Adults</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
+                          <FormItem><FormLabel className="text-xs flex items-center gap-1"><User className="h-3 w-3"/>Adults</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="householdComposition.seniors" render={({ field }) => (
-                          <FormItem><FormLabel className="text-xs flex items-center"><UserCog className="mr-1 h-3 w-3"/>Seniors</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
+                          <FormItem><FormLabel className="text-xs flex items-center gap-1"><UserCog className="h-3 w-3"/>Seniors</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="householdComposition.kids" render={({ field }) => (
-                          <FormItem><FormLabel className="text-xs flex items-center"><Baby className="mr-1 h-3 w-3"/>Kids</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
+                          <FormItem><FormLabel className="text-xs flex items-center gap-1"><Baby className="h-3 w-3"/>Kids</FormLabel><FormControl><Input type="number" min="0" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                       </div>
                       {form.formState.errors.householdComposition && <FormMessage className="col-span-3">{form.formState.errors.householdComposition.message}</FormMessage>}
@@ -307,9 +306,19 @@ export function RecipeForm() {
       </Card>
 
       <div className="lg:col-span-2 space-y-8">
-        {isLoadingSuggestions && ( <Card className="flex items-center justify-center h-64"><Sparkles className="h-12 w-12 text-accent animate-spin" /><p className="ml-3 text-lg">Finding dish ideas...</p></Card> )}
+        {isLoadingSuggestions && (
+          <Card>
+            <CardHeader><CardTitle>Finding recipe ideas...</CardTitle><CardDescription>Our AI chef is checking the pantry.</CardDescription></CardHeader>
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Skeleton className="h-32 rounded-lg" />
+              <Skeleton className="h-32 rounded-lg" />
+              <Skeleton className="h-32 rounded-lg" />
+              <Skeleton className="h-32 rounded-lg" />
+            </CardContent>
+          </Card>
+        )}
         
-        {dishSuggestions && !detailedRecipe && (
+        {dishSuggestions && !detailedRecipe && !isLoadingRecipe && (
           <Card className="animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
             <CardHeader>
               <CardTitle className="text-xl flex items-center"><Lightbulb className="mr-2 h-5 w-5 text-accent"/> Suggested Dishes</CardTitle>
@@ -319,27 +328,20 @@ export function RecipeForm() {
               {dishSuggestions.suggestions.length > 0 && !dishSuggestions.suggestions[0].toLowerCase().includes("sorry") ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {dishSuggestions.suggestions.map((dish, index) => (
-                    <Card 
-                      key={index} 
-                      onClick={() => !isLoadingRecipe && handleSelectDish(dish)}
-                      className={cn(
-                        "group cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col",
-                        isLoadingRecipe && "opacity-50 cursor-not-allowed"
-                      )}
+                    <button
+                      key={index}
+                      disabled={isLoadingRecipe}
+                      onClick={() => handleSelectDish(dish)}
+                      className="text-left p-4 border rounded-lg hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     >
-                      <CardHeader className="pb-4">
-                        <CardTitle className="text-lg flex items-center">
+                        <h3 className="font-semibold text-lg flex items-center">
                           <ChefHat className="mr-2 h-5 w-5 text-primary group-hover:text-accent transition-colors"/>
-                          {isLoadingRecipe ? 'Loading...' : dish}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="flex-grow"></CardContent>
-                      <CardFooter>
-                        <p className="text-sm font-semibold text-accent group-hover:underline">
+                          {dish}
+                        </h3>
+                        <p className="text-sm font-semibold text-accent mt-4 group-hover:underline">
                           View Full Recipe &rarr;
                         </p>
-                      </CardFooter>
-                    </Card>
+                    </button>
                   ))}
                 </div>
               ) : <p className="text-muted-foreground">No specific dish suggestions found. Try adjusting your ingredients or health concerns.</p>}
@@ -347,60 +349,84 @@ export function RecipeForm() {
           </Card>
         )}
 
-        {isLoadingRecipe && ( <Card className="flex items-center justify-center h-96"><Sparkles className="h-12 w-12 text-accent animate-spin" /><p className="ml-3 text-lg">Generating detailed recipe...</p></Card> )}
+        {isLoadingRecipe && (
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-8 w-3/4 rounded-md" />
+              <Skeleton className="h-4 w-1/2 rounded-md mt-2" />
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-3 gap-4">
+                <Skeleton className="h-12 rounded-md" />
+                <Skeleton className="h-12 rounded-md" />
+                <Skeleton className="h-12 rounded-md" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <Skeleton className="h-6 w-1/3 mb-4 rounded-md" />
+                  <Skeleton className="h-28 w-full rounded-md" />
+                </div>
+                <div>
+                  <Skeleton className="h-6 w-1/3 mb-4 rounded-md" />
+                  <Skeleton className="h-40 w-full rounded-md" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         
         {detailedRecipe && (
           <Card className="transition-shadow animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
             <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                    <CardTitle className="text-2xl flex items-center"><FileText className="mr-2 h-6 w-6 text-primary"/> {detailedRecipe.recipeTitle}</CardTitle>
-                    {detailedRecipe.description && <CardDescription className="mt-1">{detailedRecipe.description}</CardDescription>}
-                </div>
-              </div>
+                <CardTitle className="text-3xl font-bold flex items-center"><FileText className="mr-3 h-7 w-7 text-primary"/> {detailedRecipe.recipeTitle}</CardTitle>
+                {detailedRecipe.description && <CardDescription className="mt-1 text-base">{detailedRecipe.description}</CardDescription>}
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm p-3 bg-muted/60 rounded-lg">
-                {detailedRecipe.prepTime && <div><strong>Prep:</strong> {detailedRecipe.prepTime}</div>}
-                {detailedRecipe.cookTime && <div><strong>Cook:</strong> {detailedRecipe.cookTime}</div>}
-                <div className="col-span-2 sm:col-span-1"><strong>Serves:</strong> {detailedRecipe.servingsDescription}</div>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm p-4 bg-muted/60 rounded-lg border">
+                <div className="flex items-center gap-2"><Clock className="h-5 w-5 text-accent"/><div><div className="font-semibold">Prep Time</div><div>{detailedRecipe.prepTime || 'N/A'}</div></div></div>
+                <div className="flex items-center gap-2"><Soup className="h-5 w-5 text-accent"/><div><div className="font-semibold">Cook Time</div><div>{detailedRecipe.cookTime || 'N/A'}</div></div></div>
+                <div className="flex items-center gap-2"><Users className="h-5 w-5 text-accent"/><div><div className="font-semibold">Servings</div><div>{detailedRecipe.servingsDescription}</div></div></div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 pt-4">
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2">Ingredients:</h3>
-                    <ul className="list-disc list-inside space-y-1 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-x-8 gap-y-6 pt-4">
+                  <div className="md:col-span-2">
+                    <h3 className="font-semibold text-xl mb-3 border-b pb-2">Ingredients</h3>
+                    <ul className="space-y-2 text-sm">
                       {detailedRecipe.adjustedIngredients.map((ing, i) => (
-                        <li key={i}><strong>{ing.quantity}</strong> {ing.name}{ing.notes ? <span className="text-muted-foreground text-xs"> ({ing.notes})</span> : ""}</li>
+                        <li key={i} className="flex items-start">
+                          <Check className="h-4 w-4 text-green-500 mr-2 mt-1 shrink-0" />
+                          <div>
+                            <span className="font-medium">{ing.name}</span>: <span>{ing.quantity}</span>
+                            {ing.notes && <div className="text-xs text-muted-foreground">({ing.notes})</div>}
+                          </div>
+                        </li>
                       ))}
                     </ul>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2">Instructions:</h3>
-                    <ol className="list-decimal list-inside space-y-2 text-sm">
-                      {detailedRecipe.instructions.map((step, i) => <li key={i} className="pl-2">{step}</li>)}
+                  <div className="md:col-span-3">
+                    <h3 className="font-semibold text-xl mb-3 border-b pb-2">Instructions</h3>
+                    <ol className="list-decimal list-outside space-y-3 text-sm pl-5">
+                      {detailedRecipe.instructions.map((step, i) => <li key={i} className="pl-1 leading-relaxed">{step}</li>)}
                     </ol>
                   </div>
               </div>
               {detailedRecipe.healthNotes && (
-                <>
-                  <Separator className="my-4"/>
-                  <Alert>
-                    <Lightbulb className="h-4 w-4" />
-                    <AlertTitle className="font-semibold">Health Notes</AlertTitle>
-                    <AlertDescription className="whitespace-pre-line">
+                <Alert variant="default" className="bg-sky-500/10 border-sky-500/20">
+                    <Lightbulb className="h-5 w-5 text-sky-600" />
+                    <AlertTitle className="font-semibold text-sky-800 dark:text-sky-300">Health Notes & Tips</AlertTitle>
+                    <AlertDescription className="text-sky-700/90 dark:text-sky-300/90 whitespace-pre-line text-sm">
                       {detailedRecipe.healthNotes}
                     </AlertDescription>
                   </Alert>
-                </>
               )}
             </CardContent>
-            <CardFooter className="flex flex-col items-start pt-4 border-t">
+            <CardFooter className="flex flex-col items-start pt-4 border-t mt-4">
                 <h3 className="font-semibold text-xl mb-2 flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Recipe</h3>
-                <p className="text-sm text-muted-foreground mb-3">Ask about substitutions, techniques, or nutrition.</p>
-                <ScrollArea className="h-[200px] w-full rounded-md border p-3 mb-3 bg-muted/50">
+                <p className="text-sm text-muted-foreground mb-4">Ask about substitutions, techniques, or nutrition.</p>
+                <ScrollArea className="h-[200px] w-full rounded-md border p-4 mb-4 bg-muted/50">
                   {chatHistory.map((msg, index) => (
-                    <div key={index} className={`mb-2 p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
-                      <span className="font-semibold capitalize">{msg.role === 'user' ? 'You' : 'AI Chef'}: </span>{msg.content}
+                    <div key={index} className={`mb-3 p-3 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
+                      <span className="font-semibold capitalize block mb-1">{msg.role === 'user' ? 'You' : 'AI Chef'}:</span>
+                      <span>{msg.content}</span>
                     </div>
                   ))}
                   {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Chef is typing...</div>}
@@ -415,11 +441,11 @@ export function RecipeForm() {
         )}
         
         {!isLoadingSuggestions && !dishSuggestions && !detailedRecipe && !isLoadingRecipe &&(
-          <Card className="flex items-center justify-center h-full min-h-[300px] bg-muted/30 md:col-span-2">
+          <Card className="flex items-center justify-center h-full min-h-[400px] bg-muted/30 border-2 border-dashed">
             <div className="text-center p-8">
                 <ChefHat className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-                <p className="text-xl font-semibold text-muted-foreground">Let's find some recipes!</p>
-                <p className="text-md text-muted-foreground mt-1">Enter your ingredients to get started.</p>
+                <p className="text-xl font-semibold text-muted-foreground">Your recipe ideas will appear here!</p>
+                <p className="text-md text-muted-foreground mt-2 max-w-sm mx-auto">Enter your ingredients on the left and let our AI chef whip up some healthy meal suggestions for you.</p>
             </div>
           </Card>
         )}
@@ -427,3 +453,5 @@ export function RecipeForm() {
     </div>
   );
 }
+
+    
