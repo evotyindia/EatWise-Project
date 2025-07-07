@@ -19,9 +19,18 @@ export function ThemeToggleButton() {
 
   if (!mounted) {
     // A placeholder to prevent layout shift and hydration errors.
-    // It's a disabled button that is structurally similar to the final one.
+    // It's a disabled button that is structurally identical to the final one.
+    // It defaults to showing the "Light" mode toggle state.
     // A fixed width prevents content shift between "Light" and "Dark".
-    return <Button variant="outline" size="sm" disabled className="w-[88px]" />;
+    return (
+        <Button variant="outline" size="sm" disabled className="w-[88px]">
+            <>
+                <Sun />
+                <span>Light</span>
+            </>
+            <span className="sr-only">Toggle theme</span>
+        </Button>
+    );
   }
 
   return (
