@@ -236,9 +236,9 @@ export function RecipeForm() {
                <div className="space-y-2">
                   <Dialog>
                     <DialogTrigger asChild>
-                        <Button variant="outline" className="w-full justify-start text-muted-foreground font-normal">
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Browse & Add Common Ingredients...
+                        <Button variant="outline" className="w-full justify-center text-muted-foreground font-medium border-2 border-dashed hover:border-solid hover:bg-accent/10 hover:text-accent transition-all duration-300 ease-in-out group">
+                            <PlusCircle className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+                            Browse & Add Ingredients
                         </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[625px]">
