@@ -14,6 +14,7 @@ import { DiseaseEnum, HouseholdCompositionSchema, type Disease, type HouseholdCo
 
 const GetRecipeSuggestionsInputSchema = z.object({
   ingredients: z.string().min(1, "Please provide some ingredients.").describe('A comma-separated list of ingredients the user has.'),
+  userSuggestions: z.string().optional().describe("Any specific user requests, like 'make it spicy', 'quick meal', etc."),
   diseaseConcerns: z.array(DiseaseEnum).optional().describe("List of health conditions or dietary restrictions to consider. 'none' means no specific dietary disease concern."),
   householdComposition: HouseholdCompositionSchema.optional().describe("Details about the household members for portion suggestions and suitability.")
 });
@@ -51,7 +52,12 @@ Household Composition:
 Consider this for suitability of dishes (e.g., less spicy for kids/seniors, softer foods for seniors if appropriate).
 {{/if}}
 
-Based on the available ingredients, health considerations, and household composition, suggest 2-5 healthy Indian dish NAMES.
+{{#if userSuggestions}}
+User's Special Request: {{userSuggestions}}
+Please try to accommodate this request in your suggestions. For example, if they ask for a "quick meal", suggest dishes that are fast to cook.
+{{/if}}
+
+Based on all the available information, suggest 2-5 healthy Indian dish NAMES.
 These should be just the names of the dishes, not full recipes.
 The dishes should be practical to make with the listed ingredients. Prioritize using the provided ingredients.
 Suggest diverse options if possible (e.g., a dal, a sabzi, a rice dish).
