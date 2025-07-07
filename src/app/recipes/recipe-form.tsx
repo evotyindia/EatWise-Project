@@ -443,7 +443,9 @@ export function RecipeForm() {
         {isLoadingSuggestions && (
           <Card>
             <CardHeader><CardTitle>Finding recipe ideas...</CardTitle><CardDescription>Our AI chef is checking the pantry.</CardDescription></CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Skeleton className="h-28 rounded-lg" />
+              <Skeleton className="h-28 rounded-lg" />
               <Skeleton className="h-28 rounded-lg" />
               <Skeleton className="h-28 rounded-lg" />
               <Skeleton className="h-28 rounded-lg" />
@@ -460,7 +462,7 @@ export function RecipeForm() {
             </CardHeader>
             <CardContent>
               {dishSuggestions.suggestions.length > 0 && !dishSuggestions.suggestions[0].toLowerCase().includes("sorry") ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {dishSuggestions.suggestions.map((dish, index) => (
                      <Card 
                         key={index}
