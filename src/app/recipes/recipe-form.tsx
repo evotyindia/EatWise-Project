@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { GetRecipeSuggestionsInput, GetRecipeSuggestionsOutput } from "@/ai/flows/recipe-suggestions";
@@ -301,8 +302,8 @@ export function RecipeForm() {
                     <FormMessage />
                   </FormItem>
                 )} />
-
-                 <div className="space-y-2">
+                
+                <div className="space-y-2">
                     <Dialog>
                       <DialogTrigger asChild>
                           <Button variant="outline" className="w-full justify-center text-muted-foreground font-medium border-2 border-dashed hover:border-solid hover:bg-accent/10 hover:text-accent transition-all duration-300 ease-in-out group">
@@ -365,6 +366,7 @@ export function RecipeForm() {
                           </DialogFooter>
                       </DialogContent>
                     </Dialog>
+                    <p className="text-[13px] text-muted-foreground text-center">Click the button above to quickly select from a categorized list of common Indian ingredients.</p>
                 </div>
 
                 <FormField
