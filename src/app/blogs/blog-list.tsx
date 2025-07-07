@@ -3,7 +3,6 @@
 
 import { blogPosts, getBlogCategories, type BlogPost } from "@/lib/blog-data";
 import Link from "next/link";
-import Image from "next/image";
 import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -50,18 +49,6 @@ export function BlogList() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredPosts.map((post) => (
           <Card key={post.slug} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <CardHeader className="p-0">
-              <Link href={`/blogs/${post.slug}`} aria-label={post.title} className="block overflow-hidden">
-                <Image
-                  src={post.featuredImage}
-                  alt={post.title}
-                  width={600}
-                  height={400}
-                  className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
-                  data-ai-hint={post.dataAiHint}
-                />
-              </Link>
-            </CardHeader>
             <CardContent className="p-6 flex-grow">
               <p className="text-sm text-accent font-medium mb-1">{post.category}</p>
               <Link href={`/blogs/${post.slug}`}>
@@ -84,3 +71,5 @@ export function BlogList() {
     </div>
   );
 }
+
+    
