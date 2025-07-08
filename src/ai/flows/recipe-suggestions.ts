@@ -65,6 +65,8 @@ The dishes should be practical to make with the listed ingredients. Prioritize u
 Suggest diverse options if possible (e.g., a dal, a sabzi, a rice dish).
 
 Provide a brief, encouraging message as 'initialContextualGuidance', like "Here are some healthy dish ideas based on your inputs. Click a dish to see its detailed recipe."
+
+**IMPORTANT:** If you cannot find any reasonable suggestions with the provided ingredients, you MUST return an empty array for 'suggestions' and set 'initialContextualGuidance' to a helpful message explaining that no dishes could be found and suggesting the user add more common ingredients. For example: "Sorry, I couldn't find any specific recipes with only these ingredients. Try adding some common items like onions, tomatoes, or basic spices for better results."
 `,
 });
 
