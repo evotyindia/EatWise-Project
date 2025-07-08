@@ -69,7 +69,10 @@ export function BottomNavbar() {
           </SheetTrigger>
           <SheetContent side="bottom" className="w-full h-auto rounded-t-2xl">
             <SheetHeader className="text-left mb-4">
-              <SheetTitle>More Options</SheetTitle>
+              <div className="flex items-center justify-between">
+                <SheetTitle>More Options</SheetTitle>
+                <ThemeToggleButton />
+              </div>
               <SheetDescription>
                 Additional pages and settings.
               </SheetDescription>
@@ -92,11 +95,6 @@ export function BottomNavbar() {
                   </SheetClose>
                 )
               })}
-            </div>
-            <Separator className="my-4" />
-            <div className="flex items-center justify-between p-1">
-                <span className="text-base font-medium">Theme</span>
-                <ThemeToggleButton />
             </div>
           </SheetContent>
         </Sheet>
