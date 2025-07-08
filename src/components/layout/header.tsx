@@ -23,7 +23,7 @@ export function Header() {
 
   return (
     <header className={cn(
-      "sticky top-0 z-50 w-full border-b bg-background/80 shadow-md backdrop-blur-xl"
+      "sticky top-0 z-50 w-full border-b bg-background/95 shadow-sm backdrop-blur-sm"
     )}>
       <div className="container flex h-16 max-w-screen-xl items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
@@ -33,8 +33,8 @@ export function Header() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-4">
-          <nav className="hidden items-center space-x-1 md:flex">
+        <div className="flex items-center gap-6">
+          <nav className="hidden items-center space-x-2 md:flex">
             {navItems.map((item) => {
               const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
               return (
@@ -42,10 +42,10 @@ export function Header() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg",
+                    "px-3 py-1.5 text-sm font-medium transition-colors duration-300 rounded-md",
                     isActive 
-                      ? "bg-primary text-primary-foreground shadow"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      ? "bg-secondary text-secondary-foreground"
+                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   )}
                 >
                   {item.label}
