@@ -33,30 +33,33 @@ export function Header() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-6">
-          <nav className="hidden items-center space-x-2 md:flex">
-            {navItems.map((item) => {
-              const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "px-3 py-1.5 text-sm font-medium transition-colors duration-300 rounded-md",
-                    isActive 
-                      ? "bg-secondary text-secondary-foreground"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  )}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="hidden md:flex items-center space-x-2">
+        {/* Desktop nav + theme toggle */}
+        <div className="hidden md:flex items-center gap-2">
+            <nav className="items-center space-x-1 flex">
+                {navItems.map((item) => {
+                const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
+                return (
+                    <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                        "px-3 py-1.5 text-sm font-medium transition-colors duration-300 rounded-md",
+                        isActive 
+                        ? "bg-secondary text-secondary-foreground"
+                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                    )}
+                    >
+                    {item.label}
+                    </Link>
+                );
+                })}
+            </nav>
             <ThemeToggleButton />
-          </div>
+        </div>
+
+        {/* Mobile theme toggle */}
+        <div className="md:hidden">
+            <ThemeToggleButton />
         </div>
       </div>
     </header>
