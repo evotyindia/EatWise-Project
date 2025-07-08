@@ -13,8 +13,9 @@ export function ThemeToggleButton() {
   }, []);
 
   if (!mounted) {
-    // Render a placeholder to prevent layout shift
-    return <div style={{ width: '60px', height: '32px' }} />;
+    // Return null on the server and during the initial client render
+    // to avoid a hydration mismatch.
+    return null;
   }
 
   const isChecked = theme === 'dark';

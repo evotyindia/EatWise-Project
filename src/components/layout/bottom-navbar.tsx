@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Home, ScanLine, CookingPot, BookOpen, Menu, BarChart3, Mail } from "lucide-react"
@@ -9,6 +8,7 @@ import React from 'react';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils";
 import { ThemeToggleButton } from "../common/theme-toggle-button";
+import { Separator } from "../ui/separator";
 
 const mainNavItems = [
   { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
@@ -24,9 +24,19 @@ const moreNavItems = [
 
 export function BottomNavbar() {
   const pathname = usePathname();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 border-t shadow-[0_-1px_10px_rgba(0,0,0,0.05)] backdrop-blur-lg">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 border-t shadow-[0_-1px_10px_rgba(0,0,0,0.05)] backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
       <div className="container flex items-center justify-around h-20 max-w-screen-xl px-0">
         {mainNavItems.map((item) => {
           const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
@@ -82,6 +92,11 @@ export function BottomNavbar() {
                   </SheetClose>
                 )
               })}
+            </div>
+            <Separator className="my-4" />
+            <div className="flex items-center justify-between p-1">
+                <span className="text-base font-medium">Theme</span>
+                <ThemeToggleButton />
             </div>
           </SheetContent>
         </Sheet>

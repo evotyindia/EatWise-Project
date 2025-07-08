@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail } from "lucide-react"
@@ -55,12 +54,9 @@ export function Header() {
                 );
                 })}
             </nav>
-            <ThemeToggleButton />
-        </div>
-
-        {/* Mobile theme toggle */}
-        <div className="md:hidden">
-            <ThemeToggleButton />
+            <div className="pr-1">
+              <ThemeToggleButton />
+            </div>
         </div>
       </div>
     </header>
