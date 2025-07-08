@@ -10,7 +10,7 @@ import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aw
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles, ChefHat, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Check, Clock, Soup, Users, PlusCircle, BookOpen, ListChecks, ArrowRight, Search } from "lucide-react";
+import { Lightbulb, Sparkles, ChefHat, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Check, Clock, Soup, Users, PlusCircle, BookOpen, ListChecks, ArrowRight, Search, Carrot, Leaf, Flame } from "lucide-react";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
@@ -77,7 +77,7 @@ const categorizedIngredients = [
     },
     { 
         category: "Grains & Flours (Anaaj aur Aata)", 
-        items: ["Basmati Rice", "Sona Masoori Rice", "Brown Rice", "Poha (Flattened Rice)", "Murmura (Puffed Rice)", "Wheat Flour (Atta)", "Maida (All-purpose Flour)", "Besan (Gram Flour)", "Suji (Semolina/Rava)", "Rice Flour (Chawal ka Atta)", "Corn Flour (Makki ka Atta)", "Ragi Flour (Finger Millet)", "Jowar Flour (Sorghum)", "Bajra Flour (Pearl Millet)", "Oats", "Quinoa", "Sabudana (Tapioca Pearls)", "Bread (White/Brown)", "Vermicelli (Seviyan)", "Barley (Jau)", "Millet (Kodo/Foxtail)"]
+        items: ["Basmati Rice", "Sona Masoori Rice", "Brown Rice", "Poha (Flattened Rice)", "Murmura (Puffed Rice)", "Wheat Flour (Atta)", "Maida (All-purpose Flour)", "Besan (Gram Flour)", "Suji (Semolina/Rava)", "Rice Flour (Chawal ka Atta)", "Corn Flour (Makki ka Atta)", "Ragi Flour (Finger Millet)", "Jowar Flour (Sorghum)", "Bajra Flour (Pearl Millet)", "Oats", "Quinoa", "Sabudana (Tapioca Pearls)", "Bread (White/Brown)", "Vermicelli (Seviyan)", "Barley (Jau)", "Millet (Kodo/Foxtail)"] 
     },
     { 
         category: "Dairy & Alternatives", 
@@ -488,28 +488,24 @@ export function RecipeForm() {
         )}
 
         {isLoadingRecipe && (
-          <Card>
+          <Card className="flex flex-col items-center justify-center min-h-[400px] text-center overflow-hidden">
             <CardHeader>
-              <Skeleton className="h-8 w-3/4 rounded-md" />
-              <Skeleton className="h-4 w-1/2 rounded-md mt-2" />
+              <CardTitle className="text-2xl font-bold">Crafting Your Perfect Recipe...</CardTitle>
+              <CardDescription>Our AI chef is preheating the oven and mixing the ingredients!</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-3 gap-4">
-                <Skeleton className="h-12 rounded-md" />
-                <Skeleton className="h-12 rounded-md" />
-                <Skeleton className="h-12 rounded-md" />
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                <div className="lg:col-span-2">
-                  <Skeleton className="h-6 w-1/3 mb-4 rounded-md" />
-                  <Skeleton className="h-40 w-full rounded-md" />
-                </div>
-                <div className="lg:col-span-3">
-                  <Skeleton className="h-6 w-1/3 mb-4 rounded-md" />
-                  <Skeleton className="h-56 w-full rounded-md" />
+            <CardContent className="flex items-center justify-center p-8">
+              <div className="relative flex items-center justify-center w-48 h-48">
+                <Soup className="w-28 h-28 text-primary animate-simmer" />
+                <div className="absolute inset-0">
+                    <Leaf className="absolute top-4 left-10 w-8 h-8 text-green-500 animate-toss" style={{ animationDelay: '0s' }}/>
+                    <Carrot className="absolute top-8 right-8 w-8 h-8 text-orange-500 animate-toss" style={{ animationDelay: '0.5s' }}/>
+                    <Flame className="absolute top-12 left-4 w-8 h-8 text-red-500 animate-toss" style={{ animationDelay: '1s' }}/>
                 </div>
               </div>
             </CardContent>
+             <CardFooter>
+              <p className="text-sm text-muted-foreground">This may take a moment...</p>
+            </CardFooter>
           </Card>
         )}
         
