@@ -56,10 +56,13 @@ export default function Home() {
       <section className="hero-section w-full">
         <div className="relative z-10 container px-4 md:px-6 text-center animate-fade-in-up opacity-0 backdrop-blur-md py-24 md:py-32 lg:py-40" style={{animationFillMode: 'forwards'}}>
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-foreground">
-            Decode Your Food. <span className="text-primary">Unleash Your Health.</span>
+            Welcome to <span className="text-primary">EatWise India</span>
           </h1>
+          <p className="mt-4 text-2xl font-medium tracking-tight text-foreground/90">
+            Decode Your Food. Unleash Your Health.
+          </p>
           <p className="mx-auto max-w-[800px] text-foreground/80 md:text-xl mt-6">
-            Welcome to EatWise India, your AI-powered guide to navigating the complex world of food. We help you understand what you're eating, discover healthier Indian alternatives, and cook nutritious meals with confidence. Make every bite count.
+            Your intelligent nutrition partner, designed for India. Simply scan a food label or list your ingredients, and let our AI provide instant health reports, personalized recipe ideas, and healthier local alternatives. Make every bite a conscious, healthy choice.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
             <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 shadow-lg hover:shadow-primary/40 group">
