@@ -1,47 +1,26 @@
 
 "use client";
 
-<<<<<<< HEAD
-import type { BlogPost } from "@/lib/blog-data";
-import Link from "next/link";
-import Image from "next/image";
-=======
 import { blogPosts, getBlogCategories, type BlogPost } from "@/lib/blog-data";
 import Link from "next/link";
->>>>>>> finalprotest
+import Image from "next/image";
 import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Filter } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-<<<<<<< HEAD
-interface BlogListProps {
-  initialPosts: BlogPost[];
-  categories: string[];
-}
-
-export function BlogList({ initialPosts, categories }: BlogListProps) {
-=======
 export function BlogList() {
   const allPosts = blogPosts;
   const allCategories = getBlogCategories();
->>>>>>> finalprotest
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
 
   const filteredPosts = useMemo(() => {
     if (selectedCategory === "All") {
-<<<<<<< HEAD
-      return initialPosts;
-    }
-    return initialPosts.filter(post => post.category === selectedCategory);
-  }, [initialPosts, selectedCategory]);
-=======
       return allPosts;
     }
     return allPosts.filter(post => post.category === selectedCategory);
   }, [allPosts, selectedCategory]);
->>>>>>> finalprotest
 
   return (
     <div>
@@ -54,11 +33,7 @@ export function BlogList() {
               <SelectValue placeholder="Filter by category" />
             </SelectTrigger>
             <SelectContent>
-<<<<<<< HEAD
-              {categories.map(category => (
-=======
               {allCategories.map(category => (
->>>>>>> finalprotest
                 <SelectItem key={category} value={category}>
                   {category}
                 </SelectItem>
@@ -75,7 +50,6 @@ export function BlogList() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredPosts.map((post) => (
           <Card key={post.slug} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-<<<<<<< HEAD
             <CardHeader className="p-0">
               <Link href={`/blogs/${post.slug}`} aria-label={post.title} className="block overflow-hidden">
                 <Image
@@ -84,12 +58,10 @@ export function BlogList() {
                   width={600}
                   height={400}
                   className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
-                  data-ai-hint={post.dataAiHint}
+                  data-ai-hint={post.dataAiHint || ''}
                 />
               </Link>
             </CardHeader>
-=======
->>>>>>> finalprotest
             <CardContent className="p-6 flex-grow">
               <p className="text-sm text-accent font-medium mb-1">{post.category}</p>
               <Link href={`/blogs/${post.slug}`}>
@@ -100,11 +72,7 @@ export function BlogList() {
               <CardDescription className="mt-2 text-sm line-clamp-3">{post.preview}</CardDescription>
             </CardContent>
             <CardFooter className="p-6 pt-0">
-<<<<<<< HEAD
               <Button variant="link" asChild className="px-0 text-primary group transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
-=======
-              <Button variant="link" asChild className="px-0 text-accent group">
->>>>>>> finalprotest
                 <Link href={`/blogs/${post.slug}`}>
                   Read More <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
@@ -116,5 +84,3 @@ export function BlogList() {
     </div>
   );
 }
-
-    

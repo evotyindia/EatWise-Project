@@ -6,11 +6,7 @@
  *
  * - generateHealthReport - A function that handles the health report generation process.
  * - GenerateHealthReportInput - The input type for the generateHealthReport function.
-<<<<<<< HEAD
- * - GenerateHealthReportOutput - The return type for the generateHealthReport function.
-=======
  * - GenerateHealthReportOutput - The return type for the generateHealth-report function.
->>>>>>> finalprotest
  */
 
 import {ai} from '@/ai/genkit';
@@ -34,9 +30,6 @@ export type GenerateHealthReportInput = z.infer<typeof GenerateHealthReportInput
 
 const RatingObjectSchema = z.object({
   rating: z.number().min(1).max(5).describe('The numerical rating from 1 to 5 stars.'),
-<<<<<<< HEAD
-  justification: z.string().optional().describe('A short justification for the rating.'),
-=======
   justification: z.string().describe('A short justification for the rating.'),
 });
 
@@ -45,7 +38,6 @@ const IngredientDeepDiveItemSchema = z.object({
   description: z.string().describe("A brief explanation of what this ingredient is, its purpose in the food, and any health effects (positive or negative)."),
   riskLevel: z.enum(['Low', 'Medium', 'High', 'Neutral']).describe("A risk assessment for the ingredient. 'Low' for generally safe/healthy, 'Medium' for 'consume in moderation' or if it's controversial, 'High' for ingredients with known significant health risks (like trans fats, certain artificial additives), 'Neutral' for common safe items like salt, water."),
   riskReason: z.string().describe("A concise justification for the assigned risk level.")
->>>>>>> finalprotest
 });
 
 const GenerateHealthReportOutputSchema = z.object({
@@ -54,19 +46,6 @@ const GenerateHealthReportOutputSchema = z.object({
     .min(1)
     .max(5)
     .describe('The overall health rating of the food product, from 1 to 5 stars.'),
-<<<<<<< HEAD
-  detailedAnalysis: z.object({
-    summary: z.string().describe("A concise summary of the product's healthiness, ideally in bullet points."),
-    positiveAspects: z.string().optional().describe("Key positive aspects of the product, if any. Be specific, e.g., 'Good source of fiber', 'Low in added sugar'. Use bullet points."),
-    potentialConcerns: z.string().optional().describe("Potential health concerns or ingredients to watch out for. Be specific, e.g., 'High in sodium', 'Contains artificial sweeteners'. Use bullet points."),
-    keyNutrientsBreakdown: z.string().optional().describe("Brief breakdown or comments on key nutrients like protein, fats, carbs, or specific vitamins/minerals if identifiable and noteworthy. Use bullet points.")
-  }).describe("A more detailed breakdown of the health report."),
-  alternatives: z.string().describe('A list of 2-3 healthier Indian alternatives, with brief reasons why they are better. Use bullet points.'),
-  productType: z.string().optional().describe('The product type (e.g., Snack, Beverage, Ready-to-eat meal).'),
-  processingLevelRating: RatingObjectSchema.optional().describe('Rating (1-5) and justification for food processing level (1=unprocessed, 5=ultra-processed).'),
-  sugarContentRating: RatingObjectSchema.optional().describe('Rating (1-5) and justification for sugar content (1=low, 5=high).'),
-  nutrientDensityRating: RatingObjectSchema.optional().describe('Rating (1-5) and justification for nutrient density (1=low, 5=high).')
-=======
   summary: z.string().describe("A one-sentence executive summary of the product's health profile. E.g., 'A high-sugar snack with some fiber, best for occasional consumption.'"),
 
   greenFlags: z.string().describe("A bullet-point list of 2-4 key positive aspects. Be specific. E.g., '* Good source of fiber', '* Made with whole grains'. If none, state 'No significant positive aspects found.'"),
@@ -90,7 +69,6 @@ const GenerateHealthReportOutputSchema = z.object({
   processingLevelRating: RatingObjectSchema.describe('Rating (1-5) and justification for food processing level (1=unprocessed, 5=ultra-processed).'),
   sugarContentRating: RatingObjectSchema.describe('Rating (1-5) and justification for sugar content (1=low, 5=high).'),
   nutrientDensityRating: RatingObjectSchema.describe('Rating (1-5) and justification for nutrient density (1=low, 5=high).')
->>>>>>> finalprotest
 });
 export type GenerateHealthReportOutput = z.infer<typeof GenerateHealthReportOutputSchema>;
 
@@ -104,16 +82,10 @@ const prompt = ai.definePrompt({
   name: 'generateHealthReportPrompt',
   input: {schema: GenerateHealthReportInputSchema},
   output: {schema: GenerateHealthReportOutputSchema},
-<<<<<<< HEAD
-  prompt: `You are an AI assistant specialized in analyzing food products and generating detailed health reports for an Indian audience.
-
-  Analyze the following food product based on the provided information (product name, ingredients list, nutrition facts, and/or a photo of the label).
-=======
   system: `You are an expert AI nutritionist for an Indian audience. Your task is to generate a comprehensive, clear, and easy-to-understand health report for a food product. Use bullet points for all lists to ensure scannability.
 Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
 If the provided information is insufficient for a complete analysis (e.g., blurry photo, cannot read ingredients), you MUST respond with a structured error. Set 'healthRating' to 1, 'summary' to 'Sorry, the provided information is unclear...', and all other fields to 'N/A' or sensible defaults that indicate an error. Ensure the output strictly adheres to the JSON schema.`,
   prompt: `Analyze the following food product based on the provided information.
->>>>>>> finalprotest
 
   {{#if productName}}
   Product Name: {{productName}}
@@ -122,15 +94,9 @@ If the provided information is insufficient for a complete analysis (e.g., blurr
   {{#if ingredients}}
   Ingredients (provided): {{ingredients}}
   {{else if photoDataUri}}
-<<<<<<< HEAD
-  Ingredients: Please extract the ingredients from the provided photo. If the photo is unclear for ingredient extraction, state that in your analysis by populating the 'summary' field appropriately.
-  {{else}}
-  Ingredients: Not provided. Analysis might be limited if no photo is available either. Populate the 'summary' field to reflect this.
-=======
   Ingredients: Please extract the ingredients from the provided photo.
   {{else}}
   Ingredients: Not provided.
->>>>>>> finalprotest
   {{/if}}
 
   {{#if nutritionFacts}}
@@ -140,37 +106,6 @@ If the provided information is insufficient for a complete analysis (e.g., blurr
   {{~#if photoDataUri}}
   Photo: {{media url=photoDataUri}}
   {{/if}}
-<<<<<<< HEAD
-
-  Generate a detailed health report. Ensure all output fields are addressed and strictly adhere to the JSON schema.
-
-  If you are unsure about the product due to lack of clear information (e.g., blurry photo, missing ingredients, or inability to extract from photo):
-  - Set 'healthRating' to 1.
-  - Set 'detailedAnalysis.summary' to 'Sorry, I am not sure about this product. The provided information (e.g., photo, ingredients list) may be unclear or insufficient for a complete analysis. Please try uploading a clearer label or provide more details.'.
-  - Set 'detailedAnalysis.positiveAspects', 'detailedAnalysis.potentialConcerns', and 'detailedAnalysis.keyNutrientsBreakdown' to 'N/A due to unclear input.'.
-  - Set 'alternatives' to 'N/A due to unclear input.'.
-  - For 'processingLevelRating', 'sugarContentRating', and 'nutrientDensityRating': set their 'rating' to 1 and 'justification' to 'Analysis not possible due to unclear input.'. If the entire rating object is optional and cannot be formed, omit it if the schema allows, otherwise provide default values as specified.
-  - Set 'productType' to 'Unknown due to unclear input.'.
-  Ensure the output strictly adheres to the defined JSON schema even in this case. Do not output any text outside of the JSON structure.
-
-  For successful analysis:
-  1.  **Product Type**: Identify the type of product (e.g., Snack, Beverage, Breakfast Cereal).
-  2.  **Overall Health Rating**: Assign an overall health rating (number) from 1 (least healthy) to 5 (most healthy) stars.
-  3.  **Detailed Analysis** (use bullet points starting with '*' or '-' for each sub-section of detailedAnalysis):
-      *   **Summary**: Provide a concise overall summary of the product's healthiness.
-      *   **Positive Aspects**: List any key positive aspects (e.g., "Good source of whole grains", "Low in saturated fat"). If none, state that or return "N/A".
-      *   **Potential Concerns**: List potential health concerns or ingredients to watch out for (e.g., "High sodium content", "Contains palm oil", "Added sugars are high"). If none, state that or return "N/A".
-      *   **Key Nutrients Breakdown**: Briefly comment on key nutrients if identifiable and noteworthy (e.g., "Provides Xg of protein per serving", "Mainly refined carbohydrates"). If none, return "N/A".
-  4.  **Healthier Indian Alternatives** (use bullet points starting with '*' or '-'): Suggest 2-3 healthier Indian alternatives, explaining briefly why they are better choices.
-  5.  **Additional Ratings**: For each of the following, provide an object with a 'rating' (number 1-5) and a 'justification' (string). If a rating cannot be determined, and the field is optional, it can be omitted. Otherwise, provide a default rating of 1 and justification 'Cannot be determined'.
-      *   **Processing Level Rating**: (1=unprocessed to 5=ultra-processed). Justification should be short.
-      *   **Sugar Content Rating**: (1=low to 5=high). Justification should be short.
-      *   **Nutrient Density Rating**: (1=low to 5=high). Justification should be short.
-  
-  Present all lists (summary, positive aspects, potential concerns, key nutrients breakdown, alternatives) as bullet points using '*' or '-' as prefixes where specified.
-
-  IMPORTANT: Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
-=======
   
   Generate the following detailed report. Be concise but thorough.
 
@@ -192,7 +127,6 @@ If the provided information is insufficient for a complete analysis (e.g., blurr
   12. **Numerical Ratings**: Provide ratings (1-5) and a short justification for Processing Level, Sugar Content, and Nutrient Density.
 
   Present all lists as bullet points starting with '*'.
->>>>>>> finalprotest
 `,
 });
 
@@ -202,28 +136,6 @@ const generateHealthReportFlow = ai.defineFlow(
     inputSchema: GenerateHealthReportInputSchema,
     outputSchema: GenerateHealthReportOutputSchema,
   },
-<<<<<<< HEAD
-  async input => {
-    const {output} = await prompt(input);
-    if (!output) {
-      console.error('generateHealthReportFlow: LLM output was null or did not match schema for input:', JSON.stringify(input));
-      return {
-        healthRating: 1,
-        detailedAnalysis: {
-          summary: "An error occurred while analyzing the product. The AI could not generate a valid report based on the provided input. Please try again or ensure the input is clear.",
-          positiveAspects: "N/A",
-          potentialConcerns: "N/A",
-          keyNutrientsBreakdown: "N/A",
-        },
-        alternatives: "N/A",
-        productType: "Unknown",
-        processingLevelRating: { rating: 1, justification: "Error in analysis" },
-        sugarContentRating: { rating: 1, justification: "Error in analysis" },
-        nutrientDensityRating: { rating: 1, justification: "Error in analysis" },
-      };
-    }
-    return output;
-=======
   async (input) => {
     try {
       const {output} = await prompt(input);
@@ -248,6 +160,5 @@ const generateHealthReportFlow = ai.defineFlow(
         // For frontend, we will throw the error to be caught and displayed in a toast
         throw new Error(finalErrorMessage);
     }
->>>>>>> finalprotest
   }
 );

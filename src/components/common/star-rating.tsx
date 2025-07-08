@@ -8,10 +8,7 @@ interface StarRatingProps {
   size?: number;
   className?: string;
   iconClassName?: string;
-<<<<<<< HEAD
-=======
   variant?: 'good' | 'bad';
->>>>>>> finalprotest
 }
 
 export function StarRating({
@@ -20,19 +17,6 @@ export function StarRating({
   size = 20,
   className,
   iconClassName,
-<<<<<<< HEAD
-}: StarRatingProps) {
-  return (
-    <div className={cn('flex items-center space-x-1', className)}>
-      {Array.from({ length: maxRating }, (_, i) => (
-        <Star
-          key={i}
-          size={size}
-          className={cn(
-            i < Math.round(rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-gray-700',
-            iconClassName
-          )}
-=======
   variant = 'good',
 }: StarRatingProps) {
   const fullStars = Math.floor(rating);
@@ -79,7 +63,6 @@ export function StarRating({
           key={`empty-${i}`}
           size={size}
           className={cn('text-transparent fill-gray-300 dark:fill-gray-600', iconClassName)}
->>>>>>> finalprotest
         />
       ))}
     </div>
