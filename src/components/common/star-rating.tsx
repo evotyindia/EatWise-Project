@@ -8,6 +8,7 @@ interface StarRatingProps {
   size?: number;
   className?: string;
   iconClassName?: string;
+  variant?: 'good' | 'bad';
 }
 
 export function StarRating({
@@ -16,32 +17,54 @@ export function StarRating({
   size = 20,
   className,
   iconClassName,
+  variant = 'good',
 }: StarRatingProps) {
+  const fullStars = Math.floor(rating);
+  const partialStarPercentage = Math.round((rating - fullStars) * 100);
+  const emptyStars = maxRating - Math.ceil(rating);
+
+  const starColor = variant === 'good' ? 'fill-star' : 'fill-star-bad';
+
   return (
     <div className={cn('flex items-center space-x-1', className)}>
-      {Array.from({ length: maxRating }, (_, i) => {
-        const fillPercentage = Math.max(0, Math.min(1, rating - i)) * 100;
+      {/* Full Stars */}
+      {Array.from({ length: fullStars }, (_, i) => (
+        <Star
+          key={`full-${i}`}
+          size={size}
+          className={cn('text-transparent', starColor, iconClassName)}
+        />
+      ))}
 
-        return (
-          <div key={i} className="relative flex-shrink-0" style={{ width: size, height: size }}>
-            {/* Background star (unfilled part) */}
+      {/* Partial Star */}
+      {partialStarPercentage > 0 && (
+        <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
+          {/* Background star (unfilled part) */}
+          <Star
+            size={size}
+            className={cn('text-transparent fill-gray-300 dark:fill-gray-600', iconClassName)}
+          />
+          {/* Foreground star (filled part), clipped to the percentage */}
+          <div
+            className="absolute top-0 left-0 h-full overflow-hidden"
+            style={{ width: `${partialStarPercentage}%` }}
+          >
             <Star
               size={size}
-              className={cn('text-transparent fill-gray-300 dark:fill-gray-600', iconClassName)}
+              className={cn('text-transparent', starColor, iconClassName)}
             />
-            {/* Foreground star (filled part), clipped to the percentage */}
-            <div
-              className="absolute top-0 left-0 h-full overflow-hidden"
-              style={{ width: `${fillPercentage}%` }}
-            >
-              <Star
-                size={size}
-                className={cn('text-transparent fill-star', iconClassName)}
-              />
-            </div>
           </div>
-        );
-      })}
+        </div>
+      )}
+
+      {/* Empty Stars */}
+      {Array.from({ length: emptyStars }, (_, i) => (
+        <Star
+          key={`empty-${i}`}
+          size={size}
+          className={cn('text-transparent fill-gray-300 dark:fill-gray-600', iconClassName)}
+        />
+      ))}
     </div>
   );
 }

@@ -283,7 +283,7 @@ export function AnalyzerForm() {
                     <span className="text-xs font-normal text-muted-foreground">(Higher is better)</span>
                   </AlertTitle>
                   <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
-                    <StarRating rating={report.healthRating} />
+                    <StarRating rating={report.healthRating} variant="good" />
                     <span>({report.healthRating}/5)</span>
                   </AlertDescription>
                 </Alert>
@@ -296,7 +296,7 @@ export function AnalyzerForm() {
                       <span className="text-xs font-normal text-muted-foreground">(Lower is better)</span>
                     </AlertTitle>
                     <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
-                      <StarRating rating={6 - report.processingLevelRating.rating} />
+                      <StarRating rating={report.processingLevelRating.rating} variant="bad" />
                       <span>({report.processingLevelRating.rating}/5)</span>
                     </AlertDescription>
                   </Alert>
@@ -310,7 +310,7 @@ export function AnalyzerForm() {
                       <span className="text-xs font-normal text-muted-foreground">(Lower is better)</span>
                     </AlertTitle>
                     <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
-                      <StarRating rating={6 - report.sugarContentRating.rating} />
+                      <StarRating rating={report.sugarContentRating.rating} variant="bad" />
                       <span>({report.sugarContentRating.rating}/5)</span>
                     </AlertDescription>
                   </Alert>
@@ -324,7 +324,7 @@ export function AnalyzerForm() {
                       <span className="text-xs font-normal text-muted-foreground">(Higher is better)</span>
                     </AlertTitle>
                     <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
-                      <StarRating rating={report.nutrientDensityRating.rating} />
+                      <StarRating rating={report.nutrientDensityRating.rating} variant="good" />
                       <span>({report.nutrientDensityRating.rating}/5)</span>
                     </AlertDescription>
                   </Alert>
