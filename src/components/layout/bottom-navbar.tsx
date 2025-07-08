@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
 
-import { ThemeToggleButton } from "@/components/common/theme-toggle-button"
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils";
 
@@ -35,26 +34,26 @@ export function BottomNavbar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 w-20 h-full transition-colors duration-200",
-                 isActive ? "" : "text-muted-foreground hover:text-primary"
+                "flex flex-col items-center justify-center gap-1 w-full h-full transition-colors duration-200",
+                 isActive ? "text-primary" : "text-muted-foreground hover:text-primary"
               )}
             >
               <div className={cn(
-                "flex items-center justify-center gap-2 rounded-full px-4 py-1 transition-colors",
-                isActive ? "bg-secondary text-secondary-foreground" : ""
+                "flex items-center justify-center gap-2 rounded-full px-4 py-1.5 transition-all duration-300",
+                isActive ? "bg-secondary" : ""
               )}>
                 {item.icon}
-                {isActive && <span className="text-xs font-semibold tracking-tight">{item.label}</span>}
+                {isActive && <span className="text-xs font-bold">{item.label}</span>}
               </div>
-               {!isActive && <span className="text-xs tracking-tight">{item.label}</span>}
+               {!isActive && <span className="text-xs">{item.label}</span>}
             </Link>
           );
         })}
         <Sheet>
           <SheetTrigger asChild>
-            <button className="flex flex-col items-center justify-center gap-1 w-16 h-full text-muted-foreground hover:text-primary transition-colors duration-200">
+            <button className="flex flex-col items-center justify-center gap-1 w-full h-full text-muted-foreground hover:text-primary transition-colors duration-200">
                 <Menu className="h-5 w-5" />
-                <span className="text-xs tracking-tight">More</span>
+                <span className="text-xs">More</span>
             </button>
           </SheetTrigger>
           <SheetContent side="bottom" className="w-full h-auto rounded-t-2xl">
@@ -82,10 +81,6 @@ export function BottomNavbar() {
                   </SheetClose>
                 )
               })}
-              <div className="pt-4 mt-4 border-t">
-                 <p className="text-sm text-muted-foreground mb-2">Theme</p>
-                 <ThemeToggleButton />
-              </div>
             </div>
           </SheetContent>
         </Sheet>
