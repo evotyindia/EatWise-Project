@@ -242,21 +242,20 @@ export function NutritionForm() {
   }, [chatHistory]);
 
 const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
-    if (!text || text.trim().toLowerCase() === 'n/a' || text.trim() === '') {
+    if (!text || text.trim().toLowerCase() === 'n/a' || text.trim() === '' || text.trim().toLowerCase().includes('no significant')) {
       return <p className="text-sm text-muted-foreground">Not specified / Not applicable.</p>;
     }
     const lines = text.split('\n').filter(s => s.trim() !== "");
     if (lines.length === 0) return null;
 
     return (
-        <ul className="list-none space-y-1 text-sm leading-relaxed">
+        <ul className="space-y-1.5 text-sm leading-relaxed">
             {lines.map((line, index) => {
-                const trimmedLine = line.trim();
-                const content = trimmedLine.replace(/^(\*|-)\s*/, '');
+                const content = line.replace(/^(\*|-)\s*/, '');
                 if (!content) return null;
                 return (
                     <li key={index} className="flex items-start">
-                        <span className="mr-2 mt-1 text-accent">&#8226;</span>
+                        <span className="mr-3 mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
                         <span className="break-words">{content}</span>
                     </li>
                 );
@@ -422,3 +421,5 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
     </div>
   );
 }
+
+    

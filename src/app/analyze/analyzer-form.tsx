@@ -191,12 +191,17 @@ export function AnalyzerForm() {
     if (lines.length === 0) return null;
 
     return (
-      <ul className="list-disc list-outside space-y-1 text-sm leading-relaxed marker:text-accent">
-        {lines.map((line, index) => (
-          <li key={index} className="break-words pl-2">
-            {line.replace(/^(\*|-)\s*/, '')}
-          </li>
-        ))}
+      <ul className="space-y-1.5 text-sm leading-relaxed">
+        {lines.map((line, index) => {
+          const content = line.replace(/^(\*|-)\s*/, '');
+          if (!content) return null;
+          return (
+            <li key={index} className="flex items-start">
+              <span className="mr-3 mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+              <span className="break-words">{content}</span>
+            </li>
+          );
+        })}
       </ul>
     );
   };
@@ -502,3 +507,5 @@ export function AnalyzerForm() {
     </div>
   );
 }
+
+    
