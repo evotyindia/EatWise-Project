@@ -14,11 +14,11 @@ const mainNavItems = [
   { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
   { href: "/analyze", label: "Analyze", icon: <ScanLine className="h-5 w-5" /> },
   { href: "/recipes", label: "Recipes", icon: <CookingPot className="h-5 w-5" /> },
-  { href: "/blogs", label: "Blog", icon: <BookOpen className="h-5 w-5" /> },
+  { href: "/nutrition-check", label: "Nutrient", icon: <BarChart3 className="h-5 w-5" /> },
 ];
 
 const moreNavItems = [
-    { href: "/nutrition-check", label: "Nutrition Check", icon: <BarChart3 className="h-5 w-5" /> },
+    { href: "/blogs", label: "Blog", icon: <BookOpen className="h-5 w-5" /> },
     { href: "/contact", label: "Contact", icon: <Mail className="h-5 w-5" />},
 ];
 
@@ -35,12 +35,18 @@ export function BottomNavbar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 w-16 h-full transition-colors duration-200",
-                isActive ? "text-primary font-semibold" : "text-muted-foreground hover:text-primary"
+                "flex flex-col items-center justify-center gap-1 w-20 h-full transition-colors duration-200",
+                 isActive ? "" : "text-muted-foreground hover:text-primary"
               )}
             >
-              {item.icon}
-              <span className="text-xs tracking-tight">{item.label}</span>
+              <div className={cn(
+                "flex items-center justify-center gap-2 rounded-full px-4 py-1 transition-colors",
+                isActive ? "bg-secondary text-secondary-foreground" : ""
+              )}>
+                {item.icon}
+                {isActive && <span className="text-xs font-semibold tracking-tight">{item.label}</span>}
+              </div>
+               {!isActive && <span className="text-xs tracking-tight">{item.label}</span>}
             </Link>
           );
         })}
@@ -51,7 +57,7 @@ export function BottomNavbar() {
                 <span className="text-xs tracking-tight">More</span>
             </button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[280px] bg-background/95 backdrop-blur-sm">
+          <SheetContent side="bottom" className="w-full h-auto rounded-t-2xl">
             <SheetHeader className="text-left mb-4">
               <SheetTitle>More Options</SheetTitle>
               <SheetDescription>
@@ -76,7 +82,7 @@ export function BottomNavbar() {
                   </SheetClose>
                 )
               })}
-              <div className="pt-4 border-t absolute bottom-6 left-6 right-6">
+              <div className="pt-4 mt-4 border-t">
                  <p className="text-sm text-muted-foreground mb-2">Theme</p>
                  <ThemeToggleButton />
               </div>
