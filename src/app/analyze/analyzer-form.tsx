@@ -278,26 +278,30 @@ export function AnalyzerForm() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Alert variant="default" className="bg-muted/60">
                   <HeartPulse className="h-5 w-5 text-accent" />
-                  <AlertTitle className="font-semibold flex justify-between items-center">
-                    <span>Overall Health Rating</span>
-                    <span className="text-xs font-normal text-muted-foreground">(Higher is better)</span>
-                  </AlertTitle>
-                  <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
-                    <StarRating rating={report.healthRating} variant="good" />
-                    <span>({report.healthRating}/5)</span>
+                  <AlertTitle className="font-semibold">Overall Health Rating</AlertTitle>
+                  <AlertDescription>
+                    <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center gap-2">
+                            <StarRating rating={report.healthRating} variant="good" />
+                            <span className="font-medium text-sm">({report.healthRating}/5)</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">(Higher is better)</span>
+                    </div>
                   </AlertDescription>
                 </Alert>
 
                 {report.processingLevelRating?.rating !== undefined && (
                   <Alert variant="default" className="bg-muted/60">
                     <Zap className="h-5 w-5 text-accent" />
-                    <AlertTitle className="font-semibold flex justify-between items-center">
-                      <span>Processing Level</span>
-                      <span className="text-xs font-normal text-muted-foreground">(Lower is better)</span>
-                    </AlertTitle>
-                    <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
-                      <StarRating rating={report.processingLevelRating.rating} variant="bad" />
-                      <span>({report.processingLevelRating.rating}/5)</span>
+                    <AlertTitle className="font-semibold">Processing Level</AlertTitle>
+                    <AlertDescription>
+                      <div className="flex items-center justify-between mt-2">
+                          <div className="flex items-center gap-2">
+                              <StarRating rating={report.processingLevelRating.rating} variant="bad" />
+                              <span className="font-medium text-sm">({report.processingLevelRating.rating}/5)</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground">(Lower is better)</span>
+                      </div>
                     </AlertDescription>
                   </Alert>
                 )}
@@ -305,13 +309,15 @@ export function AnalyzerForm() {
                 {report.sugarContentRating?.rating !== undefined && (
                   <Alert variant="default" className="bg-muted/60">
                     <Wheat className="h-5 w-5 text-accent" />
-                    <AlertTitle className="font-semibold flex justify-between items-center">
-                      <span>Sugar Content</span>
-                      <span className="text-xs font-normal text-muted-foreground">(Lower is better)</span>
-                    </AlertTitle>
-                    <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
-                      <StarRating rating={report.sugarContentRating.rating} variant="bad" />
-                      <span>({report.sugarContentRating.rating}/5)</span>
+                    <AlertTitle className="font-semibold">Sugar Content</AlertTitle>
+                    <AlertDescription>
+                      <div className="flex items-center justify-between mt-2">
+                          <div className="flex items-center gap-2">
+                              <StarRating rating={report.sugarContentRating.rating} variant="bad" />
+                              <span className="font-medium text-sm">({report.sugarContentRating.rating}/5)</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground">(Lower is better)</span>
+                      </div>
                     </AlertDescription>
                   </Alert>
                 )}
@@ -319,13 +325,15 @@ export function AnalyzerForm() {
                 {report.nutrientDensityRating?.rating !== undefined && (
                   <Alert variant="default" className="bg-muted/60">
                     <Sparkles className="h-5 w-5 text-accent" />
-                     <AlertTitle className="font-semibold flex justify-between items-center">
-                      <span>Nutrient Density</span>
-                      <span className="text-xs font-normal text-muted-foreground">(Higher is better)</span>
-                    </AlertTitle>
-                    <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
-                      <StarRating rating={report.nutrientDensityRating.rating} variant="good" />
-                      <span>({report.nutrientDensityRating.rating}/5)</span>
+                     <AlertTitle className="font-semibold">Nutrient Density</AlertTitle>
+                     <AlertDescription>
+                        <div className="flex items-center justify-between mt-2">
+                            <div className="flex items-center gap-2">
+                                <StarRating rating={report.nutrientDensityRating.rating} variant="good" />
+                                <span className="font-medium text-sm">({report.nutrientDensityRating.rating}/5)</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground">(Higher is better)</span>
+                        </div>
                     </AlertDescription>
                   </Alert>
                 )}
@@ -472,3 +480,5 @@ export function AnalyzerForm() {
     </div>
   );
 }
+
+    
