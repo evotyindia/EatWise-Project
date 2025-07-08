@@ -1,6 +1,7 @@
 
 import { NutritionForm } from "./nutrition-form";
 import { BarChart3 } from "lucide-react";
+<<<<<<< HEAD
 import type { NextPage, Metadata } from 'next';
 
 const BASE_URL = 'https://eatwise.evotyindia.me';
@@ -21,11 +22,25 @@ const NutritionCheckPage: NextPage = () => {
         <h1 className="text-4xl font-bold tracking-tight text-center">Nutrition Analyzer</h1>
         <p className="mt-2 text-lg text-muted-foreground text-center max-w-2xl">
           Upload an image of nutritional information or enter values manually. Get an AI analysis of how balanced the item is, suitability suggestions, and an overall nutrition density rating.
+=======
+
+export default function NutritionCheckPage() {
+  return (
+    <div className="container mx-auto py-8 animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
+      <div className="flex flex-col items-center mb-8 text-center">
+        <BarChart3 className="w-16 h-16 text-accent mb-4" />
+        <h1 className="text-4xl font-bold tracking-tight">Nutrition Analyzer</h1>
+        <p className="mt-2 text-lg text-muted-foreground max-w-2xl">
+          Upload a nutrition table image or enter values manually. Get an AI analysis of the item&apos;s balance, suitability, and an overall nutrition density rating.
+>>>>>>> finalprotest
         </p>
       </div>
       <NutritionForm />
     </div>
   );
 }
+<<<<<<< HEAD
 
 export default NutritionCheckPage;
+=======
+>>>>>>> finalprotest
