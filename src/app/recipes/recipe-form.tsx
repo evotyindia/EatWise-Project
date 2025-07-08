@@ -111,6 +111,7 @@ export function RecipeForm() {
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [currentFormInputs, setCurrentFormInputs] = useState<RecipePageFormValues | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
 
@@ -190,6 +191,9 @@ export function RecipeForm() {
 
   const handleSelectDish = async (dishName: string) => {
     if (!currentFormInputs) return;
+
+    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+
     setIsLoadingRecipe(true);
     setDetailedRecipe(null);
     setChatHistory([]); 
@@ -438,7 +442,7 @@ export function RecipeForm() {
       </div>
 
 
-      <div className="lg:col-span-8 space-y-8">
+      <div ref={resultsRef} className="lg:col-span-8 space-y-8">
         {isLoadingSuggestions && (
           <Card className="flex flex-col items-center justify-center min-h-[400px] text-center overflow-hidden">
             <CardHeader>
@@ -598,5 +602,3 @@ export function RecipeForm() {
     </div>
   );
 }
-
-    
