@@ -33,7 +33,7 @@ const RatingObjectSchema = z.object({
   justification: z.string().optional().describe('A short justification for the rating.'),
 });
 
-const IngredientAnalysisItemSchema = z.object({
+const IngredientDeepDiveItemSchema = z.object({
   ingredientName: z.string().describe("The name of the ingredient."),
   description: z.string().describe("A brief explanation of what this ingredient is, its purpose in the food, and any health effects (positive or negative)."),
   riskLevel: z.enum(['Low', 'Medium', 'High', 'Neutral']).describe("A risk assessment for the ingredient. 'Low' for generally safe/healthy, 'Medium' for 'consume in moderation' or if it's controversial, 'High' for ingredients with known significant health risks (like trans fats, certain artificial additives), 'Neutral' for common safe items like salt, water."),
@@ -46,18 +46,29 @@ const GenerateHealthReportOutputSchema = z.object({
     .min(1)
     .max(5)
     .describe('The overall health rating of the food product, from 1 to 5 stars.'),
+  summary: z.string().describe("A one-sentence executive summary of the product's health profile. E.g., 'A high-sugar snack with some fiber, best for occasional consumption.'"),
+
+  greenFlags: z.string().optional().describe("A bullet-point list of 2-4 key positive aspects. Be specific. E.g., '* Good source of fiber', '* Made with whole grains'."),
+  redFlags: z.string().optional().describe("A bullet-point list of 2-4 key health concerns to be aware of. Be specific. E.g., '* High in Sodium', '* Contains artificial sweeteners'."),
+  
   detailedAnalysis: z.object({
-    summary: z.string().describe("A concise summary of the product's healthiness, ideally in bullet points."),
-    positiveAspects: z.string().optional().describe("Key positive aspects of the product, if any. Be specific, e.g., 'Good source of fiber', 'Low in added sugar'. Use bullet points."),
-    potentialConcerns: z.string().optional().describe("Potential health concerns or ingredients to watch out for. Be specific, e.g., 'High in sodium', 'Contains artificial sweeteners'. Use bullet points."),
-    keyNutrientsBreakdown: z.string().optional().describe("Brief breakdown or comments on key nutrients like protein, fats, carbs, or specific vitamins/minerals if identifiable and noteworthy. Use bullet points.")
-  }).describe("A concise breakdown of the health report."),
-  alternatives: z.string().describe('A list of 2-3 healthier Indian alternatives, with brief reasons why they are better. Use bullet points.'),
+    processingLevel: z.string().describe("Assessment of the food's processing level (e.g., 'Unprocessed', 'Minimally Processed', 'Ultra-Processed') and a brief explanation of why."),
+    macronutrientProfile: z.string().describe("Analysis of the balance of protein, carbs, and fats. E.g., 'High in refined carbohydrates and fats, with very little protein.'"),
+    micronutrientHighlights: z.string().optional().describe("Bullet-point comments on noteworthy vitamins or minerals, if identifiable and noteworthy. E.g., '* Good source of Calcium and Vitamin D.'"),
+    sugarAnalysis: z.string().describe("A specific analysis of the sugar content, distinguishing between natural and added sugars if possible. Comment on its level."),
+  }).describe("A deeper dive into specific nutritional components."),
+  
+  bestSuitedFor: z.string().describe("Describes the ideal consumer or occasion for this product. E.g., 'Best as an occasional treat for children', 'Not recommended for individuals with diabetes.'"),
+  consumptionTips: z.string().optional().describe("Actionable bullet-point tips for healthier consumption. E.g., '* Pair with a source of protein like yogurt to balance the meal.', '* Limit portion size to two biscuits.'"),
+  indianDietContext: z.string().describe("A brief explanation of how this product fits into a typical balanced Indian diet. E.g., 'This can be a convenient alternative to a traditional fried snack but should not replace a main meal like dal-roti.'"),
+  
+  healthierAlternatives: z.string().describe('A bullet-point list of 2-3 healthier Indian alternatives, with brief reasons why they are better.'),
+  ingredientDeepDive: z.array(IngredientDeepDiveItemSchema).optional().describe("A detailed analysis of each key ingredient, its purpose, and health implications."),
+
   productType: z.string().optional().describe('The product type (e.g., Snack, Beverage, Ready-to-eat meal).'),
   processingLevelRating: RatingObjectSchema.optional().describe('Rating (1-5) and justification for food processing level (1=unprocessed, 5=ultra-processed).'),
   sugarContentRating: RatingObjectSchema.optional().describe('Rating (1-5) and justification for sugar content (1=low, 5=high).'),
-  nutrientDensityRating: RatingObjectSchema.optional().describe('Rating (1-5) and justification for nutrient density (1=low, 5=high).'),
-  ingredientAnalysis: z.array(IngredientAnalysisItemSchema).optional().describe("A brief analysis of each key ingredient.")
+  nutrientDensityRating: RatingObjectSchema.optional().describe('Rating (1-5) and justification for nutrient density (1=low, 5=high).')
 });
 export type GenerateHealthReportOutput = z.infer<typeof GenerateHealthReportOutputSchema>;
 
@@ -71,7 +82,7 @@ const prompt = ai.definePrompt({
   name: 'generateHealthReportPrompt',
   input: {schema: GenerateHealthReportInputSchema},
   output: {schema: GenerateHealthReportOutputSchema},
-  prompt: `You are an expert AI nutritionist for an Indian audience. Your goal is to generate a clear, concise, and easy-to-understand health report. Use bullet points for lists to make the information scannable.
+  prompt: `You are an expert AI nutritionist for an Indian audience. Your task is to generate a comprehensive, clear, and easy-to-understand health report for a food product. Use bullet points for all lists to ensure scannability.
 
   Analyze the following food product based on the provided information.
 
@@ -95,31 +106,28 @@ const prompt = ai.definePrompt({
   Photo: {{media url=photoDataUri}}
   {{/if}}
   
-  If information is unclear (e.g., blurry photo, cannot extract ingredients):
-  - Set 'healthRating' to 1.
-  - Set 'detailedAnalysis.summary' to 'Sorry, the provided information is unclear or insufficient for a complete analysis. Please try again with a clearer image or more details.'.
-  - Set other fields to 'N/A' or provide sensible defaults that indicate an error.
-  - Ensure the output strictly adheres to the JSON schema.
+  If the provided information is insufficient for a complete analysis (e.g., blurry photo, cannot read ingredients), you MUST respond with a structured error. Set 'healthRating' to 1, 'summary' to 'Sorry, the provided information is unclear...', and all other fields to 'N/A' or sensible defaults that indicate an error. Ensure the output strictly adheres to the JSON schema.
 
-  For a successful analysis, provide the following in a concise manner:
-  1.  **Product Type**: Identify the product type (e.g., Snack, Beverage).
+  For a successful analysis, generate the following detailed report. Be concise but thorough.
+
+  1.  **Product Type**: Identify the product type (e.g., Snack, Beverage, Ready-to-eat meal).
   2.  **Overall Health Rating**: Assign a health rating from 1 (least healthy) to 5 (most healthy).
-  3.  **Detailed Analysis** (use bullet points starting with '*' or '-'):
-      *   **Summary**: A concise summary of the product's healthiness in bullet points.
-      *   **Positive Aspects**: Key positive aspects. If none, state so.
-      *   **Potential Concerns**: Potential health concerns. If none, state so.
-      *   **Key Nutrients Breakdown**: Brief, noteworthy comments on key nutrients.
-  4.  **Healthier Indian Alternatives**: Suggest 2-3 healthier Indian alternatives with brief reasons. Use bullet points.
-  5.  **Additional Ratings**: Provide ratings (1-5) and a short justification for:
-      *   **Processing Level**: (1=unprocessed, 5=ultra-processed).
-      *   **Sugar Content**: (1=low, 5=high).
-      *   **Nutrient Density**: (1=low, 5=high).
-  6.  **Ingredient-by-Ingredient Analysis**:
-      *   For each major ingredient, provide a brief 'description', its 'riskLevel' ('Low', 'Medium', 'High', 'Neutral'), and a concise 'riskReason'.
-      *   Keep the descriptions brief.
-      *   Populate this into the 'ingredientAnalysis' array.
+  3.  **Summary**: A one-sentence executive summary of the product's health profile.
+  4.  **Green Flags** (as bullet points): 2-4 key positive aspects. If none, state "No significant positive aspects found."
+  5.  **Red Flags** (as bullet points): 2-4 key health concerns. If none, state "No significant health concerns found."
+  6.  **Detailed Analysis**:
+      *   **Processing Level**: Assess the processing level (e.g., 'Ultra-Processed') and briefly explain why.
+      *   **Macronutrient Profile**: Analyze the balance of protein, carbs, and fats.
+      *   **Micronutrient Highlights** (as bullet points): Mention any noteworthy vitamins or minerals. If none, state "No significant micronutrients to highlight."
+      *   **Sugar Analysis**: Specifically analyze the sugar content.
+  7.  **Best Suited For**: Describe the ideal consumer or occasion for this product.
+  8.  **Consumption Tips** (as bullet points): Provide actionable tips for healthier consumption. If none, state "No specific consumption tips."
+  9.  **Indian Diet Context**: Explain how this product fits into a balanced Indian diet.
+  10. **Healthier Alternatives** (as bullet points): Suggest 2-3 healthier Indian alternatives with brief reasons.
+  11. **Ingredient-by-Ingredient Deep Dive**: For each major ingredient, provide a 'description', 'riskLevel' ('Low', 'Medium', 'High', 'Neutral'), and a concise 'riskReason'. Populate this into the 'ingredientDeepDive' array.
+  12. **Numerical Ratings**: Provide ratings (1-5) and a short justification for Processing Level, Sugar Content, and Nutrient Density.
 
-  Present all lists as bullet points.
+  Present all lists as bullet points starting with '*'.
 
   IMPORTANT: Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
 `,
@@ -132,45 +140,38 @@ const generateHealthReportFlow = ai.defineFlow(
     outputSchema: GenerateHealthReportOutputSchema,
   },
   async (input) => {
+    const errorBase = {
+        healthRating: 1,
+        productType: "Unknown",
+        processingLevelRating: { rating: 1, justification: "Error in analysis" },
+        sugarContentRating: { rating: 1, justification: "Error in analysis" },
+        nutrientDensityRating: { rating: 1, justification: "Error in analysis" },
+        ingredientDeepDive: [],
+        greenFlags: "N/A",
+        redFlags: "N/A",
+        bestSuitedFor: "N/A",
+        consumptionTips: "N/A",
+        indianDietContext: "N/A",
+        healthierAlternatives: "N/A",
+    };
+
     try {
       const {output} = await prompt(input);
       if (!output) {
         console.error('generateHealthReportFlow: LLM output was null or did not match schema for input:', JSON.stringify(input));
-        return {
-          healthRating: 1,
-          detailedAnalysis: {
-            summary: "An error occurred while analyzing the product. The AI could not generate a valid report based on the provided input. Please try again or ensure the input is clear.",
-            positiveAspects: "N/A",
-            potentialConcerns: "N/A",
-            keyNutrientsBreakdown: "N/A",
-          },
-          alternatives: "N/A",
-          productType: "Unknown",
-          processingLevelRating: { rating: 1, justification: "Error in analysis" },
-          sugarContentRating: { rating: 1, justification: "Error in analysis" },
-          nutrientDensityRating: { rating: 1, justification: "Error in analysis" },
-          ingredientAnalysis: [],
-        };
+        throw new Error("An error occurred while analyzing the product. The AI could not generate a valid report based on the provided input. Please try again or ensure the input is clear.");
       }
       return output;
-    } catch (error) {
-      console.error("An API error occurred in generateHealthReportFlow:", error);
-      // This is the fallback for API errors (e.g., 503)
-      return {
-        healthRating: 1,
-        detailedAnalysis: {
-          summary: "The AI service is currently busy or unavailable. This is a temporary issue. Please try again in a few moments.",
-          positiveAspects: "N/A",
-          potentialConcerns: "N/A",
-          keyNutrientsBreakdown: "N/A",
-        },
-        alternatives: "N/A",
-        productType: "Unknown",
-        processingLevelRating: { rating: 1, justification: "Service unavailable" },
-        sugarContentRating: { rating: 1, justification: "Service unavailable" },
-        nutrientDensityRating: { rating: 1, justification: "Service unavailable" },
-        ingredientAnalysis: [],
-      };
+    } catch (error: any) {
+        const isApiError = (error.cause as any)?.status >= 500;
+        const errorMessage = isApiError
+            ? "The AI service is currently busy or unavailable. This is a temporary issue. Please try again in a few moments."
+            : error.message || "An unexpected error occurred during report generation.";
+        
+        console.error(`An error occurred in generateHealthReportFlow: ${errorMessage}`, error);
+
+        // For frontend, we will throw the error to be caught and displayed in a toast
+        throw new Error(errorMessage);
     }
   }
 );
