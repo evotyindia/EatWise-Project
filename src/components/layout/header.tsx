@@ -1,6 +1,6 @@
 "use client"
 
-import { Menu } from "lucide-react"
+import { Menu, Leaf } from "lucide-react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
@@ -24,10 +24,11 @@ export function Header() {
 
   return (
     <header className={cn(
-      "sticky top-0 z-50 w-full border-b bg-background/95 shadow-sm backdrop-blur-sm"
+      "sticky top-0 z-50 w-full border-b bg-background/80 shadow-md backdrop-blur-xl"
     )}>
       <div className="container flex h-16 max-w-screen-xl items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
+          <Leaf className="h-7 w-7 text-primary" />
           <span className="font-extrabold text-2xl sm:inline-block font-headline text-foreground">
             EatWise India
           </span>
