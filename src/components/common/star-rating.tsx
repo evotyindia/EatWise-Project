@@ -20,10 +20,9 @@ export function StarRating({
   return (
     <div className={cn('flex items-center space-x-1', className)}>
       {Array.from({ length: maxRating }, (_, i) => {
-        // Calculate the fill percentage for each star
-        const fillPercentage = Math.round(
-          Math.max(0, Math.min(1, rating - i)) * 100
-        );
+        // Calculate the fill percentage for each star without rounding
+        const fillPercentage =
+          Math.max(0, Math.min(1, rating - i)) * 100;
 
         return (
           <div key={i} className="relative flex-shrink-0" style={{ width: size, height: size }}>
