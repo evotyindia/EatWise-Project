@@ -36,8 +36,8 @@
     --input: 202 54% 90%;
     --ring: 181 90% 42%;
 
-    --star: 45 93% 47%;
-    --star-bad: 15 90% 55%;
+    --star: 140 65% 40%; /* Green for good ratings */
+    --star-bad: 0 84% 60%; /* Red for bad ratings */
  
     --radius: 0.75rem;
   }
@@ -74,8 +74,8 @@
     --input: 217.2 32.6% 25%;
     --ring: 178 100% 54%;
 
-    --star: 45 93% 47%;
-    --star-bad: 15 85% 60%;
+    --star: 140 60% 50%; /* Brighter green for good ratings */
+    --star-bad: 0 70% 55%; /* Brighter red for bad ratings */
   }
 }
 
