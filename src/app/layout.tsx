@@ -23,6 +23,9 @@ const fontInter = Inter({
 export const metadata: Metadata = {
   title: 'EatWise India - AI Nutrition Guide',
   description: 'Understand food labels, get health ratings, recipe suggestions, and nutrition analysis with AI. For a healthier India with EatWise India.',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 interface RootLayoutProps {
