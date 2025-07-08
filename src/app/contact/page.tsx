@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
+<<<<<<< HEAD
 import type { NextPage, Metadata } from 'next';
 
 const BASE_URL = 'https://eatwise.evotyindia.me';
@@ -36,11 +37,36 @@ const ContactPage: NextPage = () => {
         <h1 className="text-4xl font-bold tracking-tight text-center">Contact Us</h1>
         <p className="mt-2 text-lg text-muted-foreground text-center max-w-2xl">
           We'd love to hear from you! Reach out through any of the channels below.
+=======
+
+export default function ContactPage() {
+  const contactEmail = "support@eatwiseindia.com";
+  const contactPhone = "+91-123-456-7890";
+
+  const socialLinks = [
+    { name: "Facebook", icon: <Facebook className="h-6 w-6" />, url: "#" },
+    { name: "Twitter", icon: <Twitter className="h-6 w-6" />, url: "#" },
+    { name: "Instagram", icon: <Instagram className="h-6 w-6" />, url: "#" },
+    { name: "LinkedIn", icon: <Linkedin className="h-6 w-6" />, url: "#" },
+  ];
+
+  return (
+    <div className="container mx-auto py-12 animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
+      <div className="flex flex-col items-center mb-12 text-center">
+        <Share2 className="w-16 h-16 text-accent mb-4" />
+        <h1 className="text-4xl font-bold tracking-tight">Contact Us</h1>
+        <p className="mt-2 text-lg text-muted-foreground max-w-2xl">
+          We&apos;d love to hear from you! Reach out through any of the channels below.
+>>>>>>> finalprotest
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+<<<<<<< HEAD
         <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+=======
+        <Card className="transition-shadow duration-300">
+>>>>>>> finalprotest
           <CardHeader>
             <CardTitle className="flex items-center text-2xl">
               <Mail className="mr-3 h-7 w-7 text-accent" /> General Inquiries
@@ -51,24 +77,40 @@ const ContactPage: NextPage = () => {
             <p className="text-muted-foreground">
               Please feel free to email us. We aim to respond within 24-48 business hours.
             </p>
+<<<<<<< HEAD
             <a href={`mailto:${contactEmail}`} className="text-primary hover:underline font-medium flex items-center">
+=======
+            <a href={`mailto:${contactEmail}`} className="text-accent hover:underline font-medium flex items-center">
+>>>>>>> finalprotest
               <Mail className="mr-2 h-5 w-5" /> {contactEmail}
             </a>
           </CardContent>
         </Card>
 
+<<<<<<< HEAD
         <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+=======
+        <Card className="transition-shadow duration-300">
+>>>>>>> finalprotest
           <CardHeader>
             <CardTitle className="flex items-center text-2xl">
               <Phone className="mr-3 h-7 w-7 text-accent" /> Phone Support
             </CardTitle>
+<<<<<<< HEAD
             <CardDescription>Available during business hours (Mon-Fri, 9 AM - 6 PM IST).</CardDescription>
+=======
+            <CardDescription>Mon-Fri, 9 AM - 6 PM IST</CardDescription>
+>>>>>>> finalprotest
           </CardHeader>
           <CardContent className="space-y-3">
              <p className="text-muted-foreground">
               For urgent matters, you can call us on our support line.
             </p>
+<<<<<<< HEAD
             <a href={`tel:${contactPhone}`} className="text-primary hover:underline font-medium flex items-center">
+=======
+            <a href={`tel:${contactPhone}`} className="text-accent hover:underline font-medium flex items-center">
+>>>>>>> finalprotest
               <Phone className="mr-2 h-5 w-5" /> {contactPhone}
             </a>
           </CardContent>
@@ -77,10 +119,17 @@ const ContactPage: NextPage = () => {
 
       <Separator className="my-12 max-w-4xl mx-auto" />
 
+<<<<<<< HEAD
       <Card className="max-w-4xl mx-auto shadow-lg hover:shadow-xl transition-shadow duration-300">
         <CardHeader>
           <CardTitle className="flex items-center text-2xl justify-center">
             <Share2 className="mr-3 h-7 w-7 text-accent" /> Connect With Us on Social Media
+=======
+      <Card className="max-w-4xl mx-auto transition-shadow duration-300">
+        <CardHeader>
+          <CardTitle className="flex items-center text-2xl justify-center">
+            <Share2 className="mr-3 h-7 w-7 text-accent" /> Connect With Us
+>>>>>>> finalprotest
           </CardTitle>
           <CardDescription className="text-center">
             Stay updated and engage with our community.
@@ -103,6 +152,7 @@ const ContactPage: NextPage = () => {
           ))}
         </CardContent>
       </Card>
+<<<<<<< HEAD
 
        <Separator className="my-12 max-w-4xl mx-auto" />
 
@@ -131,3 +181,8 @@ const ContactPage: NextPage = () => {
 }
 
 export default ContactPage;
+=======
+    </div>
+  );
+}
+>>>>>>> finalprotest

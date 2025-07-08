@@ -6,6 +6,7 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
+<<<<<<< HEAD
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
@@ -77,6 +78,78 @@
     --sidebar-accent-foreground: 0 0% 98%; 
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 142.1 70.6% 45.3%;
+=======
+    --foreground: 224 71% 4%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+ 
+    --primary: 187 69% 36%;
+    --primary-foreground: 180 100% 97%;
+ 
+    --secondary: 202 54% 94%;
+    --secondary-foreground: 187 69% 30%;
+ 
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+ 
+    --accent: 181 90% 42%;
+    --accent-foreground: 224 71% 4%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 140 65% 35%;
+    --success-foreground: 140 60% 95%;
+
+    --border: 202 54% 90%;
+    --input: 202 54% 90%;
+    --ring: 181 90% 42%;
+
+    --star: 140 65% 40%; /* Green for good ratings */
+    --star-bad: 0 84% 60%; /* Red for bad ratings */
+ 
+    --radius: 0.75rem;
+  }
+ 
+  .dark {
+    --background: 224 71% 4%;
+    --foreground: 210 40% 98%;
+ 
+    --card: 224 71% 8%;
+    --card-foreground: 210 40% 98%;
+ 
+    --popover: 224 71% 4%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --primary: 202 54% 72%;
+    --primary-foreground: 224 71% 10%;
+ 
+    --secondary: 245 26% 20%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --accent: 178 100% 54%;
+    --accent-foreground: 224 71% 4%;
+ 
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 140 60% 45%;
+    --success-foreground: 140 60% 96%;
+ 
+    --border: 217.2 32.6% 25%;
+    --input: 217.2 32.6% 25%;
+    --ring: 178 100% 54%;
+
+    --star: 140 60% 50%; /* Brighter green for good ratings */
+    --star-bad: 0 70% 55%; /* Brighter red for bad ratings */
+>>>>>>> finalprotest
   }
 }
 
@@ -87,11 +160,16 @@
   body {
     @apply bg-background text-foreground;
   }
+<<<<<<< HEAD
+=======
+  
+>>>>>>> finalprotest
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline;
   }
 }
 
+<<<<<<< HEAD
 /* PDF specific structural hints */
 .pdf-page-break-before {
   margin-top: 15mm; /* Provides a visual gap in the continuous canvas, might influence perceived breaks */
@@ -102,4 +180,38 @@
 .pdf-page {
   /* min-height: 277mm; /* A4 height minus typical margins */
   /* box-sizing: border-box; */
+=======
+@layer components {
+  .hero-section {
+    @apply relative overflow-hidden;
+  }
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    right: -50%;
+    bottom: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, hsl(var(--secondary)), transparent 60%);
+    animation: pulse 10s ease-in-out infinite;
+    z-index: 1;
+    will-change: transform;
+  }
+  .dark .hero-section::before {
+    background: radial-gradient(circle, hsl(var(--secondary) / 0.5), transparent 60%);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+>>>>>>> finalprotest
 }

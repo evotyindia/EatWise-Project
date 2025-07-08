@@ -14,14 +14,23 @@ import { DiseaseEnum, HouseholdCompositionSchema, type Disease, type HouseholdCo
 
 const GetRecipeSuggestionsInputSchema = z.object({
   ingredients: z.string().min(1, "Please provide some ingredients.").describe('A comma-separated list of ingredients the user has.'),
+<<<<<<< HEAD
+=======
+  userSuggestions: z.string().optional().describe("Any specific user requests, like 'make it spicy', 'quick meal', etc."),
+>>>>>>> finalprotest
   diseaseConcerns: z.array(DiseaseEnum).optional().describe("List of health conditions or dietary restrictions to consider. 'none' means no specific dietary disease concern."),
   householdComposition: HouseholdCompositionSchema.optional().describe("Details about the household members for portion suggestions and suitability.")
 });
 export type GetRecipeSuggestionsInput = z.infer<typeof GetRecipeSuggestionsInputSchema>;
 
 const GetRecipeSuggestionsOutputSchema = z.object({
+<<<<<<< HEAD
   suggestions: z.array(z.string()).describe('An array of 2-5 healthy Indian dish names that can be made with the ingredients, considering health concerns and household composition.'),
   initialContextualGuidance: z.string().optional().describe("A brief message to the user after suggestions are shown, e.g., 'Here are some ideas. Click one for a detailed recipe.'")
+=======
+  suggestions: z.array(z.string()).describe('An array of up to 8 healthy Indian dish names that can be made with the ingredients, considering health concerns and household composition.'),
+  initialContextualGuidance: z.string().describe("A brief message to the user after suggestions are shown, e.g., 'Here are some ideas. Click one for a detailed recipe.'")
+>>>>>>> finalprotest
 });
 export type GetRecipeSuggestionsOutput = z.infer<typeof GetRecipeSuggestionsOutputSchema>;
 
@@ -33,8 +42,15 @@ const prompt = ai.definePrompt({
   name: 'getRecipeSuggestionsPrompt',
   input: {schema: GetRecipeSuggestionsInputSchema},
   output: {schema: GetRecipeSuggestionsOutputSchema},
+<<<<<<< HEAD
   prompt: `You are a personal chef specializing in healthy Indian cuisine.
 A user has provided the following:
+=======
+  system: `You are a personal chef specializing in healthy Indian cuisine. Your job is to suggest dish names based on user inputs.
+Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
+Ensure the 'suggestions' array contains only the names of the dishes as strings. Example 'suggestions': ["Palak Dal", "Aloo Gobi", "Vegetable Pulao"]`,
+  prompt: `A user has provided the following:
+>>>>>>> finalprotest
 Ingredients: {{ingredients}}
 
 {{#if diseaseConcerns.length}}
@@ -51,16 +67,28 @@ Household Composition:
 Consider this for suitability of dishes (e.g., less spicy for kids/seniors, softer foods for seniors if appropriate).
 {{/if}}
 
+<<<<<<< HEAD
 Based on the available ingredients, health considerations, and household composition, suggest 2-5 healthy Indian dish NAMES.
+=======
+{{#if userSuggestions}}
+User's Special Request: {{userSuggestions}}
+Please try to accommodate this request in your suggestions. For example, if they ask for a "quick meal", suggest dishes that are fast to cook.
+{{/if}}
+
+Based on all the available information, suggest up to 8 healthy Indian dish NAMES.
+>>>>>>> finalprotest
 These should be just the names of the dishes, not full recipes.
 The dishes should be practical to make with the listed ingredients. Prioritize using the provided ingredients.
 Suggest diverse options if possible (e.g., a dal, a sabzi, a rice dish).
 
 Provide a brief, encouraging message as 'initialContextualGuidance', like "Here are some healthy dish ideas based on your inputs. Click a dish to see its detailed recipe."
+<<<<<<< HEAD
 
 IMPORTANT: Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
 Ensure the 'suggestions' array contains only the names of the dishes as strings.
 Example 'suggestions': ["Palak Dal", "Aloo Gobi", "Vegetable Pulao"]
+=======
+>>>>>>> finalprotest
 `,
 });
 
@@ -70,11 +98,16 @@ const getRecipeSuggestionsFlow = ai.defineFlow(
     inputSchema: GetRecipeSuggestionsInputSchema,
     outputSchema: GetRecipeSuggestionsOutputSchema,
   },
+<<<<<<< HEAD
   async input => {
+=======
+  async (input) => {
+>>>>>>> finalprotest
     // Ensure 'none' is handled correctly if it's the only item
     if (input.diseaseConcerns && input.diseaseConcerns.length === 1 && input.diseaseConcerns[0] === 'none') {
       input.diseaseConcerns = []; // Treat as no specific disease concerns for the prompt
     }
+<<<<<<< HEAD
     const {output} = await prompt(input);
     if (!output) {
       console.error('getRecipeSuggestionsFlow: LLM output was null or did not match schema for input:', JSON.stringify(input));
@@ -84,5 +117,24 @@ const getRecipeSuggestionsFlow = ai.defineFlow(
       };
     }
     return output;
+=======
+
+    try {
+        const {output} = await prompt(input);
+        if (!output) {
+          throw new Error("The AI returned no suggestions. Please try again.");
+        }
+        return output;
+    } catch (error: any) {
+        const errorMessage = error.message?.toLowerCase() || '';
+        if (errorMessage.includes('api key not found') || errorMessage.includes('permission denied')) {
+            console.error("Authentication error in getRecipeSuggestionsFlow:", error);
+            throw new Error("Authentication Error: The AI service API key is missing or invalid. Please check your server environment variables.");
+        }
+        
+        console.error("An API error occurred in getRecipeSuggestionsFlow:", error);
+        throw new Error("Failed to get dish suggestions. The AI service may be temporarily unavailable.");
+    }
+>>>>>>> finalprotest
   }
 );
