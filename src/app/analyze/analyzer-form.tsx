@@ -381,7 +381,7 @@ export function AnalyzerForm() {
                   </Alert>
                 )}
 
-                <Accordion type="single" collapsible className="w-full" defaultValue="detailed-analysis">
+                <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="detailed-analysis">
                     <AccordionTrigger className="text-lg font-semibold hover:no-underline">
                       <div className="flex items-center">
@@ -449,28 +449,30 @@ export function AnalyzerForm() {
                 )}
 
                 {report.ingredientDeepDive && report.ingredientDeepDive.length > 0 && (
-                  <div className="w-full border rounded-lg">
-                      <div className="flex items-center p-4">
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="ingredient-deep-dive">
+                      <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                        <div className="flex items-center">
                           <Microscope className="mr-2 h-5 w-5 text-primary" />
-                          <h3 className="text-lg font-semibold">Ingredient Deep Dive</h3>
-                      </div>
-                      <Accordion type="multiple" className="w-full">
+                          <span>Ingredient Deep Dive</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-4 pt-2">
                           {report.ingredientDeepDive.map((item, index) => (
-                              <AccordionItem key={index} value={`item-${index}`} className="border-t">
-                                  <AccordionTrigger className="px-4 text-left hover:no-underline">
-                                      <div className="flex items-center justify-between w-full">
-                                          <span className="font-medium">{item.ingredientName}</span>
-                                          <Badge variant={riskBadgeVariantMap[item.riskLevel] || 'outline'} className="ml-2 shrink-0">{item.riskLevel}</Badge>
-                                      </div>
-                                  </AccordionTrigger>
-                                  <AccordionContent className="px-4 space-y-2">
-                                      <p className="text-sm text-muted-foreground">{item.description}</p>
-                                      <p className="text-xs"><strong className="font-semibold">Justification:</strong> {item.riskReason}</p>
-                                  </AccordionContent>
-                              </AccordionItem>
+                            <div key={index} className="p-3 rounded-md border bg-muted/50">
+                              <div className="flex items-center justify-between w-full mb-2">
+                                <h4 className="font-semibold">{item.ingredientName}</h4>
+                                <Badge variant={riskBadgeVariantMap[item.riskLevel] || 'outline'} className="ml-2 shrink-0">{item.riskLevel}</Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-1">{item.description}</p>
+                              <p className="text-xs"><strong className="font-semibold">Justification:</strong> {item.riskReason}</p>
+                            </div>
                           ))}
-                      </Accordion>
-                  </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
                 )}
               </CardContent>
               <CardFooter className="flex flex-col items-start pt-4 border-t">
@@ -502,7 +504,3 @@ export function AnalyzerForm() {
     </div>
   );
 }
-
-    
-
-    
