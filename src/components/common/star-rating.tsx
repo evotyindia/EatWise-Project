@@ -19,16 +19,32 @@ export function StarRating({
 }: StarRatingProps) {
   return (
     <div className={cn('flex items-center space-x-1', className)}>
-      {Array.from({ length: maxRating }, (_, i) => (
-        <Star
-          key={i}
-          size={size}
-          className={cn(
-            i < Math.round(rating) ? 'text-[color:var(--star)] fill-[color:var(--star)]' : 'text-gray-300 dark:text-gray-600',
-            iconClassName
-          )}
-        />
-      ))}
+      {Array.from({ length: maxRating }, (_, i) => {
+        // Calculate the fill percentage for each star
+        const fillPercentage = Math.round(
+          Math.max(0, Math.min(1, rating - i)) * 100
+        );
+
+        return (
+          <div key={i} className="relative flex-shrink-0" style={{ width: size, height: size }}>
+            {/* The background, unfilled star */}
+            <Star
+              size={size}
+              className={cn('text-gray-300 dark:text-gray-600', iconClassName)}
+            />
+            {/* The foreground, filled star, clipped to the fill percentage */}
+            <div
+              className="absolute top-0 left-0 h-full overflow-hidden"
+              style={{ width: `${fillPercentage}%` }}
+            >
+              <Star
+                size={size}
+                className={cn('text-[color:var(--star)] fill-[color:var(--star)]', iconClassName)}
+              />
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
