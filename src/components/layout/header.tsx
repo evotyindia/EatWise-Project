@@ -1,6 +1,6 @@
 "use client"
 
-import { Menu, Leaf } from "lucide-react"
+import { Menu, Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail } from "lucide-react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
@@ -11,12 +11,12 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle,
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/", label: "Home" },
-  { href: "/analyze", label: "Analyze Label" },
-  { href: "/recipes", label: "Recipes" },
-  { href: "/nutrition-check", label: "Nutrition Check" },
-  { href: "/blogs", label: "Blog" },
-  { href: "/contact", label: "Contact"},
+  { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
+  { href: "/analyze", label: "Analyze Label", icon: <ScanLine className="h-5 w-5" /> },
+  { href: "/recipes", label: "Recipes", icon: <CookingPot className="h-5 w-5" /> },
+  { href: "/nutrition-check", label: "Nutrition Check", icon: <BarChart3 className="h-5 w-5" /> },
+  { href: "/blogs", label: "Blog", icon: <BookOpen className="h-5 w-5" /> },
+  { href: "/contact", label: "Contact", icon: <Mail className="h-5 w-5" />},
 ]
 
 export function Header() {
@@ -66,9 +66,9 @@ export function Header() {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[280px] bg-background/95 backdrop-blur-sm">
-                  <SheetHeader className="sr-only">
-                    <SheetTitle>Menu</SheetTitle>
-                    <SheetDescription>
+                  <SheetHeader>
+                    <SheetTitle className="sr-only">Menu</SheetTitle>
+                    <SheetDescription className="sr-only">
                       Main navigation menu for the website.
                     </SheetDescription>
                   </SheetHeader>
@@ -80,11 +80,12 @@ export function Header() {
                           <Link
                             href={item.href}
                             className={cn(
-                              "rounded-lg p-3 text-base font-medium transition-colors",
+                              "flex items-center gap-3 rounded-lg p-3 text-base font-medium transition-colors",
                               isActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
                             )}
                           >
-                            {item.label}
+                            {item.icon}
+                            <span>{item.label}</span>
                           </Link>
                         </SheetClose>
                       )
