@@ -550,10 +550,10 @@ export function RecipeForm() {
                   </div>
               </div>
               {detailedRecipe.healthNotes && (
-                <Alert variant="default" className="bg-sky-500/10 border-sky-500/20">
-                    <Lightbulb className="h-5 w-5 text-sky-600" />
-                    <AlertTitle className="font-semibold text-sky-800 dark:text-sky-300">Health Notes &amp; Tips</AlertTitle>
-                    <AlertDescription className="text-sky-700/90 dark:text-sky-300/90 whitespace-pre-line text-sm">
+                  <Alert variant="success">
+                    <Lightbulb className="h-5 w-5" />
+                    <AlertTitle>Health Notes &amp; Tips</AlertTitle>
+                    <AlertDescription className="whitespace-pre-line text-sm">
                       {detailedRecipe.healthNotes}
                     </AlertDescription>
                   </Alert>

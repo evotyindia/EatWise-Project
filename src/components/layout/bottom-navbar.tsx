@@ -8,6 +8,7 @@ import React from 'react';
 
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils";
+import { ThemeToggleButton } from "../common/theme-toggle-button";
 
 const mainNavItems = [
   { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
@@ -40,7 +41,7 @@ export function BottomNavbar() {
             >
               <div className={cn(
                 "flex items-center justify-center gap-2 rounded-full px-4 py-1.5 transition-all duration-300",
-                isActive ? "bg-secondary" : ""
+                isActive ? "bg-primary text-primary-foreground shadow-lg" : ""
               )}>
                 {item.icon}
                 {isActive && <span className="text-xs font-bold">{item.label}</span>}

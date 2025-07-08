@@ -7,7 +7,7 @@ import type { ContextAwareAIChatInput, ContextAwareAIChatOutput, ChatMessage } f
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadCloud, Sparkles, MessageCircle, Send, Zap, HeartPulse, Wheat, Info, FileText, Microscope } from "lucide-react";
+import { UploadCloud, Sparkles, MessageCircle, Send, Zap, HeartPulse, Wheat, Info, FileText, Microscope, ShieldCheck, ShieldAlert } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -176,7 +176,6 @@ export function AnalyzerForm() {
   };
 
   useEffect(() => {
-    // Only scroll if the chat has started, not on the initial welcome message.
     if (chatHistory.length > 1) {
       scrollToBottom();
     }
@@ -209,10 +208,6 @@ export function AnalyzerForm() {
 
   return (
     <div className="relative">
-      <div className="hidden">
-        {/* This div is for holding elements that should not affect layout, like print components. */}
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
@@ -344,26 +339,26 @@ export function AnalyzerForm() {
               </Alert>
 
               {renderFormattedText(report.detailedAnalysis.positiveAspects) && (
-                <Alert variant="default" className="bg-green-500/10 border-green-500/20">
-                  <Info className="h-4 w-4 text-green-500" />
-                  <AlertTitle className="font-semibold text-lg mb-1 text-green-700 dark:text-green-300">Positive Aspects</AlertTitle>
-                  <AlertDescription className="text-green-800/90 dark:text-green-300/90">{renderFormattedText(report.detailedAnalysis.positiveAspects)}</AlertDescription>
+                <Alert variant="success">
+                  <ShieldCheck className="h-4 w-4" />
+                  <AlertTitle className="font-semibold text-lg mb-1">Positive Aspects</AlertTitle>
+                  <AlertDescription>{renderFormattedText(report.detailedAnalysis.positiveAspects)}</AlertDescription>
                 </Alert>
               )}
 
               {renderFormattedText(report.detailedAnalysis.potentialConcerns) && (
-                <Alert variant="destructive" className="bg-red-500/10 border-red-500/20">
-                  <Info className="h-4 w-4 text-red-500" />
-                  <AlertTitle className="font-semibold text-lg mb-1 text-red-700 dark:text-red-300">Potential Concerns</AlertTitle>
-                  <AlertDescription className="text-red-800/90 dark:text-red-300/90">{renderFormattedText(report.detailedAnalysis.potentialConcerns)}</AlertDescription>
+                <Alert variant="destructive">
+                  <ShieldAlert className="h-4 w-4" />
+                  <AlertTitle className="font-semibold text-lg mb-1">Potential Concerns</AlertTitle>
+                  <AlertDescription>{renderFormattedText(report.detailedAnalysis.potentialConcerns)}</AlertDescription>
                 </Alert>
               )}
 
               {renderFormattedText(report.alternatives) && (
-                <Alert variant="default" className="bg-sky-500/10 border-sky-500/20">
-                  <Info className="h-4 w-4 text-sky-500" />
-                  <AlertTitle className="font-semibold text-lg mb-1 text-sky-700 dark:text-sky-300">Healthier Indian Alternatives</AlertTitle>
-                  <AlertDescription className="text-sky-800/90 dark:text-sky-300/90">{renderFormattedText(report.alternatives)}</AlertDescription>
+                <Alert variant="default" className="bg-secondary">
+                  <Info className="h-4 w-4 text-primary" />
+                  <AlertTitle className="font-semibold text-lg mb-1">Healthier Indian Alternatives</AlertTitle>
+                  <AlertDescription>{renderFormattedText(report.alternatives)}</AlertDescription>
                 </Alert>
               )}
 
