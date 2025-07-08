@@ -280,12 +280,12 @@ export function AnalyzerForm() {
                   <HeartPulse className="h-5 w-5 text-accent" />
                   <AlertTitle className="font-semibold">Overall Health Rating</AlertTitle>
                   <AlertDescription>
-                    <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-2">
                         <div className="flex items-center gap-2">
                             <StarRating rating={report.healthRating} variant="good" />
                             <span className="font-medium text-sm">({report.healthRating}/5)</span>
                         </div>
-                        <span className="text-xs text-muted-foreground">(Higher is better)</span>
+                        <span className="text-xs text-muted-foreground ml-auto">(Higher is better)</span>
                     </div>
                   </AlertDescription>
                 </Alert>
@@ -295,12 +295,12 @@ export function AnalyzerForm() {
                     <Zap className="h-5 w-5 text-accent" />
                     <AlertTitle className="font-semibold">Processing Level</AlertTitle>
                     <AlertDescription>
-                      <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-2">
                           <div className="flex items-center gap-2">
                               <StarRating rating={report.processingLevelRating.rating} variant="bad" />
                               <span className="font-medium text-sm">({report.processingLevelRating.rating}/5)</span>
                           </div>
-                          <span className="text-xs text-muted-foreground">(Lower is better)</span>
+                          <span className="text-xs text-muted-foreground ml-auto">(Lower is better)</span>
                       </div>
                     </AlertDescription>
                   </Alert>
@@ -311,12 +311,12 @@ export function AnalyzerForm() {
                     <Wheat className="h-5 w-5 text-accent" />
                     <AlertTitle className="font-semibold">Sugar Content</AlertTitle>
                     <AlertDescription>
-                      <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-2">
                           <div className="flex items-center gap-2">
                               <StarRating rating={report.sugarContentRating.rating} variant="bad" />
                               <span className="font-medium text-sm">({report.sugarContentRating.rating}/5)</span>
                           </div>
-                          <span className="text-xs text-muted-foreground">(Lower is better)</span>
+                          <span className="text-xs text-muted-foreground ml-auto">(Lower is better)</span>
                       </div>
                     </AlertDescription>
                   </Alert>
@@ -327,12 +327,12 @@ export function AnalyzerForm() {
                     <Sparkles className="h-5 w-5 text-accent" />
                      <AlertTitle className="font-semibold">Nutrient Density</AlertTitle>
                      <AlertDescription>
-                        <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-2">
                             <div className="flex items-center gap-2">
                                 <StarRating rating={report.nutrientDensityRating.rating} variant="good" />
                                 <span className="font-medium text-sm">({report.nutrientDensityRating.rating}/5)</span>
                             </div>
-                            <span className="text-xs text-muted-foreground">(Higher is better)</span>
+                            <span className="text-xs text-muted-foreground ml-auto">(Higher is better)</span>
                         </div>
                     </AlertDescription>
                   </Alert>
