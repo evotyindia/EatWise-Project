@@ -188,11 +188,10 @@ export function AnalyzerForm() {
     if (lines.length === 0) return null;
 
     return (
-      <ul className="list-none space-y-1 text-sm leading-relaxed">
+      <ul className="list-disc list-outside space-y-1 text-sm leading-relaxed marker:text-accent">
         {lines.map((line, index) => (
-          <li key={index} className="flex items-start">
-            <span className="mr-2 text-accent">&#8226;</span>
-            <span className="break-words">{line.replace(/^(\*|-)\s*/, '')}</span>
+          <li key={index} className="break-words pl-2">
+            {line.replace(/^(\*|-)\s*/, '')}
           </li>
         ))}
       </ul>
@@ -341,16 +340,18 @@ export function AnalyzerForm() {
               <Separator />
 
               <Alert variant="default" className="bg-background/30">
-                <Info className="h-4 w-4 text-primary" />
-                <AlertTitle className="font-semibold text-lg mb-1">Summary</AlertTitle>
-                <AlertDescription>{report.summary}</AlertDescription>
+                <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
+                  <Info className="h-5 w-5 mr-2 text-primary" />
+                  <span>Summary</span>
+                </AlertTitle>
+                <AlertDescription className="pl-7">{report.summary}</AlertDescription>
               </Alert>
 
               {renderFormattedText(report.greenFlags) && (
                 <Alert variant="success">
                   <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
                     <ShieldCheck className="h-5 w-5 mr-2" />
-                    Green Flags
+                    <span>Green Flags</span>
                   </AlertTitle>
                   <AlertDescription className="pl-7">
                     {renderFormattedText(report.greenFlags)}
@@ -362,7 +363,7 @@ export function AnalyzerForm() {
                 <Alert variant="destructive">
                   <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
                     <ShieldAlert className="h-5 w-5 mr-2" />
-                    Red Flags
+                    <span>Red Flags</span>
                   </AlertTitle>
                   <AlertDescription className="pl-7">
                     {renderFormattedText(report.redFlags)}
@@ -402,30 +403,38 @@ export function AnalyzerForm() {
               </Accordion>
 
               <Alert variant="default" className="bg-secondary/70">
-                <UserCheck className="h-4 w-4 text-primary" />
-                <AlertTitle className="font-semibold text-lg mb-1">Best Suited For</AlertTitle>
-                <AlertDescription>{report.bestSuitedFor}</AlertDescription>
+                <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
+                  <UserCheck className="h-5 w-5 mr-2 text-primary" />
+                  <span>Best Suited For</span>
+                </AlertTitle>
+                <AlertDescription className="pl-7">{report.bestSuitedFor}</AlertDescription>
               </Alert>
 
               {renderFormattedText(report.consumptionTips) && (
                   <Alert variant="default" className="bg-secondary/70">
-                    <Lightbulb className="h-4 w-4 text-primary" />
-                    <AlertTitle className="font-semibold text-lg mb-1">Healthy Consumption Tips</AlertTitle>
-                    <AlertDescription>{renderFormattedText(report.consumptionTips)}</AlertDescription>
+                    <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
+                      <Lightbulb className="h-5 w-5 mr-2 text-primary" />
+                      <span>Healthy Consumption Tips</span>
+                    </AlertTitle>
+                    <AlertDescription className="pl-7">{renderFormattedText(report.consumptionTips)}</AlertDescription>
                   </Alert>
               )}
 
               <Alert variant="default" className="bg-secondary/70">
-                <CookingPot className="h-4 w-4 text-primary" />
-                <AlertTitle className="font-semibold text-lg mb-1">Role in an Indian Diet</AlertTitle>
-                <AlertDescription>{report.indianDietContext}</AlertDescription>
+                <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
+                  <CookingPot className="h-5 w-5 mr-2 text-primary" />
+                  <span>Role in an Indian Diet</span>
+                </AlertTitle>
+                <AlertDescription className="pl-7">{report.indianDietContext}</AlertDescription>
               </Alert>
 
               {renderFormattedText(report.healthierAlternatives) && (
                 <Alert variant="default" className="bg-secondary">
-                  <Info className="h-4 w-4 text-primary" />
-                  <AlertTitle className="font-semibold text-lg mb-1">Healthier Indian Alternatives</AlertTitle>
-                  <AlertDescription>{renderFormattedText(report.healthierAlternatives)}</AlertDescription>
+                  <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
+                    <Info className="h-5 w-5 mr-2 text-primary" />
+                    <span>Healthier Indian Alternatives</span>
+                  </AlertTitle>
+                  <AlertDescription className="pl-7">{renderFormattedText(report.healthierAlternatives)}</AlertDescription>
                 </Alert>
               )}
 
@@ -488,3 +497,5 @@ export function AnalyzerForm() {
     </div>
   );
 }
+
+    
