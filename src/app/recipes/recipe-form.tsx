@@ -440,18 +440,24 @@ export function RecipeForm() {
 
       <div className="lg:col-span-8 space-y-8">
         {isLoadingSuggestions && (
-          <Card>
-            <CardHeader><CardTitle>Finding recipe ideas...</CardTitle><CardDescription>Our AI chef is checking the pantry.</CardDescription></CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              <Skeleton className="h-28 rounded-lg" />
-              <Skeleton className="h-28 rounded-lg" />
-              <Skeleton className="h-28 rounded-lg" />
-              <Skeleton className="h-28 rounded-lg" />
-              <Skeleton className="h-28 rounded-lg" />
-              <Skeleton className="h-28 rounded-lg" />
-              <Skeleton className="h-28 rounded-lg" />
-              <Skeleton className="h-28 rounded-lg" />
+          <Card className="flex flex-col items-center justify-center min-h-[400px] text-center overflow-hidden">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold">Finding Recipe Ideas...</CardTitle>
+              <CardDescription>Our AI chef is checking the pantry and getting creative!</CardDescription>
+            </CardHeader>
+            <CardContent className="flex items-center justify-center p-8">
+              <div className="relative flex items-center justify-center w-48 h-48">
+                <Soup className="w-28 h-28 text-primary animate-simmer" />
+                <div className="absolute inset-0">
+                    <Leaf className="absolute top-4 left-10 w-8 h-8 text-green-500 animate-toss" style={{ animationDelay: '0s' }}/>
+                    <Carrot className="absolute top-8 right-8 w-8 h-8 text-orange-500 animate-toss" style={{ animationDelay: '0.5s' }}/>
+                    <Flame className="absolute top-12 left-4 w-8 h-8 text-red-500 animate-toss" style={{ animationDelay: '1s' }}/>
+                </div>
+              </div>
             </CardContent>
+             <CardFooter>
+              <p className="text-sm text-muted-foreground">Looking for delicious combinations...</p>
+            </CardFooter>
           </Card>
         )}
         
@@ -592,3 +598,5 @@ export function RecipeForm() {
     </div>
   );
 }
+
+    
