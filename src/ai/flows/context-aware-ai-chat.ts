@@ -183,8 +183,15 @@ const contextAwareAIChatFlow = ai.defineFlow(
           throw new Error("Authentication Error: The AI service API key is missing or invalid. Please check your server environment variables.");
       }
 
-      console.error("An API error occurred in contextAwareAIChatFlow:", error);
-      throw new Error("I'm sorry, the AI service is currently busy or unavailable. Please try again in a moment.");
+      const isApiError = (error.cause as any)?.status >= 500;
+      const finalErrorMessage = isApiError
+          ? "I'm sorry, the AI service is currently busy or unavailable. Please try again in a moment."
+          : error.message || "An unexpected error occurred during the chat.";
+
+      console.error(`An error occurred in contextAwareAIChatFlow: ${finalErrorMessage}`, error);
+
+      // Re-throw with a more specific message for the front end.
+      throw new Error(finalErrorMessage);
     }
   }
 );
