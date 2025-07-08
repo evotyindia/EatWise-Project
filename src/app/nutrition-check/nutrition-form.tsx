@@ -80,6 +80,7 @@ export function NutritionForm() {
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const [isSubmittingImage, setIsSubmittingImage] = useState(false); 
 
   const { toast } = useToast();
@@ -112,6 +113,8 @@ export function NutritionForm() {
   };
 
   const generateAnalysisSharedLogic = async (inputForAI: AnalyzeNutritionInput, inputForContext: AnalyzeNutritionInput, processingType: 'image' | 'manual') => {
+    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    
     setIsLoading(true);
     if (processingType === 'image') setIsProcessingImage(true);
     if (processingType === 'manual') setIsProcessingManually(true);
@@ -315,105 +318,107 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
         </CardContent>
       </Card>
 
-      {isLoading && !analysisResult && (
-         <Card className="flex items-center justify-center h-full min-h-[300px]">
-            <div className="text-center">
-                <Sparkles className="mx-auto h-12 w-12 text-accent animate-spin mb-4" />
-                <p className="text-lg font-semibold">Generating Analysis...</p>
-                <p className="text-sm text-muted-foreground mt-1">The AI is performing a detailed nutritional breakdown.</p>
-            </div>
-        </Card>
-      )}
+      <div ref={resultsRef}>
+        {isLoading && !analysisResult && (
+           <Card className="flex items-center justify-center h-full min-h-[300px]">
+              <div className="text-center">
+                  <Sparkles className="mx-auto h-12 w-12 text-accent animate-spin mb-4" />
+                  <p className="text-lg font-semibold">Generating Analysis...</p>
+                  <p className="text-sm text-muted-foreground mt-1">The AI is performing a detailed nutritional breakdown.</p>
+              </div>
+          </Card>
+        )}
 
-      {analysisResult && (
-        <Card className="animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
-          <CardHeader>
-            <div className="flex justify-between items-start">
-                <div>
-                    <CardTitle className="flex items-center text-2xl"><FileText className="mr-2 h-6 w-6 text-primary" /> AI Nutrition Analysis</CardTitle>
-                    <CardDescription>
-                        Understanding your food&apos;s nutritional profile
-                        {currentInputContext?.foodItemDescription ? ` for: ${currentInputContext.foodItemDescription.replace("IGNORE_VALIDATION_FOR_IMAGE_SUBMIT_INTERNAL_MARKER", "").trim()}` : "."}
-                    </CardDescription>
-                </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Alert variant="default" className="bg-muted/60">
-                <Sparkles className="h-5 w-5 text-accent" />
-                <AlertTitle className="font-semibold flex justify-between items-center">
-                  <span>Nutrient Density Rating</span>
-                  <span className="text-xs font-normal text-muted-foreground">(Higher is better)</span>
-                </AlertTitle>
-                <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
-                    <StarRating rating={analysisResult.nutritionDensityRating} variant="good" /> ({analysisResult.nutritionDensityRating}/5)
-                </AlertDescription>
-            </Alert>
-            <Separator />
+        {analysisResult && (
+          <Card className="animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                  <div>
+                      <CardTitle className="flex items-center text-2xl"><FileText className="mr-2 h-6 w-6 text-primary" /> AI Nutrition Analysis</CardTitle>
+                      <CardDescription>
+                          Understanding your food&apos;s nutritional profile
+                          {currentInputContext?.foodItemDescription ? ` for: ${currentInputContext.foodItemDescription.replace("IGNORE_VALIDATION_FOR_IMAGE_SUBMIT_INTERNAL_MARKER", "").trim()}` : "."}
+                      </CardDescription>
+                  </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Alert variant="default" className="bg-muted/60">
+                  <Sparkles className="h-5 w-5 text-accent" />
+                  <AlertTitle className="font-semibold flex justify-between items-center">
+                    <span>Nutrient Density Rating</span>
+                    <span className="text-xs font-normal text-muted-foreground">(Higher is better)</span>
+                  </AlertTitle>
+                  <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
+                      <StarRating rating={analysisResult.nutritionDensityRating} variant="good" /> ({analysisResult.nutritionDensityRating}/5)
+                  </AlertDescription>
+              </Alert>
+              <Separator />
 
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertTitle className="font-semibold">Overall Analysis</AlertTitle>
-              <AlertDescription>{renderFormattedAnalysisText(analysisResult.overallAnalysis)}</AlertDescription>
-            </Alert>
-            
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="nutrition-details">
-                <AccordionTrigger className="text-lg font-semibold hover:no-underline">More Details</AccordionTrigger>
-                <AccordionContent className="space-y-4 pt-2">
-                  <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertTitle className="font-semibold">Dietary Suitability</AlertTitle>
-                    <AlertDescription>{renderFormattedAnalysisText(analysisResult.dietarySuitability)}</AlertDescription>
-                  </Alert>
-                  <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertTitle className="font-semibold">Macronutrient Balance</AlertTitle>
-                    <AlertDescription>{renderFormattedAnalysisText(analysisResult.macronutrientBalance)}</AlertDescription>
-                  </Alert>
-                  <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertTitle className="font-semibold">Micronutrient Highlights</AlertTitle>
-                    <AlertDescription>{renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}</AlertDescription>
-                  </Alert>
-                  <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertTitle className="font-semibold">Processing Level</AlertTitle>
-                    <AlertDescription>{renderFormattedAnalysisText(analysisResult.processingLevelAssessment)}</AlertDescription>
-                  </Alert>
-                   <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertTitle className="font-semibold">Serving Size Context</AlertTitle>
-                    <AlertDescription>{renderFormattedAnalysisText(analysisResult.servingSizeContext)}</AlertDescription>
-                  </Alert>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </CardContent>
-           <CardFooter className="flex flex-col items-start pt-4 border-t">
-                <h3 className="font-semibold text-xl mb-2 flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Analysis</h3>
-                <p className="text-sm text-muted-foreground mb-3">Ask about specific nutrients, comparisons, etc.</p>
-                <ScrollArea className="h-[200px] w-full rounded-md border p-3 mb-3 bg-muted/50">
-                  {chatHistory.map((msg, index) => (
-                    <div key={index} className={`mb-2 p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
-                      <span className="font-semibold capitalize">{msg.role === 'user' ? 'You' : 'AI Advisor'}: </span>{msg.content}
-                    </div>
-                  ))}
-                  {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Advisor is typing...</div>}
-                  <div ref={messagesEndRef} />
-                </ScrollArea>
-                <form onSubmit={handleChatSubmit} className="w-full flex gap-2">
-                  <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background"/>
-                  <Button type="submit" disabled={isChatLoading || !chatInput.trim()}><Send className="h-4 w-4" /></Button>
-                </form>
-            </CardFooter>
-        </Card>
-      )}
-       {!isLoading && !analysisResult && (
-        <Card className="flex items-center justify-center h-full min-h-[300px] bg-muted/30">
-            <div className="text-center p-8"><FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" /><p className="text-lg font-semibold text-muted-foreground">Your nutrition analysis will appear here.</p><p className="text-sm text-muted-foreground mt-1">Submit nutritional data to get started.</p></div>
-        </Card>
-      )}
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle className="font-semibold">Overall Analysis</AlertTitle>
+                <AlertDescription>{renderFormattedAnalysisText(analysisResult.overallAnalysis)}</AlertDescription>
+              </Alert>
+              
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="nutrition-details">
+                  <AccordionTrigger className="text-lg font-semibold hover:no-underline">More Details</AccordionTrigger>
+                  <AccordionContent className="space-y-4 pt-2">
+                    <Alert>
+                      <Info className="h-4 w-4" />
+                      <AlertTitle className="font-semibold">Dietary Suitability</AlertTitle>
+                      <AlertDescription>{renderFormattedAnalysisText(analysisResult.dietarySuitability)}</AlertDescription>
+                    </Alert>
+                    <Alert>
+                      <Info className="h-4 w-4" />
+                      <AlertTitle className="font-semibold">Macronutrient Balance</AlertTitle>
+                      <AlertDescription>{renderFormattedAnalysisText(analysisResult.macronutrientBalance)}</AlertDescription>
+                    </Alert>
+                    <Alert>
+                      <Info className="h-4 w-4" />
+                      <AlertTitle className="font-semibold">Micronutrient Highlights</AlertTitle>
+                      <AlertDescription>{renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}</AlertDescription>
+                    </Alert>
+                    <Alert>
+                      <Info className="h-4 w-4" />
+                      <AlertTitle className="font-semibold">Processing Level</AlertTitle>
+                      <AlertDescription>{renderFormattedAnalysisText(analysisResult.processingLevelAssessment)}</AlertDescription>
+                    </Alert>
+                     <Alert>
+                      <Info className="h-4 w-4" />
+                      <AlertTitle className="font-semibold">Serving Size Context</AlertTitle>
+                      <AlertDescription>{renderFormattedAnalysisText(analysisResult.servingSizeContext)}</AlertDescription>
+                    </Alert>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </CardContent>
+             <CardFooter className="flex flex-col items-start pt-4 border-t">
+                  <h3 className="font-semibold text-xl mb-2 flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Analysis</h3>
+                  <p className="text-sm text-muted-foreground mb-3">Ask about specific nutrients, comparisons, etc.</p>
+                  <ScrollArea className="h-[200px] w-full rounded-md border p-3 mb-3 bg-muted/50">
+                    {chatHistory.map((msg, index) => (
+                      <div key={index} className={`mb-2 p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
+                        <span className="font-semibold capitalize">{msg.role === 'user' ? 'You' : 'AI Advisor'}: </span>{msg.content}
+                      </div>
+                    ))}
+                    {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Advisor is typing...</div>}
+                    <div ref={messagesEndRef} />
+                  </ScrollArea>
+                  <form onSubmit={handleChatSubmit} className="w-full flex gap-2">
+                    <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background"/>
+                    <Button type="submit" disabled={isChatLoading || !chatInput.trim()}><Send className="h-4 w-4" /></Button>
+                  </form>
+              </CardFooter>
+          </Card>
+        )}
+         {!isLoading && !analysisResult && (
+          <Card className="flex items-center justify-center h-full min-h-[300px] bg-muted/30">
+              <div className="text-center p-8"><FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" /><p className="text-lg font-semibold text-muted-foreground">Your nutrition analysis will appear here.</p><p className="text-sm text-muted-foreground mt-1">Submit nutritional data to get started.</p></div>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
