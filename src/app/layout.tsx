@@ -1,19 +1,29 @@
 
 import type { Metadata } from 'next';
-<<<<<<< HEAD
 import Script from 'next/script';
-=======
->>>>>>> finalprotest
 import './globals.css';
 import { CustomThemeProvider } from '@/contexts/theme-context';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-<<<<<<< HEAD
 import { Toaster } from '@/components/ui/toaster';
+import { Poppins, Inter } from 'next/font/google';
+import { cn } from '@/lib/utils';
+import { BottomNavbar } from '@/components/layout/bottom-navbar';
 import type { WebSite, Organization } from 'schema-dts';
 import { Analytics } from "@vercel/analytics/next"
 
-const BASE_URL = 'https://eatwise.evotyindia.me';
+const fontPoppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-poppins',
+});
+
+const fontInter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+});
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
 const websiteStructuredData: WebSite = {
   "@context": "https://schema.org",
@@ -47,7 +57,6 @@ const organizationStructuredData: Organization = {
   url: BASE_URL,
   logo: `${BASE_URL}/img/logo_200x60.png`,
 };
-
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -106,48 +115,18 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-touch-icon.png', 
   },
-=======
-import { Toaster } from "@/components/ui/toaster";
-import { Poppins, Inter } from 'next/font/google';
-import { cn } from '@/lib/utils';
-import { BottomNavbar } from '@/components/layout/bottom-navbar';
-
-const fontPoppins = Poppins({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-poppins',
-});
-
-const fontInter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-});
-
-export const metadata: Metadata = {
-  title: 'EatWise India - AI Nutrition Guide',
-  description: 'Understand food labels, get health ratings, recipe suggestions, and nutrition analysis with AI. For a healthier India with EatWise India.',
->>>>>>> finalprotest
 };
 
 interface RootLayoutProps {
   children: React.ReactNode;
 }
 
-<<<<<<< HEAD
-export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
+export default function RootLayout({
+  children,
+}: Readonly<RootLayoutProps>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
+       <head>
         <Script
           id="website-structured-data"
           type="application/ld+json"
@@ -159,33 +138,6 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationStructuredData) }}
         />
       </head>
-      <body className="font-body antialiased min-h-screen bg-background text-foreground flex flex-col">
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-K396ETRNRR"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-K396ETRNRR');
-          `}
-        </Script>
-
-        <CustomThemeProvider>
-          <Header />
-          <main className="flex-grow">{children}</main>
-          <Footer />
-          <Toaster />
-        </CustomThemeProvider>
-        <Analytics/>
-=======
-export default function RootLayout({
-  children,
-}: Readonly<RootLayoutProps>) {
-  return (
-    <html lang="en" suppressHydrationWarning>
       <body className={cn(
           "min-h-screen bg-background font-body antialiased flex flex-col overflow-x-hidden",
           fontPoppins.variable,
@@ -236,7 +188,7 @@ export default function RootLayout({
           <Toaster />
           <BottomNavbar />
         </CustomThemeProvider>
->>>>>>> finalprotest
+        <Analytics/>
       </body>
     </html>
   );

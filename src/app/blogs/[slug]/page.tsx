@@ -1,23 +1,16 @@
 
 import { getBlogPostBySlug, blogPosts } from "@/lib/blog-data";
-<<<<<<< HEAD
 import Image from "next/image";
-import { Link } from "@/navigation"; 
-=======
 import Link from "next/link"; 
->>>>>>> finalprotest
 import { notFound } from "next/navigation";
 import { CalendarDays, Tag, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-<<<<<<< HEAD
 import type { Article, BreadcrumbList } from 'schema-dts';
 import Script from 'next/script';
 
-const BASE_URL = 'https://eatwise.evotyindia.me';
-=======
->>>>>>> finalprotest
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
 interface BlogPostPageProps {
   params: {
@@ -34,12 +27,14 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: BlogPostPageProps) {
   const post = getBlogPostBySlug(params.slug);
   if (!post) {
-<<<<<<< HEAD
     return { 
       title: "Post Not Found",
       description: "The blog post you are looking for could not be found." 
     };
   }
+
+  const imageUrl = `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : '/' + post.featuredImage}`;
+
   return {
     title: `${post.title} | EatWise India Blogs`,
     description: post.preview,
@@ -55,7 +50,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
       authors: [`${BASE_URL}/#organization`], 
       images: [
         {
-          url: `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : '/' + post.featuredImage}`,
+          url: imageUrl,
           width: 1200, 
           height: 675,
           alt: post.title,
@@ -66,15 +61,8 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
         card: 'summary_large_image',
         title: post.title,
         description: post.preview,
-        images: [`${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : '/' + post.featuredImage}`],
+        images: [imageUrl],
     }
-=======
-    return { title: "Post Not Found" };
-  }
-  return {
-    title: `${post.title} | EatWise India Blog`,
-    description: post.preview,
->>>>>>> finalprotest
   };
 }
 
@@ -85,7 +73,8 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
     notFound();
   }
 
-<<<<<<< HEAD
+  const imageUrl = `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : '/' + post.featuredImage}`;
+
   const articleStructuredData: Article = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -95,7 +84,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
     },
     headline: post.title,
     description: post.preview,
-    image: `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : '/' + post.featuredImage}`,
+    image: imageUrl,
     datePublished: new Date(post.date).toISOString(),
     dateModified: new Date(post.date).toISOString(), 
     author: {
@@ -179,7 +168,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
               height={675}
               className="w-full object-cover aspect-video transition-transform duration-300 hover:scale-105"
               priority
-              data-ai-hint={post.dataAiHint}
+              data-ai-hint={post.dataAiHint || ''}
             />
           </div>
         </div>
@@ -208,52 +197,3 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
     </>
   );
 }
-=======
-  return (
-    <article className="container mx-auto max-w-3xl py-8">
-      <div className="mb-8">
-        <Button variant="outline" asChild size="sm" className="mb-6 group">
-          <Link href="/blogs">
-            <ArrowLeft className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
-            Back to Blog
-          </Link>
-        </Button>
-        <h1 className="text-4xl font-bold tracking-tight mb-3 text-primary">{post.title}</h1>
-        <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-4">
-          <div className="flex items-center">
-            <CalendarDays className="mr-1.5 h-4 w-4" />
-            <span>{new Date(post.date).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-          </div>
-          <div className="flex items-center">
-            <Tag className="mr-1.5 h-4 w-4" />
-            <Badge variant="secondary">{post.category}</Badge>
-          </div>
-        </div>
-      </div>
-      
-      <Separator className="my-8" />
-
-      <div
-        className="prose prose-lg dark:prose-invert max-w-none 
-                   prose-headings:font-headline prose-headings:text-primary
-                   prose-p:text-foreground/90
-                   prose-a:text-accent hover:prose-a:text-accent/80
-                   prose-strong:text-foreground
-                   prose-ul:list-disc prose-ul:pl-6 prose-li:marker:text-accent
-                   prose-ol:list-decimal prose-ol:pl-6 prose-li:marker:text-accent"
-        dangerouslySetInnerHTML={{ __html: post.content }}
-      />
-      
-      <Separator className="my-12" />
-
-      <div className="text-center">
-        <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
-          <Link href="/analyze">Analyze Your Food Label Now</Link>
-        </Button>
-      </div>
-    </article>
-  );
-}
-
-    
->>>>>>> finalprotest
