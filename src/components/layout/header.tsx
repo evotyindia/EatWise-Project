@@ -7,7 +7,7 @@ import React from 'react';
 
 import { ThemeToggleButton } from "@/components/common/theme-toggle-button"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -66,6 +66,12 @@ export function Header() {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[280px] bg-background/95 backdrop-blur-sm">
+                  <SheetHeader className="sr-only">
+                    <SheetTitle>Menu</SheetTitle>
+                    <SheetDescription>
+                      Main navigation menu for the website.
+                    </SheetDescription>
+                  </SheetHeader>
                   <nav className="flex flex-col space-y-4 pt-8">
                     {navItems.map((item) => {
                       const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
