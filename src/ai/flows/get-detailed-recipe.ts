@@ -85,7 +85,7 @@ const prompt = ai.definePrompt({
       *   Only add *absolutely essential* Indian pantry staples (e.g., cooking oil, salt, turmeric) if they are missing. In the 'notes' for these, you MUST write: "Essential staple: add if available".
       *   Common Indian spices for flavor (e.g., garam masala, cumin powder) are NOT essential. If you suggest them, the 'notes' field MUST say: "Optional, for flavor".
   4.  **Instructions:** Provide clear, step-by-step instructions with professional cooking tips. Label optional steps clearly (e.g., start with "(Optional)").
-  5.  **Health Notes:** Provide specific advice tailored to the 'diseaseConcerns' and 'userSuggestions'. If none, give general health benefits.
+  5.  **Health Notes:** Provide specific advice tailored to the 'diseaseConcerns' and 'userSuggestions'. If none, give a general health benefit.
   6.  **Language:** Use common Indian names for ingredients (e.g., 'Palak' for Spinach).
   7.  **JSON Format:** Your entire response MUST be a single, valid JSON object that conforms to the output schema. No extra text or explanations.
 
@@ -108,23 +108,36 @@ const getDetailedRecipeFlow = ai.defineFlow(
       processedInput.diseaseConcerns = [];
     }
 
-    const {output} = await prompt(processedInput);
-    if (!output) {
-      console.error('getDetailedRecipeFlow: LLM output was null or did not match schema for input:', JSON.stringify(processedInput));
-      const household = input.householdComposition;
-      const servingsText = `Serves ${household.adults} adult(s), ${household.seniors} senior(s), ${household.kids} kid(s) (approx).`;
-      return {
-        recipeTitle: `Error generating recipe for ${input.dishName}`,
-        description: "Could not generate recipe details at this time. The AI was unable to produce a valid recipe. Please check your inputs or try again.",
-        servingsDescription: servingsText, // Ensure this reflects the input household
+    const household = input.householdComposition;
+    const servingsText = `Serves ${household.adults} adult(s), ${household.seniors} senior(s), ${household.kids} kid(s) (approx).`;
+    const errorBase = {
+        servingsDescription: servingsText,
         adjustedIngredients: [{name: "Error", quantity: "N/A", notes: "Could not retrieve ingredients due to an AI processing error."}],
         instructions: ["Failed to generate instructions. Please try again later."],
         healthNotes: "Health notes could not be generated.",
         storageOrServingTips: undefined,
         prepTime: undefined,
         cookTime: undefined
-      };
+    };
+
+    try {
+        const {output} = await prompt(processedInput);
+        if (!output) {
+          console.error('getDetailedRecipeFlow: LLM output was null or did not match schema for input:', JSON.stringify(processedInput));
+          return {
+            ...errorBase,
+            recipeTitle: `Error generating recipe for ${input.dishName}`,
+            description: "Could not generate recipe details at this time. The AI was unable to produce a valid recipe. Please check your inputs or try again.",
+          };
+        }
+        return output;
+    } catch (error) {
+        console.error("An API error occurred in getDetailedRecipeFlow:", error);
+        return {
+            ...errorBase,
+            recipeTitle: `Error generating recipe for ${input.dishName}`,
+            description: "The AI service is currently busy or unavailable. This is a temporary issue. Please try again in a few moments.",
+        };
     }
-    return output;
   }
 );

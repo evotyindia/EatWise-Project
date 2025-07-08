@@ -131,26 +131,46 @@ const generateHealthReportFlow = ai.defineFlow(
     inputSchema: GenerateHealthReportInputSchema,
     outputSchema: GenerateHealthReportOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
-    if (!output) {
-      console.error('generateHealthReportFlow: LLM output was null or did not match schema for input:', JSON.stringify(input));
+  async (input) => {
+    try {
+      const {output} = await prompt(input);
+      if (!output) {
+        console.error('generateHealthReportFlow: LLM output was null or did not match schema for input:', JSON.stringify(input));
+        return {
+          healthRating: 1,
+          detailedAnalysis: {
+            summary: "An error occurred while analyzing the product. The AI could not generate a valid report based on the provided input. Please try again or ensure the input is clear.",
+            positiveAspects: "N/A",
+            potentialConcerns: "N/A",
+            keyNutrientsBreakdown: "N/A",
+          },
+          alternatives: "N/A",
+          productType: "Unknown",
+          processingLevelRating: { rating: 1, justification: "Error in analysis" },
+          sugarContentRating: { rating: 1, justification: "Error in analysis" },
+          nutrientDensityRating: { rating: 1, justification: "Error in analysis" },
+          ingredientAnalysis: [],
+        };
+      }
+      return output;
+    } catch (error) {
+      console.error("An API error occurred in generateHealthReportFlow:", error);
+      // This is the fallback for API errors (e.g., 503)
       return {
         healthRating: 1,
         detailedAnalysis: {
-          summary: "An error occurred while analyzing the product. The AI could not generate a valid report based on the provided input. Please try again or ensure the input is clear.",
+          summary: "The AI service is currently busy or unavailable. This is a temporary issue. Please try again in a few moments.",
           positiveAspects: "N/A",
           potentialConcerns: "N/A",
           keyNutrientsBreakdown: "N/A",
         },
         alternatives: "N/A",
         productType: "Unknown",
-        processingLevelRating: { rating: 1, justification: "Error in analysis" },
-        sugarContentRating: { rating: 1, justification: "Error in analysis" },
-        nutrientDensityRating: { rating: 1, justification: "Error in analysis" },
+        processingLevelRating: { rating: 1, justification: "Service unavailable" },
+        sugarContentRating: { rating: 1, justification: "Service unavailable" },
+        nutrientDensityRating: { rating: 1, justification: "Service unavailable" },
         ingredientAnalysis: [],
       };
     }
-    return output;
   }
 );

@@ -115,20 +115,32 @@ const analyzeNutritionFlow = ai.defineFlow(
     inputSchema: AnalyzeNutritionInputSchema,
     outputSchema: AnalyzeNutritionOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
-    if (!output) {
-        console.error('analyzeNutritionFlow: LLM output was null or did not match schema for input:', JSON.stringify(input));
+  async (input) => {
+    const errorBase = {
+        macronutrientBalance: "N/A due to error.",
+        micronutrientHighlights: "N/A due to error.",
+        dietarySuitability: "Unable to determine dietary suitability due to an analysis error.",
+        nutritionDensityRating: 1,
+        processingLevelAssessment: "N/A due to error.",
+        servingSizeContext: "N/A due to error."
+    };
+
+    try {
+        const {output} = await prompt(input);
+        if (!output) {
+            console.error('analyzeNutritionFlow: LLM output was null or did not match schema for input:', JSON.stringify(input));
+            return {
+                ...errorBase,
+                overallAnalysis: "An error occurred during nutrition analysis. The AI could not generate a valid report. Please check your input or try again.",
+            };
+        }
+        return output;
+    } catch (error) {
+        console.error("An API error occurred in analyzeNutritionFlow:", error);
         return {
-            overallAnalysis: "An error occurred during nutrition analysis. The AI could not generate a valid report. Please check your input or try again.",
-            macronutrientBalance: "N/A due to error.",
-            micronutrientHighlights: "N/A due to error.",
-            dietarySuitability: "Unable to determine dietary suitability due to an analysis error.",
-            nutritionDensityRating: 1,
-            processingLevelAssessment: "N/A due to error.",
-            servingSizeContext: "N/A due to error."
+            ...errorBase,
+            overallAnalysis: "The AI service is currently busy or unavailable. This is a temporary issue. Please try again in a few moments.",
         };
     }
-    return output;
   }
 );

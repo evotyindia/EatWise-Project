@@ -76,19 +76,28 @@ const getRecipeSuggestionsFlow = ai.defineFlow(
     inputSchema: GetRecipeSuggestionsInputSchema,
     outputSchema: GetRecipeSuggestionsOutputSchema,
   },
-  async input => {
+  async (input) => {
     // Ensure 'none' is handled correctly if it's the only item
     if (input.diseaseConcerns && input.diseaseConcerns.length === 1 && input.diseaseConcerns[0] === 'none') {
       input.diseaseConcerns = []; // Treat as no specific disease concerns for the prompt
     }
-    const {output} = await prompt(input);
-    if (!output) {
-      console.error('getRecipeSuggestionsFlow: LLM output was null or did not match schema for input:', JSON.stringify(input));
-      return {
-        suggestions: ["Sorry, I couldn't come up with recipe ideas at this moment. Please check your ingredients or try again later."],
-        initialContextualGuidance: "There was an issue generating suggestions."
-      };
+
+    try {
+        const {output} = await prompt(input);
+        if (!output) {
+          console.error('getRecipeSuggestionsFlow: LLM output was null or did not match schema for input:', JSON.stringify(input));
+          return {
+            suggestions: ["Sorry, I couldn't come up with recipe ideas at this moment. Please check your ingredients or try again later."],
+            initialContextualGuidance: "There was an issue generating suggestions."
+          };
+        }
+        return output;
+    } catch (error) {
+        console.error("An API error occurred in getRecipeSuggestionsFlow:", error);
+        return {
+            suggestions: ["Sorry, the AI service is currently busy. Please try again in a few moments."],
+            initialContextualGuidance: "The AI service is temporarily unavailable."
+        };
     }
-    return output;
   }
 );
