@@ -30,7 +30,7 @@ export type GenerateHealthReportInput = z.infer<typeof GenerateHealthReportInput
 
 const RatingObjectSchema = z.object({
   rating: z.number().min(1).max(5).describe('The numerical rating from 1 to 5 stars.'),
-  justification: z.string().optional().describe('A short justification for the rating.'),
+  justification: z.string().describe('A short justification for the rating.'),
 });
 
 const IngredientDeepDiveItemSchema = z.object({
@@ -48,27 +48,27 @@ const GenerateHealthReportOutputSchema = z.object({
     .describe('The overall health rating of the food product, from 1 to 5 stars.'),
   summary: z.string().describe("A one-sentence executive summary of the product's health profile. E.g., 'A high-sugar snack with some fiber, best for occasional consumption.'"),
 
-  greenFlags: z.string().optional().describe("A bullet-point list of 2-4 key positive aspects. Be specific. E.g., '* Good source of fiber', '* Made with whole grains'."),
-  redFlags: z.string().optional().describe("A bullet-point list of 2-4 key health concerns to be aware of. Be specific. E.g., '* High in Sodium', '* Contains artificial sweeteners'."),
+  greenFlags: z.string().describe("A bullet-point list of 2-4 key positive aspects. Be specific. E.g., '* Good source of fiber', '* Made with whole grains'. If none, state 'No significant positive aspects found.'"),
+  redFlags: z.string().describe("A bullet-point list of 2-4 key health concerns to be aware of. Be specific. E.g., '* High in Sodium', '* Contains artificial sweeteners'. If none, state 'No significant health concerns found.'"),
   
   detailedAnalysis: z.object({
     processingLevel: z.string().describe("Assessment of the food's processing level (e.g., 'Unprocessed', 'Minimally Processed', 'Ultra-Processed') and a brief explanation of why."),
     macronutrientProfile: z.string().describe("Analysis of the balance of protein, carbs, and fats. E.g., 'High in refined carbohydrates and fats, with very little protein.'"),
-    micronutrientHighlights: z.string().optional().describe("Bullet-point comments on noteworthy vitamins or minerals, if identifiable and noteworthy. E.g., '* Good source of Calcium and Vitamin D.'"),
+    micronutrientHighlights: z.string().describe("Bullet-point comments on noteworthy vitamins or minerals, if identifiable and noteworthy. E.g., '* Good source of Calcium and Vitamin D.'. If none, state 'No significant micronutrients to highlight.'"),
     sugarAnalysis: z.string().describe("A specific analysis of the sugar content, distinguishing between natural and added sugars if possible. Comment on its level."),
   }).describe("A deeper dive into specific nutritional components."),
   
   bestSuitedFor: z.string().describe("Describes the ideal consumer or occasion for this product. E.g., 'Best as an occasional treat for children', 'Not recommended for individuals with diabetes.'"),
-  consumptionTips: z.string().optional().describe("Actionable bullet-point tips for healthier consumption. E.g., '* Pair with a source of protein like yogurt to balance the meal.', '* Limit portion size to two biscuits.'"),
+  consumptionTips: z.string().describe("Actionable bullet-point tips for healthier consumption. E.g., '* Pair with a source of protein like yogurt to balance the meal.', '* Limit portion size to two biscuits.'. If none, state 'No specific consumption tips.'"),
   indianDietContext: z.string().describe("A brief explanation of how this product fits into a typical balanced Indian diet. E.g., 'This can be a convenient alternative to a traditional fried snack but should not replace a main meal like dal-roti.'"),
   
   healthierAlternatives: z.string().describe('A bullet-point list of 2-3 healthier Indian alternatives, with brief reasons why they are better.'),
-  ingredientDeepDive: z.array(IngredientDeepDiveItemSchema).optional().describe("A detailed analysis of each key ingredient, its purpose, and health implications."),
+  ingredientDeepDive: z.array(IngredientDeepDiveItemSchema).describe("A detailed analysis of each key ingredient, its purpose, and health implications. If ingredients are not available or unclear, this should be an empty array."),
 
-  productType: z.string().optional().describe('The product type (e.g., Snack, Beverage, Ready-to-eat meal).'),
-  processingLevelRating: RatingObjectSchema.optional().describe('Rating (1-5) and justification for food processing level (1=unprocessed, 5=ultra-processed).'),
-  sugarContentRating: RatingObjectSchema.optional().describe('Rating (1-5) and justification for sugar content (1=low, 5=high).'),
-  nutrientDensityRating: RatingObjectSchema.optional().describe('Rating (1-5) and justification for nutrient density (1=low, 5=high).')
+  productType: z.string().describe('The product type (e.g., Snack, Beverage, Ready-to-eat meal).'),
+  processingLevelRating: RatingObjectSchema.describe('Rating (1-5) and justification for food processing level (1=unprocessed, 5=ultra-processed).'),
+  sugarContentRating: RatingObjectSchema.describe('Rating (1-5) and justification for sugar content (1=low, 5=high).'),
+  nutrientDensityRating: RatingObjectSchema.describe('Rating (1-5) and justification for nutrient density (1=low, 5=high).')
 });
 export type GenerateHealthReportOutput = z.infer<typeof GenerateHealthReportOutputSchema>;
 
@@ -82,9 +82,10 @@ const prompt = ai.definePrompt({
   name: 'generateHealthReportPrompt',
   input: {schema: GenerateHealthReportInputSchema},
   output: {schema: GenerateHealthReportOutputSchema},
-  prompt: `You are an expert AI nutritionist for an Indian audience. Your task is to generate a comprehensive, clear, and easy-to-understand health report for a food product. Use bullet points for all lists to ensure scannability.
-
-  Analyze the following food product based on the provided information.
+  system: `You are an expert AI nutritionist for an Indian audience. Your task is to generate a comprehensive, clear, and easy-to-understand health report for a food product. Use bullet points for all lists to ensure scannability.
+Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
+If the provided information is insufficient for a complete analysis (e.g., blurry photo, cannot read ingredients), you MUST respond with a structured error. Set 'healthRating' to 1, 'summary' to 'Sorry, the provided information is unclear...', and all other fields to 'N/A' or sensible defaults that indicate an error. Ensure the output strictly adheres to the JSON schema.`,
+  prompt: `Analyze the following food product based on the provided information.
 
   {{#if productName}}
   Product Name: {{productName}}
@@ -106,9 +107,7 @@ const prompt = ai.definePrompt({
   Photo: {{media url=photoDataUri}}
   {{/if}}
   
-  If the provided information is insufficient for a complete analysis (e.g., blurry photo, cannot read ingredients), you MUST respond with a structured error. Set 'healthRating' to 1, 'summary' to 'Sorry, the provided information is unclear...', and all other fields to 'N/A' or sensible defaults that indicate an error. Ensure the output strictly adheres to the JSON schema.
-
-  For a successful analysis, generate the following detailed report. Be concise but thorough.
+  Generate the following detailed report. Be concise but thorough.
 
   1.  **Product Type**: Identify the product type (e.g., Snack, Beverage, Ready-to-eat meal).
   2.  **Overall Health Rating**: Assign a health rating from 1 (least healthy) to 5 (most healthy).
@@ -128,8 +127,6 @@ const prompt = ai.definePrompt({
   12. **Numerical Ratings**: Provide ratings (1-5) and a short justification for Processing Level, Sugar Content, and Nutrient Density.
 
   Present all lists as bullet points starting with '*'.
-
-  IMPORTANT: Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
 `,
 });
 
@@ -140,38 +137,28 @@ const generateHealthReportFlow = ai.defineFlow(
     outputSchema: GenerateHealthReportOutputSchema,
   },
   async (input) => {
-    const errorBase = {
-        healthRating: 1,
-        productType: "Unknown",
-        processingLevelRating: { rating: 1, justification: "Error in analysis" },
-        sugarContentRating: { rating: 1, justification: "Error in analysis" },
-        nutrientDensityRating: { rating: 1, justification: "Error in analysis" },
-        ingredientDeepDive: [],
-        greenFlags: "N/A",
-        redFlags: "N/A",
-        bestSuitedFor: "N/A",
-        consumptionTips: "N/A",
-        indianDietContext: "N/A",
-        healthierAlternatives: "N/A",
-    };
-
     try {
       const {output} = await prompt(input);
       if (!output) {
-        console.error('generateHealthReportFlow: LLM output was null or did not match schema for input:', JSON.stringify(input));
         throw new Error("An error occurred while analyzing the product. The AI could not generate a valid report based on the provided input. Please try again or ensure the input is clear.");
       }
       return output;
     } catch (error: any) {
+        const errorMessage = error.message?.toLowerCase() || '';
+        if (errorMessage.includes('api key not found') || errorMessage.includes('permission denied')) {
+            console.error("Authentication error in generateHealthReportFlow:", error);
+            throw new Error("Authentication Error: The AI service API key is missing or invalid. Please check your server environment variables.");
+        }
+
         const isApiError = (error.cause as any)?.status >= 500;
-        const errorMessage = isApiError
+        const finalErrorMessage = isApiError
             ? "The AI service is currently busy or unavailable. This is a temporary issue. Please try again in a few moments."
             : error.message || "An unexpected error occurred during report generation.";
         
-        console.error(`An error occurred in generateHealthReportFlow: ${errorMessage}`, error);
+        console.error(`An error occurred in generateHealthReportFlow: ${finalErrorMessage}`, error);
 
         // For frontend, we will throw the error to be caught and displayed in a toast
-        throw new Error(errorMessage);
+        throw new Error(finalErrorMessage);
     }
   }
 );

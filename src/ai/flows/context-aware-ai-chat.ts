@@ -92,11 +92,13 @@ const prompt = ai.definePrompt({
   name: 'contextAwareAIChatPrompt',
   input: {schema: InternalPromptInputSchema}, // Uses the internal schema with boolean flags
   output: {schema: ContextAwareAIChatOutputSchema},
-  prompt: `You are "EatWise AI Advisor", a friendly and knowledgeable AI assistant for Swasth Bharat Advisor, an app helping users with Indian food choices.
+  system: `You are "EatWise AI Advisor", a friendly and knowledgeable AI assistant for Swasth Bharat Advisor, an app helping users with Indian food choices.
 Your responses should be helpful, concise, and directly address the user's question based on the provided context and chat history.
 Do not generate any disclaimers or safety warnings unless specifically asked about safety. Avoid weasel words.
 Maintain a supportive and encouraging tone. Your persona is an expert nutritionist and chef.
-
+If the question is unclear or outside your scope (Indian food, nutrition, provided context), politely state that you cannot help with that specific query.
+IMPORTANT: Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.`,
+  prompt: `
 Previous conversation:
 {{#if chatHistoryTransformed}}
   {{#each chatHistoryTransformed}}
@@ -143,9 +145,6 @@ Context:
 {{/if}}
 
 Based on the chat history and the current context, provide a helpful and concise answer to the user's question.
-If the question is unclear or outside your scope (Indian food, nutrition, provided context), politely state that you cannot help with that specific query.
-
-IMPORTANT: Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
 `,
 });
 
@@ -174,17 +173,18 @@ const contextAwareAIChatFlow = ai.defineFlow(
     try {
       const {output} = await prompt(promptInput);
       if (!output) {
-        console.error('contextAwareAIChatFlow: LLM output was null or did not match schema for input:', JSON.stringify(promptInput));
-        return {
-          answer: "I'm sorry, I encountered an issue and couldn't process your question right now. Please try again."
-        };
+        throw new Error("The AI returned an empty or invalid response. Please try again.");
       }
       return output;
-    } catch (error) {
+    } catch (error: any) {
+      const errorMessage = error.message?.toLowerCase() || '';
+      if (errorMessage.includes('api key not found') || errorMessage.includes('permission denied')) {
+          console.error("Authentication error in contextAwareAIChatFlow:", error);
+          throw new Error("Authentication Error: The AI service API key is missing or invalid. Please check your server environment variables.");
+      }
+
       console.error("An API error occurred in contextAwareAIChatFlow:", error);
-      return {
-          answer: "I'm sorry, the AI service is currently busy. Please try asking your question again in a moment."
-      };
+      throw new Error("I'm sorry, the AI service is currently busy or unavailable. Please try again in a moment.");
     }
   }
 );
