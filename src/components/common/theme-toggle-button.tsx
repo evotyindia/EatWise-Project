@@ -14,7 +14,7 @@ export function ThemeToggleButton() {
 
   if (!mounted) {
     // Render a placeholder to prevent layout shift
-    return <div style={{ width: '52px', height: '28px' }} />;
+    return <div style={{ width: '60px', height: '32px' }} />;
   }
 
   const isChecked = theme === 'dark';
@@ -33,18 +33,18 @@ export function ThemeToggleButton() {
         checked={isChecked}
         onChange={handleChange}
       />
-      <svg className="switch__icon" width="20px" height="20px" aria-hidden="true">
+      <svg className="switch__icon" width="24px" height="24px" aria-hidden="true">
         <use href="#light" />
       </svg>
-      <svg className="switch__icon" width="20px" height="20px" aria-hidden="true">
+      <svg className="switch__icon" width="24px" height="24px" aria-hidden="true">
         <use href="#dark" />
       </svg>
       <span className="switch__inner"></span>
       <span className="switch__inner-icons">
-        <svg className="switch__icon" width="20px" height="20px" aria-hidden="true">
+        <svg className="switch__icon" width="24px" height="24px" aria-hidden="true">
           <use href="#light" />
         </svg>
-        <svg className="switch__icon" width="20px" height="20px" aria-hidden="true">
+        <svg className="switch__icon" width="24px" height="24px" aria-hidden="true">
           <use href="#dark" />
         </svg>
       </span>
