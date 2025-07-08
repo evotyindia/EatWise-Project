@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { CheckCircle, ScanLine, MessageCircle, CookingPot, BarChart3, Users, Lightbulb, User, UploadCloud, Cpu, ClipboardCheck } from "lucide-react";
+import { CheckCircle, ScanLine, MessageCircle, CookingPot, BarChart3, Users, Lightbulb, User, UploadCloud, Cpu, ClipboardCheck, ArrowRight } from "lucide-react";
 
 export default function Home() {
   const features = [
@@ -54,22 +54,19 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <section className="hero-section w-full">
-        <div className="relative z-10 container px-4 md:px-6 text-center animate-fade-in-up opacity-0 backdrop-blur-sm py-20 md:py-28 lg:py-32" style={{animationFillMode: 'forwards'}}>
+        <div className="relative z-10 container px-4 md:px-6 text-center animate-fade-in-up opacity-0 backdrop-blur-md py-24 md:py-32 lg:py-40" style={{animationFillMode: 'forwards'}}>
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-foreground">
-            EatWise India
+            Decode Your Food. <span className="text-primary">Unleash Your Health.</span>
           </h1>
-          <p className="mx-auto max-w-[700px] text-foreground/90 md:text-xl mt-4">
-            Empowering India to Eat Smarter with AI
+          <p className="mx-auto max-w-[800px] text-foreground/80 md:text-xl mt-6">
+            Welcome to EatWise India, your AI-powered guide to navigating the complex world of food. We help you understand what you're eating, discover healthier Indian alternatives, and cook nutritious meals with confidence. Make every bite count.
           </p>
-          <p className="mx-auto max-w-[600px] text-foreground/80 md:text-lg mt-2">
-            Your personal AI-powered nutrition guide.
-          </p>
-          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-            <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
-              <Link href="/analyze">Analyze a Food Label</Link>
+          <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+            <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 shadow-lg hover:shadow-primary/40 group">
+              <Link href="/analyze">Start Analyzing <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" /></Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
-              <Link href="/recipes">Get Recipe Ideas</Link>
+            <Button asChild variant="outline" size="lg" className="transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 border-2 border-input hover:bg-accent/10">
+              <Link href="/recipes">Find a Recipe</Link>
             </Button>
           </div>
         </div>
