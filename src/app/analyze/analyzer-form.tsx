@@ -191,7 +191,7 @@ export function AnalyzerForm() {
       <ul className="list-none space-y-1 text-sm leading-relaxed">
         {lines.map((line, index) => (
           <li key={index} className="flex items-start">
-            <span className="mr-2 mt-1 text-accent">&#8226;</span>
+            <span className="mr-2 text-accent">&#8226;</span>
             <span className="break-words">{line.replace(/^(\*|-)\s*/, '')}</span>
           </li>
         ))}
@@ -348,17 +348,25 @@ export function AnalyzerForm() {
 
               {renderFormattedText(report.greenFlags) && (
                 <Alert variant="success">
-                  <ShieldCheck className="h-4 w-4" />
-                  <AlertTitle className="font-semibold text-lg mb-1">Green Flags</AlertTitle>
-                  <AlertDescription>{renderFormattedText(report.greenFlags)}</AlertDescription>
+                  <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
+                    <ShieldCheck className="h-5 w-5 mr-2" />
+                    Green Flags
+                  </AlertTitle>
+                  <AlertDescription className="pl-7">
+                    {renderFormattedText(report.greenFlags)}
+                  </AlertDescription>
                 </Alert>
               )}
 
               {renderFormattedText(report.redFlags) && (
                 <Alert variant="destructive">
-                  <ShieldAlert className="h-4 w-4" />
-                  <AlertTitle className="font-semibold text-lg mb-1">Red Flags</AlertTitle>
-                  <AlertDescription>{renderFormattedText(report.redFlags)}</AlertDescription>
+                  <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
+                    <ShieldAlert className="h-5 w-5 mr-2" />
+                    Red Flags
+                  </AlertTitle>
+                  <AlertDescription className="pl-7">
+                    {renderFormattedText(report.redFlags)}
+                  </AlertDescription>
                 </Alert>
               )}
 
@@ -480,5 +488,3 @@ export function AnalyzerForm() {
     </div>
   );
 }
-
-    
