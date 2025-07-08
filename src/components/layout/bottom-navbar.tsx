@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Home, ScanLine, CookingPot, BookOpen, Menu, BarChart3, Mail } from "lucide-react"
@@ -68,7 +69,7 @@ export function BottomNavbar() {
             </button>
           </SheetTrigger>
           <SheetContent side="bottom" className="w-full h-auto rounded-t-2xl">
-            <SheetHeader className="text-left mb-4">
+            <SheetHeader className="text-left mb-4 pr-12">
               <div className="flex items-center justify-between">
                 <SheetTitle>More Options</SheetTitle>
                 <ThemeToggleButton />
