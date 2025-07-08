@@ -31,6 +31,7 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         star: "hsl(var(--star))",
+        "star-bad": "hsl(var(--star-bad))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",

@@ -345,7 +345,7 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
                 <Sparkles className="h-4 w-4 text-primary" />
                 <div>
                     <AlertTitle className="font-bold">Nutrition Density Rating</AlertTitle>
-                    <AlertDescription className="flex items-center gap-2"><StarRating rating={analysisResult.nutritionDensityRating} /> ({analysisResult.nutritionDensityRating}/5)</AlertDescription>
+                    <AlertDescription className="flex items-center gap-2"><StarRating rating={analysisResult.nutritionDensityRating} variant="good" /> ({analysisResult.nutritionDensityRating}/5)</AlertDescription>
                 </div>
             </Alert>
             <Separator />
