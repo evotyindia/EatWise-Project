@@ -43,8 +43,8 @@ export function Header() {
     )}>
       <div className="container flex h-16 max-w-screen-xl items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
-          <Leaf className="h-7 w-7 text-primary" />
-          <span className="font-extrabold text-xl sm:inline-block font-headline text-primary">
+          <Leaf className="h-8 w-8 text-primary" />
+          <span className="font-extrabold text-2xl sm:inline-block font-headline text-foreground">
             EatWise India
           </span>
         </Link>
@@ -58,10 +58,10 @@ export function Header() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "px-3 py-2 text-sm font-medium transition-colors rounded-md",
+                    "px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg",
                     isActive 
-                      ? "text-primary" 
-                      : "text-muted-foreground hover:text-primary"
+                      ? "bg-primary text-primary-foreground shadow"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                 >
                   {item.label}
@@ -89,8 +89,8 @@ export function Header() {
                           <Link
                             href={item.href}
                             className={cn(
-                              "rounded-md p-3 text-lg font-medium transition-colors",
-                              isActive ? "text-primary" : "text-foreground hover:text-primary hover:bg-accent/50"
+                              "rounded-lg p-3 text-base font-medium transition-colors",
+                              isActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
                             )}
                           >
                             {item.label}
