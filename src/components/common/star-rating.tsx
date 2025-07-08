@@ -24,7 +24,7 @@ export function StarRating({
           key={i}
           size={size}
           className={cn(
-            i < Math.round(rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-gray-600',
+            i < Math.round(rating) ? 'text-[color:var(--star)] fill-[color:var(--star)]' : 'text-gray-300 dark:text-gray-600',
             iconClassName
           )}
         />
