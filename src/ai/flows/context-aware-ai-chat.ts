@@ -171,13 +171,20 @@ const contextAwareAIChatFlow = ai.defineFlow(
       isGeneralContext: input.contextType === "general",
     };
 
-    const {output} = await prompt(promptInput);
-    if (!output) {
-      console.error('contextAwareAIChatFlow: LLM output was null or did not match schema for input:', JSON.stringify(promptInput));
+    try {
+      const {output} = await prompt(promptInput);
+      if (!output) {
+        console.error('contextAwareAIChatFlow: LLM output was null or did not match schema for input:', JSON.stringify(promptInput));
+        return {
+          answer: "I'm sorry, I encountered an issue and couldn't process your question right now. Please try again."
+        };
+      }
+      return output;
+    } catch (error) {
+      console.error("An API error occurred in contextAwareAIChatFlow:", error);
       return {
-        answer: "I'm sorry, I encountered an issue and couldn't process your question right now. Please try again."
+          answer: "I'm sorry, the AI service is currently busy. Please try asking your question again in a moment."
       };
     }
-    return output;
   }
 );
