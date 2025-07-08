@@ -19,7 +19,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel as H
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { fileToDataUri } from "@/lib/utils";
+import { cn, fileToDataUri } from "@/lib/utils";
 import { StarRating } from "@/components/common/star-rating";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -166,9 +166,10 @@ export function AnalyzerForm() {
       };
       const aiResponse = await contextAwareAIChat(chatContextInput);
       setChatHistory((prev) => [...prev, { role: "assistant", content: aiResponse.answer }]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Chat error:", error);
-      setChatHistory((prev) => [...prev, { role: "assistant", content: "Sorry, I couldn't process that. Please try again." }]);
+      const errorMessage = (error as Error).message || "Sorry, I couldn't process that. Please try again.";
+      setChatHistory((prev) => [...prev, { role: "assistant", content: errorMessage }]);
       toast({ title: "Chat Error", description: "Could not get AI response.", variant: "destructive" });
     }
     setIsChatLoading(false);
@@ -448,7 +449,7 @@ export function AnalyzerForm() {
                 )}
 
                 {report.ingredientDeepDive && report.ingredientDeepDive.length > 0 && (
-                  <Accordion type="single" collapsible className="w-full">
+                  <Accordion type="single" collapsible className="w-full" defaultValue="ingredient-breakdown">
                     <AccordionItem value="ingredient-breakdown">
                       <AccordionTrigger className="text-lg font-semibold hover:no-underline">
                         <div className="flex items-center">
@@ -457,13 +458,13 @@ export function AnalyzerForm() {
                         </div>
                       </AccordionTrigger>
                       <AccordionContent>
-                        <Accordion type="single" collapsible className="w-full">
+                        <Accordion type="multiple" className="w-full">
                           {report.ingredientDeepDive.map((item, index) => (
                             <AccordionItem key={index} value={`item-${index}`}>
                               <AccordionTrigger>
                                 <div className="flex items-center justify-between w-full pr-2">
-                                  <span className="font-medium">{item.ingredientName}</span>
-                                  <Badge variant={riskBadgeVariantMap[item.riskLevel] || 'outline'}>{item.riskLevel}</Badge>
+                                  <span className="font-medium text-left">{item.ingredientName}</span>
+                                  <Badge variant={riskBadgeVariantMap[item.riskLevel] || 'outline'} className="ml-2 shrink-0">{item.riskLevel}</Badge>
                                 </div>
                               </AccordionTrigger>
                               <AccordionContent className="space-y-2 px-1">
