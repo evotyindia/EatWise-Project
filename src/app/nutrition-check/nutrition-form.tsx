@@ -7,7 +7,7 @@ import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aw
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadCloud, Sparkles, FileText, MessageCircle, Send } from "lucide-react";
+import { UploadCloud, Sparkles, FileText, MessageCircle, Send, Info } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -24,6 +24,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 
 const numberPreprocess = (val: unknown) => (val === "" || val === null || val === undefined ? undefined : Number(val));
@@ -128,9 +129,9 @@ export function NutritionForm() {
           foodItemDescription: inputForContext.foodItemDescription || (inputForAI.nutritionDataUri ? "Scanned food item" : "Manually entered data")
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error analyzing nutrition:", error);
-      toast({ title: "Error", description: "Failed to analyze nutrition. Please try again.", variant: "destructive" });
+      toast({ title: "Analysis Failed", description: error.message || "An unknown error occurred.", variant: "destructive" });
     }
     setIsLoading(false);
     setIsProcessingImage(false);
@@ -189,8 +190,9 @@ export function NutritionForm() {
     try {
         const aiResponse = await contextAwareAIChat(input);
         setChatHistory([{ role: "assistant", content: aiResponse.answer }]);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Chat init error:", error);
+        toast({ title: "Chat Init Failed", description: error.message || "Could not start AI chat.", variant: "destructive" });
         setChatHistory([{ role: "assistant", content: "Hello! Ask me anything about this nutrition report." }]);
     }
     setIsChatLoading(false);
@@ -217,10 +219,10 @@ export function NutritionForm() {
       };
       const aiResponse = await contextAwareAIChat(chatContextInput);
       setChatHistory((prev) => [...prev, { role: "assistant", content: aiResponse.answer }]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Chat error:", error);
       setChatHistory((prev) => [...prev, { role: "assistant", content: "Sorry, I couldn't process that." }]);
-      toast({ title: "Chat Error", variant: "destructive" });
+      toast({ title: "Chat Error", description: error.message || "Could not get AI response.", variant: "destructive" });
     }
     setIsChatLoading(false);
   };
@@ -238,13 +240,13 @@ export function NutritionForm() {
 
 const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
     if (!text || text.trim().toLowerCase() === 'n/a' || text.trim() === '') {
-      return <p className="text-sm">Not specified / Not applicable.</p>;
+      return <p className="text-sm text-muted-foreground">Not specified / Not applicable.</p>;
     }
     const lines = text.split('\n').filter(s => s.trim() !== "");
     if (lines.length === 0) return null;
 
     return (
-        <ul className="list-none space-y-1 text-sm">
+        <ul className="list-none space-y-1 text-sm leading-relaxed">
             {lines.map((line, index) => {
                 const trimmedLine = line.trim();
                 const content = trimmedLine.replace(/^(\*|-)\s*/, '');
@@ -263,7 +265,7 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <Card className="shadow-lg hover:shadow-xl transition-shadow">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center text-2xl"><UploadCloud className="mr-2 h-6 w-6" /> Input Nutritional Data</CardTitle>
           <CardDescription>Upload an image of the nutrition table or enter values manually for a detailed AI analysis.</CardDescription>
@@ -324,15 +326,11 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
       )}
 
       {analysisResult && (
-        <>
-        <div className="hidden">
-            {/* This div is for holding elements that should not affect layout, like print components. */}
-        </div>
-        <Card className="shadow-lg hover:shadow-xl transition-shadow">
+        <Card className="animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
           <CardHeader>
             <div className="flex justify-between items-start">
                 <div>
-                    <CardTitle className="flex items-center text-2xl"><FileText className="mr-2 h-6 w-6 text-accent" /> AI Nutrition Analysis</CardTitle>
+                    <CardTitle className="flex items-center text-2xl"><FileText className="mr-2 h-6 w-6 text-primary" /> AI Nutrition Analysis</CardTitle>
                     <CardDescription>
                         Understanding your food&apos;s nutritional profile
                         {currentInputContext?.foodItemDescription ? ` for: ${currentInputContext.foodItemDescription.replace("IGNORE_VALIDATION_FOR_IMAGE_SUBMIT_INTERNAL_MARKER", "").trim()}` : "."}
@@ -341,28 +339,56 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Alert variant="default" className="bg-background">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <div>
-                    <AlertTitle className="font-bold">Nutrition Density Rating</AlertTitle>
-                    <AlertDescription className="flex items-center gap-2"><StarRating rating={analysisResult.nutritionDensityRating} variant="good" /> ({analysisResult.nutritionDensityRating}/5)</AlertDescription>
-                </div>
+            <Alert variant="default" className="bg-muted/60">
+                <Sparkles className="h-5 w-5 text-accent" />
+                <AlertTitle className="font-semibold flex justify-between items-center">
+                  <span>Nutrient Density Rating</span>
+                  <span className="text-xs font-normal text-muted-foreground">(Higher is better)</span>
+                </AlertTitle>
+                <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
+                    <StarRating rating={analysisResult.nutritionDensityRating} variant="good" /> ({analysisResult.nutritionDensityRating}/5)
+                </AlertDescription>
             </Alert>
             <Separator />
-            <Alert variant="default" className="bg-background">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <div>
-                    <AlertTitle className="font-bold">Overall Analysis:</AlertTitle>
-                    <AlertDescription>{renderFormattedAnalysisText(analysisResult.overallAnalysis)}</AlertDescription>
-                </div>
+
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertTitle className="font-semibold">Overall Analysis</AlertTitle>
+              <AlertDescription>{renderFormattedAnalysisText(analysisResult.overallAnalysis)}</AlertDescription>
             </Alert>
-            <Alert variant="default" className="bg-background">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <div>
-                    <AlertTitle className="font-bold">Dietary Suitability:</AlertTitle>
+            
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="nutrition-details">
+                <AccordionTrigger className="text-lg font-semibold hover:no-underline">More Details</AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-2">
+                  <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertTitle className="font-semibold">Dietary Suitability</AlertTitle>
                     <AlertDescription>{renderFormattedAnalysisText(analysisResult.dietarySuitability)}</AlertDescription>
-                </div>
-            </Alert>
+                  </Alert>
+                  <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertTitle className="font-semibold">Macronutrient Balance</AlertTitle>
+                    <AlertDescription>{renderFormattedAnalysisText(analysisResult.macronutrientBalance)}</AlertDescription>
+                  </Alert>
+                  <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertTitle className="font-semibold">Micronutrient Highlights</AlertTitle>
+                    <AlertDescription>{renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}</AlertDescription>
+                  </Alert>
+                  <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertTitle className="font-semibold">Processing Level</AlertTitle>
+                    <AlertDescription>{renderFormattedAnalysisText(analysisResult.processingLevelAssessment)}</AlertDescription>
+                  </Alert>
+                   <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertTitle className="font-semibold">Serving Size Context</AlertTitle>
+                    <AlertDescription>{renderFormattedAnalysisText(analysisResult.servingSizeContext)}</AlertDescription>
+                  </Alert>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </CardContent>
            <CardFooter className="flex flex-col items-start pt-4 border-t">
                 <h3 className="font-semibold text-xl mb-2 flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Analysis</h3>
@@ -382,7 +408,6 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
                 </form>
             </CardFooter>
         </Card>
-        </>
       )}
        {!isLoading && !analysisResult && (
         <Card className="flex items-center justify-center h-full min-h-[300px] bg-muted/30">

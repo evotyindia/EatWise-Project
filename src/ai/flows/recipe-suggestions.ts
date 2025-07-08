@@ -22,7 +22,7 @@ export type GetRecipeSuggestionsInput = z.infer<typeof GetRecipeSuggestionsInput
 
 const GetRecipeSuggestionsOutputSchema = z.object({
   suggestions: z.array(z.string()).describe('An array of up to 8 healthy Indian dish names that can be made with the ingredients, considering health concerns and household composition.'),
-  initialContextualGuidance: z.string().optional().describe("A brief message to the user after suggestions are shown, e.g., 'Here are some ideas. Click one for a detailed recipe.'")
+  initialContextualGuidance: z.string().describe("A brief message to the user after suggestions are shown, e.g., 'Here are some ideas. Click one for a detailed recipe.'")
 });
 export type GetRecipeSuggestionsOutput = z.infer<typeof GetRecipeSuggestionsOutputSchema>;
 
@@ -34,8 +34,10 @@ const prompt = ai.definePrompt({
   name: 'getRecipeSuggestionsPrompt',
   input: {schema: GetRecipeSuggestionsInputSchema},
   output: {schema: GetRecipeSuggestionsOutputSchema},
-  prompt: `You are a personal chef specializing in healthy Indian cuisine.
-A user has provided the following:
+  system: `You are a personal chef specializing in healthy Indian cuisine. Your job is to suggest dish names based on user inputs.
+Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
+Ensure the 'suggestions' array contains only the names of the dishes as strings. Example 'suggestions': ["Palak Dal", "Aloo Gobi", "Vegetable Pulao"]`,
+  prompt: `A user has provided the following:
 Ingredients: {{ingredients}}
 
 {{#if diseaseConcerns.length}}
@@ -57,16 +59,12 @@ User's Special Request: {{userSuggestions}}
 Please try to accommodate this request in your suggestions. For example, if they ask for a "quick meal", suggest dishes that are fast to cook.
 {{/if}}
 
-Based on all the available information, suggest up to 8 healthy Indian dish NAMES, if possible.
+Based on all the available information, suggest up to 8 healthy Indian dish NAMES.
 These should be just the names of the dishes, not full recipes.
 The dishes should be practical to make with the listed ingredients. Prioritize using the provided ingredients.
 Suggest diverse options if possible (e.g., a dal, a sabzi, a rice dish).
 
 Provide a brief, encouraging message as 'initialContextualGuidance', like "Here are some healthy dish ideas based on your inputs. Click a dish to see its detailed recipe."
-
-IMPORTANT: Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
-Ensure the 'suggestions' array contains only the names of the dishes as strings.
-Example 'suggestions': ["Palak Dal", "Aloo Gobi", "Vegetable Pulao"]
 `,
 });
 
@@ -85,19 +83,18 @@ const getRecipeSuggestionsFlow = ai.defineFlow(
     try {
         const {output} = await prompt(input);
         if (!output) {
-          console.error('getRecipeSuggestionsFlow: LLM output was null or did not match schema for input:', JSON.stringify(input));
-          return {
-            suggestions: ["Sorry, I couldn't come up with recipe ideas at this moment. Please check your ingredients or try again later."],
-            initialContextualGuidance: "There was an issue generating suggestions."
-          };
+          throw new Error("The AI returned no suggestions. Please try again.");
         }
         return output;
-    } catch (error) {
+    } catch (error: any) {
+        const errorMessage = error.message?.toLowerCase() || '';
+        if (errorMessage.includes('api key not found') || errorMessage.includes('permission denied')) {
+            console.error("Authentication error in getRecipeSuggestionsFlow:", error);
+            throw new Error("Authentication Error: The AI service API key is missing or invalid. Please check your server environment variables.");
+        }
+        
         console.error("An API error occurred in getRecipeSuggestionsFlow:", error);
-        return {
-            suggestions: ["Sorry, the AI service is currently busy. Please try again in a few moments."],
-            initialContextualGuidance: "The AI service is temporarily unavailable."
-        };
+        throw new Error("Failed to get dish suggestions. The AI service may be temporarily unavailable.");
     }
   }
 );

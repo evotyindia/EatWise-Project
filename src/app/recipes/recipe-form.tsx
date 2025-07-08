@@ -181,9 +181,9 @@ export function RecipeForm() {
       const result = await getRecipeSuggestions(input);
       setDishSuggestions(result);
       toast({ title: "Dish Ideas Ready!", description: result.initialContextualGuidance || "Click a dish for its recipe." });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error getting dish suggestions:", error);
-      toast({ title: "Error", description: "Failed to get dish suggestions. Please try again.", variant: "destructive" });
+      toast({ title: "Suggestion Failed", description: error.message || "Could not get dish suggestions.", variant: "destructive" });
     }
     setIsLoadingSuggestions(false);
   };
@@ -213,16 +213,14 @@ export function RecipeForm() {
       if (result) {
         initiateChatWithWelcome("recipe", { dishName: result.recipeTitle, recipeIngredients: result.adjustedIngredients.map(i => `${i.quantity} ${i.name}`).join(', '), currentRecipeHealthNotes: result.healthNotes });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error getting detailed recipe:", error);
-      toast({ title: "Error", description: "Failed to get detailed recipe. Please try again.", variant: "destructive" });
+      toast({ title: "Recipe Failed", description: error.message || "Could not generate the detailed recipe.", variant: "destructive" });
     }
     setIsLoadingRecipe(false);
   };
   
   const initiateChatWithWelcome = async (contextType: "recipe", contextData: any) => {
-    
-    // Welcome message logic...
     setIsChatLoading(true);
     setChatHistory([]); 
     const input: ContextAwareAIChatInput = {
@@ -233,8 +231,9 @@ export function RecipeForm() {
     try {
         const aiResponse = await contextAwareAIChat(input);
         setChatHistory([{ role: "assistant", content: aiResponse.answer }]);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Chat init error:", error);
+        toast({ title: "Chat Init Failed", description: error.message || "Could not start AI chat.", variant: "destructive" });
         setChatHistory([{ role: "assistant", content: "Hello! How can I help you today?" }]);
     }
     setIsChatLoading(false);
@@ -263,10 +262,10 @@ export function RecipeForm() {
       };
       const aiResponse = await contextAwareAIChat(chatContextInput);
       setChatHistory(prev => [...prev, { role: "assistant", content: aiResponse.answer }]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Chat error:", error);
+      toast({ title: "Chat Error", description: error.message || "Could not get AI response.", variant: "destructive" });
       setChatHistory(prev => [...prev, { role: "assistant", content: "Sorry, I couldn't process that. Please try again." }]);
-      toast({ title: "Chat Error", description: "Could not get AI response.", variant: "destructive" });
     }
     setIsChatLoading(false);
   };
@@ -276,7 +275,6 @@ export function RecipeForm() {
   };
 
   useEffect(() => {
-    // Only scroll if the chat has started, not on the initial welcome message.
     if (chatHistory.length > 1) {
       scrollToBottom();
     }
@@ -523,8 +521,8 @@ export function RecipeForm() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm p-4 bg-muted/60 rounded-lg border">
-                <div className="flex items-center gap-2"><Clock className="h-5 w-5 text-accent"/><div><div className="font-semibold">Prep Time</div><div>{detailedRecipe.prepTime || 'N/A'}</div></div></div>
-                <div className="flex items-center gap-2"><Soup className="h-5 w-5 text-accent"/><div><div className="font-semibold">Cook Time</div><div>{detailedRecipe.cookTime || 'N/A'}</div></div></div>
+                <div className="flex items-center gap-2"><Clock className="h-5 w-5 text-accent"/><div><div className="font-semibold">Prep Time</div><div>{detailedRecipe.prepTime}</div></div></div>
+                <div className="flex items-center gap-2"><Soup className="h-5 w-5 text-accent"/><div><div className="font-semibold">Cook Time</div><div>{detailedRecipe.cookTime}</div></div></div>
                 <div className="flex items-center gap-2"><Users className="h-5 w-5 text-accent"/><div><div className="font-semibold">Servings</div><div>{detailedRecipe.servingsDescription}</div></div></div>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-x-8 gap-y-6 pt-4">
@@ -536,7 +534,7 @@ export function RecipeForm() {
                           <Check className="h-4 w-4 text-green-500 mr-2.5 mt-1 shrink-0" />
                           <div>
                             <span className="font-medium">{ing.name}</span>: <span>{ing.quantity}</span>
-                            {ing.notes && <div className="text-xs text-muted-foreground">({ing.notes})</div>}
+                            <div className="text-xs text-muted-foreground">({ing.notes})</div>
                           </div>
                         </li>
                       ))}
@@ -549,15 +547,20 @@ export function RecipeForm() {
                     </ol>
                   </div>
               </div>
-              {detailedRecipe.healthNotes && (
-                  <Alert variant="success">
-                    <Lightbulb className="h-5 w-5" />
-                    <AlertTitle>Health Notes &amp; Tips</AlertTitle>
-                    <AlertDescription className="whitespace-pre-line text-sm">
-                      {detailedRecipe.healthNotes}
-                    </AlertDescription>
-                  </Alert>
-              )}
+              <Alert variant="success">
+                <Lightbulb className="h-5 w-5" />
+                <AlertTitle>Health Notes &amp; Tips</AlertTitle>
+                <AlertDescription className="whitespace-pre-line text-sm">
+                  {detailedRecipe.healthNotes}
+                </AlertDescription>
+              </Alert>
+              <Alert>
+                  <Lightbulb className="h-5 w-5" />
+                  <AlertTitle>Storage &amp; Serving Tips</AlertTitle>
+                  <AlertDescription className="whitespace-pre-line text-sm">
+                    {detailedRecipe.storageOrServingTips}
+                  </AlertDescription>
+              </Alert>
             </CardContent>
             <CardFooter className="flex flex-col items-start pt-4 border-t mt-4">
                 <h3 className="font-semibold text-xl mb-2 flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Recipe</h3>

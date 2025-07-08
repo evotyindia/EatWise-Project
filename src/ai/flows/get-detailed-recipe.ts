@@ -29,19 +29,19 @@ const InternalGetDetailedRecipeInputSchema = GetDetailedRecipeInputSchema.extend
 const IngredientDetailSchema = z.object({
   name: z.string().describe("Name of the ingredient, e.g., 'Onion', 'Spinach'."),
   quantity: z.string().describe("Quantity with unit, e.g., '1 large', '200g', '1 cup', '2 tsp'."),
-  notes: z.string().optional().describe("Specific preparation notes, e.g., 'finely chopped', 'soaked overnight', 'optional', or 'Essential staple: add if available'.")
+  notes: z.string().describe("Specific preparation notes, e.g., 'finely chopped', 'soaked overnight', 'optional', or 'Essential staple: add if available'.")
 });
 
 const GetDetailedRecipeOutputSchema = z.object({
   recipeTitle: z.string().describe("The full title of the recipe, e.g., 'Healthy Palak Paneer'."),
-  description: z.string().optional().describe("A brief 2-3 sentence description of the dish, highlighting its healthiness or key features."),
+  description: z.string().describe("A brief 2-3 sentence description of the dish, highlighting its healthiness or key features."),
   servingsDescription: z.string().describe("A description of how many people the recipe serves, reflecting the household composition (e.g., 'Serves 2 adults, 1 senior, and 1 child'). State if quantities are generous or average."),
-  prepTime: z.string().optional().describe("Estimated preparation time, e.g., '15 minutes'."),
-  cookTime: z.string().optional().describe("Estimated cooking time, e.g., '30 minutes'."),
+  prepTime: z.string().describe("Estimated preparation time, e.g., '15 minutes'."),
+  cookTime: z.string().describe("Estimated cooking time, e.g., '30 minutes'."),
   adjustedIngredients: z.array(IngredientDetailSchema).describe("List of ingredients with quantities adjusted for the household and preparation notes. Focus on using the 'availableIngredients' provided by the user primarily. If essential common pantry staples are missing but absolutely necessary, they can be added with a clear note."),
   instructions: z.array(z.string()).describe("Step-by-step cooking instructions. Each step as a separate string in the array."),
-  healthNotes: z.string().optional().describe("Specific health considerations, tips, or modifications for this recipe based on the provided 'diseaseConcerns' (e.g., 'For diabetes, ensure to use minimal oil and monitor carbohydrate content. This recipe uses whole grains which is beneficial.'). If no specific concerns, provide general health benefits."),
-  storageOrServingTips: z.string().optional().describe("Tips for storing leftovers or creative serving suggestions.")
+  healthNotes: z.string().describe("Specific health considerations, tips, or modifications for this recipe based on the provided 'diseaseConcerns' (e.g., 'For diabetes, ensure to use minimal oil and monitor carbohydrate content. This recipe uses whole grains which is beneficial.'). If no specific concerns, provide general health benefits."),
+  storageOrServingTips: z.string().describe("Tips for storing leftovers or creative serving suggestions.")
 });
 export type GetDetailedRecipeOutput = z.infer<typeof GetDetailedRecipeOutputSchema>;
 
@@ -53,9 +53,8 @@ const prompt = ai.definePrompt({
   name: 'getDetailedRecipePrompt',
   input: {schema: InternalGetDetailedRecipeInputSchema}, // Use internal schema
   output: {schema: GetDetailedRecipeOutputSchema},
+  system: `You are a recipe generation engine. Your ONLY purpose is to generate a JSON object matching the output schema. Adhere to all instructions precisely. Your entire response MUST be a single, valid JSON object that conforms to the output schema. No extra text or explanations.`,
   prompt: `
-  SYSTEM: You are a recipe generation engine. Your ONLY purpose is to generate a JSON object matching the output schema. Adhere to all instructions precisely.
-
   TASK: Generate a detailed Indian recipe for "{{dishName}}".
 
   **CRITICAL MANDATE: RECIPE SCALING**
@@ -87,8 +86,7 @@ const prompt = ai.definePrompt({
   4.  **Instructions:** Provide clear, step-by-step instructions with professional cooking tips. Label optional steps clearly (e.g., start with "(Optional)").
   5.  **Health Notes:** Provide specific advice tailored to the 'diseaseConcerns' and 'userSuggestions'. If none, give a general health benefit.
   6.  **Language:** Use common Indian names for ingredients (e.g., 'Palak' for Spinach).
-  7.  **JSON Format:** Your entire response MUST be a single, valid JSON object that conforms to the output schema. No extra text or explanations.
-
+  
   Now, generate the JSON output based on these strict instructions.
 `,
 });
@@ -108,36 +106,21 @@ const getDetailedRecipeFlow = ai.defineFlow(
       processedInput.diseaseConcerns = [];
     }
 
-    const household = input.householdComposition;
-    const servingsText = `Serves ${household.adults} adult(s), ${household.seniors} senior(s), ${household.kids} kid(s) (approx).`;
-    const errorBase = {
-        servingsDescription: servingsText,
-        adjustedIngredients: [{name: "Error", quantity: "N/A", notes: "Could not retrieve ingredients due to an AI processing error."}],
-        instructions: ["Failed to generate instructions. Please try again later."],
-        healthNotes: "Health notes could not be generated.",
-        storageOrServingTips: undefined,
-        prepTime: undefined,
-        cookTime: undefined
-    };
-
     try {
         const {output} = await prompt(processedInput);
         if (!output) {
-          console.error('getDetailedRecipeFlow: LLM output was null or did not match schema for input:', JSON.stringify(processedInput));
-          return {
-            ...errorBase,
-            recipeTitle: `Error generating recipe for ${input.dishName}`,
-            description: "Could not generate recipe details at this time. The AI was unable to produce a valid recipe. Please check your inputs or try again.",
-          };
+          throw new Error("The AI returned an empty or invalid recipe. Please try again.");
         }
         return output;
-    } catch (error) {
+    } catch (error: any) {
+        const errorMessage = error.message?.toLowerCase() || '';
+        if (errorMessage.includes('api key not found') || errorMessage.includes('permission denied')) {
+            console.error("Authentication error in getDetailedRecipeFlow:", error);
+            throw new Error("Authentication Error: The AI service API key is missing or invalid. Please check your server environment variables.");
+        }
+        
         console.error("An API error occurred in getDetailedRecipeFlow:", error);
-        return {
-            ...errorBase,
-            recipeTitle: `Error generating recipe for ${input.dishName}`,
-            description: "The AI service is currently busy or unavailable. This is a temporary issue. Please try again in a few moments.",
-        };
+        throw new Error("Failed to generate the recipe. The AI service may be temporarily unavailable.");
     }
   }
 );
