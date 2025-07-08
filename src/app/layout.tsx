@@ -7,6 +7,7 @@ import { Footer } from '@/components/layout/footer';
 import { Toaster } from "@/components/ui/toaster";
 import { Poppins, Inter } from 'next/font/google';
 import { cn } from '@/lib/utils';
+import { BottomNavbar } from '@/components/layout/bottom-navbar';
 
 const fontPoppins = Poppins({
   subsets: ['latin'],
@@ -58,11 +59,12 @@ export default function RootLayout({
         />
         <CustomThemeProvider>
           <Header />
-          <main className="flex-grow">
+          <main className="flex-grow pb-20 md:pb-0">
             {children}
           </main>
           <Footer />
           <Toaster />
+          <BottomNavbar />
         </CustomThemeProvider>
       </body>
     </html>
