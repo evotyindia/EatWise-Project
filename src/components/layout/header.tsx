@@ -8,6 +8,7 @@ import React from 'react';
 
 import { ThemeToggleButton } from "@/components/common/theme-toggle-button"
 import { cn } from "@/lib/utils";
+import '../common/theme-toggle-button.css';
 
 const navItems = [
   { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
@@ -34,7 +35,7 @@ export function Header() {
         </Link>
 
         {/* Desktop nav + theme toggle */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-4">
             <nav className="items-center space-x-1 flex">
                 {navItems.map((item) => {
                 const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));

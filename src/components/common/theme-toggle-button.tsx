@@ -1,47 +1,54 @@
 "use client"
 
 import React, { useState, useEffect } from "react";
-import { Moon, Sun } from "lucide-react"
-import { useTheme } from "@/contexts/theme-context"
-import { Button } from "@/components/ui/button"
+import { useTheme } from "@/contexts/theme-context";
+import './theme-toggle-button.css';
 
 export function ThemeToggleButton() {
-  const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
-  const toggleTheme = () => {
-    // The button is disabled until mounted, so this only runs on the client
-    setTheme(theme === "light" ? "dark" : "light")
+  if (!mounted) {
+    // Render a placeholder to prevent layout shift
+    return <div style={{ width: '52px', height: '28px' }} />;
   }
 
-  // To fix hydration errors, we render a disabled button on the server and during
-  // the initial client render. After the component mounts on the client, it becomes
-  // enabled and its content dynamically reflects the current theme.
+  const isChecked = theme === 'dark';
+
+  const handleChange = () => {
+    setTheme(isChecked ? 'light' : 'dark');
+  };
+
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={toggleTheme}
-      disabled={!mounted}
-      className="w-[88px]"
-    >
-      {mounted && theme === "light" ? (
-        <>
-          <Moon />
-          <span>Dark</span>
-        </>
-      ) : (
-        // This is the default state shown on server and initial client render
-        <>
-          <Sun />
-          <span>Light</span>
-        </>
-      )}
-      <span className="sr-only">Toggle theme</span>
-    </Button>
-  )
+    <label className="switch">
+      <input
+        className="switch__input"
+        type="checkbox"
+        role="switch"
+        name="dark"
+        checked={isChecked}
+        onChange={handleChange}
+      />
+      <svg className="switch__icon" width="20px" height="20px" aria-hidden="true">
+        <use href="#light" />
+      </svg>
+      <svg className="switch__icon" width="20px" height="20px" aria-hidden="true">
+        <use href="#dark" />
+      </svg>
+      <span className="switch__inner"></span>
+      <span className="switch__inner-icons">
+        <svg className="switch__icon" width="20px" height="20px" aria-hidden="true">
+          <use href="#light" />
+        </svg>
+        <svg className="switch__icon" width="20px" height="20px" aria-hidden="true">
+          <use href="#dark" />
+        </svg>
+      </span>
+      <span className="switch__sr">Toggle Theme</span>
+    </label>
+  );
 }
