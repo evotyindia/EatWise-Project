@@ -38,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn(
-          "min-h-screen bg-background font-body antialiased flex flex-col overflow-x-hidden",
+          "min-h-screen bg-background font-body antialiased flex flex-col",
           fontPoppins.variable,
           fontInter.variable
       )}>
@@ -80,7 +80,7 @@ export default function RootLayout({
         />
         <CustomThemeProvider>
           <Header />
-          <main className="flex-grow pb-20 md:pb-0">
+          <main className="flex-grow pb-24 md:pb-0">
             {children}
           </main>
           <Footer />

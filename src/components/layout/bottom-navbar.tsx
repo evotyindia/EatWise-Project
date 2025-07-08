@@ -27,7 +27,7 @@ export function BottomNavbar() {
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 border-t shadow-[0_-1px_10px_rgba(0,0,0,0.05)] backdrop-blur-lg">
-      <div className="container flex items-center justify-around h-16 max-w-screen-xl px-0">
+      <div className="container flex items-center justify-around h-20 max-w-screen-xl px-0">
         {mainNavItems.map((item) => {
           const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
           return (
