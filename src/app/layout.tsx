@@ -35,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn(
-          "min-h-screen bg-background font-body antialiased flex flex-col",
+          "min-h-screen bg-background font-body antialiased flex flex-col overflow-x-hidden",
           fontPoppins.variable,
           fontInter.variable
       )}>
