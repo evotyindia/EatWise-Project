@@ -5,26 +5,19 @@ import { useRouter } from "next/navigation";
 import { AnalyzerForm } from "@/app/analyze/analyzer-form";
 import { ScanLine, LoaderCircle } from "lucide-react";
 import type { NextPage } from 'next';
-import { useToast } from "@/hooks/use-toast";
 
 const AnalyzePage: NextPage = () => {
   const router = useRouter();
-  const { toast } = useToast();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
     const user = localStorage.getItem("loggedInUser");
     if (!user) {
-      toast({
-        title: "Login Required",
-        description: "Please log in to access the Analyzer.",
-        variant: "destructive",
-      });
       router.replace('/login');
     } else {
       setIsCheckingAuth(false);
     }
-  }, [router, toast]);
+  }, [router]);
 
   if (isCheckingAuth) {
     return (
