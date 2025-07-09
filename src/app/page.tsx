@@ -151,12 +151,12 @@ export default function Home() {
           <p className="mx-auto max-w-[800px] text-foreground/80 md:text-xl mt-6">
             Your intelligent nutrition partner, designed for India. Simply scan a food label or list your ingredients, and let our AI provide instant health reports, personalized recipe ideas, and healthier local alternatives. Make every bite a conscious, healthy choice.
           </p>
-          <div className="mt-10 mx-auto grid max-w-xs grid-cols-1 gap-4 sm:max-w-md sm:grid-cols-2">
-            <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 shadow-lg hover:shadow-primary/40 group">
+          <div className="mt-10 mx-auto grid max-w-sm grid-cols-1 gap-4 sm:max-w-md sm:grid-cols-2">
+            <Button asChild size="lg" className="group transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 shadow-lg hover:shadow-primary/40">
               <Link href="/analyze">Start Analyzing <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" /></Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 border-2 border-input hover:bg-accent/10">
-              <Link href="/recipes">Find a Recipe</Link>
+            <Button asChild size="lg" variant="outline" className="group transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 border-2 border-input hover:bg-accent/10">
+              <Link href="/recipes">Find a Recipe <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" /></Link>
             </Button>
           </div>
         </div>
