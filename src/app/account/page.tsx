@@ -176,7 +176,7 @@ export default function AccountPage() {
           variant: "destructive",
         });
       } else {
-        toast({ title: "Error", description: "Could not delete account. Please try again.", variant: "destructive" });
+        toast({ title: "Error", description: (error as Error).message || "Could not delete account. Please try again.", variant: "destructive" });
       }
     }
   }
