@@ -114,7 +114,6 @@ Make sure to add these to your `.env` file for local development. For production
 This Next.js application can be deployed to any platform that supports Next.js, such as Vercel, Netlify, or Firebase App Hosting (an `apphosting.yaml` is included).
 
 For Genkit flows to work in production, ensure your deployment environment has the `GOOGLE_API_KEY` environment variable set.
-Ensure `NEXT_PUBLIC_BASE_URL` is set to your production domain for correct SEO and link generation.
 
 ## Contributing
 

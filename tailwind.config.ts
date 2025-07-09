@@ -87,21 +87,27 @@ export default {
             height: '0',
           },
         },
-        'smoky-aurora': {
-          '0%': { transform: 'translate(0, 0) scale(1.1)' },
-          '50%': { transform: 'translate(20px, 40px) scale(1.2)' },
-          '100%': { transform: 'translate(-20px, -40px) scale(1.1)' },
-        },
         'fade-in-up': {
           '0%': { opacity: '0', transform: 'translateY(20px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
-        }
+        },
+        'simmer': {
+          '0%, 100%': { transform: 'translateY(0) scale(1)', opacity: '1' },
+          '50%': { transform: 'translateY(-5px) scale(1.05)', opacity: '0.95' },
+        },
+        'toss': {
+          '0%': { transform: 'translateY(0px) rotate(0deg)', opacity: '0' },
+          '25%': { transform: 'translateY(-50px) rotate(-15deg)', opacity: '1' },
+          '75%': { transform: 'translateY(-50px) rotate(15deg)', opacity: '1' },
+          '100%': { transform: 'translateY(0px) rotate(0deg)', opacity: '0' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'smoky-aurora': 'smoky-aurora 25s ease-in-out infinite alternate',
         'fade-in-up': 'fade-in-up 0.6s ease-out forwards',
+        'simmer': 'simmer 2.5s ease-in-out infinite',
+        'toss': 'toss 2.2s ease-in-out infinite',
       },
     },
   },

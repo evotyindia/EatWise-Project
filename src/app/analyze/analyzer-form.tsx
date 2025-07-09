@@ -19,7 +19,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel as H
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { fileToDataUri } from "@/lib/utils";
+import { cn, fileToDataUri } from "@/lib/utils";
 import { StarRating } from "@/components/common/star-rating";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -47,6 +47,7 @@ export function AnalyzerForm() {
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const { toast } = useToast();
 
@@ -75,6 +76,8 @@ export function AnalyzerForm() {
   };
 
   const generateReportSharedLogic = async (input: GenerateHealthReportInput, processingType: 'image' | 'manual') => {
+    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    
     setIsLoading(true);
     if (processingType === 'image') setIsProcessingImage(true);
     if (processingType === 'manual') setIsProcessingManually(true);
@@ -163,9 +166,10 @@ export function AnalyzerForm() {
       };
       const aiResponse = await contextAwareAIChat(chatContextInput);
       setChatHistory((prev) => [...prev, { role: "assistant", content: aiResponse.answer }]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Chat error:", error);
-      setChatHistory((prev) => [...prev, { role: "assistant", content: "Sorry, I couldn't process that. Please try again." }]);
+      const errorMessage = (error as Error).message || "Sorry, I couldn't process that. Please try again.";
+      setChatHistory((prev) => [...prev, { role: "assistant", content: errorMessage }]);
       toast({ title: "Chat Error", description: "Could not get AI response.", variant: "destructive" });
     }
     setIsChatLoading(false);
@@ -188,13 +192,17 @@ export function AnalyzerForm() {
     if (lines.length === 0) return null;
 
     return (
-      <ul className="list-none space-y-1 text-sm leading-relaxed">
-        {lines.map((line, index) => (
-          <li key={index} className="flex items-start">
-            <span className="mr-2 mt-1 text-accent">&#8226;</span>
-            <span className="break-words">{line.replace(/^(\*|-)\s*/, '')}</span>
-          </li>
-        ))}
+      <ul className="space-y-1.5 text-sm leading-relaxed">
+        {lines.map((line, index) => {
+          const content = line.replace(/^(\*|-)\s*/, '');
+          if (!content) return null;
+          return (
+            <li key={index} className="flex items-start">
+              <span className="mr-3 mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+              <span className="break-words">{content}</span>
+            </li>
+          );
+        })}
       </ul>
     );
   };
@@ -254,220 +262,244 @@ export function AnalyzerForm() {
           </CardContent>
         </Card>
 
-        {isLoading && !report && (
-          <Card className="flex items-center justify-center h-full min-h-[300px]">
-            <div className="text-center">
-              <Sparkles className="mx-auto h-12 w-12 text-accent animate-spin mb-4" />
-              <p className="text-lg font-semibold">Generating AI Report...</p>
-              <p className="text-sm text-muted-foreground mt-1">Our AI is carefully analyzing the data. This may take a few moments.</p>
-            </div>
-          </Card>
-        )}
+        <div ref={resultsRef}>
+          {isLoading && !report && (
+            <Card className="flex items-center justify-center h-full min-h-[300px]">
+              <div className="text-center">
+                <Sparkles className="mx-auto h-12 w-12 text-accent animate-spin mb-4" />
+                <p className="text-lg font-semibold">Generating AI Report...</p>
+                <p className="text-sm text-muted-foreground mt-1">Our AI is carefully analyzing the data. This may take a few moments.</p>
+              </div>
+            </Card>
+          )}
 
-        {report && (
-          <Card className="animate-fade-in-up opacity-0" style={{ animationFillMode: 'forwards' }}>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="flex items-center text-2xl"><FileText className="mr-2 h-6 w-6 text-primary" /> AI Health Report</CardTitle>
-                  {report.productType && (<CardDescription>Product Type: <span className="font-semibold">{report.productType}</span></CardDescription>)}
+          {report && (
+            <Card className="animate-fade-in-up opacity-0" style={{ animationFillMode: 'forwards' }}>
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="flex items-center text-2xl"><FileText className="mr-2 h-6 w-6 text-primary" /> AI Health Report</CardTitle>
+                    {report.productType && (<CardDescription>Product Type: <span className="font-semibold">{report.productType}</span></CardDescription>)}
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Alert variant="default" className="bg-muted/60">
-                  <HeartPulse className="h-5 w-5 text-accent" />
-                  <AlertTitle className="font-semibold flex justify-between items-center">
-                    <span>Overall Health Rating</span>
-                    <span className="text-xs font-normal text-muted-foreground">(Higher is better)</span>
-                  </AlertTitle>
-                  <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
-                    <StarRating rating={report.healthRating} variant="good" />
-                    <span>({report.healthRating}/5)</span>
-                  </AlertDescription>
-                </Alert>
-
-                {report.processingLevelRating?.rating !== undefined && (
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Alert variant="default" className="bg-muted/60">
-                    <Zap className="h-5 w-5 text-accent" />
-                    <AlertTitle className="font-semibold flex justify-between items-center">
-                      <span>Processing Level</span>
-                      <span className="text-xs font-normal text-muted-foreground">(Lower is better)</span>
-                    </AlertTitle>
-                    <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
-                      <StarRating rating={report.processingLevelRating.rating} variant="bad" />
-                      <span>({report.processingLevelRating.rating}/5)</span>
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {report.sugarContentRating?.rating !== undefined && (
-                  <Alert variant="default" className="bg-muted/60">
-                    <Wheat className="h-5 w-5 text-accent" />
-                    <AlertTitle className="font-semibold flex justify-between items-center">
-                      <span>Sugar Content</span>
-                      <span className="text-xs font-normal text-muted-foreground">(Lower is better)</span>
-                    </AlertTitle>
-                    <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
-                      <StarRating rating={report.sugarContentRating.rating} variant="bad" />
-                      <span>({report.sugarContentRating.rating}/5)</span>
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {report.nutrientDensityRating?.rating !== undefined && (
-                  <Alert variant="default" className="bg-muted/60">
-                    <Sparkles className="h-5 w-5 text-accent" />
-                     <AlertTitle className="font-semibold flex justify-between items-center">
-                      <span>Nutrient Density</span>
-                      <span className="text-xs font-normal text-muted-foreground">(Higher is better)</span>
-                    </AlertTitle>
-                    <AlertDescription className="flex items-center gap-1 flex-wrap mt-1">
-                      <StarRating rating={report.nutrientDensityRating.rating} variant="good" />
-                      <span>({report.nutrientDensityRating.rating}/5)</span>
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
-              <Separator />
-
-              <Alert variant="default" className="bg-background/30">
-                <Info className="h-4 w-4 text-primary" />
-                <AlertTitle className="font-semibold text-lg mb-1">Summary</AlertTitle>
-                <AlertDescription>{report.summary}</AlertDescription>
-              </Alert>
-
-              {renderFormattedText(report.greenFlags) && (
-                <Alert variant="success">
-                  <ShieldCheck className="h-4 w-4" />
-                  <AlertTitle className="font-semibold text-lg mb-1">Green Flags</AlertTitle>
-                  <AlertDescription>{renderFormattedText(report.greenFlags)}</AlertDescription>
-                </Alert>
-              )}
-
-              {renderFormattedText(report.redFlags) && (
-                <Alert variant="destructive">
-                  <ShieldAlert className="h-4 w-4" />
-                  <AlertTitle className="font-semibold text-lg mb-1">Red Flags</AlertTitle>
-                  <AlertDescription>{renderFormattedText(report.redFlags)}</AlertDescription>
-                </Alert>
-              )}
-
-              <Accordion type="single" collapsible className="w-full" defaultValue="detailed-analysis">
-                <AccordionItem value="detailed-analysis">
-                  <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                    <div className="flex items-center">
-                      <ClipboardList className="mr-2 h-5 w-5 text-primary" />
-                      <span>Detailed Nutritional Breakdown</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="space-y-4 pt-2">
-                      <div className="p-3 rounded-md border bg-muted/50">
-                          <h4 className="font-semibold mb-1">Processing Level</h4>
-                          <p className="text-sm text-muted-foreground">{report.detailedAnalysis.processingLevel}</p>
-                      </div>
-                      <div className="p-3 rounded-md border bg-muted/50">
-                          <h4 className="font-semibold mb-1">Macronutrient Profile</h4>
-                          <p className="text-sm text-muted-foreground">{report.detailedAnalysis.macronutrientProfile}</p>
-                      </div>
-                      <div className="p-3 rounded-md border bg-muted/50">
-                          <h4 className="font-semibold mb-1">Sugar Analysis</h4>
-                          <p className="text-sm text-muted-foreground">{report.detailedAnalysis.sugarAnalysis}</p>
-                      </div>
-                      {renderFormattedText(report.detailedAnalysis.micronutrientHighlights) && (
-                          <div className="p-3 rounded-md border bg-muted/50">
-                              <h4 className="font-semibold mb-1">Micronutrient Highlights</h4>
-                              <div className="text-sm text-muted-foreground">{renderFormattedText(report.detailedAnalysis.micronutrientHighlights)}</div>
+                    <HeartPulse className="h-5 w-5 text-accent" />
+                    <AlertTitle className="font-semibold">Overall Health Rating</AlertTitle>
+                    <AlertDescription>
+                      <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-2">
+                          <div className="flex items-center gap-2">
+                              <StarRating rating={report.healthRating} variant="good" />
+                              <span className="font-medium text-sm">({report.healthRating}/5)</span>
                           </div>
-                      )}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-
-              <Alert variant="default" className="bg-secondary/70">
-                <UserCheck className="h-4 w-4 text-primary" />
-                <AlertTitle className="font-semibold text-lg mb-1">Best Suited For</AlertTitle>
-                <AlertDescription>{report.bestSuitedFor}</AlertDescription>
-              </Alert>
-
-              {renderFormattedText(report.consumptionTips) && (
-                  <Alert variant="default" className="bg-secondary/70">
-                    <Lightbulb className="h-4 w-4 text-primary" />
-                    <AlertTitle className="font-semibold text-lg mb-1">Healthy Consumption Tips</AlertTitle>
-                    <AlertDescription>{renderFormattedText(report.consumptionTips)}</AlertDescription>
+                          <span className="text-xs text-muted-foreground ml-auto">(Higher is better)</span>
+                      </div>
+                    </AlertDescription>
                   </Alert>
-              )}
 
-              <Alert variant="default" className="bg-secondary/70">
-                <CookingPot className="h-4 w-4 text-primary" />
-                <AlertTitle className="font-semibold text-lg mb-1">Role in an Indian Diet</AlertTitle>
-                <AlertDescription>{report.indianDietContext}</AlertDescription>
-              </Alert>
+                  {report.processingLevelRating?.rating !== undefined && (
+                    <Alert variant="default" className="bg-muted/60">
+                      <Zap className="h-5 w-5 text-accent" />
+                      <AlertTitle className="font-semibold">Processing Level</AlertTitle>
+                      <AlertDescription>
+                        <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-2">
+                            <div className="flex items-center gap-2">
+                                <StarRating rating={report.processingLevelRating.rating} variant="bad" />
+                                <span className="font-medium text-sm">({report.processingLevelRating.rating}/5)</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground ml-auto">(Lower is better)</span>
+                        </div>
+                      </AlertDescription>
+                    </Alert>
+                  )}
 
-              {renderFormattedText(report.healthierAlternatives) && (
-                <Alert variant="default" className="bg-secondary">
-                  <Info className="h-4 w-4 text-primary" />
-                  <AlertTitle className="font-semibold text-lg mb-1">Healthier Indian Alternatives</AlertTitle>
-                  <AlertDescription>{renderFormattedText(report.healthierAlternatives)}</AlertDescription>
+                  {report.sugarContentRating?.rating !== undefined && (
+                    <Alert variant="default" className="bg-muted/60">
+                      <Wheat className="h-5 w-5 text-accent" />
+                      <AlertTitle className="font-semibold">Sugar Content</AlertTitle>
+                      <AlertDescription>
+                        <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-2">
+                            <div className="flex items-center gap-2">
+                                <StarRating rating={report.sugarContentRating.rating} variant="bad" />
+                                <span className="font-medium text-sm">({report.sugarContentRating.rating}/5)</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground ml-auto">(Lower is better)</span>
+                        </div>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {report.nutrientDensityRating?.rating !== undefined && (
+                    <Alert variant="default" className="bg-muted/60">
+                      <Sparkles className="h-5 w-5 text-accent" />
+                       <AlertTitle className="font-semibold">Nutrient Density</AlertTitle>
+                       <AlertDescription>
+                          <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-2">
+                              <div className="flex items-center gap-2">
+                                  <StarRating rating={report.nutrientDensityRating.rating} variant="good" />
+                                  <span className="font-medium text-sm">({report.nutrientDensityRating.rating}/5)</span>
+                              </div>
+                              <span className="text-xs text-muted-foreground ml-auto">(Higher is better)</span>
+                          </div>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+                <Separator />
+
+                <Alert variant="default" className="bg-background/30">
+                  <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
+                    <Info className="h-5 w-5 mr-2 text-primary" />
+                    <span>Summary</span>
+                  </AlertTitle>
+                  <AlertDescription className="pl-7">{report.summary}</AlertDescription>
                 </Alert>
-              )}
 
-              {report.ingredientDeepDive && report.ingredientDeepDive.length > 0 && (
+                {renderFormattedText(report.greenFlags) && (
+                  <Alert variant="success">
+                    <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
+                      <ShieldCheck className="h-5 w-5 mr-2" />
+                      <span>Green Flags</span>
+                    </AlertTitle>
+                    <AlertDescription className="pl-7">
+                      {renderFormattedText(report.greenFlags)}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {renderFormattedText(report.redFlags) && (
+                  <Alert variant="destructive">
+                    <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
+                      <ShieldAlert className="h-5 w-5 mr-2" />
+                      <span>Red Flags</span>
+                    </AlertTitle>
+                    <AlertDescription className="pl-7">
+                      {renderFormattedText(report.redFlags)}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="ingredient-breakdown">
+                  <AccordionItem value="detailed-analysis">
                     <AccordionTrigger className="text-lg font-semibold hover:no-underline">
                       <div className="flex items-center">
-                        <Microscope className="mr-2 h-5 w-5 text-primary" />
-                        <span>Ingredient Deep Dive</span>
+                        <ClipboardList className="mr-2 h-5 w-5 text-primary" />
+                        <span>Detailed Nutritional Breakdown</span>
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent>
-                      <Accordion type="single" collapsible className="w-full">
-                        {report.ingredientDeepDive.map((item, index) => (
-                          <AccordionItem key={index} value={`item-${index}`}>
-                            <AccordionTrigger>
-                              <div className="flex items-center justify-between w-full pr-2">
-                                <span className="font-medium">{item.ingredientName}</span>
-                                <Badge variant={riskBadgeVariantMap[item.riskLevel] || 'outline'}>{item.riskLevel}</Badge>
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="space-y-2 px-1">
-                              <p className="text-sm text-muted-foreground">{item.description}</p>
-                              <p className="text-xs"><strong className="font-semibold">Justification:</strong> {item.riskReason}</p>
-                            </AccordionContent>
-                          </AccordionItem>
-                        ))}
-                      </Accordion>
+                    <AccordionContent className="space-y-4 pt-2">
+                        <div className="p-3 rounded-md border bg-muted/50">
+                            <h4 className="font-semibold mb-1">Processing Level</h4>
+                            <p className="text-sm text-muted-foreground">{report.detailedAnalysis.processingLevel}</p>
+                        </div>
+                        <div className="p-3 rounded-md border bg-muted/50">
+                            <h4 className="font-semibold mb-1">Macronutrient Profile</h4>
+                            <p className="text-sm text-muted-foreground">{report.detailedAnalysis.macronutrientProfile}</p>
+                        </div>
+                        <div className="p-3 rounded-md border bg-muted/50">
+                            <h4 className="font-semibold mb-1">Sugar Analysis</h4>
+                            <p className="text-sm text-muted-foreground">{report.detailedAnalysis.sugarAnalysis}</p>
+                        </div>
+                        {renderFormattedText(report.detailedAnalysis.micronutrientHighlights) && (
+                            <div className="p-3 rounded-md border bg-muted/50">
+                                <h4 className="font-semibold mb-1">Micronutrient Highlights</h4>
+                                <div className="text-sm text-muted-foreground">{renderFormattedText(report.detailedAnalysis.micronutrientHighlights)}</div>
+                            </div>
+                        )}
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
-              )}
-            </CardContent>
-            <CardFooter className="flex flex-col items-start pt-4 border-t">
-              <h3 className="font-semibold text-xl mb-2 flex items-center"><MessageCircle className="mr-2 h-5 w-5" /> Chat with AI Advisor</h3>
-              <p className="text-sm text-muted-foreground mb-4">Ask questions about this report.</p>
-              <ScrollArea className="h-[200px] w-full rounded-md border p-3 mb-4 bg-muted/50">
-                {chatHistory.map((msg, index) => (
-                  <div key={index} className={`mb-2 p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
-                    <span className="font-semibold capitalize">{msg.role === 'user' ? 'You' : 'AI Advisor'}: </span>{msg.content}
-                  </div>
-                ))}
-                {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Advisor is typing...</div>}
-                <div ref={messagesEndRef} />
-              </ScrollArea>
-              <form onSubmit={handleChatSubmit} className="w-full flex gap-2">
-                <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background/50" />
-                <Button type="submit" disabled={isChatLoading || !chatInput.trim()}><Send className="h-4 w-4" /></Button>
-              </form>
-            </CardFooter>
-          </Card>
-        )}
-        {!isLoading && !report && (
-          <Card className="flex items-center justify-center h-full min-h-[300px] bg-muted/30">
-            <div className="text-center p-8"><Sparkles className="mx-auto h-12 w-12 text-muted-foreground mb-4" /><p className="text-lg font-semibold text-muted-foreground">Your AI report will appear here.</p><p className="text-sm text-muted-foreground mt-1">Submit a food label to get started.</p></div>
-          </Card>
-        )}
+
+                <Alert variant="default" className="bg-secondary/70">
+                  <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
+                    <UserCheck className="h-5 w-5 mr-2 text-primary" />
+                    <span>Best Suited For</span>
+                  </AlertTitle>
+                  <AlertDescription className="pl-7">{report.bestSuitedFor}</AlertDescription>
+                </Alert>
+
+                {renderFormattedText(report.consumptionTips) && (
+                    <Alert variant="default" className="bg-secondary/70">
+                      <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
+                        <Lightbulb className="h-5 w-5 mr-2 text-primary" />
+                        <span>Healthy Consumption Tips</span>
+                      </AlertTitle>
+                      <AlertDescription className="pl-7">{renderFormattedText(report.consumptionTips)}</AlertDescription>
+                    </Alert>
+                )}
+
+                <Alert variant="default" className="bg-secondary/70">
+                  <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
+                    <CookingPot className="h-5 w-5 mr-2 text-primary" />
+                    <span>Role in an Indian Diet</span>
+                  </AlertTitle>
+                  <AlertDescription className="pl-7">{report.indianDietContext}</AlertDescription>
+                </Alert>
+
+                {renderFormattedText(report.healthierAlternatives) && (
+                  <Alert variant="default" className="bg-secondary">
+                    <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
+                      <Info className="h-5 w-5 mr-2 text-primary" />
+                      <span>Healthier Indian Alternatives</span>
+                    </AlertTitle>
+                    <AlertDescription className="pl-7">{renderFormattedText(report.healthierAlternatives)}</AlertDescription>
+                  </Alert>
+                )}
+
+                {report.ingredientDeepDive && report.ingredientDeepDive.length > 0 && (
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="ingredient-deep-dive">
+                      <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                        <div className="flex items-center">
+                          <Microscope className="mr-2 h-5 w-5 text-primary" />
+                          <span>Ingredient Deep Dive</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-4 pt-2">
+                          {report.ingredientDeepDive.map((item, index) => (
+                            <div key={index} className="p-3 rounded-md border bg-muted/50">
+                              <div className="flex items-center justify-between w-full mb-2">
+                                <h4 className="font-semibold">{item.ingredientName}</h4>
+                                <Badge variant={riskBadgeVariantMap[item.riskLevel] || 'outline'} className="ml-2 shrink-0">{item.riskLevel}</Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-1">{item.description}</p>
+                              <p className="text-xs"><strong className="font-semibold">Justification:</strong> {item.riskReason}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                )}
+              </CardContent>
+              <CardFooter className="flex flex-col items-start pt-4 border-t">
+                <h3 className="font-semibold text-xl mb-2 flex items-center"><MessageCircle className="mr-2 h-5 w-5" /> Chat with AI Advisor</h3>
+                <p className="text-sm text-muted-foreground mb-4">Ask questions about this report.</p>
+                <ScrollArea className="h-[200px] w-full rounded-md border p-3 mb-4 bg-muted/50">
+                  {chatHistory.map((msg, index) => (
+                    <div key={index} className={`mb-2 p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
+                      <span className="font-semibold capitalize">{msg.role === 'user' ? 'You' : 'AI Advisor'}: </span>{msg.content}
+                    </div>
+                  ))}
+                  {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Advisor is typing...</div>}
+                  <div ref={messagesEndRef} />
+                </ScrollArea>
+                <form onSubmit={handleChatSubmit} className="w-full flex gap-2">
+                  <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background/50" />
+                  <Button type="submit" disabled={isChatLoading || !chatInput.trim()}><Send className="h-4 w-4" /></Button>
+                </form>
+              </CardFooter>
+            </Card>
+          )}
+          {!isLoading && !report && (
+            <Card className="flex items-center justify-center h-full min-h-[300px] bg-muted/30">
+              <div className="text-center p-8"><Sparkles className="mx-auto h-12 w-12 text-muted-foreground mb-4" /><p className="text-lg font-semibold text-muted-foreground">Your AI report will appear here.</p><p className="text-sm text-muted-foreground mt-1">Submit a food label to get started.</p></div>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );

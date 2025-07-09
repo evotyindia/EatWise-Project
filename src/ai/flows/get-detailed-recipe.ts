@@ -55,7 +55,15 @@ const prompt = ai.definePrompt({
   output: {schema: GetDetailedRecipeOutputSchema},
   system: `You are a recipe generation engine. Your ONLY purpose is to generate a JSON object matching the output schema. Adhere to all instructions precisely. Your entire response MUST be a single, valid JSON object that conforms to the output schema. No extra text or explanations.`,
   prompt: `
-  TASK: Generate a detailed Indian recipe for "{{dishName}}".
+  TASK: Generate a detailed, delicious, and healthy Indian recipe for "{{dishName}}".
+
+  **CULINARY PHILOSOPHY: The Art of Indian Flavors**
+  You are an expert Indian chef. Your goal is not just to list steps, but to teach the user how to create a dish with deep, authentic flavor. Emphasize these core techniques in your instructions:
+  - **Tadka (Tempering):** Explain how to bloom whole spices in hot oil or ghee to release their essential oils.
+  - **Bhunao (Sautéing):** Stress the importance of sautéing the onion-ginger-garlic paste until golden brown and the tomatoes until they release oil. This is the foundation of flavor.
+  - **Layering Spices:** Instruct the user to add powdered spices after the base is sautéed and cook them for a minute to remove their raw taste.
+  - **Finishing Touches:** Suggest finishing the dish with a sprinkle of garam masala, fresh coriander, or a squeeze of lemon to brighten the flavors.
+  - **Health-conscious cooking:** While prioritizing taste, use healthy techniques. Advise on using minimal oil without compromising flavor and incorporating vegetables creatively.
 
   **CRITICAL MANDATE: RECIPE SCALING**
   This is your most important instruction. All ingredient quantities and times MUST be scaled for a household of **{{totalPeople}} people**.
@@ -83,7 +91,7 @@ const prompt = ai.definePrompt({
       *   Prioritize using the 'availableIngredients'.
       *   Only add *absolutely essential* Indian pantry staples (e.g., cooking oil, salt, turmeric) if they are missing. In the 'notes' for these, you MUST write: "Essential staple: add if available".
       *   Common Indian spices for flavor (e.g., garam masala, cumin powder) are NOT essential. If you suggest them, the 'notes' field MUST say: "Optional, for flavor".
-  4.  **Instructions:** Provide clear, step-by-step instructions with professional cooking tips. Label optional steps clearly (e.g., start with "(Optional)").
+  4.  **Instructions:** Provide clear, step-by-step instructions that embody the **CULINARY PHILOSOPHY**. Include professional cooking tips within the steps (e.g., "Sauté the onions until they are translucent and light golden at the edges; this develops their sweetness."). Label optional steps clearly.
   5.  **Health Notes:** Provide specific advice tailored to the 'diseaseConcerns' and 'userSuggestions'. If none, give a general health benefit.
   6.  **Language:** Use common Indian names for ingredients (e.g., 'Palak' for Spinach).
   
@@ -113,14 +121,17 @@ const getDetailedRecipeFlow = ai.defineFlow(
         }
         return output;
     } catch (error: any) {
-        const errorMessage = error.message?.toLowerCase() || '';
-        if (errorMessage.includes('api key not found') || errorMessage.includes('permission denied')) {
-            console.error("Authentication error in getDetailedRecipeFlow:", error);
-            throw new Error("Authentication Error: The AI service API key is missing or invalid. Please check your server environment variables.");
+        // Log the full, detailed error to the server console (Vercel logs) for debugging.
+        console.error(`An error occurred in getDetailedRecipeFlow:`, error);
+
+        // Provide a clear error message for the most common deployment issue.
+        if (error.message?.toLowerCase().includes('api key')) {
+            throw new Error('AI service configuration error. The API key is not set or invalid in the deployment environment.');
         }
-        
-        console.error("An API error occurred in getDetailedRecipeFlow:", error);
-        throw new Error("Failed to generate the recipe. The AI service may be temporarily unavailable.");
+
+        // For any other errors, throw a generic but helpful message to the user.
+        // The specific error details are available in the server logs.
+        throw new Error('An unexpected error occurred while communicating with the AI service. Please try again later.');
     }
   }
 );
