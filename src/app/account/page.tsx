@@ -31,7 +31,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { type User as UserType, updateUser, deleteUser, getUserByUid } from "@/services/userService";
+import { type User as UserType, updateUser, deleteUser, getUserByUid, setUsername } from "@/services/userService";
 import { deleteReportsByUserId } from "@/services/reportService";
 import { getAuth, deleteUser as deleteAuthUser, onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -105,13 +105,13 @@ export default function AccountPage() {
   }, [currentUser, profileForm, usernameForm]);
 
   async function onUsernameSubmit(values: z.infer<typeof usernameFormSchema>) {
-    if (!currentUser?.id) return;
+    if (!currentUser?.id || !currentUser?.uid) return;
     try {
-      await updateUser(currentUser.id, { username: values.username.toLowerCase() });
+      await setUsername(currentUser.uid, currentUser.id, values.username);
       
       const updatedUser = { ...currentUser, username: values.username.toLowerCase() };
       setCurrentUser(updatedUser);
-      localStorage.setItem("loggedInUser", JSON.stringify({ id: updatedUser.id, email: updatedUser.email, username: updatedUser.username }));
+      localStorage.setItem("loggedInUser", JSON.stringify({ id: updatedUser.id, email: updatedUser.email, uid: updatedUser.uid, username: updatedUser.username }));
       toast({ title: "Username Set!", description: "Your unique username has been saved." });
     } catch (error) {
        console.error("Username update error:", error);
@@ -122,13 +122,11 @@ export default function AccountPage() {
   async function onProfileSubmit(values: z.infer<typeof profileFormSchema>) {
      if (!currentUser?.id) return;
     try {
-      const updatedData: Partial<UserType> = { name: values.name, phone: values.phone };
+      const updatedData: Partial<Omit<UserType, 'id' | 'uid' | 'email' | 'username' | 'emailVerified'>> = { name: values.name, phone: values.phone };
       await updateUser(currentUser.id, updatedData);
 
       const updatedUser = { ...currentUser, ...updatedData };
       setCurrentUser(updatedUser);
-      localStorage.setItem("loggedInUser", JSON.stringify({ id: updatedUser.id, email: updatedUser.email, username: updatedUser.username }));
-      
       toast({ title: "Profile Updated", description: "Your details have been successfully saved." });
     } catch (error) {
       console.error("Profile update error:", error);
@@ -161,8 +159,8 @@ export default function AccountPage() {
       // Step 1: Delete all associated reports from Firestore
       await deleteReportsByUserId(currentUser.uid);
 
-      // Step 2: Delete user record from Firestore
-      await deleteUser(currentUser.id);
+      // Step 2: Delete user record from Firestore and their username reservation
+      await deleteUser(currentUser.id, currentUser.username || '');
       
       // Step 3: Delete user from Firebase Authentication
       await deleteAuthUser(authUser);
@@ -380,5 +378,3 @@ export default function AccountPage() {
     </div>
   );
 }
-
-    
