@@ -1,6 +1,7 @@
+
 "use client"
 
-import { Home, ScanLine, CookingPot, BookOpen, Menu, BarChart3, Mail, User, LogOut, UserCog, History } from "lucide-react"
+import { Home, ScanLine, CookingPot, BookOpen, Menu, BarChart3, Mail, User, LogOut, UserCog, Bookmark } from "lucide-react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
@@ -18,7 +19,7 @@ const mainNavItems = [
 ];
 
 const moreNavItems = [
-    { href: "/history", label: "History", icon: History },
+    { href: "/bookmarks", label: "Bookmarks", icon: Bookmark },
     { href: "/blogs", label: "Blogs", icon: BookOpen },
     { href: "/contact", label: "Contact", icon: Mail},
 ];

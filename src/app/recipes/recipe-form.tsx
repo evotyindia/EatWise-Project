@@ -95,7 +95,7 @@ const categorizedIngredients = [
     },
     { 
         category: "Sweeteners (Mithas)", 
-        items: ["Sugar (Cheeni)", "Jaggery (Gud)", "Honey (Shahad)", "Brown Sugar", "Stevia", "Palm Sugar"]
+        items: ["Sugar (Cheeni)", "Jaggery (Gud)", "Honey (Shahad)", "Brown Sugar", "Stevia", "Palm Sugar"] 
     },
     { 
         category: "Pantry Staples, Pastes & Condiments", 
@@ -303,12 +303,12 @@ export function RecipeForm() {
 
         await createReport(newReport);
 
-        toast({ title: "Recipe Saved", description: "The recipe has been saved to your history.", variant: "success" });
+        toast({ title: "Recipe Bookmarked", description: "The recipe has been saved to your bookmarks.", variant: "success" });
         setIsSaveDialogOpen(false);
         setReportTitle("");
     } catch (error) {
         console.error("Failed to save recipe:", error);
-        toast({ title: "Save Failed", description: (error as Error).message || "Could not save the recipe to the database.", variant: "destructive" });
+        toast({ title: "Bookmark Failed", description: (error as Error).message || "Could not save the recipe.", variant: "destructive" });
     }
   };
   
@@ -564,12 +564,12 @@ export function RecipeForm() {
                   <DialogTrigger asChild>
                     <Button variant="outline" onClick={() => setReportTitle(detailedRecipe.recipeTitle)}>
                       <Save className="mr-2 h-4 w-4" />
-                      Save Recipe
+                      Bookmark Recipe
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Save Recipe</DialogTitle>
+                      <DialogTitle>Bookmark Recipe</DialogTitle>
                       <DialogDescription>Give your recipe a name to easily find it later.</DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -579,7 +579,7 @@ export function RecipeForm() {
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button type="button" onClick={handleSaveRecipe}>Save</Button>
+                      <Button type="button" onClick={handleSaveRecipe}>Save Bookmark</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
