@@ -17,8 +17,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserCog, LogOut, ShieldCheck, User, Trash2, Ban, AtSign, LoaderCircle, CheckCircle2, XCircle } from "lucide-react";
-import { useEffect, useState, useCallback } from "react";
+import { UserCog, LogOut, ShieldCheck, User, Trash2, Ban, AtSign, LoaderCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import {
   AlertDialog,
@@ -31,17 +31,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { type User as UserType, updateUser, deleteUser, getUserByUid, setUsername, checkUsernameExists } from "@/services/userService";
+import { type User as UserType, updateUser, deleteUser, getUserByUid } from "@/services/userService";
 import { deleteReportsByUserId } from "@/services/reportService";
 import { getAuth, deleteUser as deleteAuthUser, onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { useDebounce } from "@/hooks/use-debounce";
-
-
-// Schema for setting username for the first time
-const usernameFormSchema = z.object({
-  username: z.string().min(3, { message: "Username must be at least 3 characters." }).regex(/^[a-zA-Z0-9_]+$/, { message: "Username can only contain letters, numbers, and underscores." }),
-});
+import { UsernameSetupDialog } from "@/components/common/UsernameSetupDialog";
 
 // Schema for updating personal details
 const profileFormSchema = z.object({
@@ -55,12 +49,8 @@ export default function AccountPage() {
   const [currentUser, setCurrentUser] = useState<UserType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const [isUsernameModalOpen, setIsUsernameModalOpen] = useState(false);
 
-  // State for real-time username validation
-  const [usernameToCheck, setUsernameToCheck] = useState("");
-  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
-  const [usernameStatus, setUsernameStatus] = useState<"idle" | "available" | "taken" | "invalid">("idle");
-  const debouncedUsername = useDebounce(usernameToCheck, 500);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
@@ -69,6 +59,9 @@ export default function AccountPage() {
           const userProfile = await getUserByUid(authUser.uid);
           if (userProfile) {
             setCurrentUser(userProfile);
+             if (!userProfile.username) {
+              setIsUsernameModalOpen(true);
+            }
           } else {
             handleLogout(true);
             router.replace('/login');
@@ -94,68 +87,24 @@ export default function AccountPage() {
     defaultValues: { name: "", phone: "" },
   });
 
-  const usernameForm = useForm<z.infer<typeof usernameFormSchema>>({
-    resolver: zodResolver(usernameFormSchema),
-    defaultValues: { username: "" },
-  });
-
-  // Effect for debounced username check
-  useEffect(() => {
-    const checkUser = async () => {
-      if (debouncedUsername.length < 3 || !/^[a-zA-Z0-9_]+$/.test(debouncedUsername)) {
-        setUsernameStatus(debouncedUsername.length > 0 ? "invalid" : "idle");
-        setIsCheckingUsername(false);
-        return;
-      }
-      setIsCheckingUsername(true);
-      try {
-        const exists = await checkUsernameExists(debouncedUsername);
-        setUsernameStatus(exists ? "taken" : "available");
-      } catch (error) {
-        console.error("Username check error:", error);
-        setUsernameStatus("idle"); // Fallback on error
-      }
-      setIsCheckingUsername(false);
-    };
-
-    if (debouncedUsername) {
-      checkUser();
-    } else {
-      setUsernameStatus("idle");
-    }
-  }, [debouncedUsername]);
-
-
   useEffect(() => {
     if (currentUser) {
       profileForm.reset({
         name: currentUser.name || "",
         phone: currentUser.phone || "",
       });
-      usernameForm.reset({
-        username: currentUser.username || ""
-      });
     }
-  }, [currentUser, profileForm, usernameForm]);
+  }, [currentUser, profileForm]);
 
-  async function onUsernameSubmit(values: z.infer<typeof usernameFormSchema>) {
-    if (!currentUser?.id || !currentUser?.uid) return;
-    if (usernameStatus !== 'available') {
-        toast({ title: "Username Invalid", description: "Please choose an available username.", variant: "destructive"});
-        return;
-    }
-
-    const result = await setUsername(currentUser.uid, currentUser.id, values.username);
-
-    if (result.success) {
-        const updatedUser = { ...currentUser, username: values.username.toLowerCase() };
+  const handleUsernameSet = (newUsername: string) => {
+    if (currentUser) {
+        const updatedUser = { ...currentUser, username: newUsername.toLowerCase() };
         setCurrentUser(updatedUser);
         localStorage.setItem("loggedInUser", JSON.stringify({ id: updatedUser.id, email: updatedUser.email, uid: updatedUser.uid, username: updatedUser.username }));
-        toast({ title: "Username Set!", description: "Your unique username has been saved." });
-    } else {
-        toast({ title: "An Error Occurred", description: result.message || "Could not set your username.", variant: "destructive" });
     }
-  }
+    setIsUsernameModalOpen(false);
+    toast({ title: "Username Set!", description: "Your unique username has been saved." });
+  };
 
   async function onProfileSubmit(values: z.infer<typeof profileFormSchema>) {
      if (!currentUser?.id) return;
@@ -175,7 +124,7 @@ export default function AccountPage() {
   const handleClearBookmarks = async () => {
     if (!currentUser?.uid) return;
     try {
-      await deleteReportsByUserId(currentUser.uid); // Use UID for report queries now
+      await deleteReportsByUserId(currentUser.uid);
       toast({ title: "Bookmarks Cleared", description: "All your saved reports have been deleted." });
     } catch (error) {
       toast({ title: "Error", description: "Could not clear bookmarks.", variant: "destructive" });
@@ -246,57 +195,21 @@ export default function AccountPage() {
         </div>
     );
   }
-
+  
   if (!currentUser.username) {
-    return (
-       <div className="container mx-auto py-12 px-4 md:px-6 animate-fade-in-up flex justify-center items-center min-h-[calc(100vh-8rem)]">
-         <Card className="w-full max-w-lg">
-           <CardHeader>
-             <CardTitle className="flex items-center"><AtSign className="mr-2 h-6 w-6 text-primary" /> Set Your Username</CardTitle>
-             <CardDescription>Choose a unique username for your account. This is a one-time action and cannot be changed later.</CardDescription>
-           </CardHeader>
-           <CardContent>
-             <Form {...usernameForm}>
-               <form onSubmit={usernameForm.handleSubmit(onUsernameSubmit)} className="space-y-6">
-                  <FormField
-                     control={usernameForm.control}
-                     name="username"
-                     render={({ field }) => (
-                       <FormItem>
-                         <FormLabel>Username</FormLabel>
-                         <div className="relative">
-                            <FormControl>
-                                <Input 
-                                    placeholder="your_unique_username" 
-                                    {...field} 
-                                    onChange={(e) => {
-                                        field.onChange(e);
-                                        setUsernameToCheck(e.target.value);
-                                    }}
-                                />
-                            </FormControl>
-                            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                                {isCheckingUsername && <LoaderCircle className="h-5 w-5 text-muted-foreground animate-spin" />}
-                                {!isCheckingUsername && usernameStatus === 'available' && <CheckCircle2 className="h-5 w-5 text-success" />}
-                                {!isCheckingUsername && usernameStatus === 'taken' && <XCircle className="h-5 w-5 text-destructive" />}
-                                {!isCheckingUsername && usernameStatus === 'invalid' && <XCircle className="h-5 w-5 text-destructive" />}
-                            </div>
-                         </div>
-                         {usernameStatus === 'taken' && <p className="text-sm font-medium text-destructive">This username is already taken.</p>}
-                         {usernameStatus === 'invalid' && debouncedUsername.length > 0 && <p className="text-sm font-medium text-destructive">Must be at least 3 characters and only contain letters, numbers, or underscores.</p>}
-                         <FormMessage />
-                       </FormItem>
-                     )}
-                   />
-                 <Button type="submit" className="w-full" disabled={usernameForm.formState.isSubmitting || usernameStatus !== 'available'}>
-                   {usernameForm.formState.isSubmitting ? "Saving..." : "Save Username"}
-                 </Button>
-               </form>
-             </Form>
-           </CardContent>
-         </Card>
-       </div>
-    );
+     return (
+        <div className="container mx-auto py-12 px-4 md:px-6 flex justify-center items-center min-h-[calc(100vh-8rem)]">
+             {currentUser && (
+                <UsernameSetupDialog
+                    isOpen={isUsernameModalOpen}
+                    onOpenChange={setIsUsernameModalOpen}
+                    onUsernameSet={handleUsernameSet}
+                    user={currentUser}
+                    forceOpen={true} // Keep it open on this page until set
+                />
+            )}
+        </div>
+     )
   }
 
   return (
