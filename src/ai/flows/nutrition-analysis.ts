@@ -103,15 +103,15 @@ Your entire response MUST be a single, valid JSON object that conforms to the ou
   {{#if potassium}}Potassium: {{potassium}}mg{{/if}}
   {{#if vitaminC}}Vitamin C: {{vitaminC}}mg{{/if}}
 
-  Now, generate the following detailed report:
+  Now, generate the following extremely detailed report:
 
   1.  **Nutrition Density Rating**: Rate from 1 (low density) to 5 (high density).
   2.  **Overall Analysis**: A detailed summary of the key takeaways. Use bullet points.
-  3.  **Macronutrient Balance**: A detailed bullet-point analysis of the macros.
-  4.  **Micronutrient Highlights**: Detailed bullet points on vitamins and minerals.
-  5.  **Dietary Suitability**: Specific, actionable advice for different consumer types.
-  6.  **Processing Level Assessment**: Detailed assessment based on the data.
-  7.  **Serving Size Context**: Detailed comments on the provided serving size.
+  3.  **Macronutrient Balance**: Provide a detailed, bullet-point analysis of the macronutrient balance (carbohydrates, protein, fat). Discuss the quality of each (e.g., complex vs. simple carbs, source of protein) and its impact on energy levels, satiety, and overall health. Be specific.
+  4.  **Micronutrient Highlights**: Create a detailed bullet-point list of any significant micronutrients (vitamins/minerals) present. For each, explain its importance and comment on whether the amount is high, low, or adequate. If none are noteworthy, state that clearly.
+  5.  **Dietary Suitability**: Give highly specific, actionable advice on who this food is best suited for (e.g., 'An excellent post-workout recovery snack for athletes due to its carb-protein ratio') and who should avoid it (e.g., 'Not recommended for individuals with hypertension because of the high sodium content'). Mention specific dietary patterns like Keto, low-carb, or heart-healthy diets if applicable.
+  6.  **Processing Level Assessment**: Based on the provided nutrient data, infer the likely level of processing (e.g., unprocessed, minimally processed, processed, ultra-processed). Provide a detailed explanation for your assessment and discuss the health implications.
+  7.  **Serving Size Context**: Provide a detailed and critical analysis of the serving size. Is it realistic for how a person would typically consume this food? Explain how consuming a more realistic portion would change the nutritional impact (e.g., 'The label's serving size is only 3 biscuits, but most people eat the whole packet, which would quadruple the sugar and sodium intake.').
   8.  **Nutrient Analysis Table**: For EACH nutrient with a value provided above, create an entry in the 'nutrientAnalysisTable' array.
       - **Nutrient:** Name of the nutrient (e.g., 'Sodium').
       - **Value:** The value and unit (e.g., '500mg').
@@ -144,4 +144,5 @@ const analyzeNutritionFlow = ai.defineFlow(
     }
   }
 );
+
 

@@ -341,7 +341,7 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
                   </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <Alert variant="default" className="bg-muted/60">
                   <Sparkles className="h-5 w-5 text-accent" />
                   <AlertTitle className="font-semibold flex justify-between items-center">
@@ -360,86 +360,85 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
                 <AlertDescription>{renderFormattedAnalysisText(analysisResult.overallAnalysis)}</AlertDescription>
               </Alert>
               
-              <Accordion type="multiple" collapsible className="w-full" defaultValue={['breakdown']}>
-                 {analysisResult.nutrientAnalysisTable && analysisResult.nutrientAnalysisTable.length > 0 && (
-                    <AccordionItem value="breakdown">
-                      <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                        <div className="flex items-center">
-                           <Microscope className="mr-2 h-5 w-5 text-primary" />
-                          <span>Nutrient-by-Nutrient Breakdown</span>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="rounded-lg border overflow-hidden">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead className="font-semibold">Nutrient</TableHead>
-                                <TableHead className="font-semibold">Amount</TableHead>
-                                <TableHead className="font-semibold">Verdict</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {analysisResult.nutrientAnalysisTable.map((item, index) => {
-                                const verdict = (item.verdict || "").toLowerCase();
-                                const colorClass = 
-                                  verdict.includes('good') || verdict.includes('low') // Low is good for sugar/sodium
-                                    ? 'text-success'
-                                    : verdict.includes('high')
-                                    ? 'text-destructive'
-                                    : verdict.includes('okay')
-                                    ? 'text-orange-500 dark:text-orange-400'
-                                    : 'text-muted-foreground';
+              <Separator />
 
-                                return (
-                                  <TableRow key={index} className="bg-background">
-                                    <TableCell className="font-semibold">{item.nutrient}</TableCell>
-                                    <TableCell>{item.value}</TableCell>
-                                    <TableCell>
-                                      <div className={cn("font-bold", colorClass)}>{item.verdict}</div>
-                                      <p className="text-xs text-muted-foreground mt-1">{item.comment}</p>
-                                    </TableCell>
-                                  </TableRow>
-                                );
-                              })}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  )}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-xl flex items-center pt-2">
+                  <FileText className="mr-2 h-5 w-5 text-primary" />
+                  Detailed Nutritional Insights
+                </h3>
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertTitle className="font-semibold">Dietary Suitability</AlertTitle>
+                  <AlertDescription>{renderFormattedAnalysisText(analysisResult.dietarySuitability)}</AlertDescription>
+                </Alert>
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertTitle className="font-semibold">Macronutrient Balance</AlertTitle>
+                  <AlertDescription>{renderFormattedAnalysisText(analysisResult.macronutrientBalance)}</AlertDescription>
+                </Alert>
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertTitle className="font-semibold">Micronutrient Highlights</AlertTitle>
+                  <AlertDescription>{renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}</AlertDescription>
+                </Alert>
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertTitle className="font-semibold">Processing Level Assessment</AlertTitle>
+                  <AlertDescription>{renderFormattedAnalysisText(analysisResult.processingLevelAssessment)}</AlertDescription>
+                </Alert>
+                 <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertTitle className="font-semibold">Serving Size Context</AlertTitle>
+                  <AlertDescription>{renderFormattedAnalysisText(analysisResult.servingSizeContext)}</AlertDescription>
+                </Alert>
+              </div>
 
-                <AccordionItem value="nutrition-details">
-                  <AccordionTrigger className="text-lg font-semibold hover:no-underline">More Details</AccordionTrigger>
-                  <AccordionContent className="space-y-4 pt-2">
-                    <Alert>
-                      <Info className="h-4 w-4" />
-                      <AlertTitle className="font-semibold">Dietary Suitability</AlertTitle>
-                      <AlertDescription>{renderFormattedAnalysisText(analysisResult.dietarySuitability)}</AlertDescription>
-                    </Alert>
-                    <Alert>
-                      <Info className="h-4 w-4" />
-                      <AlertTitle className="font-semibold">Macronutrient Balance</AlertTitle>
-                      <AlertDescription>{renderFormattedAnalysisText(analysisResult.macronutrientBalance)}</AlertDescription>
-                    </Alert>
-                    <Alert>
-                      <Info className="h-4 w-4" />
-                      <AlertTitle className="font-semibold">Micronutrient Highlights</AlertTitle>
-                      <AlertDescription>{renderFormattedAnalysisText(analysisResult.micronutrientHighlights)}</AlertDescription>
-                    </Alert>
-                    <Alert>
-                      <Info className="h-4 w-4" />
-                      <AlertTitle className="font-semibold">Processing Level</AlertTitle>
-                      <AlertDescription>{renderFormattedAnalysisText(analysisResult.processingLevelAssessment)}</AlertDescription>
-                    </Alert>
-                     <Alert>
-                      <Info className="h-4 w-4" />
-                      <AlertTitle className="font-semibold">Serving Size Context</AlertTitle>
-                      <AlertDescription>{renderFormattedAnalysisText(analysisResult.servingSizeContext)}</AlertDescription>
-                    </Alert>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+              {analysisResult.nutrientAnalysisTable && analysisResult.nutrientAnalysisTable.length > 0 && (
+                <div className="space-y-4">
+                  <Separator />
+                  <h3 className="font-semibold text-xl flex items-center pt-2">
+                    <Microscope className="mr-2 h-5 w-5 text-primary" />
+                    Nutrient-by-Nutrient Breakdown
+                  </h3>
+                  <div className="rounded-lg border overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="font-semibold">Nutrient</TableHead>
+                          <TableHead className="font-semibold">Amount</TableHead>
+                          <TableHead className="font-semibold">Verdict</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {analysisResult.nutrientAnalysisTable.map((item, index) => {
+                          const verdict = (item.verdict || "").toLowerCase();
+                          const colorClass = 
+                            verdict.includes('good') || verdict.includes('low') // Low is good for sugar/sodium
+                              ? 'text-success'
+                              : verdict.includes('high')
+                              ? 'text-destructive'
+                              : verdict.includes('okay')
+                              ? 'text-orange-500 dark:text-orange-400'
+                              : 'text-muted-foreground';
+
+                          return (
+                            <TableRow key={index} className="bg-background">
+                              <TableCell className="font-semibold">{item.nutrient}</TableCell>
+                              <TableCell>{item.value}</TableCell>
+                              <TableCell>
+                                <div className={cn("font-bold", colorClass)}>{item.verdict}</div>
+                                <p className="text-xs text-muted-foreground mt-1">{item.comment}</p>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              )}
+
             </CardContent>
              <CardFooter className="flex flex-col items-start pt-4 border-t">
                   <h3 className="font-semibold text-xl mb-2 flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Analysis</h3>
@@ -469,4 +468,5 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
     </div>
   );
 }
+
 
