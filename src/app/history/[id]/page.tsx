@@ -169,7 +169,7 @@ export default function IndividualHistoryPage() {
   };
 
   useEffect(() => {
-    if (chatHistory.length > 0) {
+    if (chatHistory.length > 1) {
       scrollToBottom();
     }
   }, [chatHistory]);
