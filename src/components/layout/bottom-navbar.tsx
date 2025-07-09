@@ -18,7 +18,7 @@ const mainNavItems = [
 ];
 
 const moreNavItems = [
-    { href: "/blogs", label: "Blog", icon: <BookOpen className="h-5 w-5" /> },
+    { href: "/blogs", label: "Blogs", icon: <BookOpen className="h-5 w-5" /> },
     { href: "/contact", label: "Contact", icon: <Mail className="h-5 w-5" />},
 ];
 
