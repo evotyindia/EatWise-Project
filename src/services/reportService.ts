@@ -1,6 +1,6 @@
 
 import { db } from '@/lib/firebase';
-import { collection, addDoc, query, where, getDocs, doc, getDoc, deleteDoc, writeBatch } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, doc, getDoc, deleteDoc, writeBatch, updateDoc } from 'firebase/firestore';
 
 // This is now a CLIENT-SIDE service. It should NOT have 'use server'.
 // The Firebase SDK on the client will automatically handle user authentication.
@@ -14,13 +14,14 @@ export interface Report<T = any> {
   createdAt: string; // ISO string
   data: T; // The full AI output
   userInput: any; // The original input to the AI flow
+  isPublic?: boolean; // New field for public sharing
 }
 
 // Create a new report in Firestore
 export async function createReport(reportData: Omit<Report<any>, 'id'>): Promise<string> {
     try {
         const reportsCollection = collection(db, 'reports');
-        const docRef = await addDoc(reportsCollection, reportData);
+        const docRef = await addDoc(reportsCollection, { ...reportData, isPublic: false }); // Ensure isPublic is false on creation
         return docRef.id;
     } catch (error: any) {
         if (error.code === 'permission-denied') {
@@ -52,7 +53,7 @@ export async function getReportsByUid(uid: string): Promise<Report[]> {
     }
 }
 
-// Get a single report by its document ID
+// Get a single report by its document ID (for authenticated users)
 export async function getReportById(reportId: string): Promise<Report | null> {
     try {
         const reportDocRef = doc(db, 'reports', reportId);
@@ -73,6 +74,41 @@ export async function getReportById(reportId: string): Promise<Report | null> {
         }
         console.error("Error fetching report by ID: ", error);
         throw new Error("Could not fetch the specified report.");
+    }
+}
+
+// Get a single PUBLIC report by its document ID (for public access)
+export async function getPublicReportById(reportId: string): Promise<Report | null> {
+    try {
+        const reportDocRef = doc(db, 'reports', reportId);
+        const reportDoc = await getDoc(reportDocRef);
+
+        if (reportDoc.exists()) {
+            const reportData = reportDoc.data() as Report;
+            if (reportData.isPublic) {
+                return { id: reportDoc.id, ...reportData };
+            }
+        }
+        return null; // Return null if not public or doesn't exist
+    } catch (error) {
+        console.error("Error fetching public report by ID:", error);
+        throw new Error("Could not fetch the specified report.");
+    }
+}
+
+
+// Update a report's public status
+export async function updateReportPublicStatus(reportId: string, isPublic: boolean): Promise<void> {
+    try {
+        const reportDocRef = doc(db, 'reports', reportId);
+        await updateDoc(reportDocRef, { isPublic });
+    } catch (error: any) {
+        if (error.code === 'permission-denied') {
+            console.error("Firestore Permission Denied on updateReportPublicStatus:", error.message);
+            throw new Error("You do not have permission to change this report's status.");
+        }
+        console.error("Error updating report status:", error);
+        throw new Error("Could not update the report's public status.");
     }
 }
 

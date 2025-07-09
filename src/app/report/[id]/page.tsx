@@ -2,8 +2,8 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { LoaderCircle, FileText, ArrowLeft, MessageCircle, Send, Globe, Share2, Copy, Check } from "lucide-react";
+import { useParams } from "next/navigation";
+import { LoaderCircle, FileText, Globe, MessageCircle, Send, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -18,76 +18,21 @@ import type { GenerateHealthReportOutput } from "@/ai/flows/generate-health-repo
 import type { GetDetailedRecipeOutput } from "@/ai/flows/get-detailed-recipe";
 import type { AnalyzeNutritionOutput } from "@/ai/flows/nutrition-analysis";
 import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aware-ai-chat";
-import { getReportById, updateReportPublicStatus, type Report } from "@/services/reportService";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { getPublicReportById, type Report } from "@/services/reportService";
 
-export default function IndividualBookmarkPage() {
+export default function PublicReportPage() {
   const params = useParams();
-  const router = useRouter();
   const id = params.id as string;
   
   const [report, setReport] = useState<Report<any> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isOwner, setIsOwner] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
 
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-
-  const handlePublicToggle = async (isPublic: boolean) => {
-    if (!report) return;
-    try {
-      await updateReportPublicStatus(report.id, isPublic);
-      setReport(prev => prev ? { ...prev, isPublic } : null);
-      toast({
-        title: `Report is now ${isPublic ? 'Public' : 'Private'}`,
-        description: isPublic ? "Anyone with the link can now view this report." : "This report is no longer publicly accessible.",
-        variant: "success",
-      });
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message || "Could not update public status.", variant: "destructive" });
-    }
-  };
-
-  const getPublicUrl = () => {
-    return `${window.location.origin}/report/${id}`;
-  };
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(getPublicUrl()).then(() => {
-      setIsCopied(true);
-      toast({ title: "Link Copied!", description: "The public link has been copied to your clipboard." });
-      setTimeout(() => setIsCopied(false), 2000);
-    });
-  };
-
-  const handleShare = async () => {
-    const shareData = {
-      title: `EatWise Report: ${report?.title}`,
-      text: `Check out this health report I generated with EatWise India: ${report?.summary}`,
-      url: getPublicUrl(),
-    };
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        // Fallback for browsers that don't support Web Share API
-        handleCopyLink();
-      }
-    } catch (error) {
-      console.error("Share failed:", error);
-      // Fallback to copy link if sharing is cancelled or fails
-      handleCopyLink();
-    }
-  };
 
   const getChatContext = (report: Report<any>): Omit<ContextAwareAIChatInput, 'userQuestion' | 'chatHistory'> => {
     switch (report.type) {
@@ -175,36 +120,26 @@ export default function IndividualBookmarkPage() {
   useEffect(() => {
     if (!id) return;
     
-    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
-        if (authUser) {
-            try {
-                const foundReport = await getReportById(id);
-                if (foundReport) {
-                    // Authorization check: does this report's UID match the logged-in user's UID?
-                    if (foundReport.uid === authUser.uid) {
-                         setIsOwner(true);
-                         setReport(foundReport);
-                         initiateChatWithWelcome(foundReport);
-                    } else {
-                         setError("You do not have permission to view this bookmark.");
-                    }
-                } else {
-                    setError("Bookmark not found. It may have been deleted or the link is incorrect.");
-                }
-            } catch (e) {
-                console.error("Failed to load report from Firestore:", e);
-                setError("An error occurred while trying to load the bookmark.");
-            } finally {
-                setIsLoading(false);
+    const fetchPublicReport = async () => {
+        try {
+            const foundReport = await getPublicReportById(id);
+            if (foundReport) {
+                setReport(foundReport);
+                initiateChatWithWelcome(foundReport);
+            } else {
+                setError("This report is either private or does not exist. Please check the link or ask the owner to make it public.");
             }
-        } else {
-            router.replace('/login');
+        } catch (e) {
+            console.error("Failed to load public report:", e);
+            setError("An error occurred while trying to load the report.");
+        } finally {
+            setIsLoading(false);
         }
-    });
-
-    return () => unsubscribe();
+    };
+    
+    fetchPublicReport();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, router]);
+  }, [id]);
   
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -235,7 +170,7 @@ export default function IndividualBookmarkPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background">
         <LoaderCircle className="w-16 h-16 text-accent animate-spin mb-4" />
-        <h1 className="text-2xl font-bold">Loading Bookmark...</h1>
+        <h1 className="text-2xl font-bold">Loading Shared Report...</h1>
       </div>
     );
   }
@@ -243,13 +178,12 @@ export default function IndividualBookmarkPage() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background text-center p-4">
-        <FileText className="w-16 h-16 text-destructive mb-4" />
-        <h1 className="text-2xl font-bold text-destructive">Error Loading Bookmark</h1>
-        <p className="mt-2 text-lg text-muted-foreground">{error}</p>
+        <AlertTriangle className="w-16 h-16 text-destructive mb-4" />
+        <h1 className="text-2xl font-bold text-destructive">Could Not Load Report</h1>
+        <p className="mt-2 text-lg text-muted-foreground max-w-md">{error}</p>
         <Button asChild className="mt-8">
-          <Link href="/bookmarks">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Bookmarks
+          <Link href="/">
+            Return to Homepage
           </Link>
         </Button>
       </div>
@@ -259,70 +193,12 @@ export default function IndividualBookmarkPage() {
   return (
     <div className="bg-background min-h-screen p-4 sm:p-6 md:p-8">
       <div className="max-w-4xl mx-auto space-y-8">
-        <div className="mb-6 flex justify-between items-center">
-            <Button asChild variant="outline">
-                <Link href="/bookmarks">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to All Bookmarks
-                </Link>
-            </Button>
-        </div>
-        
-        {isOwner && report && (
-          <Card className="bg-secondary/50 border-primary/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Globe className="h-5 w-5 text-primary"/> Sharing Settings</CardTitle>
-              <CardDescription>Manage the visibility and sharing options for this report.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                   <div className="flex items-center space-x-3">
-                    <Switch
-                        id="public-toggle-switch"
-                        checked={report.isPublic}
-                        // This onCheckedChange is just for visual trigger, logic is in AlertDialog
-                        onCheckedChange={() => {}} 
-                      />
-                      <Label htmlFor="public-toggle-switch" className="cursor-pointer">
-                        {report.isPublic ? 'Report is Public' : 'Report is Private'}
-                      </Label>
-                    </div>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Change Report Visibility?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {report.isPublic 
-                        ? "Making this report private will disable the public link. Anyone who has the link will no longer be able to view it."
-                        : "Making this report public will generate a shareable link. Anyone with this link will be able to view the report and its chat history, without needing to log in."
-                      }
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => handlePublicToggle(!report.isPublic)}>
-                      {`Yes, Make ${report.isPublic ? 'Private' : 'Public'}`}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-              
-              {report.isPublic && (
-                <div className="flex flex-col sm:flex-row gap-2 mt-4 animate-fade-in-up">
-                  <Button onClick={handleCopyLink} variant="outline" className="flex-1">
-                    {isCopied ? <Check className="mr-2 h-4 w-4 text-success" /> : <Copy className="mr-2 h-4 w-4" />}
-                    {isCopied ? 'Link Copied!' : 'Copy Link'}
-                  </Button>
-                  <Button onClick={handleShare} className="flex-1">
-                    <Share2 className="mr-2 h-4 w-4" />
-                    Share Report
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+        <Card className="bg-primary/5 border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Globe className="h-5 w-5 text-primary"/> A Public Report from EatWise India</CardTitle>
+            <CardDescription>This report was shared publicly by a user. You can explore the analysis and even interact with the AI chat below.</CardDescription>
+          </CardHeader>
+        </Card>
 
         {renderReport()}
 
@@ -330,7 +206,7 @@ export default function IndividualBookmarkPage() {
            <Card>
               <CardHeader>
                   <CardTitle className="font-semibold text-xl flex items-center"><MessageCircle className="mr-2 h-5 w-5" /> Chat with AI Advisor</CardTitle>
-                  <CardDescription className="text-sm text-muted-foreground pt-1">Ask follow-up questions about this saved report.</CardDescription>
+                  <CardDescription className="text-sm text-muted-foreground pt-1">Ask follow-up questions about this report.</CardDescription>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[250px] w-full rounded-md border p-3 mb-4 bg-muted/50">
