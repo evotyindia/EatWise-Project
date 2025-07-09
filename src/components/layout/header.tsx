@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail, User, LogOut, UserCog, History, Menu } from "lucide-react"
@@ -59,43 +58,47 @@ export function Header() {
             )}
           </span>
         </Link>
-
-        {/* Desktop nav (LG and up) */}
-        <nav className="hidden lg:flex items-center gap-1 flex-wrap">
-            {navItems.map((item) => {
-            const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
-            return (
-                <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                    "px-3 py-1.5 text-sm font-medium transition-colors duration-300 rounded-md",
-                    isActive 
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                )}
-                >
-                {item.label}
-                </Link>
-            );
-            })}
-        </nav>
         
-        <div className="hidden lg:flex items-center gap-2">
-            {mounted && isLoggedIn ? (
-                <Button asChild variant="outline" size="sm">
-                <Link href="/account">
-                    <UserCog className="mr-2 h-4 w-4" /> Account
-                </Link>
-                </Button>
-            ) : (
-                mounted && <Button asChild size="sm">
-                <Link href="/login">
-                    <User className="mr-2 h-4 w-4" /> Login
-                </Link>
-                </Button>
-            )}
-            <ThemeToggleButton />
+        {/* Wrapper for right-aligned desktop nav and buttons */}
+        <div className="hidden lg:flex items-center gap-4">
+            {/* Desktop nav */}
+            <nav className="flex items-center gap-1 flex-wrap">
+                {navItems.map((item) => {
+                const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
+                return (
+                    <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                        "px-3 py-1.5 text-sm font-medium transition-colors duration-300 rounded-md",
+                        isActive 
+                        ? "bg-accent text-accent-foreground"
+                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                    )}
+                    >
+                    {item.label}
+                    </Link>
+                );
+                })}
+            </nav>
+            
+            {/* Account and theme buttons */}
+            <div className="flex items-center gap-2">
+                {mounted && isLoggedIn ? (
+                    <Button asChild variant="outline" size="sm">
+                    <Link href="/account">
+                        <UserCog className="mr-2 h-4 w-4" /> Account
+                    </Link>
+                    </Button>
+                ) : (
+                    mounted && <Button asChild size="sm">
+                    <Link href="/login">
+                        <User className="mr-2 h-4 w-4" /> Login
+                    </Link>
+                    </Button>
+                )}
+                <ThemeToggleButton />
+            </div>
         </div>
 
         {/* Tablet Sidebar Trigger (MD to LG) */}
