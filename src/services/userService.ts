@@ -28,20 +28,6 @@ export async function checkUsernameExists(username: string): Promise<boolean> {
     }
 }
 
-// Check if an email already exists in the 'users' collection
-export async function checkEmailExists(email: string): Promise<boolean> {
-    const sanitizedEmail = email.toLowerCase();
-    const q = query(collection(db, "users"), where("email", "==", sanitizedEmail), limit(1));
-    try {
-        const querySnapshot = await getDocs(q);
-        return !querySnapshot.empty;
-    } catch (error) {
-        console.error("Error checking email existence: ", error);
-        // On error, assume it does not exist to prevent users from getting stuck.
-        return false;
-    }
-}
-
 // Create a new user profile in Firestore
 export async function createUserInFirestore(uid: string, name: string, email: string, phone: string | undefined): Promise<{ success: boolean; message?: string; }> {
     try {
@@ -104,12 +90,8 @@ export async function getUserByUid(uid: string): Promise<User | null> {
         const userDoc = querySnapshot.docs[0];
         return { id: userDoc.id, ...userDoc.data() } as User;
     } catch (error: any) {
-        if (error.code === 'permission-denied') {
-            console.error("Firestore Permission Denied on getUserByUid:", error.message);
-            // This is not a user-facing error in the login flow, so just log and return null
-             return null;
-        }
         console.error("Error fetching user by UID:", error);
+        // Do not throw here, as it can break login flows. Return null.
         return null;
     }
 }
@@ -123,12 +105,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
         if (querySnapshot.empty) return null;
         const userDoc = querySnapshot.docs[0];
         return { id: userDoc.id, ...userDoc.data() } as User;
-    } catch (error: any) {
-        if (error.code === 'permission-denied') {
-            console.error("Firestore Permission Denied on getUserByEmail:", error.message);
-            // This is not a user-facing error in the login flow, so just log and return null
-            return null;
-        }
+    } catch (error) {
         console.error("Error fetching user by email:", error);
         return null;
     }
@@ -212,7 +189,7 @@ export async function deleteUser(userId: string, username: string): Promise<void
     // Delete username reservation document
     if (username) {
         try {
-            const usernameDocRef = doc(db, "usernames", username);
+            const usernameDocRef = doc(db, "usernames", username.toLowerCase());
             await deleteDoc(usernameDocRef);
         } catch (error: any) {
             if (error.code === 'permission-denied') {

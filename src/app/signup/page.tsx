@@ -17,7 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { UserPlus, LoaderCircle } from "lucide-react";
 import { Suspense } from "react";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
@@ -60,11 +60,12 @@ function SignupContent() {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email.toLowerCase(), values.password);
       const user = userCredential.user;
 
-      // Step 2: Send verification email from the client
-      await sendEmailVerification(user);
-
-      // Step 3: Call server action to create the user profile in Firestore
+      // Step 2: Call server action to create the user profile in Firestore
+      // This happens before email verification to ensure the profile exists
       await createUserInFirestore(user.uid, values.name, values.email, values.phone);
+      
+      // Step 3: Send verification email from the client
+      await sendEmailVerification(user);
       
       // Step 4: Redirect and inform the user
       if (redirectUrl) {
@@ -76,12 +77,23 @@ function SignupContent() {
       let errorMessage = "Could not create your account. Please try again.";
       if (error.code === 'auth/email-already-in-use') {
         errorMessage = "An account with this email already exists.";
+        toast({
+          title: "Account Exists",
+          description: errorMessage,
+          variant: "destructive",
+          action: (
+            <Button variant="secondary" size="sm" asChild>
+                <Link href="/login">Log In</Link>
+            </Button>
+          ),
+        });
+      } else {
+        toast({
+          title: "Signup Failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
       }
-      toast({
-        title: "Signup Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
       console.error("Signup error:", error);
     }
   }
@@ -169,13 +181,15 @@ function SignupContent() {
               </Button>
             </form>
           </Form>
-          <div className="mt-6 text-center text-sm">
-            Already have an account?{" "}
-            <Link href="/login" className="underline text-primary">
-              Log in
-            </Link>
-          </div>
         </CardContent>
+         <CardFooter className="mt-6 text-center text-sm">
+            <p className="mx-auto">
+              Already have an account?{" "}
+              <Link href="/login" className="underline text-primary font-semibold">
+                Log in
+              </Link>
+            </p>
+        </CardFooter>
       </Card>
     </div>
   );

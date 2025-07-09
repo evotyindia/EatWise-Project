@@ -22,7 +22,7 @@ import { LogIn } from "lucide-react";
 import { useEffect, Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getAndSyncUser, getUserByUsername, getUserByEmail } from "@/services/userService";
+import { getAndSyncUser, getUserByUsername } from "@/services/userService";
 
 const formSchema = z.object({
   identifier: z.string().min(3, { message: "Please enter a valid email or username." }),
@@ -62,45 +62,33 @@ function LoginContent() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    form.clearErrors();
     let userEmail: string | undefined;
 
-    // Step 1: Find the user's email, whether they entered an email or username.
     try {
+      // Step 1: Determine the email address to use for login.
       if (isEmail(values.identifier)) {
-        // If it's an email, we'll use it directly. We still need to check if the user exists.
-        const userByEmail = await getUserByEmail(values.identifier);
-        if (userByEmail) {
-            userEmail = userByEmail.email;
-        }
+        userEmail = values.identifier;
       } else {
         // If it's a username, find the corresponding user to get their email.
         const userByUsername = await getUserByUsername(values.identifier);
         if (userByUsername) {
           userEmail = userByUsername.email;
+        } else {
+            // If we can't find a user by username, we show an error immediately.
+            toast({
+                title: "Account Not Found",
+                description: "No account found with that username. Please check the username or try logging in with your email.",
+                variant: "destructive",
+            });
+            return;
         }
-      }
-
-      // If after all checks, we couldn't find an email, the user doesn't exist.
-      if (!userEmail) {
-        toast({
-            title: "Account Not Found",
-            description: "No account found with that identifier. Please sign up.",
-            variant: "destructive",
-            action: (
-              <Button variant="secondary" size="sm" asChild>
-                  <Link href={`/signup?email=${isEmail(values.identifier) ? encodeURIComponent(values.identifier) : ''}`}>Sign Up</Link>
-              </Button>
-            ),
-        });
-        return;
       }
 
       // Step 2: Attempt to sign in with the found email and the provided password.
       const userCredential = await signInWithEmailAndPassword(auth, userEmail, values.password);
       const authUser = userCredential.user;
 
-      // Step 3: Handle post-login logic (email verification, profile sync).
+      // Step 3: Handle post-login logic (email verification check, profile sync).
       if (!authUser.emailVerified) {
         await sendEmailVerification(authUser).catch(e => console.error("Failed to resend verification email:", e));
         toast({
@@ -116,7 +104,7 @@ function LoginContent() {
 
       if (!userProfile) {
         await auth.signOut();
-        throw new Error("Your user profile could not be found. Please contact support or try signing up again.");
+        throw new Error("Your user profile could not be found in our database. Please contact support or try signing up again.");
       }
 
       localStorage.setItem("loggedInUser", JSON.stringify({ id: userProfile.id, email: userProfile.email, uid: userProfile.uid, username: userProfile.username }));
@@ -131,11 +119,11 @@ function LoginContent() {
     } catch (error: any) {
       console.error("Login process error:", error);
       
-      // Step 4: Handle specific errors from the login attempt.
-      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+      // Step 4: Handle specific Firebase errors from the login attempt.
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
         toast({
           title: "Incorrect Credentials",
-          description: "The password you entered was incorrect. Please try again.",
+          description: "The email or password you entered was incorrect. Please try again.",
           variant: "destructive",
            action: (
               <Button variant="secondary" size="sm" asChild>
@@ -145,18 +133,6 @@ function LoginContent() {
         });
       } else if (error.message.includes("Your user profile could not be found")) {
          toast({ title: "Login Failed", description: error.message, variant: "destructive" });
-      } else if (error.code !== 'auth/invalid-credential' && error.code !== 'auth/wrong-password' && !userEmail) {
-        // This is a fallback case if the initial user check somehow failed before the login attempt.
-         toast({
-            title: "Account Not Found",
-            description: "No account found with that identifier. Please sign up.",
-            variant: "destructive",
-             action: (
-              <Button variant="secondary" size="sm" asChild>
-                  <Link href={`/signup?email=${isEmail(values.identifier) ? encodeURIComponent(values.identifier) : ''}`}>Sign Up</Link>
-              </Button>
-            ),
-        });
       }
       else {
          toast({
