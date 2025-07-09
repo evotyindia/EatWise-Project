@@ -66,31 +66,36 @@ function LoginContent() {
     let userEmail: string | undefined;
 
     try {
+      // Step 1: Determine the user's email from the identifier (email or username)
       if (isEmail(values.identifier)) {
         userEmail = values.identifier;
       } else {
         const userByUsername = await getUserByUsername(values.identifier);
         if (userByUsername) {
           userEmail = userByUsername.email;
-        } else {
-            // This case handles a specific username that doesn't exist.
-            toast({
-                title: "Account Not Found",
-                description: "No account found with that email or username. Please check your details or sign up.",
-                variant: "destructive",
-                action: (
-                  <Button variant="secondary" size="sm" asChild>
-                      <Link href="/signup">Sign Up</Link>
-                  </Button>
-                ),
-            });
-            return;
         }
       }
+
+      // Step 2: If no email could be found, the user does not exist.
+      if (!userEmail) {
+        toast({
+          title: "Account Not Found",
+          description: "No account found with that email or username. Please check your details or sign up.",
+          variant: "destructive",
+          action: (
+            <Button variant="secondary" size="sm" asChild>
+                <Link href="/signup">Sign Up</Link>
+            </Button>
+          ),
+        });
+        return;
+      }
       
+      // Step 3: Attempt to sign in with the found email and password
       const userCredential = await signInWithEmailAndPassword(auth, userEmail, values.password);
       const authUser = userCredential.user;
 
+      // Step 4: Handle email verification
       if (!authUser.emailVerified) {
         try {
             await sendEmailVerification(authUser);
@@ -111,6 +116,7 @@ function LoginContent() {
         return;
       }
       
+      // Step 5: Sync user data and finalize login
       const userProfile = await getAndSyncUser(authUser.uid);
 
       if (!userProfile) {
@@ -130,7 +136,6 @@ function LoginContent() {
     } catch (error: any) {
       console.error("Login process error:", error);
       
-      // The most common error for bad password or non-existent email is 'auth/invalid-credential'.
       if (error.code === 'auth/invalid-credential') {
         toast({
           title: "Incorrect Credentials",
