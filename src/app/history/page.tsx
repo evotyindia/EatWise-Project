@@ -1,3 +1,4 @@
+
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -92,7 +93,7 @@ export default function HistoryPage() {
             <CardDescription className="line-clamp-2">{report.summary}</CardDescription>
           </div>
         </CardHeader>
-        <CardContent className="flex-grow"></CardContent>
+        <div className="flex-grow" />
         <CardFooter className="flex justify-between items-center">
           <p className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(report.createdAt), { addSuffix: true })}</p>
           <div className="flex items-center gap-2">
@@ -166,7 +167,7 @@ export default function HistoryPage() {
       </div>
 
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="h-auto w-full flex-wrap">
+        <TabsList className="h-auto w-full flex-wrap justify-center">
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="label">Label Reports</TabsTrigger>
           <TabsTrigger value="recipe">Recipes</TabsTrigger>
