@@ -129,9 +129,9 @@ export default function PublicReportPage() {
             } else {
                 setError("This report is either private or does not exist. Please check the link or ask the owner to make it public.");
             }
-        } catch (e) {
+        } catch (e: any) {
             console.error("Failed to load public report:", e);
-            setError("An error occurred while trying to load the report.");
+            setError(e.message || "An unexpected error occurred while trying to load the report.");
         } finally {
             setIsLoading(false);
         }
