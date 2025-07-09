@@ -17,8 +17,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserCog, LogOut, ShieldCheck, User, Trash2, Ban, AtSign, LoaderCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { UserCog, LogOut, ShieldCheck, User, Trash2, Ban, AtSign, LoaderCircle, MoreVertical, ArrowUp } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
 import { Separator } from "@/components/ui/separator";
 import {
   AlertDialog,
@@ -31,6 +31,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { type User as UserType, updateUser, deleteUser, getUserByUid, setUsername } from "@/services/userService";
 import { deleteReportsByUserId } from "@/services/reportService";
 import { getAuth, deleteUser as deleteAuthUser, onAuthStateChanged } from "firebase/auth";
@@ -54,6 +55,21 @@ export default function AccountPage() {
   const [currentUser, setCurrentUser] = useState<UserType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const [showFab, setShowFab] = useState(false);
+  const topRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 250) {
+        setShowFab(true);
+      } else {
+        setShowFab(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
@@ -242,7 +258,7 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="container mx-auto py-12 px-4 md:px-6 animate-fade-in-up">
+    <div ref={topRef} className="container mx-auto py-12 px-4 md:px-6 animate-fade-in-up">
       <div className="flex flex-col items-center mb-8">
         <UserCog className="w-16 h-16 text-accent mb-4" />
         <h1 className="text-4xl font-bold tracking-tight">Your Account</h1>
@@ -374,8 +390,44 @@ export default function AccountPage() {
         </Button>
       </div>
 
+      {/* Floating Action Button */}
+      {showFab && (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="default"
+              size="icon"
+              className="fixed bottom-28 right-6 md:bottom-8 md:right-8 h-16 w-16 rounded-full shadow-lg z-50 animate-fade-in-up"
+            >
+              <MoreVertical className="h-6 w-6" />
+              <span className="sr-only">Account Options</span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-56 mr-4 mb-2" side="top" align="end">
+            <div className="grid gap-2">
+              <p className="font-semibold text-sm px-2 py-1.5">Quick Actions</p>
+              <Separator />
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => topRef.current?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                <ArrowUp className="mr-2 h-4 w-4" />
+                Account Dashboard
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={() => handleLogout(false)}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Log Out
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+      )}
+
     </div>
   );
 }
-
-    
