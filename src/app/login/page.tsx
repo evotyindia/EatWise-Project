@@ -72,21 +72,20 @@ function LoginContent() {
         const userByUsername = await getUserByUsername(values.identifier);
         if (userByUsername) {
           userEmail = userByUsername.email;
+        } else {
+            // If username lookup fails, it's a non-existent account for sure.
+            toast({
+                title: "Account Not Found",
+                description: "No account found with that email or username. Please check your details or sign up.",
+                variant: "destructive",
+                action: (
+                  <Button variant="secondary" size="sm" asChild>
+                      <Link href="/signup">Sign Up</Link>
+                  </Button>
+                ),
+            });
+            return;
         }
-      }
-
-      if (!userEmail) {
-        toast({
-            title: "Account Not Found",
-            description: "No account found with that email or username. Please check your details or sign up.",
-            variant: "destructive",
-            action: (
-              <Button variant="secondary" size="sm" asChild>
-                  <Link href="/signup">Sign Up</Link>
-              </Button>
-            ),
-        });
-        return;
       }
       
       const userCredential = await signInWithEmailAndPassword(auth, userEmail, values.password);
@@ -195,17 +194,17 @@ function LoginContent() {
                           type={showPassword ? "text" : "password"}
                           placeholder="••••••••"
                           {...field}
-                          className="pr-10"
+                          className="pr-12"
                         />
                       </FormControl>
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:bg-transparent"
+                        className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:bg-transparent hover:text-foreground transition-transform duration-200 ease-in-out hover:scale-110 active:scale-95"
                         onClick={() => setShowPassword(!showPassword)}
                       >
-                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        {showPassword ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
                       </Button>
                     </div>
                     <FormMessage />

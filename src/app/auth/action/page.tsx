@@ -152,17 +152,17 @@ function AuthActionHandler() {
                                                         type={showPassword ? "text" : "password"}
                                                         placeholder="••••••••"
                                                         {...field}
-                                                        className="pr-10"
+                                                        className="pr-12"
                                                     />
                                                 </FormControl>
                                                 <Button
                                                     type="button"
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:bg-transparent"
+                                                    className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:bg-transparent hover:text-foreground transition-transform duration-200 ease-in-out hover:scale-110 active:scale-95"
                                                     onClick={() => setShowPassword(!showPassword)}
                                                 >
-                                                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                                    {showPassword ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
                                                 </Button>
                                             </div>
                                             <FormMessage />
@@ -181,17 +181,17 @@ function AuthActionHandler() {
                                                         type={showConfirmPassword ? "text" : "password"}
                                                         placeholder="••••••••"
                                                         {...field}
-                                                        className="pr-10"
+                                                        className="pr-12"
                                                     />
                                                 </FormControl>
                                                 <Button
                                                     type="button"
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:bg-transparent"
+                                                    className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:bg-transparent hover:text-foreground transition-transform duration-200 ease-in-out hover:scale-110 active:scale-95"
                                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                 >
-                                                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                                    {showConfirmPassword ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
                                                 </Button>
                                             </div>
                                             <FormMessage />
