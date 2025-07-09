@@ -162,6 +162,7 @@ export function NutritionForm() {
       setAnalysisResult(result);
       toast({ title: "Analysis Complete", description: "Nutritional insights generated." });
       if (result) {
+        setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
         initiateChatWithWelcome("nutritionAnalysis", {
           nutritionReportSummary: result.overallAnalysis,
           foodItemDescription: inputForContext.foodItemDescription || (inputForAI.nutritionDataUri ? "Scanned food item" : "Manually entered data")

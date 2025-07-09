@@ -187,6 +187,7 @@ export function RecipeForm() {
       const result = await getRecipeSuggestions(input);
       setDishSuggestions(result);
       toast({ title: "Dish Ideas Ready!", description: result.initialContextualGuidance || "Click a dish for its recipe." });
+      setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     } catch (error: any) {
       console.error("Error getting dish suggestions:", error);
       toast({ title: "Suggestion Failed", description: error.message || "Could not get dish suggestions.", variant: "destructive" });
@@ -220,6 +221,7 @@ export function RecipeForm() {
       setDetailedRecipe(result);
       toast({ title: `Recipe for ${result.recipeTitle} Generated!`, description: "Scroll down to view the recipe and chat." });
       if (result) {
+        setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
         initiateChatWithWelcome("recipe", { dishName: result.recipeTitle, recipeIngredients: result.adjustedIngredients.map(i => `${i.quantity} ${i.name}`).join(', '), currentRecipeHealthNotes: result.healthNotes });
       }
     } catch (error: any) {
