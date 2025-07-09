@@ -14,11 +14,11 @@ const mainNavItems = [
   { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
   { href: "/analyze", label: "Analyze", icon: <ScanLine className="h-5 w-5" /> },
   { href: "/recipes", label: "Recipes", icon: <CookingPot className="h-5 w-5" /> },
-  { href: "/history", label: "History", icon: <History className="h-5 w-5" /> },
+  { href: "/nutrition-check", label: "Nutrition", icon: <BarChart3 className="h-5 w-5" /> },
 ];
 
 const moreNavItems = [
-    { href: "/nutrition-check", label: "Nutrition Check", icon: <BarChart3 className="h-5 w-5" /> },
+    { href: "/history", label: "History", icon: <History className="h-5 w-5" /> },
     { href: "/blogs", label: "Blogs", icon: <BookOpen className="h-5 w-5" /> },
     { href: "/contact", label: "Contact", icon: <Mail className="h-5 w-5" />},
 ];
