@@ -4,7 +4,7 @@
 import { Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail } from "lucide-react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { ThemeToggleButton } from "@/components/common/theme-toggle-button"
 import { cn } from "@/lib/utils";
@@ -21,6 +21,11 @@ const navItems = [
 
 export function Header() {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <header className={cn(
@@ -30,8 +35,15 @@ export function Header() {
         <Link href="/" className="flex items-center space-x-2">
           <Leaf className="h-7 w-7 text-primary" />
           <span className="font-extrabold text-2xl sm:inline-block font-headline">
-            <span className="text-primary">EatWise</span>
-            <span className="text-accent"> India</span>
+            {mounted ? (
+              <>
+                <span className="text-primary">EatWise</span>
+                <span className="text-accent"> India</span>
+              </>
+            ) : (
+              // This placeholder renders on the server and initial client render, avoiding mismatch.
+              <span className="text-primary">EatWise India</span>
+            )}
           </span>
         </Link>
 
