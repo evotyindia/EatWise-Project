@@ -111,9 +111,31 @@ Make sure to add these to your `.env` file for local development. For production
 
 ## Deployment
 
-This Next.js application can be deployed to any platform that supports Next.js, such as Vercel, Netlify, or Firebase App Hosting (an `apphosting.yaml` is included).
+### Deploying to Vercel
+
+This Next.js application is optimized for deployment on Vercel, the platform from the creators of Next.js.
+
+1.  **Fork the Repository:** Start by forking this project's repository to your own GitHub/GitLab/Bitbucket account.
+2.  **Create a Vercel Project:**
+    *   Sign up or log in to your [Vercel account](https://vercel.com/signup).
+    *   Click "Add New..." and select "Project".
+    *   Import the repository you just forked.
+3.  **Configure Environment Variables:** This is the most crucial step. In your Vercel project settings, navigate to the "Environment Variables" section and add the following:
+    *   `GOOGLE_API_KEY`: Your API key for Google AI services (Gemini). This is required for all AI features.
+    *   `NEXT_PUBLIC_FIREBASE_API_KEY`: Your Firebase project's API key.
+    *   `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`: Your Firebase project's auth domain.
+    *   `NEXT_PUBLIC_FIREBASE_PROJECT_ID`: Your Firebase project's ID.
+    *   `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`: Your Firebase project's storage bucket.
+    *   `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`: Your Firebase project's messaging sender ID.
+    *   `NEXT_PUBLIC_FIREBASE_APP_ID`: Your Firebase project's app ID.
+    *   `NEXT_PUBLIC_BASE_URL`: The **full production URL** that Vercel will assign to your project (e.g., `https://your-project-name.vercel.app`). This is required for generating the correct sitemap and metadata.
+4.  **Deploy:** Click the "Deploy" button. Vercel will automatically detect that this is a Next.js project, install dependencies, run the build script, and deploy your application.
 
 For Genkit flows to work in production, ensure your deployment environment has the `GOOGLE_API_KEY` environment variable set.
+
+### Other Platforms
+
+This Next.js application can also be deployed to other platforms that support Next.js, such as Netlify or Firebase App Hosting (an `apphosting.yaml` is included). Ensure you set the required environment variables in your chosen provider's settings.
 
 ## Contributing
 
@@ -122,4 +144,3 @@ Contributions are welcome! Please follow the existing code style and ensure your
 ## License
 
 This project is licensed under the MIT License. (Or specify your chosen license).
-
