@@ -127,6 +127,7 @@ export async function setUsername(uid: string, userId: string, newUsername: stri
             if (usernameDoc.exists()) {
                 throw new Error("This username is already taken. Please choose another one.");
             }
+            // The security rule will verify that the UID matches the authenticated user
             transaction.set(usernameDocRef, { uid: uid });
             transaction.update(userDocRef, { username: sanitizedUsername });
         });
@@ -158,33 +159,30 @@ export async function updateUser(userId: string, dataToUpdate: Partial<Omit<User
 
 // Delete a user from Firestore and their username reservation, with better error handling.
 export async function deleteUser(userId: string, username: string): Promise<void> {
-    // Delete user document
+    const userDocRef = doc(db, 'users', userId);
+    const usernameDocRef = doc(db, "usernames", username.toLowerCase());
+
     try {
-        const userDocRef = doc(db, 'users', userId);
-        await deleteDoc(userDocRef);
+        const batch = writeBatch(db);
+
+        // Add user document deletion to the batch
+        batch.delete(userDocRef);
+
+        // If a username exists, add its deletion to the batch as well
+        if (username) {
+            batch.delete(usernameDocRef);
+        }
+
+        // Commit the batch transaction
+        await batch.commit();
+
     } catch (error: any) {
         if (error.code === 'permission-denied') {
-            console.error("Firestore Permission Denied when deleting the main user document:", error.message);
-            throw new Error("You do not have permission to delete this account profile.");
+            console.error("Firestore Permission Denied during account deletion batch:", error.message);
+            throw new Error("You do not have permission to delete this account. Please check Firestore rules.");
         }
-        console.error("Error deleting user document from Firestore:", error);
-        throw new Error("Could not delete the user profile from the database.");
-    }
-
-    // Delete username reservation document
-    if (username) {
-        try {
-            const usernameDocRef = doc(db, "usernames", username.toLowerCase());
-            await deleteDoc(usernameDocRef);
-        } catch (error: any) {
-            if (error.code === 'permission-denied') {
-                console.error("Firestore Permission Denied when deleting the username reservation:", error.message);
-                // This error is critical as it indicates a rules problem, so we should throw it.
-                throw new Error("You do not have permission to delete this account's username reservation. Please check Firestore rules.");
-            }
-            // Log other errors but don't block the user deletion process if the main document is already gone.
-            console.error("Could not delete username reservation, but main user profile was deleted:", error);
-        }
+        console.error("Error deleting user account and data:", error);
+        throw new Error("Could not delete the user account due to a server error.");
     }
 }
 
