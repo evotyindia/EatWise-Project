@@ -23,8 +23,6 @@ import { useEffect, Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getAndSyncUser } from "@/services/userService";
-import { ToastAction } from "@/components/ui/toast";
-
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -106,17 +104,15 @@ function LoginContent() {
     } catch (error: any) {
       console.error("Login error:", error);
       
+      // This is the key change: on invalid credential, redirect to signup with email pre-filled.
       if (error.code === 'auth/invalid-credential') {
         toast({
-          title: "Login Failed",
-          description: "Invalid email or password. Please try again.",
-          variant: "destructive",
-          action: (
-            <ToastAction altText="Sign up" onClick={() => router.push(`/signup?email=${encodeURIComponent(values.email)}`)}>
-              Sign Up
-            </ToastAction>
-          )
+          title: "Account Not Found",
+          description: "Redirecting to sign up...",
+          variant: "default",
         });
+        const signupUrl = `/signup?email=${encodeURIComponent(values.email)}&redirect=${encodeURIComponent(redirectUrl)}`;
+        router.push(signupUrl);
         return;
       }
 
