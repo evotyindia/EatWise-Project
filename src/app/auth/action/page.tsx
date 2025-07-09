@@ -152,6 +152,7 @@ function AuthActionHandler() {
                                                         type={showPassword ? "text" : "password"}
                                                         placeholder="••••••••"
                                                         {...field}
+                                                        className="pr-10"
                                                     />
                                                 </FormControl>
                                                 <Button
@@ -161,7 +162,7 @@ function AuthActionHandler() {
                                                     className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:bg-transparent"
                                                     onClick={() => setShowPassword(!showPassword)}
                                                 >
-                                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                                 </Button>
                                             </div>
                                             <FormMessage />
@@ -180,6 +181,7 @@ function AuthActionHandler() {
                                                         type={showConfirmPassword ? "text" : "password"}
                                                         placeholder="••••••••"
                                                         {...field}
+                                                        className="pr-10"
                                                     />
                                                 </FormControl>
                                                 <Button
@@ -189,7 +191,7 @@ function AuthActionHandler() {
                                                     className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:bg-transparent"
                                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                 >
-                                                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                                 </Button>
                                             </div>
                                             <FormMessage />
