@@ -99,6 +99,16 @@ function LoginContent() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     form.clearErrors();
     
+    // Safety check in case the user submits before the async check completes
+    if (identifierStatus === 'not_exists') {
+        toast({
+            title: "Account Not Found",
+            description: `No account found for ${values.identifier}. Please sign up.`,
+            variant: "destructive",
+        });
+        return;
+    }
+    
     let userEmail: string | undefined;
 
     try {

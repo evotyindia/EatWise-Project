@@ -106,10 +106,11 @@ export async function getUserByUid(uid: string): Promise<User | null> {
     } catch (error: any) {
         if (error.code === 'permission-denied') {
             console.error("Firestore Permission Denied on getUserByUid:", error.message);
-            throw new Error("You do not have permission to query user data.");
+            // This is not a user-facing error in the login flow, so just log and return null
+             return null;
         }
         console.error("Error fetching user by UID:", error);
-        throw new Error("Could not fetch user by UID.");
+        return null;
     }
 }
 
@@ -125,10 +126,11 @@ export async function getUserByEmail(email: string): Promise<User | null> {
     } catch (error: any) {
         if (error.code === 'permission-denied') {
             console.error("Firestore Permission Denied on getUserByEmail:", error.message);
-            throw new Error("You do not have permission to query user emails.");
+            // This is not a user-facing error in the login flow, so just log and return null
+            return null;
         }
         console.error("Error fetching user by email:", error);
-        throw new Error("Could not fetch user by email.");
+        return null;
     }
 }
 
@@ -147,7 +149,7 @@ export async function getUserByUsername(username: string): Promise<User | null> 
         return null;
     } catch (error) {
         console.error("Error fetching user by username:", error);
-        throw new Error("Could not fetch user by username.");
+        return null;
     }
 }
 
