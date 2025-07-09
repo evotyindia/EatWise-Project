@@ -92,6 +92,7 @@ const prompt = ai.definePrompt({
   name: 'contextAwareAIChatPrompt',
   input: {schema: InternalPromptInputSchema}, // Uses the internal schema with boolean flags
   output: {schema: ContextAwareAIChatOutputSchema},
+  config: { output: { format: 'json' } }, // Enforce JSON output
   system: `You are "EatWise AI Advisor", a friendly and knowledgeable AI assistant for Swasth Bharat Advisor, an app helping users with Indian food choices.
 Your responses should be helpful, concise, and directly address the user's question based on the provided context and chat history.
 Do not generate any disclaimers or safety warnings unless specifically asked about safety. Avoid weasel words.
@@ -181,13 +182,12 @@ const contextAwareAIChatFlow = ai.defineFlow(
       console.error(`An error occurred in contextAwareAIChatFlow:`, error);
 
       // Provide a clear error message for the most common deployment issue.
-      if (error.message?.toLowerCase().includes('api key')) {
-          throw new Error('AI service configuration error. The API key is not set or invalid in the deployment environment.');
+      if (error.message?.toLowerCase().includes('api key') || /5\d\d/.test(error.message)) {
+          throw new Error('AI service configuration error or service is temporarily unavailable. Please check API key and try again later.');
       }
 
-      // For any other errors, throw a generic but helpful message to the user.
-      // The specific error details are available in the server logs.
-      throw new Error('An unexpected error occurred while communicating with the AI service. Please try again later.');
+      // For other errors (like safety blocks), re-throw the original message for better client-side feedback.
+      throw new Error(error.message || 'An unexpected error occurred while communicating with the AI service.');
     }
   }
 );

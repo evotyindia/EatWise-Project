@@ -34,6 +34,7 @@ const prompt = ai.definePrompt({
   name: 'getRecipeSuggestionsPrompt',
   input: {schema: GetRecipeSuggestionsInputSchema},
   output: {schema: GetRecipeSuggestionsOutputSchema},
+  config: { output: { format: 'json' } }, // Enforce JSON output
   system: `You are a personal chef specializing in healthy Indian cuisine. Your job is to suggest dish names based on user inputs.
 Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
 Ensure the 'suggestions' array contains only the names of the dishes as strings. Example 'suggestions': ["Palak Dal", "Aloo Gobi", "Vegetable Pulao"]`,

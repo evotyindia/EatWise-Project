@@ -64,6 +64,7 @@ const prompt = ai.definePrompt({
   name: 'analyzeNutritionPrompt',
   input: {schema: AnalyzeNutritionInputSchema},
   output: {schema: AnalyzeNutritionOutputSchema},
+  config: { output: { format: 'json' } }, // Enforce JSON output
   system: `You are an expert nutritionist. Your task is to analyze the nutritional information provided for a food item and return a structured JSON object.
 Your analysis should be detailed yet simple to understand. Use short, clear points, especially bullet points, for better clarity.
 Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.`,
