@@ -92,14 +92,13 @@ const getRecipeSuggestionsFlow = ai.defineFlow(
         // Log the full, detailed error to the server console (Vercel logs) for debugging.
         console.error(`An error occurred in getRecipeSuggestionsFlow:`, error);
 
-        // Provide a clear error message for the most common deployment issue.
-        if (error.message?.toLowerCase().includes('api key')) {
-            throw new Error('AI service configuration error. The API key is not set or invalid in the deployment environment.');
+        // Provide a clear error message for common deployment/server issues.
+        if (error.message?.toLowerCase().includes('api key') || /5\d\d/.test(error.message)) {
+            throw new Error('AI service configuration error or service is temporarily unavailable. Please check API key and try again later.');
         }
 
-        // For any other errors, throw a generic but helpful message to the user.
-        // The specific error details are available in the server logs.
-        throw new Error('An unexpected error occurred while communicating with the AI service. Please try again later.');
+        // For other errors (like safety blocks), re-throw the original message for better client-side feedback.
+        throw new Error(error.message || 'An unexpected error occurred while communicating with the AI service.');
     }
   }
 );
