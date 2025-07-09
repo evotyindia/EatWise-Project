@@ -18,13 +18,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { LogIn, LoaderCircle, CheckCircle2, XCircle } from "lucide-react";
+import { LogIn } from "lucide-react";
 import { useEffect, Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getAndSyncUser, getUserByUsername, checkUserExists } from "@/services/userService";
-import { useDebounce } from "@/hooks/use-debounce";
-
+import { getAndSyncUser, getUserByUsername } from "@/services/userService";
 
 const formSchema = z.object({
   identifier: z.string().min(3, { message: "Please enter a valid email or username." }),
@@ -37,10 +35,6 @@ function LoginContent() {
   const { toast } = useToast();
 
   const [redirectUrl, setRedirectUrl] = useState("/");
-  const [identifierToCheck, setIdentifierToCheck] = useState("");
-  const [isCheckingIdentifier, setIsCheckingIdentifier] = useState(false);
-  const [identifierStatus, setIdentifierStatus] = useState<"idle" | "exists" | "not_found">("idle");
-  const debouncedIdentifier = useDebounce(identifierToCheck, 500);
 
   useEffect(() => {
     const searchRedirect = searchParams.get("redirect");
@@ -58,30 +52,6 @@ function LoginContent() {
     }
   }, [searchParams, toast]);
   
-  // Effect for debounced identifier check
-  useEffect(() => {
-    const checkIdentifier = async () => {
-      if (debouncedIdentifier.length < 3) {
-        setIdentifierStatus("idle");
-        return;
-      }
-      setIsCheckingIdentifier(true);
-      try {
-        const exists = await checkUserExists(debouncedIdentifier);
-        setIdentifierStatus(exists ? "exists" : "not_found");
-      } catch (error) {
-        console.error("Identifier check error:", error);
-        setIdentifierStatus("idle"); // Fallback on error
-      }
-      setIsCheckingIdentifier(false);
-    };
-
-    if (debouncedIdentifier) {
-      checkIdentifier();
-    } else {
-      setIdentifierStatus("idle");
-    }
-  }, [debouncedIdentifier]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -99,11 +69,19 @@ function LoginContent() {
     let userEmail = values.identifier;
     
     try {
-      // If identifier is not an email, assume it's a username and fetch the email
       if (!isEmail(values.identifier)) {
         const userProfile = await getUserByUsername(values.identifier);
         if (!userProfile) {
-          toast({ title: "Login Failed", description: "User with this username not found.", variant: "destructive" });
+           toast({
+              title: "Account Not Found",
+              description: "No account found with that username.",
+              variant: "destructive",
+              action: (
+                <Link href="/signup">
+                  <Button variant="secondary" size="sm">Sign Up</Button>
+                </Link>
+              ),
+            });
           return;
         }
         userEmail = userProfile.email;
@@ -143,7 +121,18 @@ function LoginContent() {
       console.error("Login error:", error);
       
       let errorMessage = "An error occurred during login. Please try again.";
-      if (error.code === 'auth/invalid-credential') {
+      let errorTitle = "Login Failed";
+      let errorAction;
+
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
+         errorTitle = "Account Not Found";
+         errorMessage = `No account found for ${values.identifier}. Would you like to sign up?`;
+         errorAction = (
+           <Link href={`/signup?email=${isEmail(values.identifier) ? encodeURIComponent(values.identifier) : ''}`}>
+             <Button variant="secondary" size="sm">Sign Up</Button>
+           </Link>
+         );
+      } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
         errorMessage = "Email/Username or password was incorrect. Please try again.";
       }
       if (error.message.includes("Your user profile could not be found")) {
@@ -151,9 +140,10 @@ function LoginContent() {
       }
 
       toast({
-        title: "Login Failed",
+        title: errorTitle,
         description: errorMessage,
         variant: "destructive",
+        action: errorAction,
       });
     }
   }
@@ -177,31 +167,12 @@ function LoginContent() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Email or Username</FormLabel>
-                    <div className="relative">
-                        <FormControl>
-                          <Input 
-                            placeholder="you@example.com or your_username" 
-                            {...field} 
-                            onChange={(e) => {
-                                field.onChange(e);
-                                setIdentifierToCheck(e.target.value);
-                            }}
-                          />
-                        </FormControl>
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                            {isCheckingIdentifier && <LoaderCircle className="h-5 w-5 text-muted-foreground animate-spin" />}
-                            {!isCheckingIdentifier && identifierStatus === 'exists' && <CheckCircle2 className="h-5 w-5 text-success" />}
-                            {!isCheckingIdentifier && identifierStatus === 'not_found' && <XCircle className="h-5 w-5 text-destructive" />}
-                        </div>
-                    </div>
-                     {identifierStatus === 'not_found' && debouncedIdentifier.length > 0 && (
-                        <p className="text-sm font-medium text-destructive">
-                            Account not found.{" "}
-                            <Link href={`/signup?email=${isEmail(debouncedIdentifier) ? encodeURIComponent(debouncedIdentifier) : ''}`} className="underline">
-                                Sign up?
-                            </Link>
-                        </p>
-                    )}
+                    <FormControl>
+                      <Input 
+                        placeholder="you@example.com or your_username" 
+                        {...field} 
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -228,7 +199,7 @@ function LoginContent() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting || identifierStatus === 'not_found'}>
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                  {form.formState.isSubmitting ? "Logging in..." : "Log In"}
               </Button>
             </form>
@@ -252,7 +223,7 @@ export default function LoginPage() {
     return (
         <Suspense fallback={
             <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
-                <LoaderCircle className="w-12 h-12 animate-spin text-primary" />
+                <LogIn className="w-12 h-12 animate-pulse text-primary" />
             </div>
         }>
             <LoginContent />
