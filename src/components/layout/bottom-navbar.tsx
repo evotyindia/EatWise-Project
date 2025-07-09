@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, ScanLine, CookingPot, BookOpen, Menu, BarChart3, Mail, User, LogOut } from "lucide-react"
+import { Home, ScanLine, CookingPot, BookOpen, Menu, BarChart3, Mail, User, LogOut, UserCog } from "lucide-react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
@@ -103,12 +103,25 @@ export function BottomNavbar() {
               {/* Conditional Login/Logout Button */}
               {mounted && (
                 isLoggedIn ? (
+                  <>
+                  <SheetClose asChild>
+                     <Link
+                      href="/account"
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg p-3 text-base font-medium transition-colors text-foreground hover:bg-muted"
+                      )}
+                    >
+                      <UserCog />
+                      <span>Account Settings</span>
+                    </Link>
+                  </SheetClose>
                   <SheetClose asChild>
                      <Button variant="ghost" onClick={handleLogout} className="flex items-center justify-start gap-3 rounded-lg p-3 text-base font-medium text-destructive hover:bg-destructive/10 hover:text-destructive">
                       <LogOut />
                       <span>Logout</span>
                     </Button>
                   </SheetClose>
+                  </>
                 ) : (
                   <SheetClose asChild>
                      <Link

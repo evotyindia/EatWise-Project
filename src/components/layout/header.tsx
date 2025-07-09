@@ -1,6 +1,6 @@
 "use client"
 
-import { Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail, User, LogOut } from "lucide-react"
+import { Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail, User, LogOut, UserCog } from "lucide-react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
@@ -30,13 +30,6 @@ export function Header() {
     const user = localStorage.getItem("loggedInUser");
     setIsLoggedIn(!!user);
   }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("loggedInUser");
-    setIsLoggedIn(false);
-    // Force a reload to ensure consistent state across the app
-    window.location.href = "/";
-  };
 
   return (
     <header className={cn(
@@ -81,8 +74,10 @@ export function Header() {
             </nav>
             <div className="flex items-center gap-2">
               {mounted && isLoggedIn ? (
-                  <Button variant="outline" size="sm" onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" /> Logout
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/account">
+                      <UserCog className="mr-2 h-4 w-4" /> Account
+                    </Link>
                   </Button>
                 ) : (
                    mounted && <Button asChild size="sm">
