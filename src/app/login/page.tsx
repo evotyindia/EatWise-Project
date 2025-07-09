@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,6 +23,7 @@ import { useEffect, Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getAndSyncUser } from "@/services/userService";
+import { ToastAction } from "@/components/ui/toast";
 
 
 const formSchema = z.object({
@@ -105,9 +107,17 @@ function LoginContent() {
       console.error("Login error:", error);
       
       if (error.code === 'auth/invalid-credential') {
-        // If credentials are bad, redirect to signup, pre-filling their email.
-        router.push(`/signup?email=${encodeURIComponent(values.email)}`);
-        return; // Stop further execution
+        toast({
+          title: "Login Failed",
+          description: "Invalid email or password. Please try again.",
+          variant: "destructive",
+          action: (
+            <ToastAction altText="Sign up" onClick={() => router.push(`/signup?email=${encodeURIComponent(values.email)}`)}>
+              Sign Up
+            </ToastAction>
+          )
+        });
+        return;
       }
 
       let errorMessage = "An error occurred during login. Please try again.";
