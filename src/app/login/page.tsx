@@ -22,7 +22,7 @@ import { LogIn, LoaderCircle, CheckCircle2, XCircle } from "lucide-react";
 import { useEffect, Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getAndSyncUser, getUserByUsername, checkUsernameExists } from "@/services/userService";
+import { getAndSyncUser, getUserByUsername, checkUsernameExists, getUserByEmail } from "@/services/userService";
 import { useDebounce } from "@/hooks/use-debounce";
 
 const formSchema = z.object({
@@ -61,28 +61,26 @@ function LoginContent() {
   
   useEffect(() => {
     const checkIdentifier = async () => {
-      // If it looks like an email, we don't perform a live check for security reasons.
-      // The check will happen on submit. We'll mark it as 'exists' to enable the login button.
+      // If it looks like an email, we skip the live check due to security rules for unauthenticated users.
+      // We will mark it as "exists" to enable the login button, and validation will occur on submit.
       if (isEmail(debouncedIdentifier)) {
-        setIdentifierStatus("exists");
+        setIdentifierStatus("exists"); 
         setIsChecking(false);
         return;
       }
       
-      // If it doesn't look like an email and is too short, do nothing.
       if (debouncedIdentifier.length < 3) {
         setIdentifierStatus("idle");
         setIsChecking(false);
         return;
       }
       
-      // Perform the check for usernames.
       setIsChecking(true);
       try {
         const exists = await checkUsernameExists(debouncedIdentifier);
         setIdentifierStatus(exists ? "exists" : "not_exists");
       } catch (error) {
-        setIdentifierStatus("not_exists"); 
+        setIdentifierStatus("idle");
         console.error("Error checking identifier:", error);
       }
       setIsChecking(false);
@@ -107,40 +105,38 @@ function LoginContent() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     form.clearErrors();
     let userEmail: string | undefined;
+    let userExists = false;
 
     try {
       if (isEmail(values.identifier)) {
-        userEmail = values.identifier;
+        const userByEmail = await getUserByEmail(values.identifier);
+        if (userByEmail) {
+          userEmail = userByEmail.email;
+          userExists = true;
+        }
       } else {
         const userByUsername = await getUserByUsername(values.identifier);
         if (userByUsername) {
           userEmail = userByUsername.email;
-        } else {
-            toast({
-                title: "Account Not Found",
-                description: `No account found for username '${values.identifier}'.`,
-                variant: "destructive",
-            });
-            return;
+          userExists = true;
         }
       }
 
-      if (!userEmail) {
+      if (!userExists || !userEmail) {
         toast({
             title: "Account Not Found",
-            description: `No account found. Would you like to sign up?`,
+            description: "No account found with that identifier.",
             variant: "destructive",
             action: (
-              <Link href={`/signup?email=${isEmail(values.identifier) ? encodeURIComponent(values.identifier) : ''}`}>
-                <Button variant="secondary" size="sm">Sign Up</Button>
-              </Link>
+              <Button variant="secondary" size="sm" asChild>
+                  <Link href={`/signup?email=${isEmail(values.identifier) ? encodeURIComponent(values.identifier) : ''}`}>Sign Up</Link>
+              </Button>
             ),
         });
         return;
       }
 
-
-      const userCredential = await signInWithEmailAndPassword(auth, userEmail.toLowerCase(), values.password);
+      const userCredential = await signInWithEmailAndPassword(auth, userEmail, values.password);
       const authUser = userCredential.user;
 
       if (!authUser.emailVerified) {
@@ -173,26 +169,41 @@ function LoginContent() {
     } catch (error: any) {
       console.error("Login error:", error);
       
-      let errorMessage = "An error occurred during login. Please try again.";
-      let errorTitle = "Login Failed";
-      
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-        errorMessage = "The username/email or password you entered was incorrect. Please try again.";
-        errorTitle = "Incorrect Credentials";
+        toast({
+          title: "Incorrect Credentials",
+          description: "The password you entered was incorrect. Please try again.",
+          variant: "destructive",
+           action: (
+              <Button variant="secondary" size="sm" asChild>
+                  <Link href="/forgot-password">Forgot Password?</Link>
+              </Button>
+            ),
+        });
+      } else if (error.message.includes("Your user profile could not be found")) {
+        toast({
+          title: "Login Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else if (!userExists) { // This case is already handled above, but as a fallback.
+         toast({
+            title: "Account Not Found",
+            description: "No account found with that identifier.",
+            variant: "destructive",
+             action: (
+              <Button variant="secondary" size="sm" asChild>
+                  <Link href="/signup">Sign Up</Link>
+              </Button>
+            ),
+        });
+      } else {
+         toast({
+          title: "Login Failed",
+          description: "An unexpected error occurred during login. Please try again.",
+          variant: "destructive",
+        });
       }
-      if (error.code === 'auth/user-not-found') {
-        errorMessage = "No account was found for this email address. Please sign up instead.";
-        errorTitle = "Account Not Found";
-      }
-      if (error.message.includes("Your user profile could not be found")) {
-        errorMessage = error.message;
-      }
-
-      toast({
-        title: errorTitle,
-        description: errorMessage,
-        variant: "destructive",
-      });
     }
   }
 
@@ -229,10 +240,10 @@ function LoginContent() {
                        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                         {isChecking && <LoaderCircle className="h-5 w-5 text-muted-foreground animate-spin" />}
                         {!isChecking && !isEmail(debouncedIdentifier) && identifierStatus === 'exists' && <CheckCircle2 className="h-5 w-5 text-success" />}
-                        {!isChecking && !isEmail(debouncedIdentifier) && identifierStatus === 'not_exists' && debouncedIdentifier && <XCircle className="h-5 w-5 text-destructive" />}
+                        {!isChecking && !isEmail(debouncedIdentifier) && identifierStatus === 'not_exists' && debouncedIdentifier.length > 2 && <XCircle className="h-5 w-5 text-destructive" />}
                       </div>
                     </div>
-                     {!isEmail(debouncedIdentifier) && identifierStatus === 'not_exists' && debouncedIdentifier && (
+                     {!isEmail(debouncedIdentifier) && identifierStatus === 'not_exists' && debouncedIdentifier.length > 2 && (
                       <p className="text-sm font-medium text-destructive">
                         Username not found. Please <Link href="/signup" className="underline">sign up</Link>.
                       </p>
