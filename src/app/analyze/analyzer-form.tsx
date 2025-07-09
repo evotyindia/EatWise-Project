@@ -24,8 +24,8 @@ import { cn, fileToDataUri } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { getUserByEmail } from "@/services/userService";
 import { createReport } from "@/services/reportService";
+import { auth } from "@/lib/firebase";
 
 const manualInputSchema = z.object({
   productName: z.string().optional(),
@@ -78,8 +78,8 @@ export function AnalyzerForm() {
   };
 
   const handleSaveReport = async () => {
-    const loggedInUserEmail = JSON.parse(localStorage.getItem("loggedInUser") || "{}").email;
-    if (!loggedInUserEmail) {
+    const authUser = auth.currentUser;
+    if (!authUser) {
       toast({ title: "Login Required", description: "You must be logged in to save reports.", variant: "destructive" });
       return;
     }
@@ -89,14 +89,8 @@ export function AnalyzerForm() {
     }
 
     try {
-      const user = await getUserByEmail(loggedInUserEmail);
-      if (!user?.uid) {
-        toast({ title: "User Not Found", description: "Could not find your user account to save the report.", variant: "destructive" });
-        return;
-      }
-      
       const newReportData = {
-        uid: user.uid,
+        uid: authUser.uid,
         type: 'label' as const,
         title: reportTitle.trim() || report.productType || manualForm.getValues("productName") || "Untitled Label Report",
         summary: report.summary,
@@ -107,7 +101,7 @@ export function AnalyzerForm() {
 
       await createReport(newReportData);
 
-      toast({ title: "Report Saved", description: "The health report has been saved to your history." });
+      toast({ title: "Report Saved", description: "The health report has been saved to your history.", variant: "success" });
       setIsSaveDialogOpen(false);
       setReportTitle("");
 
@@ -350,3 +344,5 @@ export function AnalyzerForm() {
     </div>
   );
 }
+
+    

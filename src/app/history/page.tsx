@@ -11,9 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from 'date-fns';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { cn } from "@/lib/utils";
 import { getReportsByUid, deleteReport, type Report } from "@/services/reportService";
-import { getUserByEmail } from "@/services/userService";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function HistoryPage() {
   const router = useRouter();
@@ -22,48 +22,38 @@ export default function HistoryPage() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [userUid, setUserUid] = useState<string | null>(null);
   const [reports, setReports] = useState<Report[]>([]);
-  const [isLoadingReports, setIsLoadingReports] = useState(true);
+  const [isLoadingReports, setIsLoadingReports] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const loggedInUserEmail = JSON.parse(localStorage.getItem("loggedInUser") || "{}").email;
-    if (!loggedInUserEmail) {
-      router.replace(`/login?redirect=${pathname}`);
-      return;
-    }
-    
-    async function fetchInitialData() {
-      try {
-        const user = await getUserByEmail(loggedInUserEmail);
-        if (user?.uid) {
-          setUserUid(user.uid);
-          const userReports = await getReportsByUid(user.uid);
+    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+      if (authUser) {
+        setUserUid(authUser.uid);
+        setIsCheckingAuth(false);
+        setIsLoadingReports(true);
+        try {
+          const userReports = await getReportsByUid(authUser.uid);
           userReports.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
           setReports(userReports);
-        } else {
-            // User not found in DB, maybe deleted. Log them out.
-            localStorage.removeItem("loggedInUser");
-            router.replace('/login');
-        }
-      } catch (error) {
-          console.error("Failed to load initial history data:", error);
+        } catch (error) {
+          console.error("Failed to load history data:", error);
           toast({ title: "Error", description: "Could not load your history.", variant: "destructive" });
-      } finally {
-        setIsCheckingAuth(false);
-        setIsLoadingReports(false);
+        } finally {
+          setIsLoadingReports(false);
+        }
+      } else {
+        router.replace(`/login?redirect=${pathname}`);
       }
-    }
+    });
 
-    fetchInitialData();
+    return () => unsubscribe();
   }, [router, pathname, toast]);
   
   const handleDeleteReport = async (reportId: string) => {
-    if (!userUid) return;
-
     try {
       await deleteReport(reportId);
       setReports(prevReports => prevReports.filter(report => report.id !== reportId));
-      toast({ title: "Report Deleted", description: "The report has been removed from your history." });
+      toast({ title: "Report Deleted", description: "The report has been removed from your history.", variant: "success" });
     } catch (error) {
        console.error("Failed to delete report:", error);
        toast({ title: "Error", description: "Could not delete the report.", variant: "destructive" });
@@ -192,3 +182,5 @@ export default function HistoryPage() {
     </div>
   );
 }
+
+    
