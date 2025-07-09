@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn, fileToDataUri } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const manualInputSchema = z.object({
   productName: z.string().optional(),
@@ -44,6 +45,9 @@ export function AnalyzerForm() {
   const [isChatLoading, setIsChatLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+
+  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+  const [reportTitle, setReportTitle] = useState("");
 
   const { toast } = useToast();
 
@@ -86,7 +90,7 @@ export function AnalyzerForm() {
       id: crypto.randomUUID(),
       userId: loggedInUser.email,
       type: 'label' as const,
-      title: report.productType || manualForm.getValues("productName") || "Untitled Label Report",
+      title: reportTitle.trim() || report.productType || manualForm.getValues("productName") || "Untitled Label Report",
       summary: report.summary,
       createdAt: new Date().toISOString(),
       data: report,
@@ -101,6 +105,8 @@ export function AnalyzerForm() {
     localStorage.setItem("userReports", JSON.stringify(allUserReports));
 
     toast({ title: "Report Saved", description: "The health report has been saved to your history." });
+    setIsSaveDialogOpen(false);
+    setReportTitle("");
   };
 
 
@@ -274,18 +280,38 @@ export function AnalyzerForm() {
           )}
 
           {report && (
-            <div className="animate-fade-in-up opacity-0" style={{ animationFillMode: 'forwards' }}>
+            <div className="animate-fade-in-up opacity-0 space-y-8" style={{ animationFillMode: 'forwards' }}>
+              <div className="flex justify-end">
+                  <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" onClick={() => setReportTitle(report.productType || manualForm.getValues("productName") || '')}>
+                        <Save className="mr-2 h-4 w-4" />
+                        Save Report
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Save Report</DialogTitle>
+                        <DialogDescription>Give your report a name to easily find it later in your history.</DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="report-name" className="text-right">Name</Label>
+                          <Input id="report-name" value={reportTitle} onChange={(e) => setReportTitle(e.target.value)} className="col-span-3" />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button type="button" onClick={handleSaveReport}>Save</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+              </div>
+
               <LabelReportDisplay report={report} />
 
-              <Card className="mt-8">
+              <Card>
                 <CardHeader>
-                    <div className="flex justify-between items-center">
-                        <h3 className="font-semibold text-xl flex items-center"><MessageCircle className="mr-2 h-5 w-5" /> Chat with AI Advisor</h3>
-                        <Button variant="outline" size="sm" onClick={handleSaveReport} disabled={!report}>
-                            <Save className="mr-2 h-4 w-4" />
-                            Save Report
-                        </Button>
-                    </div>
+                    <h3 className="font-semibold text-xl flex items-center"><MessageCircle className="mr-2 h-5 w-5" /> Chat with AI Advisor</h3>
                     <p className="text-sm text-muted-foreground pt-1">Ask questions about this report.</p>
                 </CardHeader>
                 <CardContent>
