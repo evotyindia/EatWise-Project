@@ -1,5 +1,4 @@
 
-import Image from "next/image";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
@@ -197,22 +196,14 @@ export default function Home() {
 
       <section id="our-mission" className="w-full py-12 md:py-24 lg:py-32 bg-muted/20">
         <div className="container px-4 md:px-6">
-            <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-16">
-                <div className="space-y-4 animate-in fade-in slide-in-from-left-12 duration-500 ease-out">
+            <div className="grid items-center gap-8">
+                <div className="space-y-4 animate-in fade-in duration-500 ease-out text-center">
                     <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">Our Mission</div>
                     <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Empowering Healthier Choices, Together</h2>
-                    <p className="max-w-[600px] text-muted-foreground md:text-lg/relaxed">
+                    <p className="max-w-[700px] text-muted-foreground md:text-lg/relaxed mx-auto">
                         At EatWise India, our mission is to bridge the gap between complex nutritional science and everyday food choices. We believe that everyone deserves to understand what's in their food. By harnessing the power of AI, we provide clear, culturally relevant, and actionable insights, helping you navigate your health journey with confidence and ease.
                     </p>
                 </div>
-                <Image
-                    src="https://placehold.co/600x400.png"
-                    alt="A group of people enjoying a healthy meal"
-                    width={600}
-                    height={400}
-                    className="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full animate-in fade-in slide-in-from-right-12 duration-500 ease-out"
-                    data-ai-hint="people eating healthy"
-                />
             </div>
         </div>
       </section>
@@ -313,18 +304,6 @@ export default function Home() {
             <div className="grid gap-8 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-12 duration-500 ease-out">
                 {latestPosts.map((post) => (
                     <Card key={post.slug} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                        <CardHeader className="p-0">
-                            <Link href={`/blogs/${post.slug}`} aria-label={post.title} className="block overflow-hidden">
-                                <Image
-                                    src={post.featuredImage}
-                                    alt={post.title}
-                                    width={600}
-                                    height={340}
-                                    className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
-                                    data-ai-hint={post.dataAiHint || ''}
-                                />
-                            </Link>
-                        </CardHeader>
                         <CardContent className="p-6 flex-grow">
                             <p className="text-sm text-accent font-medium mb-1">{post.category}</p>
                             <Link href={`/blogs/${post.slug}`}>
