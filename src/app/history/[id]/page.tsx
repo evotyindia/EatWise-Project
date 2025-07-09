@@ -21,19 +21,8 @@ import type { GenerateHealthReportOutput } from "@/ai/flows/generate-health-repo
 import type { GetDetailedRecipeOutput } from "@/ai/flows/get-detailed-recipe";
 import type { AnalyzeNutritionOutput } from "@/ai/flows/nutrition-analysis";
 import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aware-ai-chat";
+import { getReportById, type Report } from "@/services/reportService";
 
-
-// Define a unified report structure for state management
-interface Report<T> {
-  id: string;
-  userId: string;
-  type: 'label' | 'recipe' | 'nutrition';
-  title: string;
-  summary: string;
-  createdAt: string;
-  data: T; // The full AI output
-  userInput: any; // The original input to the AI flow
-}
 
 export default function IndividualHistoryPage() {
   const params = useParams();
@@ -135,34 +124,41 @@ export default function IndividualHistoryPage() {
 
   useEffect(() => {
     if (id) {
-      try {
-        const allUserReports = JSON.parse(localStorage.getItem("userReports") || "{}");
-        let foundReport: Report<any> | null = null;
-
-        for (const userEmail in allUserReports) {
-          const userReports = allUserReports[userEmail] as Report<any>[];
-          const matched = userReports.find(r => r.id === id);
-          if (matched) {
-            foundReport = matched;
-            break;
-          }
+        const loggedInUserEmail = JSON.parse(localStorage.getItem("loggedInUser") || "{}").email;
+        if (!loggedInUserEmail) {
+            router.replace('/login');
+            return;
         }
 
-        if (foundReport) {
-          setReport(foundReport);
-          initiateChatWithWelcome(foundReport);
-        } else {
-          setError("Report not found. It may have been deleted or the link is incorrect.");
+        async function fetchReport() {
+            try {
+                const foundReport = await getReportById(id);
+                if (foundReport && foundReport.userId) {
+                    // Basic authorization check: does this report belong to the logged-in user?
+                    // This check should ideally be stronger, e.g., using user IDs instead of emails.
+                    // For now, we'll fetch the user and compare emails.
+                    // A proper implementation would use user ID from a session.
+                    // Since we store email in session, this is the best we can do without auth refactor.
+                    if (foundReport.userEmail?.toLowerCase() === loggedInUserEmail.toLowerCase()) {
+                         setReport(foundReport);
+                         initiateChatWithWelcome(foundReport);
+                    } else {
+                         setError("You do not have permission to view this report.");
+                    }
+                } else {
+                    setError("Report not found. It may have been deleted or the link is incorrect.");
+                }
+            } catch (e) {
+                console.error("Failed to load report from Firestore:", e);
+                setError("An error occurred while trying to load the report.");
+            } finally {
+                setIsLoading(false);
+            }
         }
-      } catch (e) {
-        console.error("Failed to load report from local storage:", e);
-        setError("An error occurred while trying to load the report.");
-      } finally {
-        setIsLoading(false);
-      }
+        fetchReport();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, router]);
   
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

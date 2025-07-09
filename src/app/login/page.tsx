@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogIn } from "lucide-react";
+import { getUserByEmailOrUsername } from "@/services/userService";
 
 const formSchema = z.object({
   identifier: z.string().min(1, { message: "Email or Username is required." }),
@@ -39,16 +40,11 @@ export default function LoginPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const users = JSON.parse(localStorage.getItem("users") || "[]");
-      const user = users.find(
-        (u: any) =>
-          (u.email.toLowerCase() === values.identifier.toLowerCase() || u.username?.toLowerCase() === values.identifier.toLowerCase()) &&
-          u.password === values.password
-      );
+      const user = await getUserByEmailOrUsername(values.identifier.toLowerCase());
 
-      if (user) {
+      if (user && user.password === values.password) {
         localStorage.setItem("loggedInUser", JSON.stringify({ email: user.email }));
         toast({
           title: "Login Successful",
@@ -72,7 +68,7 @@ export default function LoginPage() {
       console.error("Login error:", error);
       toast({
         title: "An Error Occurred",
-        description: "Could not log you in. Please try again.",
+        description: (error as Error).message || "Could not log you in. Please try again.",
         variant: "destructive",
       });
     }

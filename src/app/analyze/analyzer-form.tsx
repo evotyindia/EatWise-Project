@@ -24,6 +24,8 @@ import { cn, fileToDataUri } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { getUserByEmail } from "@/services/userService";
+import { createReport } from "@/services/reportService";
 
 const manualInputSchema = z.object({
   productName: z.string().optional(),
@@ -75,9 +77,9 @@ export function AnalyzerForm() {
     }
   };
 
-  const handleSaveReport = () => {
-    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
-    if (!loggedInUser.email) {
+  const handleSaveReport = async () => {
+    const loggedInUserEmail = JSON.parse(localStorage.getItem("loggedInUser") || "{}").email;
+    if (!loggedInUserEmail) {
       toast({ title: "Login Required", description: "You must be logged in to save reports.", variant: "destructive" });
       return;
     }
@@ -86,27 +88,33 @@ export function AnalyzerForm() {
       return;
     }
 
-    const newReport = {
-      id: crypto.randomUUID(),
-      userId: loggedInUser.email,
-      type: 'label' as const,
-      title: reportTitle.trim() || report.productType || manualForm.getValues("productName") || "Untitled Label Report",
-      summary: report.summary,
-      createdAt: new Date().toISOString(),
-      data: report,
-      userInput: { ...manualForm.getValues(), photoDataUri: uploadedImage ? "Image Uploaded" : undefined }
-    };
+    try {
+      const user = await getUserByEmail(loggedInUserEmail);
+      if (!user?.id) {
+        toast({ title: "User Not Found", description: "Could not find your user account to save the report.", variant: "destructive" });
+        return;
+      }
+      
+      const newReportData = {
+        userId: user.id,
+        type: 'label' as const,
+        title: reportTitle.trim() || report.productType || manualForm.getValues("productName") || "Untitled Label Report",
+        summary: report.summary,
+        createdAt: new Date().toISOString(),
+        data: report,
+        userInput: { ...manualForm.getValues(), photoDataUri: uploadedImage ? "Image Uploaded" : undefined }
+      };
 
-    const allUserReports = JSON.parse(localStorage.getItem("userReports") || "{}");
-    if (!allUserReports[loggedInUser.email]) {
-      allUserReports[loggedInUser.email] = [];
+      await createReport(newReportData);
+
+      toast({ title: "Report Saved", description: "The health report has been saved to your history." });
+      setIsSaveDialogOpen(false);
+      setReportTitle("");
+
+    } catch(error) {
+        console.error("Failed to save report:", error);
+        toast({ title: "Save Failed", description: "Could not save the report to the database.", variant: "destructive" });
     }
-    allUserReports[loggedInUser.email].push(newReport);
-    localStorage.setItem("userReports", JSON.stringify(allUserReports));
-
-    toast({ title: "Report Saved", description: "The health report has been saved to your history." });
-    setIsSaveDialogOpen(false);
-    setReportTitle("");
   };
 
 
@@ -211,13 +219,13 @@ export function AnalyzerForm() {
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatHistory.length > 1) { // Only scroll after the first user message
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   useEffect(() => {
-    if (chatHistory.length > 1) {
-      scrollToBottom();
-    }
+    scrollToBottom();
   }, [chatHistory]);
 
   return (

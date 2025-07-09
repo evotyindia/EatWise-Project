@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserPlus } from "lucide-react";
+import { createUser } from "@/services/userService";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -52,42 +53,17 @@ export default function SignupPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const users = JSON.parse(localStorage.getItem("users") || "[]");
-      
-      const newUsername = values.username.toLowerCase();
-      const newEmail = values.email.toLowerCase();
-
-      const emailExists = users.some((user: any) => user.email.toLowerCase() === newEmail);
-      const usernameExists = users.some((user: any) => user.username?.toLowerCase() === newUsername);
-
-      if (emailExists) {
-        toast({
-          title: "Signup Failed",
-          description: "An account with this email already exists.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      if (usernameExists) {
-        toast({
-          title: "Signup Failed",
-          description: "This username is already taken. Please choose another one.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      users.push({ 
+      const newUser = { 
         name: values.name, 
-        username: newUsername,
-        email: newEmail, 
+        username: values.username.toLowerCase(),
+        email: values.email.toLowerCase(), 
         phone: values.phone, 
         password: values.password 
-      });
-      localStorage.setItem("users", JSON.stringify(users));
+      };
+
+      await createUser(newUser);
 
       toast({
         title: "Signup Successful",
@@ -100,8 +76,8 @@ export default function SignupPage() {
     } catch (error) {
       console.error("Signup error:", error);
       toast({
-        title: "An Error Occurred",
-        description: "Could not create your account. Please try again.",
+        title: "Signup Failed",
+        description: (error as Error).message || "Could not create your account. Please try again.",
         variant: "destructive",
       });
     }
