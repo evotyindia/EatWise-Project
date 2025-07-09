@@ -148,7 +148,6 @@ export function NutritionForm() {
   };
 
   const generateAnalysisSharedLogic = async (inputForAI: AnalyzeNutritionInput, inputForContext: AnalyzeNutritionInput, processingType: 'image' | 'manual') => {
-    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     
     setIsLoading(true);
     if (processingType === 'image') setIsProcessingImage(true);
@@ -340,7 +339,7 @@ export function NutritionForm() {
         </CardContent>
       </Card>
 
-      <div ref={resultsRef}>
+      <div>
         {isLoading && !analysisResult && (
            <Card className="flex items-center justify-center h-full min-h-[300px]">
               <div className="text-center">
@@ -353,7 +352,7 @@ export function NutritionForm() {
 
         {analysisResult && (
           <div className="space-y-8 animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
-            <div className="flex justify-end">
+            <div ref={resultsRef} className="flex justify-end">
               <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
                   <DialogTrigger asChild>
                     <Button variant="outline" onClick={() => setReportTitle(currentInputContext?.foodItemDescription || '')}>

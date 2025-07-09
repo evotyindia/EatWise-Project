@@ -113,7 +113,6 @@ export function AnalyzerForm() {
 
 
   const generateReportSharedLogic = async (input: GenerateHealthReportInput, processingType: 'image' | 'manual') => {
-    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     
     setIsLoading(true);
     if (processingType === 'image') setIsProcessingImage(true);
@@ -271,7 +270,7 @@ export function AnalyzerForm() {
           </CardContent>
         </Card>
 
-        <div ref={resultsRef}>
+        <div>
           {isLoading && !report && (
             <Card className="flex items-center justify-center h-full min-h-[300px]">
               <div className="text-center">
@@ -284,7 +283,7 @@ export function AnalyzerForm() {
 
           {report && (
             <div className="animate-fade-in-up opacity-0 space-y-8" style={{ animationFillMode: 'forwards' }}>
-              <div className="flex justify-end">
+              <div ref={resultsRef} className="flex justify-end">
                   <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
                     <DialogTrigger asChild>
                       <Button variant="outline" onClick={() => setReportTitle(report.productType || manualForm.getValues("productName") || '')}>

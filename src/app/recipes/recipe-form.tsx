@@ -187,7 +187,9 @@ export function RecipeForm() {
       const result = await getRecipeSuggestions(input);
       setDishSuggestions(result);
       toast({ title: "Dish Ideas Ready!", description: result.initialContextualGuidance || "Click a dish for its recipe." });
-      setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      if (result.suggestions.length > 0) {
+        setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      }
     } catch (error: any) {
       console.error("Error getting dish suggestions:", error);
       toast({ title: "Suggestion Failed", description: error.message || "Could not get dish suggestions.", variant: "destructive" });
@@ -197,8 +199,6 @@ export function RecipeForm() {
 
   const handleSelectDish = async (dishName: string) => {
     if (!currentFormInputs) return;
-
-    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 
     setIsLoadingRecipe(true);
     setDetailedRecipe(null);
@@ -482,7 +482,7 @@ export function RecipeForm() {
       </div>
 
 
-      <div ref={resultsRef} className="lg:col-span-8 space-y-8">
+      <div className="lg:col-span-8 space-y-8">
         {isLoadingSuggestions && (
           <Card className="flex flex-col items-center justify-center min-h-[400px] text-center overflow-hidden">
             <CardHeader>
@@ -506,7 +506,7 @@ export function RecipeForm() {
         )}
         
         {dishSuggestions && !detailedRecipe && !isLoadingRecipe && (
-          <Card className="animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
+          <Card ref={resultsRef} className="animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
             <CardHeader>
               <CardTitle className="text-xl flex items-center"><Lightbulb className="mr-2 h-5 w-5 text-accent"/> Suggested Dishes</CardTitle>
               {dishSuggestions.initialContextualGuidance && <CardDescription>{dishSuggestions.initialContextualGuidance}</CardDescription>}
@@ -561,7 +561,7 @@ export function RecipeForm() {
         
         {detailedRecipe && (
           <div className="space-y-8 animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
-             <div className="flex justify-end">
+             <div ref={resultsRef} className="flex justify-end">
                 <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
                   <DialogTrigger asChild>
                     <Button variant="outline" onClick={() => setReportTitle(detailedRecipe.recipeTitle)}>
