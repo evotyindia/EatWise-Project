@@ -100,6 +100,39 @@ export async function getUserByUid(uid: string): Promise<User | null> {
     }
 }
 
+// Get user by username
+export async function getUserByUsername(username: string): Promise<User | null> {
+    const sanitizedUsername = username.toLowerCase();
+    try {
+        const q = query(collection(db, "users"), where("username", "==", sanitizedUsername), limit(1));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) return null;
+        const userDoc = querySnapshot.docs[0];
+        return { id: userDoc.id, ...userDoc.data() } as User;
+    } catch (error: any) {
+        console.error("Error fetching user by username:", error);
+        throw new Error("Could not fetch user by username.");
+    }
+}
+
+// Check if a user exists by email or username
+export async function checkUserExists(identifier: string): Promise<boolean> {
+    const sanitizedIdentifier = identifier.toLowerCase();
+    const isEmail = /\S+@\S+\.\S+/.test(sanitizedIdentifier);
+
+    const field = isEmail ? 'email' : 'username';
+    const q = query(collection(db, "users"), where(field, "==", sanitizedIdentifier), limit(1));
+
+    try {
+        const querySnapshot = await getDocs(q);
+        return !querySnapshot.empty;
+    } catch (error) {
+        console.error("Error checking user existence:", error);
+        // Default to false to avoid locking out users if there's a DB error
+        return false; 
+    }
+}
+
 // This function securely sets the username using a transaction.
 export async function setUsername(uid: string, userId: string, newUsername: string): Promise<{success: boolean, message?: string}> {
     const sanitizedUsername = newUsername.toLowerCase();
