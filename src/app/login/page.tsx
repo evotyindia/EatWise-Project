@@ -18,11 +18,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { LogIn } from "lucide-react";
+import { LogIn, LoaderCircle, CheckCircle2, XCircle } from "lucide-react";
 import { useEffect, Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getAndSyncUser, getUserByUsername, getUserByUid } from "@/services/userService";
+import { getAndSyncUser, getUserByUsername, getUserByEmail, checkUsernameExists, checkEmailExists } from "@/services/userService";
+import { useDebounce } from "@/hooks/use-debounce";
 
 const formSchema = z.object({
   identifier: z.string().min(3, { message: "Please enter a valid email or username." }),
@@ -35,6 +36,10 @@ function LoginContent() {
   const { toast } = useToast();
 
   const [redirectUrl, setRedirectUrl] = useState("/");
+  const [identifierToCheck, setIdentifierToCheck] = useState("");
+  const [isChecking, setIsChecking] = useState(false);
+  const [identifierStatus, setIdentifierStatus] = useState<"idle" | "exists" | "not_exists">("idle");
+  const debouncedIdentifier = useDebounce(identifierToCheck, 500);
 
   useEffect(() => {
     const searchRedirect = searchParams.get("redirect");
@@ -52,6 +57,36 @@ function LoginContent() {
     }
   }, [searchParams, toast]);
   
+  const isEmail = (str: string) => /\S+@\S+\.\S+/.test(str);
+
+  useEffect(() => {
+    const checkIdentifier = async () => {
+      if (debouncedIdentifier.length < 3) {
+        setIdentifierStatus("idle");
+        return;
+      }
+      setIsChecking(true);
+      try {
+        let exists = false;
+        if (isEmail(debouncedIdentifier)) {
+          exists = await checkEmailExists(debouncedIdentifier);
+        } else {
+          exists = await checkUsernameExists(debouncedIdentifier);
+        }
+        setIdentifierStatus(exists ? "exists" : "not_exists");
+      } catch (error) {
+        setIdentifierStatus("idle");
+        console.error("Error checking identifier:", error);
+      }
+      setIsChecking(false);
+    };
+
+    if (debouncedIdentifier) {
+      checkIdentifier();
+    } else {
+      setIdentifierStatus("idle");
+    }
+  }, [debouncedIdentifier]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -60,8 +95,6 @@ function LoginContent() {
       password: "",
     },
   });
-  
-  const isEmail = (str: string) => /\S+@\S+\.\S+/.test(str);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     form.clearErrors();
@@ -69,18 +102,15 @@ function LoginContent() {
     let userEmail: string | undefined;
 
     try {
-        // If the identifier is NOT an email, assume it's a username and fetch the corresponding user profile to get the email.
-        if (!isEmail(values.identifier)) {
+        if (isEmail(values.identifier)) {
+            userEmail = values.identifier;
+        } else {
             const userByUsername = await getUserByUsername(values.identifier);
             if (userByUsername) {
                 userEmail = userByUsername.email;
             }
-        } else {
-            // If it IS an email, use it directly.
-            userEmail = values.identifier;
         }
 
-        // If after checking, we still don't have an email, the user doesn't exist or the username was wrong.
         if (!userEmail) {
             toast({
                 title: "Account Not Found",
@@ -133,15 +163,7 @@ function LoginContent() {
       let errorTitle = "Login Failed";
       let errorAction;
 
-      if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
-         errorTitle = "Account Not Found";
-         errorMessage = `No account found for ${values.identifier}. Would you like to sign up?`;
-         errorAction = (
-           <Link href={`/signup?email=${isEmail(values.identifier) ? encodeURIComponent(values.identifier) : ''}`}>
-             <Button variant="secondary" size="sm">Sign Up</Button>
-           </Link>
-         );
-      } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
         errorMessage = "Email/Username or password was incorrect. Please try again.";
       }
       if (error.message.includes("Your user profile could not be found")) {
@@ -176,12 +198,28 @@ function LoginContent() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Email or Username</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="you@example.com or your_username" 
-                        {...field} 
-                      />
-                    </FormControl>
+                    <div className="relative">
+                      <FormControl>
+                        <Input 
+                          placeholder="you@example.com or your_username" 
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            setIdentifierToCheck(e.target.value);
+                          }}
+                        />
+                      </FormControl>
+                       <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                        {isChecking && <LoaderCircle className="h-5 w-5 text-muted-foreground animate-spin" />}
+                        {!isChecking && identifierStatus === 'exists' && <CheckCircle2 className="h-5 w-5 text-success" />}
+                        {!isChecking && identifierStatus === 'not_exists' && <XCircle className="h-5 w-5 text-destructive" />}
+                      </div>
+                    </div>
+                     {identifierStatus === 'not_exists' && (
+                      <p className="text-sm font-medium text-destructive">
+                        Account not found. Please <Link href="/signup" className="underline">sign up</Link>.
+                      </p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -208,7 +246,7 @@ function LoginContent() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting || identifierStatus !== 'exists'}>
                  {form.formState.isSubmitting ? "Logging in..." : "Log In"}
               </Button>
             </form>
