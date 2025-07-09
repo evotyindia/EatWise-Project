@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Home, ScanLine, CookingPot, BookOpen, Menu, BarChart3, Mail } from "lucide-react"
@@ -47,12 +46,12 @@ export function BottomNavbar() {
               href={item.href}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 w-full h-full transition-colors duration-200",
-                 isActive ? "text-primary" : "text-muted-foreground hover:text-primary"
+                 isActive ? "text-accent" : "text-muted-foreground hover:text-accent"
               )}
             >
               <div className={cn(
                 "flex items-center justify-center gap-2 rounded-full px-4 py-1.5 transition-all duration-300",
-                isActive ? "bg-primary text-primary-foreground shadow-lg" : ""
+                isActive ? "bg-accent text-accent-foreground shadow-lg" : ""
               )}>
                 {item.icon}
                 {isActive && <span className="text-xs font-bold">{item.label}</span>}
