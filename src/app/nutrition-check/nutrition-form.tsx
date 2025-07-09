@@ -7,7 +7,7 @@ import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aw
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadCloud, Sparkles, FileText, MessageCircle, Send, Info } from "lucide-react";
+import { UploadCloud, Sparkles, FileText, MessageCircle, Send, Info, Microscope } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -18,13 +18,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel as HookFormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { fileToDataUri } from "@/lib/utils";
+import { fileToDataUri, cn } from "@/lib/utils";
 import { StarRating } from "@/components/common/star-rating";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 
 const numberPreprocess = (val: unknown) => (val === "" || val === null || val === undefined ? undefined : Number(val));
@@ -235,7 +236,6 @@ export function NutritionForm() {
   };
 
   useEffect(() => {
-    // Only scroll if the chat has started, not on the initial welcome message.
     if (chatHistory.length > 1) {
       scrollToBottom();
     }
@@ -360,7 +360,55 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
                 <AlertDescription>{renderFormattedAnalysisText(analysisResult.overallAnalysis)}</AlertDescription>
               </Alert>
               
-              <Accordion type="single" collapsible className="w-full">
+              <Accordion type="multiple" collapsible className="w-full" defaultValue={['breakdown']}>
+                 {analysisResult.nutrientAnalysisTable && analysisResult.nutrientAnalysisTable.length > 0 && (
+                    <AccordionItem value="breakdown">
+                      <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                        <div className="flex items-center">
+                           <Microscope className="mr-2 h-5 w-5 text-primary" />
+                          <span>Nutrient-by-Nutrient Breakdown</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="rounded-lg border overflow-hidden">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead className="font-semibold">Nutrient</TableHead>
+                                <TableHead className="font-semibold">Amount</TableHead>
+                                <TableHead className="font-semibold">Verdict</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {analysisResult.nutrientAnalysisTable.map((item, index) => {
+                                const verdict = (item.verdict || "").toLowerCase();
+                                const colorClass = 
+                                  verdict.includes('good') || verdict.includes('low') // Low is good for sugar/sodium
+                                    ? 'text-success'
+                                    : verdict.includes('high')
+                                    ? 'text-destructive'
+                                    : verdict.includes('okay')
+                                    ? 'text-orange-500 dark:text-orange-400'
+                                    : 'text-muted-foreground';
+
+                                return (
+                                  <TableRow key={index} className="bg-background">
+                                    <TableCell className="font-semibold">{item.nutrient}</TableCell>
+                                    <TableCell>{item.value}</TableCell>
+                                    <TableCell>
+                                      <div className={cn("font-bold", colorClass)}>{item.verdict}</div>
+                                      <p className="text-xs text-muted-foreground mt-1">{item.comment}</p>
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  )}
+
                 <AccordionItem value="nutrition-details">
                   <AccordionTrigger className="text-lg font-semibold hover:no-underline">More Details</AccordionTrigger>
                   <AccordionContent className="space-y-4 pt-2">
@@ -422,4 +470,3 @@ const renderFormattedAnalysisText = (text?: string): JSX.Element | null => {
   );
 }
 
-    

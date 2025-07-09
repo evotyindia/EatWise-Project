@@ -39,20 +39,28 @@ const AnalyzeNutritionInputSchema = z.object({
 });
 export type AnalyzeNutritionInput = z.infer<typeof AnalyzeNutritionInputSchema>;
 
+const NutrientAnalysisItemSchema = z.object({
+    nutrient: z.string().describe("The name of the nutrient (e.g., 'Saturated Fat', 'Sodium', 'Dietary Fiber')."),
+    value: z.string().describe("The value and unit of the nutrient as provided (e.g., '10g', '500mg')."),
+    verdict: z.enum(['Good', 'Okay', 'High', 'Very High', 'Low']).describe("A simple verdict on the nutrient's level. Use 'Good' for beneficial nutrients like fiber/protein, 'Low' for things that should be low like sugar/sodium, 'Okay' for moderate amounts, and 'High' or 'Very High' for excessive amounts."),
+    comment: z.string().describe("A brief, simple explanation for the verdict (e.g., 'Excellent source of fiber', 'This is very high and exceeds 25% of the daily recommended limit.')."),
+});
+
 const AnalyzeNutritionOutputSchema = z.object({
-  overallAnalysis: z.string().describe('A concise summary of the most important nutritional aspects and how balanced the item is. Use bullet points for key highlights or takeaways.'),
-  macronutrientBalance: z.string().describe("Brief bullet points on the balance and quality of macronutrients (carbohydrates, protein, fat). If not enough data, state it."),
-  micronutrientHighlights: z.string().describe("Bullet points on significant micronutrients (vitamins/minerals) identified, their levels (high/low/adequate), and potential impact. If none, state so."),
+  overallAnalysis: z.string().describe('A detailed summary of the most important nutritional aspects and how balanced the item is. Use bullet points for key highlights or takeaways.'),
+  macronutrientBalance: z.string().describe("Detailed bullet points on the balance and quality of macronutrients (carbohydrates, protein, fat), explaining their impact on health. If not enough data, state it."),
+  micronutrientHighlights: z.string().describe("Detailed bullet points on significant micronutrients (vitamins/minerals) identified, their levels (high/low/adequate), and potential impact. If none, state so."),
   dietarySuitability: z
     .string()
     .describe(
-      'Suggests what kind of person or dietary pattern this item might be suitable or unsuitable for (e.g., "May be suitable for athletes needing quick energy", "Less suitable for individuals watching sodium intake", "Good for children if portion controlled"). Mention specific conditions like diabetes, heart health if relevant based on data. Keep advice actionable and clear.'
+      'Provide specific, actionable advice on what kind of person or dietary pattern this item is suitable or unsuitable for (e.g., "May be suitable for athletes needing quick energy", "Less suitable for individuals watching sodium intake", "Good for children if portion controlled"). Mention specific conditions like diabetes, heart health if relevant based on data.'
     ),
   nutritionDensityRating: z
     .number().min(1).max(5)
     .describe('Rate the overall nutrition density from 1 (low) to 5 (high), considering beneficial nutrients vs. calories and less desirable components.'),
   processingLevelAssessment: z.string().describe("A brief assessment of the food's likely processing level (e.g., unprocessed, minimally processed, processed, ultra-processed) if inferable from the data, and its implications."),
-  servingSizeContext: z.string().describe("Brief comment on how the serving size impacts the nutritional assessment, if serving size is provided. If not, state that context is missing.")
+  servingSizeContext: z.string().describe("Detailed comment on how the serving size impacts the nutritional assessment, including whether the serving size is realistic for typical consumption. If not provided, state that context is missing."),
+  nutrientAnalysisTable: z.array(NutrientAnalysisItemSchema).describe("A detailed breakdown of each provided nutrient, with a verdict and comment on its health impact."),
 });
 export type AnalyzeNutritionOutput = z.infer<typeof AnalyzeNutritionOutputSchema>;
 
@@ -67,16 +75,15 @@ const prompt = ai.definePrompt({
     schema: AnalyzeNutritionOutputSchema,
     format: 'json',
   },
-  system: `You are an expert nutritionist. Your task is to analyze the nutritional information provided for a food item and return a structured JSON object.
-Your analysis should be detailed yet simple to understand. Use short, clear points, especially bullet points, for better clarity.
-Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.`,
-  prompt: `Here is the nutritional information. If a field is not provided, it means the data is unavailable.
-  Focus your analysis on the provided data.
+  system: `You are an expert nutritionist for an Indian audience. Your task is to analyze the nutritional information provided and return a structured JSON object.
+Your analysis must be extremely detailed, clear, and easy to understand. Use bullet points generously for better clarity.
+Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text outside this object.`,
+  prompt: `Analyze the nutritional information below. For context, base your analysis and verdicts on a standard 2000 kcal diet where applicable (e.g., for Sodium, Sugar).
 
   {{#if servingSize}}Serving Size: {{servingSize}}{{/if}}
   {{#if nutritionDataUri}}
   Nutritional Information Table (from image): {{media url=nutritionDataUri}}
-  (If specific values are also provided below, prioritize them. Use the image for overall context or missing values.)
+  (Prioritize the specific values provided below if there's a conflict. Use the image for overall context or missing values.)
   {{/if}}
 
   {{#if calories}}Calories: {{calories}} kcal{{/if}}
@@ -90,23 +97,28 @@ Your entire response MUST be a single, valid JSON object that conforms to the ou
   {{#if sugar}}Total Sugars: {{sugar}}g{{/if}}
   {{#if addedSugar}}Added Sugars: {{addedSugar}}g{{/if}}
   {{#if protein}}Protein: {{protein}}g{{/if}}
-  {{#if vitaminD}}Vitamin D: {{vitaminD}} (unit as provided or infer if possible){{/if}}
+  {{#if vitaminD}}Vitamin D: {{vitaminD}} (unit as provided){{/if}}
   {{#if calcium}}Calcium: {{calcium}}mg{{/if}}
   {{#if iron}}Iron: {{iron}}mg{{/if}}
   {{#if potassium}}Potassium: {{potassium}}mg{{/if}}
   {{#if vitaminC}}Vitamin C: {{vitaminC}}mg{{/if}}
 
-  Based on the available data, provide:
-  1.  **Nutrition Density Rating**: Rate the overall nutrition density from 1 (low) to 5 (high).
-  2.  **Overall Analysis**: Provide a concise summary of the most important nutritional aspects and how balanced the item is. Use bullet points for key highlights or takeaways.
-  3.  **Macronutrient Balance**: Provide brief bullet points on the balance and quality of macronutrients.
-  4.  **Micronutrient Highlights**: Use bullet points to mention significant micronutrients and their levels.
-  5.  **Dietary Suitability**: Suggest who can consume it (e.g., child, diabetic, athlete) and any contraindications. Keep advice actionable.
-  6.  **Processing Level Assessment**: If inferable, provide a brief assessment of its processing level.
-  7.  **Serving Size Context**: If serving size is provided, provide a brief comment on its impact.
+  Now, generate the following detailed report:
 
+  1.  **Nutrition Density Rating**: Rate from 1 (low density) to 5 (high density).
+  2.  **Overall Analysis**: A detailed summary of the key takeaways. Use bullet points.
+  3.  **Macronutrient Balance**: A detailed bullet-point analysis of the macros.
+  4.  **Micronutrient Highlights**: Detailed bullet points on vitamins and minerals.
+  5.  **Dietary Suitability**: Specific, actionable advice for different consumer types.
+  6.  **Processing Level Assessment**: Detailed assessment based on the data.
+  7.  **Serving Size Context**: Detailed comments on the provided serving size.
+  8.  **Nutrient Analysis Table**: For EACH nutrient with a value provided above, create an entry in the 'nutrientAnalysisTable' array.
+      - **Nutrient:** Name of the nutrient (e.g., 'Sodium').
+      - **Value:** The value and unit (e.g., '500mg').
+      - **Verdict:** Your assessment. Use 'High' or 'Very High' for values that are a significant portion of daily limits (e.g., Sodium > 400mg, Added Sugar > 10g). Use 'Good' for high fiber or protein. Use 'Low' for low amounts of sugar, sodium, etc. Use 'Okay' for moderate values.
+      - **Comment:** A short, clear justification for your verdict. Example: "This is high, representing over 20% of the daily recommended intake."
+  
   Be specific and provide actionable insights. If data is insufficient for a particular aspect, state that clearly.
-  Present information clearly, using bullet points (e.g. starting with * or -) where specified in the output schema descriptions.
 `,
 });
 
@@ -124,16 +136,12 @@ const analyzeNutritionFlow = ai.defineFlow(
         }
         return output;
     } catch (error: any) {
-        // Log the full, detailed error to the server console (Vercel logs) for debugging.
         console.error(`An error occurred in analyzeNutritionFlow:`, error);
-
-        // Provide a clear error message for common deployment/server issues.
         if (error.message?.toLowerCase().includes('api key') || /5\d\d/.test(error.message)) {
             throw new Error('AI service configuration error or service is temporarily unavailable. Please check API key and try again later.');
         }
-
-        // For other errors (like safety blocks), re-throw the original message for better client-side feedback.
         throw new Error(error.message || 'An unexpected error occurred while communicating with the AI service.');
     }
   }
 );
+
