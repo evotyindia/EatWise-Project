@@ -1,7 +1,6 @@
-
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { LoaderCircle, History, FileText, CookingPot, BarChart3, Trash2, Search } from "lucide-react";
@@ -25,6 +24,7 @@ interface Report {
 
 export default function HistoryPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { toast } = useToast();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -34,14 +34,13 @@ export default function HistoryPage() {
   useEffect(() => {
     const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
     if (!loggedInUser.email) {
-      toast({ title: "Login Required", description: "Please log in to view your history.", variant: "destructive" });
-      router.replace('/login');
+      router.replace(`/login?redirect=${pathname}`);
     } else {
       setUserEmail(loggedInUser.email);
       loadReports(loggedInUser.email);
       setIsCheckingAuth(false);
     }
-  }, [router, toast]);
+  }, [router, pathname]);
 
   const loadReports = (email: string) => {
     const allUserReports = JSON.parse(localStorage.getItem("userReports") || "{}");
