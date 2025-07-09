@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogIn, LoaderCircle } from "lucide-react";
-import { useEffect, Suspense } from "react";
+import { useEffect, Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getAndSyncUser, createUserInFirestore } from "@/services/userService";
@@ -35,10 +35,15 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
 
-  const redirectUrl = searchParams.get("redirect") || localStorage.getItem("loginRedirect") || "/";
+  const [redirectUrl, setRedirectUrl] = useState("/");
   const isVerified = searchParams.get("verified");
 
   useEffect(() => {
+    // This effect runs only on the client, so localStorage is available.
+    const searchRedirect = searchParams.get("redirect");
+    const localRedirect = localStorage.getItem("loginRedirect");
+    setRedirectUrl(searchRedirect || localRedirect || "/");
+
     if(isVerified) {
       toast({
         title: "Email Verified!",
@@ -48,8 +53,7 @@ function LoginContent() {
       // Clear the redirect from local storage if it exists, so it's only used once
       localStorage.removeItem("loginRedirect");
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isVerified]);
+  }, [isVerified, searchParams, toast]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
