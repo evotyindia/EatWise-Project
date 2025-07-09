@@ -1,6 +1,7 @@
+
 "use client"
 
-import { Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail, User, LogOut, UserCog, History } from "lucide-react"
+import { Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail, User, LogOut, UserCog, History, Menu } from "lucide-react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
@@ -9,6 +10,7 @@ import { ThemeToggleButton } from "@/components/common/theme-toggle-button"
 import { cn } from "@/lib/utils";
 import '../common/theme-toggle-button.css';
 import { Button } from "../ui/button";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 
 const navItems = [
   { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
@@ -32,6 +34,12 @@ export function Header() {
     setIsLoggedIn(!!user);
   }, [pathname]); // Re-check on path change
 
+  const handleLogout = () => {
+    localStorage.removeItem("loggedInUser");
+    setIsLoggedIn(false);
+    window.location.href = "/";
+  };
+
   return (
     <header className={cn(
       "sticky top-0 z-50 w-full border-b bg-background/95 shadow-sm backdrop-blur-sm"
@@ -52,8 +60,8 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Desktop nav + theme toggle */}
-        <div className="hidden md:flex items-center gap-4">
+        {/* Desktop nav (LG and up) */}
+        <div className="hidden lg:flex items-center gap-4">
             <nav className="flex items-center gap-1 flex-wrap">
                 {navItems.map((item) => {
                 const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
@@ -90,6 +98,76 @@ export function Header() {
               <ThemeToggleButton />
             </div>
         </div>
+
+        {/* Tablet Sidebar Trigger (MD to LG) */}
+        <div className="hidden md:block lg:hidden">
+            <Sheet>
+                <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                        <Menu className="h-6 w-6" />
+                        <span className="sr-only">Open Menu</span>
+                    </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[300px]">
+                    <div className="flex flex-col h-full">
+                        <div className="border-b pb-4 mb-4">
+                            <Link href="/" className="flex items-center space-x-2">
+                                <Leaf className="h-7 w-7 text-primary" />
+                                <span className="font-extrabold text-xl font-headline">
+                                    <span className="text-primary">EatWise</span>
+                                    <span className="text-accent"> India</span>
+                                </span>
+                            </Link>
+                        </div>
+                        <nav className="flex flex-col gap-2 flex-grow">
+                            {navItems.map((item) => {
+                                const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
+                                return (
+                                <SheetClose asChild key={item.href}>
+                                    <Link
+                                    href={item.href}
+                                    className={cn(
+                                        "flex items-center gap-3 rounded-md p-3 text-base font-medium transition-colors",
+                                        isActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
+                                    )}
+                                    >
+                                    {item.icon}
+                                    <span>{item.label}</span>
+                                    </Link>
+                                </SheetClose>
+                                );
+                            })}
+                        </nav>
+                        <div className="border-t pt-4 mt-4 space-y-3">
+                           {mounted && isLoggedIn ? (
+                                <>
+                                <SheetClose asChild>
+                                    <Link href="/account" className="flex items-center gap-3 rounded-md p-3 text-base font-medium transition-colors text-foreground hover:bg-muted">
+                                        <UserCog /> Account Settings
+                                    </Link>
+                                </SheetClose>
+                                <SheetClose asChild>
+                                    <Button variant="ghost" onClick={handleLogout} className="w-full justify-start flex items-center gap-3 rounded-md p-3 text-base font-medium text-destructive hover:bg-destructive/10 hover:text-destructive">
+                                        <LogOut /> Logout
+                                    </Button>
+                                </SheetClose>
+                                </>
+                            ) : (
+                                <SheetClose asChild>
+                                    <Link href="/login" className="flex items-center gap-3 rounded-md p-3 text-base font-medium transition-colors text-foreground hover:bg-muted">
+                                        <User /> Login / Signup
+                                    </Link>
+                                </SheetClose>
+                            )}
+                            <div className="flex justify-center pt-2">
+                                <ThemeToggleButton />
+                            </div>
+                        </div>
+                    </div>
+                </SheetContent>
+            </Sheet>
+        </div>
+
       </div>
     </header>
   )
