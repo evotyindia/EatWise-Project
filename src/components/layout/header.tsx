@@ -28,7 +28,7 @@ export function Header() {
       <div className="container flex h-16 max-w-screen-xl items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
           <Leaf className="h-7 w-7 text-primary" />
-          <span className="font-extrabold text-2xl sm:inline-block font-headline text-foreground">
+          <span className="font-extrabold text-2xl sm:inline-block font-headline text-primary">
             EatWise India
           </span>
         </Link>
@@ -45,7 +45,7 @@ export function Header() {
                     className={cn(
                         "px-3 py-1.5 text-sm font-medium transition-colors duration-300 rounded-md",
                         isActive 
-                        ? "bg-secondary text-secondary-foreground"
+                        ? "bg-accent text-accent-foreground"
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                     )}
                     >
