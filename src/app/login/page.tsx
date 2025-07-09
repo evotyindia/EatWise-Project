@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +26,9 @@ const formSchema = z.object({
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
+  const redirectUrl = searchParams.get("redirect");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,13 +52,15 @@ export default function LoginPage() {
           description: "Welcome back!",
         });
         // Force a page reload to update header state
-        window.location.href = "/";
+        window.location.href = redirectUrl || "/";
       } else {
         toast({
-          title: "Login Failed",
-          description: "Invalid email or password.",
+          title: "Account Not Found",
+          description: "Please create an account to continue.",
           variant: "destructive",
         });
+        const redirectQuery = redirectUrl ? `&redirect=${encodeURIComponent(redirectUrl)}` : '';
+        router.push(`/signup?email=${encodeURIComponent(values.email)}${redirectQuery}`);
       }
     } catch (error) {
       console.error("Login error:", error);

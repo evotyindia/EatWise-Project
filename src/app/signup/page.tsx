@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,13 +32,17 @@ const formSchema = z.object({
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
+
+  const emailFromQuery = searchParams.get('email');
+  const redirectUrl = searchParams.get('redirect');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      email: "",
+      email: emailFromQuery || "",
       phone: "",
       password: "",
       confirmPassword: "",
@@ -46,8 +50,6 @@ export default function SignupPage() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // For testing purposes, we use localStorage.
-    // In a real app, this would be an API call.
     try {
       const users = JSON.parse(localStorage.getItem("users") || "[]");
       const userExists = users.some((user: any) => user.email === values.email);
@@ -68,8 +70,9 @@ export default function SignupPage() {
         title: "Signup Successful",
         description: "You can now log in with your new account.",
       });
-
-      router.push("/login");
+      
+      const loginUrl = `/login${redirectUrl ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}`;
+      router.push(loginUrl);
 
     } catch (error) {
       console.error("Signup error:", error);

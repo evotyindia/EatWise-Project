@@ -1,23 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { RecipeForm } from "./recipe-form";
 import { CookingPot, LoaderCircle } from "lucide-react";
 import type { NextPage } from 'next';
 
 const RecipesPage: NextPage = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
     const user = localStorage.getItem("loggedInUser");
     if (!user) {
-      router.replace('/login');
+      router.replace(`/login?redirect=${pathname}`);
     } else {
       setIsCheckingAuth(false);
     }
-  }, [router]);
+  }, [router, pathname]);
 
   if (isCheckingAuth) {
     return (

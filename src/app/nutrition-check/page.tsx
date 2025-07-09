@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { NutritionForm } from "./nutrition-form";
 import { BarChart3, LoaderCircle } from "lucide-react";
 import type { NextPage } from 'next';
@@ -9,16 +9,17 @@ import type { NextPage } from 'next';
 
 const NutritionCheckPage: NextPage = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
     const user = localStorage.getItem("loggedInUser");
     if (!user) {
-      router.replace('/login');
+      router.replace(`/login?redirect=${pathname}`);
     } else {
       setIsCheckingAuth(false);
     }
-  }, [router]);
+  }, [router, pathname]);
 
   if (isCheckingAuth) {
     return (
