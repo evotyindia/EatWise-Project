@@ -17,7 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { LogIn, LoaderCircle } from "lucide-react";
 import { useEffect, Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
@@ -164,7 +164,16 @@ function LoginContent() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <div className="flex justify-between items-center">
+                      <FormLabel>Password</FormLabel>
+                      <Link
+                        href="/forgot-password"
+                        className="text-sm font-medium text-primary hover:underline"
+                        tabIndex={-1}
+                      >
+                        Forgot Password?
+                      </Link>
+                    </div>
                     <FormControl>
                       <Input type="password" placeholder="••••••••" {...field} />
                     </FormControl>
@@ -177,13 +186,15 @@ function LoginContent() {
               </Button>
             </form>
           </Form>
-          <div className="mt-6 text-center text-sm">
-            Don't have an account?{" "}
-            <Link href="/signup" className="underline text-primary">
-              Sign up
-            </Link>
-          </div>
         </CardContent>
+        <CardFooter className="mt-6 text-center text-sm">
+            <p className="mx-auto">
+                Don't have an account?{" "}
+                <Link href="/signup" className="underline text-primary">
+                Sign up
+                </Link>
+            </p>
+        </CardFooter>
       </Card>
     </div>
   );
