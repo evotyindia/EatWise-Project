@@ -109,22 +109,30 @@ export async function getUserByEmail(email: string): Promise<User | null> {
         if (querySnapshot.empty) return null;
         const userDoc = querySnapshot.docs[0];
         return { id: userDoc.id, ...userDoc.data() } as User;
-    } catch (error: any) {
+    } catch (error) {
+        if (error.code === 'permission-denied') {
+            console.error("Firestore Permission Denied on getUserByEmail:", error.message);
+            throw new Error("You do not have permission to query user emails.");
+        }
         console.error("Error fetching user by email:", error);
         throw new Error("Could not fetch user by email.");
     }
 }
 
-// Get user by username
+// Get user by username by first looking up UID in the 'usernames' collection
 export async function getUserByUsername(username: string): Promise<User | null> {
     const sanitizedUsername = username.toLowerCase();
+    const usernameDocRef = doc(db, "usernames", sanitizedUsername);
     try {
-        const q = query(collection(db, "users"), where("username", "==", sanitizedUsername), limit(1));
-        const querySnapshot = await getDocs(q);
-        if (querySnapshot.empty) return null;
-        const userDoc = querySnapshot.docs[0];
-        return { id: userDoc.id, ...userDoc.data() } as User;
-    } catch (error: any) {
+        const usernameDoc = await getDoc(usernameDocRef);
+        if (usernameDoc.exists()) {
+            const { uid } = usernameDoc.data();
+            if (uid) {
+                return await getUserByUid(uid);
+            }
+        }
+        return null;
+    } catch (error) {
         console.error("Error fetching user by username:", error);
         throw new Error("Could not fetch user by username.");
     }
