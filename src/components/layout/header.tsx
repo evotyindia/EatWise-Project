@@ -10,7 +10,7 @@ import { ThemeToggleButton } from "@/components/common/theme-toggle-button"
 import { cn } from "@/lib/utils";
 import '../common/theme-toggle-button.css';
 import { Button } from "../ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const navItems = [
   { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
@@ -61,42 +61,41 @@ export function Header() {
         </Link>
 
         {/* Desktop nav (LG and up) */}
-        <div className="hidden lg:flex items-center gap-4">
-            <nav className="flex items-center gap-1 flex-wrap">
-                {navItems.map((item) => {
-                const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
-                return (
-                    <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                        "px-3 py-1.5 text-sm font-medium transition-colors duration-300 rounded-md",
-                        isActive 
-                        ? "bg-accent text-accent-foreground"
-                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                    )}
-                    >
-                    {item.label}
-                    </Link>
-                );
-                })}
-            </nav>
-            <div className="flex items-center gap-2">
-              {mounted && isLoggedIn ? (
-                  <Button asChild variant="outline" size="sm">
-                    <Link href="/account">
-                      <UserCog className="mr-2 h-4 w-4" /> Account
-                    </Link>
-                  </Button>
-                ) : (
-                   mounted && <Button asChild size="sm">
-                    <Link href="/login">
-                      <User className="mr-2 h-4 w-4" /> Login
-                    </Link>
-                  </Button>
+        <nav className="hidden lg:flex items-center gap-1 flex-wrap">
+            {navItems.map((item) => {
+            const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
+            return (
+                <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                    "px-3 py-1.5 text-sm font-medium transition-colors duration-300 rounded-md",
+                    isActive 
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                 )}
-              <ThemeToggleButton />
-            </div>
+                >
+                {item.label}
+                </Link>
+            );
+            })}
+        </nav>
+        
+        <div className="hidden lg:flex items-center gap-2">
+            {mounted && isLoggedIn ? (
+                <Button asChild variant="outline" size="sm">
+                <Link href="/account">
+                    <UserCog className="mr-2 h-4 w-4" /> Account
+                </Link>
+                </Button>
+            ) : (
+                mounted && <Button asChild size="sm">
+                <Link href="/login">
+                    <User className="mr-2 h-4 w-4" /> Login
+                </Link>
+                </Button>
+            )}
+            <ThemeToggleButton />
         </div>
 
         {/* Tablet Sidebar Trigger (MD to LG) */}
@@ -109,6 +108,9 @@ export function Header() {
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[300px]">
+                    <SheetHeader className="sr-only">
+                        <SheetTitle>Main Menu</SheetTitle>
+                    </SheetHeader>
                     <div className="flex flex-col h-full">
                         <div className="border-b pb-4 mb-4">
                             <Link href="/" className="flex items-center space-x-2">
