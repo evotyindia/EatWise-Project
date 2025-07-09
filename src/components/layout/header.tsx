@@ -1,6 +1,6 @@
 "use client"
 
-import { Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail } from "lucide-react"
+import { Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail, User, LogOut } from "lucide-react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { ThemeToggleButton } from "@/components/common/theme-toggle-button"
 import { cn } from "@/lib/utils";
 import '../common/theme-toggle-button.css';
+import { Button } from "../ui/button";
 
 const navItems = [
   { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
@@ -21,10 +22,21 @@ const navItems = [
 export function Header() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    // Check localStorage for logged-in user
+    const user = localStorage.getItem("loggedInUser");
+    setIsLoggedIn(!!user);
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("loggedInUser");
+    setIsLoggedIn(false);
+    // Force a reload to ensure consistent state across the app
+    window.location.href = "/";
+  };
 
   return (
     <header className={cn(
@@ -67,7 +79,18 @@ export function Header() {
                 );
                 })}
             </nav>
-            <div className="pr-1">
+            <div className="flex items-center gap-2">
+              {mounted && isLoggedIn ? (
+                  <Button variant="outline" size="sm" onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" /> Logout
+                  </Button>
+                ) : (
+                   mounted && <Button asChild size="sm">
+                    <Link href="/login">
+                      <User className="mr-2 h-4 w-4" /> Login
+                    </Link>
+                  </Button>
+                )}
               <ThemeToggleButton />
             </div>
         </div>

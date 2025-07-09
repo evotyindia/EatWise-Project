@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, ScanLine, CookingPot, BookOpen, Menu, BarChart3, Mail } from "lucide-react"
+import { Home, ScanLine, CookingPot, BookOpen, Menu, BarChart3, Mail, User, LogOut } from "lucide-react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
@@ -8,7 +8,7 @@ import React from 'react';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils";
 import { ThemeToggleButton } from "../common/theme-toggle-button";
-import { Separator } from "../ui/separator";
+import { Button } from "../ui/button";
 
 const mainNavItems = [
   { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
@@ -25,14 +25,19 @@ const moreNavItems = [
 export function BottomNavbar() {
   const pathname = usePathname();
   const [mounted, setMounted] = React.useState(false);
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
+    const user = localStorage.getItem("loggedInUser");
+    setIsLoggedIn(!!user);
   }, []);
 
-  if (!mounted) {
-    return null;
-  }
+  const handleLogout = () => {
+    localStorage.removeItem("loggedInUser");
+    setIsLoggedIn(false);
+    window.location.href = "/";
+  };
 
 
   return (
@@ -95,6 +100,29 @@ export function BottomNavbar() {
                   </SheetClose>
                 )
               })}
+              {/* Conditional Login/Logout Button */}
+              {mounted && (
+                isLoggedIn ? (
+                  <SheetClose asChild>
+                     <Button variant="ghost" onClick={handleLogout} className="flex items-center justify-start gap-3 rounded-lg p-3 text-base font-medium text-destructive hover:bg-destructive/10 hover:text-destructive">
+                      <LogOut />
+                      <span>Logout</span>
+                    </Button>
+                  </SheetClose>
+                ) : (
+                  <SheetClose asChild>
+                     <Link
+                      href="/login"
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg p-3 text-base font-medium transition-colors text-foreground hover:bg-muted"
+                      )}
+                    >
+                      <User />
+                      <span>Login / Signup</span>
+                    </Link>
+                  </SheetClose>
+                )
+              )}
             </div>
           </SheetContent>
         </Sheet>
