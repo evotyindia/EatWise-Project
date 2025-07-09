@@ -125,6 +125,7 @@ export function AnalyzerForm() {
       setReport(result);
       toast({ title: "Report Generated", description: "AI analysis complete." });
       if (result) {
+        setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
         initiateChatWithWelcome("labelAnalysis", {
           productName: result.productType || input.productName || "the product",
           ingredients: input.ingredients || (input.photoDataUri ? "from scanned image" : "N/A"),
