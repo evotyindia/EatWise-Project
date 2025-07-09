@@ -90,9 +90,16 @@ export async function getPublicReportById(reportId: string): Promise<Report | nu
             }
         }
         return null; // Return null if not public or doesn't exist
-    } catch (error) {
+    } catch (error: any) {
+        // This is a critical change. Firestore security rules for public access might deny reads
+        // for unauthenticated users on the general collection. Instead of throwing, we treat it as "not found".
+        if (error.code === 'permission-denied') {
+            console.warn("Permission denied while fetching public report. This likely means the Firestore rules are correctly preventing a collection scan, and the document is not public or does not exist.");
+            return null;
+        }
         console.error("Error fetching public report by ID:", error);
-        throw new Error("Could not fetch the specified report.");
+        // We re-throw for other unexpected errors so it can be caught by the page.
+        throw new Error("An unexpected error occurred while fetching the report.");
     }
 }
 
