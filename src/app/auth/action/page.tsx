@@ -5,7 +5,6 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { applyActionCode, checkActionCode } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { markEmailAsVerified } from "@/services/userService";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { LoaderCircle, CircleCheck, AlertTriangle } from "lucide-react";
@@ -29,24 +28,16 @@ function AuthActionHandler() {
 
         const handleVerifyEmail = async (code: string) => {
             try {
-                // Check if the code is valid and get user info
-                const actionCodeInfo = await checkActionCode(auth, code);
-                const email = actionCodeInfo.data.email;
+                // Check if the code is valid before applying it
+                await checkActionCode(auth, code);
 
-                if (!email) {
-                    throw new Error("Invalid action code. No email found.");
-                }
-
-                // Apply the action code to verify the email
+                // Apply the action code to verify the email within Firebase Authentication
                 await applyActionCode(auth, code);
-
-                // Update the user's status in Firestore
-                await markEmailAsVerified(email);
                 
                 setStatus("success");
-                setMessage(`Success! Your email ${email} has been verified.`);
+                setMessage("Success! Your email has been verified.");
 
-                // Redirect to login after a short delay
+                // Redirect to login after a short delay, passing a flag for the success toast.
                 setTimeout(() => {
                     const redirectUrl = localStorage.getItem("loginRedirect") || "/";
                     router.push(`/login?verified=true&redirect=${encodeURIComponent(redirectUrl)}`);

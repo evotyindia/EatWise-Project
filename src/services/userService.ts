@@ -7,6 +7,7 @@ import {
     createUserWithEmailAndPassword, 
     sendEmailVerification,
     signInWithEmailAndPassword,
+    signOut,
 } from 'firebase/auth';
 
 export interface User {
@@ -69,14 +70,26 @@ export async function signInUser(email: string, password: string): Promise<User>
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        if (!user.emailVerified) {
-            await sendEmailVerification(user).catch(e => console.error("Failed to resend verification email:", e));
-            throw new Error("Your email is not verified. We've sent another verification link to your inbox. Please check your email (and spam folder) to continue.");
-        }
-        
         const userProfile = await getUserByUid(user.uid);
         if (!userProfile) {
-            throw new Error("Could not find user profile data.");
+            // This case is unlikely if signup is working, but it's good practice to handle.
+            await signOut(auth);
+            throw new Error("Could not find user profile data. Please contact support.");
+        }
+
+        // Sync verification status from Auth to Firestore if it's not already synced.
+        if (user.emailVerified && !userProfile.emailVerified) {
+            const userDocRef = doc(db, 'users', userProfile.id);
+            await updateDoc(userDocRef, { emailVerified: true });
+            // Update the in-memory object so we don't have to fetch it again.
+            userProfile.emailVerified = true;
+        }
+
+        // Now, perform the definitive check on the (possibly updated) profile.
+        if (!userProfile.emailVerified) {
+            await signOut(auth); // Sign out to prevent leaving them in a partially logged-in state.
+            await sendEmailVerification(user).catch(e => console.error("Failed to resend verification email:", e));
+            throw new Error("Your email is not verified. We've sent another verification link to your inbox. Please check your email (and spam folder) to continue.");
         }
         
         return userProfile;
@@ -84,6 +97,7 @@ export async function signInUser(email: string, password: string): Promise<User>
         if (error.code === 'auth/invalid-credential') {
             throw new Error("Invalid email or password.");
         }
+        // Re-throw our specific "not verified" error so the UI can catch it.
         if (error.message.includes("Your email is not verified")) {
             throw error;
         }
@@ -91,16 +105,6 @@ export async function signInUser(email: string, password: string): Promise<User>
         throw new Error("An error occurred during login. Please try again.");
     }
 }
-
-// Update user email as verified in Firestore
-export async function markEmailAsVerified(email: string): Promise<void> {
-    const user = await getUserByEmail(email);
-    if (user && user.id) {
-        const userDocRef = doc(db, 'users', user.id);
-        await updateDoc(userDocRef, { emailVerified: true });
-    }
-}
-
 
 // Get user from Firestore by UID
 async function getUserByUid(uid: string): Promise<User | null> {
