@@ -18,7 +18,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserPlus } from "lucide-react";
+import { UserPlus, LoaderCircle } from "lucide-react";
+import { Suspense } from "react";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { createUserInFirestore } from "@/services/userService";
@@ -34,7 +35,7 @@ const formSchema = z.object({
   path: ["confirmPassword"],
 });
 
-export default function SignupPage() {
+function SignupContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -178,4 +179,17 @@ export default function SignupPage() {
       </Card>
     </div>
   );
+}
+
+
+export default function SignupPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
+                <LoaderCircle className="w-12 h-12 animate-spin text-primary" />
+            </div>
+        }>
+            <SignupContent />
+        </Suspense>
+    )
 }
