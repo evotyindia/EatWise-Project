@@ -23,8 +23,8 @@ import { fileToDataUri } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { getUserByEmail } from "@/services/userService";
 import { createReport } from "@/services/reportService";
+import { auth } from "@/lib/firebase";
 
 
 const numberPreprocess = (val: unknown) => (val === "" || val === null || val === undefined ? undefined : Number(val));
@@ -114,8 +114,8 @@ export function NutritionForm() {
   };
 
   const handleSaveAnalysis = async () => {
-    const loggedInUserEmail = JSON.parse(localStorage.getItem("loggedInUser") || "{}").email;
-    if (!loggedInUserEmail) {
+    const authUser = auth.currentUser;
+    if (!authUser) {
       toast({ title: "Login Required", description: "You must be logged in to save analyses.", variant: "destructive" });
       return;
     }
@@ -125,14 +125,8 @@ export function NutritionForm() {
     }
     
     try {
-        const user = await getUserByEmail(loggedInUserEmail);
-        if (!user?.uid) {
-            toast({ title: "User Not Found", description: "Could not find your user account to save the analysis.", variant: "destructive" });
-            return;
-        }
-
         const newReportData = {
-          uid: user.uid,
+          uid: authUser.uid,
           type: 'nutrition' as const,
           title: reportTitle.trim() || currentInputContext.foodItemDescription || "Untitled Nutrition Analysis",
           summary: analysisResult.overallAnalysis,
@@ -143,7 +137,7 @@ export function NutritionForm() {
 
         await createReport(newReportData);
 
-        toast({ title: "Analysis Saved", description: "The nutrition analysis has been saved to your history." });
+        toast({ title: "Analysis Saved", description: "The nutrition analysis has been saved to your history.", variant: "success" });
         setIsSaveDialogOpen(false);
         setReportTitle("");
 
@@ -418,3 +412,5 @@ export function NutritionForm() {
     </div>
   );
 }
+
+    

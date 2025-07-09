@@ -31,9 +31,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { type User as UserType, getUserById, updateUser, deleteUser } from "@/services/userService";
+import { type User as UserType, updateUser, deleteUser, getUserByUid } from "@/services/userService";
 import { deleteReportsByUserId } from "@/services/reportService";
-import { getAuth, deleteUser as deleteAuthUser } from "firebase/auth";
+import { getAuth, deleteUser as deleteAuthUser, onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 
 // Schema for setting username for the first time
@@ -55,32 +56,29 @@ export default function AccountPage() {
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
   useEffect(() => {
-    const loggedInUserId = JSON.parse(localStorage.getItem("loggedInUser") || "{}").id;
-    if (!loggedInUserId) {
-      router.replace('/login');
-      return;
-    }
-
-    async function fetchUser() {
-      try {
-        const user = await getUserById(loggedInUserId);
-        if (user) {
-          setCurrentUser(user);
-        } else {
-          // This case might happen if user is deleted from DB but session remains
-          handleLogout(true);
-          router.replace('/login');
+    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+      if (authUser) {
+        try {
+          const userProfile = await getUserByUid(authUser.uid);
+          if (userProfile) {
+            setCurrentUser(userProfile);
+          } else {
+            handleLogout(true);
+            router.replace('/login');
+          }
+        } catch (error) {
+          console.error("Failed to fetch user data:", error);
+          toast({ title: "Error", description: "Could not load your account details.", variant: "destructive" });
+          router.replace('/');
+        } finally {
+          setIsLoading(false);
         }
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
-        toast({ title: "Error", description: "Could not load your account details.", variant: "destructive" });
-        router.replace('/');
-      } finally {
-        setIsLoading(false);
+      } else {
+        router.replace('/login');
       }
-    }
+    });
 
-    fetchUser();
+    return () => unsubscribe();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
@@ -100,16 +98,20 @@ export default function AccountPage() {
         name: currentUser.name || "",
         phone: currentUser.phone || "",
       });
+      usernameForm.reset({
+        username: currentUser.username || ""
+      });
     }
-  }, [currentUser, profileForm]);
+  }, [currentUser, profileForm, usernameForm]);
 
   async function onUsernameSubmit(values: z.infer<typeof usernameFormSchema>) {
     if (!currentUser?.id) return;
     try {
-      await updateUser(currentUser.id, { username: values.username });
+      await updateUser(currentUser.id, { username: values.username.toLowerCase() });
       
-      const updatedUser = { ...currentUser, username: values.username };
+      const updatedUser = { ...currentUser, username: values.username.toLowerCase() };
       setCurrentUser(updatedUser);
+      localStorage.setItem("loggedInUser", JSON.stringify({ id: updatedUser.id, email: updatedUser.email, username: updatedUser.username }));
       toast({ title: "Username Set!", description: "Your unique username has been saved." });
     } catch (error) {
        console.error("Username update error:", error);
@@ -125,6 +127,7 @@ export default function AccountPage() {
 
       const updatedUser = { ...currentUser, ...updatedData };
       setCurrentUser(updatedUser);
+      localStorage.setItem("loggedInUser", JSON.stringify({ id: updatedUser.id, email: updatedUser.email, username: updatedUser.username }));
       
       toast({ title: "Profile Updated", description: "Your details have been successfully saved." });
     } catch (error) {
@@ -134,7 +137,7 @@ export default function AccountPage() {
   }
 
   const handleClearHistory = async () => {
-    if (!currentUser?.id) return;
+    if (!currentUser?.uid) return;
     try {
       await deleteReportsByUserId(currentUser.uid); // Use UID for report queries now
       toast({ title: "History Cleared", description: "All your saved reports have been deleted." });
@@ -149,8 +152,8 @@ export default function AccountPage() {
     const auth = getAuth();
     const authUser = auth.currentUser;
 
-    if (!authUser) {
-      toast({ title: "Error", description: "You must be logged in to delete your account. Please log out and log back in.", variant: "destructive" });
+    if (!authUser || authUser.uid !== currentUser.uid) {
+      toast({ title: "Error", description: "Authentication mismatch. Please log out and log back in.", variant: "destructive" });
       return;
     }
 
@@ -158,18 +161,17 @@ export default function AccountPage() {
       // Step 1: Delete all associated reports from Firestore
       await deleteReportsByUserId(currentUser.uid);
 
-      // Step 2: Delete user from Firebase Authentication (client-side)
-      await deleteAuthUser(authUser);
-
-      // Step 3: Delete user record from Firestore (server-side)
+      // Step 2: Delete user record from Firestore
       await deleteUser(currentUser.id);
+      
+      // Step 3: Delete user from Firebase Authentication
+      await deleteAuthUser(authUser);
       
       handleLogout(true);
       toast({ title: "Account Deleted", description: "Your account and all data have been permanently deleted." });
 
     } catch (error: any) {
       console.error("Account deletion error:", error);
-      // Handle re-authentication if required for deletion
       if (error.code === 'auth/requires-recent-login') {
         toast({
           title: "Re-authentication Required",
@@ -185,10 +187,11 @@ export default function AccountPage() {
   const handleLogout = (isDeletion = false) => {
     localStorage.removeItem("loggedInUser");
     localStorage.removeItem("loginRedirect");
+    auth.signOut();
     if (!isDeletion) {
       toast({ title: "Logged Out", description: "You have been successfully logged out." });
     }
-    window.location.href = "/";
+    router.push('/');
   };
   
   if (isLoading) {
@@ -315,7 +318,7 @@ export default function AccountPage() {
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" className="w-full sm:w-44 shrink-0">
+                <Button variant="outline" className="w-full sm:w-auto shrink-0">
                   <Trash2 className="mr-2 h-4 w-4" /> Clear History
                 </Button>
               </AlertDialogTrigger>
@@ -333,7 +336,7 @@ export default function AccountPage() {
             </div>
             <AlertDialog onOpenChange={(isOpen) => { if (!isOpen) setDeleteConfirmation(""); }}>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full sm:w-44 shrink-0">
+                <Button variant="destructive" className="w-full sm:w-auto shrink-0">
                   <Ban className="mr-2 h-4 w-4" /> Delete Account
                 </Button>
               </AlertDialogTrigger>
@@ -377,3 +380,5 @@ export default function AccountPage() {
     </div>
   );
 }
+
+    

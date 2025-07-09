@@ -22,7 +22,8 @@ import type { GetDetailedRecipeOutput } from "@/ai/flows/get-detailed-recipe";
 import type { AnalyzeNutritionOutput } from "@/ai/flows/nutrition-analysis";
 import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aware-ai-chat";
 import { getReportById, type Report } from "@/services/reportService";
-import { getUserById } from "@/services/userService";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 
 export default function IndividualHistoryPage() {
@@ -124,20 +125,15 @@ export default function IndividualHistoryPage() {
   };
 
   useEffect(() => {
-    if (id) {
-        const loggedInUserId = JSON.parse(localStorage.getItem("loggedInUser") || "{}").id;
-        if (!loggedInUserId) {
-            router.replace('/login');
-            return;
-        }
-
-        async function fetchReport() {
+    if (!id) return;
+    
+    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+        if (authUser) {
             try {
                 const foundReport = await getReportById(id);
                 if (foundReport) {
                     // Authorization check: does this report's UID match the logged-in user's UID?
-                    const user = await getUserById(loggedInUserId);
-                    if (user && foundReport.uid === user.uid) {
+                    if (foundReport.uid === authUser.uid) {
                          setReport(foundReport);
                          initiateChatWithWelcome(foundReport);
                     } else {
@@ -152,9 +148,12 @@ export default function IndividualHistoryPage() {
             } finally {
                 setIsLoading(false);
             }
+        } else {
+            router.replace('/login');
         }
-        fetchReport();
-    }
+    });
+
+    return () => unsubscribe();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, router]);
   
@@ -248,3 +247,5 @@ export default function IndividualHistoryPage() {
     </div>
   );
 }
+
+    

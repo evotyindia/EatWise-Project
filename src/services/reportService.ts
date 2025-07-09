@@ -1,14 +1,10 @@
 
-'use server';
-
 import { db } from '@/lib/firebase';
 import { collection, addDoc, query, where, getDocs, doc, getDoc, deleteDoc, writeBatch } from 'firebase/firestore';
-import type { GenerateHealthReportOutput } from "@/ai/flows/generate-health-report";
-import type { GetDetailedRecipeOutput } from "@/ai/flows/get-detailed-recipe";
-import type { AnalyzeNutritionOutput } from "@/ai/flows/nutrition-analysis";
-import { getUserById } from './userService';
 
-// Define a unified report structure for state management
+// This is now a CLIENT-SIDE service. It should NOT have 'use server'.
+// The Firebase SDK on the client will automatically handle user authentication.
+
 export interface Report<T = any> {
   id: string; // Firestore document ID
   uid: string; // Firebase Auth User ID
@@ -21,7 +17,7 @@ export interface Report<T = any> {
 }
 
 // Create a new report in Firestore
-export async function createReport(reportData: Omit<Report<any>, 'id'>) {
+export async function createReport(reportData: Omit<Report<any>, 'id'>): Promise<string> {
     try {
         const reportsCollection = collection(db, 'reports');
         const docRef = await addDoc(reportsCollection, reportData);
@@ -101,3 +97,5 @@ export async function deleteReportsByUserId(uid: string): Promise<void> {
         throw new Error("Could not clear user history.");
     }
 }
+
+    

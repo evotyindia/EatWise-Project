@@ -28,8 +28,8 @@ import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Check } from "lucide-react";
-import { getUserByEmail } from "@/services/userService";
 import { createReport } from "@/services/reportService";
+import { auth } from "@/lib/firebase";
 
 
 const diseaseOptions: { id: Disease; label: string; icon: React.ElementType }[] = [
@@ -280,8 +280,8 @@ export function RecipeForm() {
   };
 
   const handleSaveRecipe = async () => {
-    const loggedInUserEmail = JSON.parse(localStorage.getItem("loggedInUser") || "{}").email;
-    if (!loggedInUserEmail) {
+    const authUser = auth.currentUser;
+    if (!authUser) {
       toast({ title: "Login Required", description: "You must be logged in to save recipes.", variant: "destructive" });
       return;
     }
@@ -291,14 +291,8 @@ export function RecipeForm() {
     }
 
     try {
-        const user = await getUserByEmail(loggedInUserEmail);
-        if (!user?.uid) {
-            toast({ title: "User Not Found", description: "Could not find your user account to save the recipe.", variant: "destructive" });
-            return;
-        }
-
         const newReport = {
-          uid: user.uid,
+          uid: authUser.uid,
           type: 'recipe' as const,
           title: reportTitle.trim() || detailedRecipe.recipeTitle,
           summary: detailedRecipe.description,
@@ -309,7 +303,7 @@ export function RecipeForm() {
 
         await createReport(newReport);
 
-        toast({ title: "Recipe Saved", description: "The recipe has been saved to your history." });
+        toast({ title: "Recipe Saved", description: "The recipe has been saved to your history.", variant: "success" });
         setIsSaveDialogOpen(false);
         setReportTitle("");
     } catch (error) {
@@ -631,3 +625,5 @@ export function RecipeForm() {
     </div>
   );
 }
+
+    
