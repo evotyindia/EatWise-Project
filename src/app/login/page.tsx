@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { LogIn } from "lucide-react";
+import { LogIn, Eye, EyeOff } from "lucide-react";
 import { useEffect, Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -35,6 +35,7 @@ function LoginContent() {
   const { toast } = useToast();
 
   const [redirectUrl, setRedirectUrl] = useState("/");
+  const [showPassword, setShowPassword] = useState(false);
   const isEmail = (str: string) => /\S+@\S+\.\S+/.test(str);
 
   useEffect(() => {
@@ -65,30 +66,32 @@ function LoginContent() {
     let userEmail: string | undefined;
 
     try {
-      // Step 1: Determine the email address to use for login.
       if (isEmail(values.identifier)) {
         userEmail = values.identifier;
       } else {
-        // If it's a username, find the corresponding user to get their email.
         const userByUsername = await getUserByUsername(values.identifier);
         if (userByUsername) {
           userEmail = userByUsername.email;
-        } else {
-            // If we can't find a user by username, we show an error immediately.
-            toast({
-                title: "Account Not Found",
-                description: "No account found with that username. Please check the username or try logging in with your email.",
-                variant: "destructive",
-            });
-            return;
         }
       }
 
-      // Step 2: Attempt to sign in with the found email and the provided password.
+      if (!userEmail) {
+        toast({
+            title: "Account Not Found",
+            description: "No account found with that email or username. Please check your details or sign up.",
+            variant: "destructive",
+            action: (
+              <Button variant="secondary" size="sm" asChild>
+                  <Link href="/signup">Sign Up</Link>
+              </Button>
+            ),
+        });
+        return;
+      }
+      
       const userCredential = await signInWithEmailAndPassword(auth, userEmail, values.password);
       const authUser = userCredential.user;
 
-      // Step 3: Handle post-login logic (email verification check, profile sync).
       if (!authUser.emailVerified) {
         await sendEmailVerification(authUser).catch(e => console.error("Failed to resend verification email:", e));
         toast({
@@ -119,11 +122,10 @@ function LoginContent() {
     } catch (error: any) {
       console.error("Login process error:", error);
       
-      // Step 4: Handle specific Firebase errors from the login attempt.
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
         toast({
           title: "Incorrect Credentials",
-          description: "The email or password you entered was incorrect. Please try again.",
+          description: "The email/username or password you entered was incorrect. Please try again.",
           variant: "destructive",
            action: (
               <Button variant="secondary" size="sm" asChild>
@@ -133,8 +135,7 @@ function LoginContent() {
         });
       } else if (error.message.includes("Your user profile could not be found")) {
          toast({ title: "Login Failed", description: error.message, variant: "destructive" });
-      }
-      else {
+      } else {
          toast({
           title: "Login Failed",
           description: "An unexpected error occurred. Please try again.",
@@ -188,9 +189,24 @@ function LoginContent() {
                         Forgot Password?
                       </Link>
                     </div>
-                    <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
-                    </FormControl>
+                    <div className="relative">
+                      <FormControl>
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          {...field}
+                        />
+                      </FormControl>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}

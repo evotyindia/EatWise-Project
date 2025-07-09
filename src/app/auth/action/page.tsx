@@ -7,7 +7,7 @@ import { applyActionCode, checkActionCode, confirmPasswordReset, verifyPasswordR
 import { auth } from "@/lib/firebase";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { LoaderCircle, CircleCheck, AlertTriangle, KeyRound } from "lucide-react";
+import { LoaderCircle, CircleCheck, AlertTriangle, KeyRound, Eye, EyeOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,6 +35,8 @@ function AuthActionHandler() {
     const [message, setMessage] = useState("Processing your request, please wait...");
     const [mode, setMode] = useState<string | null>(null);
     const [oobCode, setOobCode] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const passwordForm = useForm<PasswordResetFormValues>({
         resolver: zodResolver(passwordResetSchema),
@@ -144,7 +146,24 @@ function AuthActionHandler() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>New Password</FormLabel>
-                                            <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
+                                            <div className="relative">
+                                                <FormControl>
+                                                    <Input
+                                                        type={showPassword ? "text" : "password"}
+                                                        placeholder="••••••••"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:bg-transparent"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                >
+                                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                </Button>
+                                            </div>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -155,7 +174,24 @@ function AuthActionHandler() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Confirm New Password</FormLabel>
-                                            <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
+                                            <div className="relative">
+                                                <FormControl>
+                                                    <Input
+                                                        type={showConfirmPassword ? "text" : "password"}
+                                                        placeholder="••••••••"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:bg-transparent"
+                                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                >
+                                                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                </Button>
+                                            </div>
                                             <FormMessage />
                                         </FormItem>
                                     )}

@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { UserPlus, LoaderCircle } from "lucide-react";
-import { Suspense } from "react";
+import { UserPlus, LoaderCircle, Eye, EyeOff } from "lucide-react";
+import { Suspense, useState } from "react";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { createUserInFirestore } from "@/services/userService";
@@ -39,6 +39,8 @@ function SignupContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const emailFromQuery = searchParams.get('email');
   const redirectUrl = searchParams.get('redirect');
@@ -56,18 +58,13 @@ function SignupContent() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      // Step 1: Create user in Firebase Auth on the client
       const userCredential = await createUserWithEmailAndPassword(auth, values.email.toLowerCase(), values.password);
       const user = userCredential.user;
 
-      // Step 2: Call server action to create the user profile in Firestore
-      // This happens before email verification to ensure the profile exists
       await createUserInFirestore(user.uid, values.name, values.email, values.phone);
       
-      // Step 3: Send verification email from the client
       await sendEmailVerification(user);
       
-      // Step 4: Redirect and inform the user
       if (redirectUrl) {
         localStorage.setItem("loginRedirect", redirectUrl);
       }
@@ -156,9 +153,24 @@ function SignupContent() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
-                    </FormControl>
+                    <div className="relative">
+                      <FormControl>
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          {...field}
+                        />
+                      </FormControl>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -169,9 +181,24 @@ function SignupContent() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
-                    </FormControl>
+                    <div className="relative">
+                      <FormControl>
+                        <Input
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          {...field}
+                        />
+                      </FormControl>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:bg-transparent"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
