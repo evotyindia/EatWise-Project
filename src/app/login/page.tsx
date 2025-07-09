@@ -74,6 +74,7 @@ function LoginContent() {
           userEmail = userByUsername.email;
         } else {
             // If username lookup fails, it's a non-existent account for sure.
+            // This case handles a specific username that doesn't exist.
             toast({
                 title: "Account Not Found",
                 description: "No account found with that email or username. Please check your details or sign up.",
@@ -121,7 +122,8 @@ function LoginContent() {
     } catch (error: any) {
       console.error("Login process error:", error);
       
-      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+      // The most common error for bad password or non-existent email is 'auth/invalid-credential'.
+      if (error.code === 'auth/invalid-credential') {
         toast({
           title: "Incorrect Credentials",
           description: "The email/username or password you entered was incorrect. Please try again.",
