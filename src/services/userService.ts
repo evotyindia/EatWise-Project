@@ -1,3 +1,4 @@
+
 'use client';
 
 import { db } from '@/lib/firebase';
@@ -63,37 +64,24 @@ export async function getUserByUid(uid: string): Promise<User | null> {
 }
 
 // This function securely sets the username using a transaction.
-export async function setUsername(uid: string, userId: string, newUsername: string): Promise<void> {
+export async function setUsername(uid: string, userId: string, newUsername: string): Promise<{success: boolean, message?: string}> {
     const sanitizedUsername = newUsername.toLowerCase();
-    
     const userDocRef = doc(db, "users", userId);
-    // Create a new reference to a "usernames" collection document.
-    // The document ID is the username itself, enforcing uniqueness at the document ID level.
     const usernameDocRef = doc(db, "usernames", sanitizedUsername);
 
     try {
         await runTransaction(db, async (transaction) => {
-            // 1. Check if the username document already exists.
             const usernameDoc = await transaction.get(usernameDocRef);
             if (usernameDoc.exists()) {
-                // If it exists, the username is taken. Abort the transaction.
                 throw new Error("This username is already taken. Please choose another one.");
             }
-
-            // 2. If the username is available, create the username document to reserve it.
-            // The document stores the UID of the user who owns it.
             transaction.set(usernameDocRef, { uid: uid });
-
-            // 3. Update the user's profile in the 'users' collection with the new username.
             transaction.update(userDocRef, { username: sanitizedUsername });
         });
+        return { success: true };
     } catch (error: any) {
-        console.error("Error setting username:", error);
-        // Re-throw specific, user-friendly errors to be displayed in a toast.
-        if (error.message.includes("already taken")) {
-            throw error;
-        }
-        throw new Error("Could not set your username due to a server error.");
+        console.error("Error in setUsername transaction:", error);
+        return { success: false, message: error.message || "Could not set your username due to a server error." };
     }
 }
 
@@ -112,15 +100,21 @@ export async function updateUser(userId: string, dataToUpdate: Partial<Omit<User
 // Delete a user from Firestore and their username reservation
 export async function deleteUser(userId: string, username: string): Promise<void> {
     const userDocRef = doc(db, 'users', userId);
-    const usernameDocRef = doc(db, "usernames", username);
     
     try {
         const batch = writeBatch(db);
+
+        // Queue deletion of the main user document
         batch.delete(userDocRef);
-        // Only attempt to delete the username document if a username was actually set.
+
+        // If a username was set, queue deletion of its reservation document as well.
+        // This is safe even if the username document doesn't exist.
         if (username) {
-             batch.delete(usernameDocRef);
+            const usernameDocRef = doc(db, "usernames", username);
+            batch.delete(usernameDocRef);
         }
+        
+        // Commit all deletions in a single atomic operation.
         await batch.commit();
     } catch (error) {
         console.error("Error deleting user from Firestore: ", error);
@@ -137,3 +131,5 @@ export async function getUserById(userId: string): Promise<User | null> {
     }
     return null;
 }
+
+    
