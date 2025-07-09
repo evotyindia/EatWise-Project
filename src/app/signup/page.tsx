@@ -52,29 +52,26 @@ export default function SignupPage() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const newUser = { 
-        name: values.name, 
-        email: values.email, 
-        phone: values.phone, 
-        password: values.password 
-      };
+    const newUser = { 
+      name: values.name, 
+      email: values.email, 
+      phone: values.phone, 
+      password: values.password 
+    };
 
-      await createUser(newUser);
+    const result = await createUser(newUser);
 
+    if (result.success) {
       // Store the original redirect URL if it exists
       if (redirectUrl) {
         localStorage.setItem("loginRedirect", redirectUrl);
       }
-
       // Redirect to the verify email page
       router.push(`/verify-email?email=${encodeURIComponent(values.email)}`);
-
-    } catch (error) {
-      console.error("Signup error:", error);
+    } else {
       toast({
         title: "Signup Failed",
-        description: (error as Error).message || "Could not create your account. Please try again.",
+        description: result.message || "Could not create your account. Please try again.",
         variant: "destructive",
       });
     }
