@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from 'date-fns';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 
 // Define the structure of a report
 interface Report {
@@ -86,11 +87,15 @@ export default function HistoryPage() {
 
     return (
       <Card className="flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
-        <CardHeader className="flex flex-row items-start gap-4 space-y-0">
-          <div className="mt-1">{icons[report.type]}</div>
-          <div>
-            <CardTitle>{report.title}</CardTitle>
-            <CardDescription className="line-clamp-2 min-h-10">{report.summary}</CardDescription>
+        <CardHeader>
+          <div className="flex items-start gap-4">
+            <div className="mt-1">{icons[report.type]}</div>
+            <div>
+              <CardTitle>{report.title}</CardTitle>
+              <CardDescription className="mt-2 line-clamp-2 min-h-[2.5rem]">
+                {report.summary}
+              </CardDescription>
+            </div>
           </div>
         </CardHeader>
         <div className="flex-grow" />
