@@ -18,14 +18,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { LogIn, LoaderCircle } from "lucide-react";
+import { LogIn, LoaderCircle, CheckCircle2, XCircle } from "lucide-react";
 import { useEffect, Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getAndSyncUser } from "@/services/userService";
+import { getAndSyncUser, getUserByUsername, checkUserExists } from "@/services/userService";
+import { useDebounce } from "@/hooks/use-debounce";
+
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
+  identifier: z.string().min(3, { message: "Please enter a valid email or username." }),
   password: z.string().min(1, { message: "Password is required." }),
 });
 
@@ -35,7 +37,11 @@ function LoginContent() {
   const { toast } = useToast();
 
   const [redirectUrl, setRedirectUrl] = useState("/");
-  
+  const [identifierToCheck, setIdentifierToCheck] = useState("");
+  const [isCheckingIdentifier, setIsCheckingIdentifier] = useState(false);
+  const [identifierStatus, setIdentifierStatus] = useState<"idle" | "exists" | "not_found">("idle");
+  const debouncedIdentifier = useDebounce(identifierToCheck, 500);
+
   useEffect(() => {
     const searchRedirect = searchParams.get("redirect");
     const localRedirect = localStorage.getItem("loginRedirect");
@@ -51,19 +57,59 @@ function LoginContent() {
       localStorage.removeItem("loginRedirect");
     }
   }, [searchParams, toast]);
+  
+  // Effect for debounced identifier check
+  useEffect(() => {
+    const checkIdentifier = async () => {
+      if (debouncedIdentifier.length < 3) {
+        setIdentifierStatus("idle");
+        return;
+      }
+      setIsCheckingIdentifier(true);
+      try {
+        const exists = await checkUserExists(debouncedIdentifier);
+        setIdentifierStatus(exists ? "exists" : "not_found");
+      } catch (error) {
+        console.error("Identifier check error:", error);
+        setIdentifierStatus("idle"); // Fallback on error
+      }
+      setIsCheckingIdentifier(false);
+    };
+
+    if (debouncedIdentifier) {
+      checkIdentifier();
+    } else {
+      setIdentifierStatus("idle");
+    }
+  }, [debouncedIdentifier]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
+      identifier: "",
       password: "",
     },
   });
+  
+  const isEmail = (str: string) => /\S+@\S+\.\S+/.test(str);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     form.clearErrors();
+    
+    let userEmail = values.identifier;
+    
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, values.email.toLowerCase(), values.password);
+      // If identifier is not an email, assume it's a username and fetch the email
+      if (!isEmail(values.identifier)) {
+        const userProfile = await getUserByUsername(values.identifier);
+        if (!userProfile) {
+          toast({ title: "Login Failed", description: "User with this username not found.", variant: "destructive" });
+          return;
+        }
+        userEmail = userProfile.email;
+      }
+
+      const userCredential = await signInWithEmailAndPassword(auth, userEmail.toLowerCase(), values.password);
       const authUser = userCredential.user;
 
       if (!authUser.emailVerified) {
@@ -97,21 +143,9 @@ function LoginContent() {
       console.error("Login error:", error);
       
       let errorMessage = "An error occurred during login. Please try again.";
-      let toastAction: React.ReactNode | undefined = undefined;
-
       if (error.code === 'auth/invalid-credential') {
-        errorMessage = "Email or password was incorrect. Please try again.";
-        toastAction = (
-          <Button 
-            variant="secondary" 
-            size="sm" 
-            onClick={() => router.push(`/signup?email=${encodeURIComponent(values.email)}&redirect=${encodeURIComponent(redirectUrl)}`)}
-          >
-            Sign Up
-          </Button>
-        );
+        errorMessage = "Email/Username or password was incorrect. Please try again.";
       }
-
       if (error.message.includes("Your user profile could not be found")) {
         errorMessage = error.message;
       }
@@ -120,7 +154,6 @@ function LoginContent() {
         title: "Login Failed",
         description: errorMessage,
         variant: "destructive",
-        action: toastAction,
       });
     }
   }
@@ -140,13 +173,35 @@ function LoginContent() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
-                name="email"
+                name="identifier"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email Address</FormLabel>
-                    <FormControl>
-                      <Input placeholder="you@example.com" {...field} />
-                    </FormControl>
+                    <FormLabel>Email or Username</FormLabel>
+                    <div className="relative">
+                        <FormControl>
+                          <Input 
+                            placeholder="you@example.com or your_username" 
+                            {...field} 
+                            onChange={(e) => {
+                                field.onChange(e);
+                                setIdentifierToCheck(e.target.value);
+                            }}
+                          />
+                        </FormControl>
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                            {isCheckingIdentifier && <LoaderCircle className="h-5 w-5 text-muted-foreground animate-spin" />}
+                            {!isCheckingIdentifier && identifierStatus === 'exists' && <CheckCircle2 className="h-5 w-5 text-success" />}
+                            {!isCheckingIdentifier && identifierStatus === 'not_found' && <XCircle className="h-5 w-5 text-destructive" />}
+                        </div>
+                    </div>
+                     {identifierStatus === 'not_found' && debouncedIdentifier.length > 0 && (
+                        <p className="text-sm font-medium text-destructive">
+                            Account not found.{" "}
+                            <Link href={`/signup?email=${isEmail(debouncedIdentifier) ? encodeURIComponent(debouncedIdentifier) : ''}`} className="underline">
+                                Sign up?
+                            </Link>
+                        </p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -173,7 +228,7 @@ function LoginContent() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting || identifierStatus === 'not_found'}>
                  {form.formState.isSubmitting ? "Logging in..." : "Log In"}
               </Button>
             </form>
