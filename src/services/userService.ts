@@ -1,14 +1,8 @@
 
 'use server';
 
-import { db, auth } from '@/lib/firebase';
-import { collection, addDoc, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc, limit, runTransaction } from 'firebase/firestore';
-import { 
-    createUserWithEmailAndPassword, 
-    sendEmailVerification,
-    signInWithEmailAndPassword,
-    signOut,
-} from 'firebase/auth';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc, limit } from 'firebase/firestore';
 
 export interface User {
     id: string; // This will be the Firestore document ID
@@ -21,7 +15,6 @@ export interface User {
 }
 
 // Check for existing user by username in Firestore
-// This function is now designed to be called by an authenticated user.
 async function isUsernameTaken(username: string): Promise<boolean> {
     const usersCollection = collection(db, 'users');
     const q = query(usersCollection, where("username", "==", username.toLowerCase()), limit(1));
@@ -29,79 +22,46 @@ async function isUsernameTaken(username: string): Promise<boolean> {
     return !querySnapshot.empty;
 }
 
-// Create a new user in Firebase Auth and Firestore
-export async function createUser(userData: Omit<User, 'id' | 'uid' | 'emailVerified' | 'username'> & { password?: string }): Promise<{ success: boolean, message?: string }> {
-    if (!userData.password) {
-        return { success: false, message: "Password is required to create a user." };
-    }
-    
+// Create a new user profile in Firestore
+// This is called from the client after Firebase Auth has created the user.
+export async function createUserInFirestore(uid: string, name: string, email: string, phone: string | undefined): Promise<{ success: boolean, message?: string }> {
     try {
-        const userCredential = await createUserWithEmailAndPassword(auth, userData.email.toLowerCase(), userData.password);
-        const user = userCredential.user;
-
-        await sendEmailVerification(user);
-
         const usersCollection = collection(db, 'users');
         await addDoc(usersCollection, {
-            uid: user.uid,
-            name: userData.name,
-            username: '', // Username is set later
-            email: userData.email.toLowerCase(),
-            phone: userData.phone || '',
-            emailVerified: user.emailVerified, // Store initial state
+            uid: uid,
+            name: name,
+            username: '', // Username is set later on the account page
+            email: email.toLowerCase(),
+            phone: phone || '',
+            emailVerified: false, // Email is not verified at the point of creation
         });
-        
         return { success: true };
-
-    } catch (error: any) {
-        if (error.code === 'auth/email-already-in-use') {
-            return { success: false, message: "An account with this email already exists." };
-        }
-        console.error("Error creating user: ", error);
-        return { success: false, message: "Could not create user account. Please try again." };
+    } catch (error) {
+        console.error("Error creating user profile in Firestore: ", error);
+        return { success: false, message: "Could not create user profile in database." };
     }
 }
 
-// Sign in user with email and password
-export async function signInUser(email: string, password: string): Promise<User> {
-    try {
-        const userCredential = await signInWithEmailAndPassword(auth, email.toLowerCase(), password);
-        const user = userCredential.user;
 
-        const userProfile = await getUserByUid(user.uid);
-        if (!userProfile) {
-            // This case is unlikely if signup is working, but it's good practice to handle.
-            await signOut(auth);
-            throw new Error("Could not find user profile data. Please contact support.");
-        }
+// Get a user profile from Firestore by their UID and sync their verification status
+// This is called from the client after a successful login.
+export async function getAndSyncUser(uid: string): Promise<User | null> {
+    const userProfile = await getUserByUid(uid);
 
-        // Sync verification status from Auth to Firestore if it's not already synced.
-        if (user.emailVerified && !userProfile.emailVerified) {
+    if (userProfile && !userProfile.emailVerified) {
+        try {
+            // The client is authenticated when calling this server action, so this update is allowed by Firestore rules.
             const userDocRef = doc(db, 'users', userProfile.id);
             await updateDoc(userDocRef, { emailVerified: true });
-            // Update the in-memory object so we don't have to fetch it again.
-            userProfile.emailVerified = true;
+            userProfile.emailVerified = true; // Update in-memory object before returning
+        } catch (error) {
+            console.error("Error syncing verification status:", error);
+            // We don't throw an error here, as the primary goal is to fetch the user.
+            // The sync can be re-attempted on the next login.
         }
-
-        // Now, perform the definitive check on the (possibly updated) profile.
-        if (!userProfile.emailVerified) {
-            await signOut(auth); // Sign out to prevent leaving them in a partially logged-in state.
-            await sendEmailVerification(user).catch(e => console.error("Failed to resend verification email:", e));
-            throw new Error("Your email is not verified. We've sent another verification link to your inbox. Please check your email (and spam folder) to continue.");
-        }
-        
-        return userProfile;
-    } catch (error: any) {
-        if (error.code === 'auth/invalid-credential') {
-            throw new Error("Invalid email or password.");
-        }
-        // Re-throw our specific "not verified" error so the UI can catch it.
-        if (error.message.includes("Your email is not verified")) {
-            throw error;
-        }
-        console.error("Error signing in: ", error);
-        throw new Error("An error occurred during login. Please try again.");
     }
+    
+    return userProfile;
 }
 
 // Get user from Firestore by UID
@@ -146,7 +106,6 @@ export async function updateUser(userId: string, dataToUpdate: Partial<Omit<User
             throw new Error("This username is already taken. Please choose another one.");
         }
         
-        // This is safe now because we're only updating one user's info.
         dataToUpdate.username = newUsername;
     }
     
@@ -163,7 +122,6 @@ export async function deleteUser(userId: string): Promise<void> {
     try {
         const userDocRef = doc(db, 'users', userId);
         await deleteDoc(userDocRef);
-        // Deleting from Firebase Auth is handled on the client-side for security.
     } catch (error) {
         console.error("Error deleting user from Firestore: ", error);
         throw new Error("Could not delete user account from the database.");

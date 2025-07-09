@@ -19,8 +19,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogIn } from "lucide-react";
-import { signInUser } from "@/services/userService";
 import { useEffect } from "react";
+import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { getAndSyncUser } from "@/services/userService";
+
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -57,27 +60,49 @@ export default function LoginPage() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    form.clearErrors();
     try {
-      const user = await signInUser(values.email, values.password);
+      // Step 1: Sign in on the client using Firebase Auth
+      const userCredential = await signInWithEmailAndPassword(auth, values.email.toLowerCase(), values.password);
+      const authUser = userCredential.user;
 
-      if (user) {
-        localStorage.setItem("loggedInUser", JSON.stringify({ id: user.id, email: user.email }));
+      // Step 2: Check if the user's email is verified in Firebase Auth
+      if (!authUser.emailVerified) {
+        await sendEmailVerification(authUser).catch(e => console.error("Failed to resend verification email:", e));
+        toast({
+          title: "Email Not Verified",
+          description: "We've sent another verification link to your inbox. Please check your email (and spam folder) to continue.",
+          variant: "destructive",
+        });
+        await auth.signOut(); // Log them out so they can't proceed
+        return;
+      }
+      
+      // Step 3: Call server action to get user profile from Firestore and sync verification status
+      const userProfile = await getAndSyncUser(authUser.uid);
+
+      if (userProfile) {
+        localStorage.setItem("loggedInUser", JSON.stringify({ id: userProfile.id, email: userProfile.email }));
         toast({
           title: "Login Successful",
           description: "Welcome back!",
           variant: "success",
         });
-        window.location.href = redirectUrl;
+        window.location.href = redirectUrl; // Use window.location to ensure a full page reload
         localStorage.removeItem("loginRedirect");
       } else {
-        // This case should not be reached if signInUser throws an error, but as a fallback
-        throw new Error("Login failed. Please check your credentials.");
+        throw new Error("Could not find user profile data. Please contact support.");
       }
-    } catch (error) {
+
+    } catch (error: any) {
       console.error("Login error:", error);
+      let errorMessage = "An error occurred during login. Please try again.";
+      if (error.code === 'auth/invalid-credential') {
+          errorMessage = "Invalid email or password.";
+      }
       toast({
         title: "Login Failed",
-        description: (error as Error).message || "Could not log you in. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     }
