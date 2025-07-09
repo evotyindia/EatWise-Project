@@ -11,16 +11,16 @@ import { ThemeToggleButton } from "../common/theme-toggle-button";
 import { Button } from "../ui/button";
 
 const mainNavItems = [
-  { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
-  { href: "/analyze", label: "Analyze", icon: <ScanLine className="h-5 w-5" /> },
-  { href: "/recipes", label: "Recipes", icon: <CookingPot className="h-5 w-5" /> },
-  { href: "/nutrition-check", label: "Nutrition", icon: <BarChart3 className="h-5 w-5" /> },
+  { href: "/", label: "Home", icon: Home },
+  { href: "/analyze", label: "Analyze", icon: ScanLine },
+  { href: "/recipes", label: "Recipes", icon: CookingPot },
+  { href: "/nutrition-check", label: "Nutrition", icon: BarChart3 },
 ];
 
 const moreNavItems = [
-    { href: "/history", label: "History", icon: <History className="h-5 w-5" /> },
-    { href: "/blogs", label: "Blogs", icon: <BookOpen className="h-5 w-5" /> },
-    { href: "/contact", label: "Contact", icon: <Mail className="h-5 w-5" />},
+    { href: "/history", label: "History", icon: History },
+    { href: "/blogs", label: "Blogs", icon: BookOpen },
+    { href: "/contact", label: "Contact", icon: Mail},
 ];
 
 export function BottomNavbar() {
@@ -46,6 +46,7 @@ export function BottomNavbar() {
       <div className="container flex items-center justify-around h-20 max-w-screen-xl px-0">
         {mainNavItems.map((item) => {
           const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
+          const Icon = item.icon;
           return (
             <Link
               key={item.href}
@@ -59,7 +60,7 @@ export function BottomNavbar() {
                 "flex items-center justify-center gap-2 rounded-full px-4 py-1.5 transition-all duration-300",
                 isActive ? "bg-accent text-accent-foreground shadow-lg" : ""
               )}>
-                {item.icon}
+                <Icon className="h-5 w-5" />
                 {isActive && <span className="text-xs font-bold">{item.label}</span>}
               </div>
                {!isActive && <span className="text-xs">{item.label}</span>}
@@ -86,6 +87,7 @@ export function BottomNavbar() {
             <div className="flex flex-col space-y-2">
               {moreNavItems.map((item) => {
                 const isActive = pathname.startsWith(item.href);
+                const Icon = item.icon;
                 return (
                   <SheetClose asChild key={item.href}>
                     <Link
@@ -95,7 +97,7 @@ export function BottomNavbar() {
                         isActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
                       )}
                     >
-                      {item.icon}
+                      <Icon className="h-5 w-5" />
                       <span>{item.label}</span>
                     </Link>
                   </SheetClose>
