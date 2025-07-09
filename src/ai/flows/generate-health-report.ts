@@ -6,7 +6,7 @@
  *
  * - generateHealthReport - A function that handles the health report generation process.
  * - GenerateHealthReportInput - The input type for the generateHealthReport function.
- * - GenerateHealthReportOutput - The return type for the generateHealth-report function.
+ * - GenerateHealthReportOutput - The return type for the generateHealthReport function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -46,24 +46,24 @@ const GenerateHealthReportOutputSchema = z.object({
     .min(1)
     .max(5)
     .describe('The overall health rating of the food product, from 1 to 5 stars.'),
-  summary: z.string().describe("A one-sentence executive summary of the product's health profile. E.g., 'A high-sugar snack with some fiber, best for occasional consumption.'"),
+  summary: z.string().describe("A concise, 2-3 sentence executive summary of the product's health profile, highlighting the most critical takeaways for the user."),
 
-  greenFlags: z.string().describe("A bullet-point list of 2-4 key positive aspects. Be specific. E.g., '* Good source of fiber', '* Made with whole grains'. If none, state 'No significant positive aspects found.'"),
-  redFlags: z.string().describe("A bullet-point list of 2-4 key health concerns to be aware of. Be specific. E.g., '* High in Sodium', '* Contains artificial sweeteners'. If none, state 'No significant health concerns found.'"),
+  greenFlags: z.string().describe("A detailed bullet-point list of all significant positive aspects, with a brief explanation for each. Be specific and encouraging. If none, state 'No significant positive aspects were identified.'"),
+  redFlags: z.string().describe("A detailed bullet-point list of all significant health concerns. Explain why each is a concern in simple terms. If none, state 'No significant health concerns were identified.'"),
   
   detailedAnalysis: z.object({
-    processingLevel: z.string().describe("Assessment of the food's processing level (e.g., 'Unprocessed', 'Minimally Processed', 'Ultra-Processed') and a brief explanation of why."),
-    macronutrientProfile: z.string().describe("Analysis of the balance of protein, carbs, and fats. E.g., 'High in refined carbohydrates and fats, with very little protein.'"),
-    micronutrientHighlights: z.string().describe("Bullet-point comments on noteworthy vitamins or minerals, if identifiable and noteworthy. E.g., '* Good source of Calcium and Vitamin D.'. If none, state 'No significant micronutrients to highlight.'"),
-    sugarAnalysis: z.string().describe("A specific analysis of the sugar content, distinguishing between natural and added sugars if possible. Comment on its level."),
+    processingLevel: z.string().describe("Assessment of the food's processing level (e.g., 'Unprocessed', 'Minimally Processed', 'Ultra-Processed') and a detailed but simple explanation of why, referencing the ingredients if possible."),
+    macronutrientProfile: z.string().describe("Detailed analysis of the balance and quality of protein, carbs, and fats (e.g., source of protein, refined vs complex carbs). Explain the implications for energy and satiety."),
+    micronutrientHighlights: z.string().describe("Detailed bullet-point comments on noteworthy vitamins or minerals, explaining their benefits. If none, state 'No significant micronutrients to highlight.'"),
+    sugarAnalysis: z.string().describe("A very specific and detailed analysis of the sugar content, distinguishing between natural and added sugars if possible. Comment on its level relative to daily recommendations."),
   }).describe("A deeper dive into specific nutritional components."),
   
-  bestSuitedFor: z.string().describe("Describes the ideal consumer or occasion for this product. E.g., 'Best as an occasional treat for children', 'Not recommended for individuals with diabetes.'"),
+  bestSuitedFor: z.string().describe("Provides specific recommendations for consumer types or occasions for this product (e.g., 'Best as an occasional treat for children', 'Not recommended for individuals with diabetes due to high sugar content.')."),
   consumptionTips: z.string().describe("Actionable bullet-point tips for healthier consumption. E.g., '* Pair with a source of protein like yogurt to balance the meal.', '* Limit portion size to two biscuits.'. If none, state 'No specific consumption tips.'"),
-  indianDietContext: z.string().describe("A brief explanation of how this product fits into a typical balanced Indian diet. E.g., 'This can be a convenient alternative to a traditional fried snack but should not replace a main meal like dal-roti.'"),
+  indianDietContext: z.string().describe("A detailed explanation of how this product fits into a typical balanced Indian diet. E.g., 'This can be a convenient alternative to a traditional fried snack like samosa, but it lacks the fiber and nutrients of a meal like dal-roti and should not replace it.'"),
   
-  healthierAlternatives: z.string().describe('A bullet-point list of 2-3 healthier Indian alternatives, with brief reasons why they are better.'),
-  ingredientDeepDive: z.array(IngredientDeepDiveItemSchema).describe("A detailed analysis of each key ingredient, its purpose, and health implications. If ingredients are not available or unclear, this should be an empty array."),
+  healthierAlternatives: z.string().describe('A detailed bullet-point list of 2-3 healthier Indian alternatives, with clear reasons why they are better options.'),
+  ingredientDeepDive: z.array(IngredientDeepDiveItemSchema).describe("An extremely detailed analysis of the top 5-7 most impactful ingredients, both good and bad. Provide a clear description, risk level, and justification for each."),
 
   productType: z.string().describe('The product type (e.g., Snack, Beverage, Ready-to-eat meal).'),
   processingLevelRating: RatingObjectSchema.describe('Rating (1-5) and justification for food processing level (1=unprocessed, 5=ultra-processed).'),
@@ -85,10 +85,8 @@ const prompt = ai.definePrompt({
     schema: GenerateHealthReportOutputSchema,
     format: 'json',
   },
-  system: `You are an expert AI nutritionist for an Indian audience. Your task is to generate a comprehensive, clear, and easy-to-understand health report for a food product. Use bullet points for all lists to ensure scannability.
-Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object.
-If the provided information is insufficient for a complete analysis (e.g., blurry photo, cannot read ingredients), you MUST respond with a structured error. Set 'healthRating' to 1, 'summary' to 'Sorry, the provided information is unclear...', and all other fields to 'N/A' or sensible defaults that indicate an error. Ensure the output strictly adheres to the JSON schema.`,
-  prompt: `Analyze the following food product based on the provided information.
+  system: `You are an expert AI nutritionist for an Indian audience. Your task is to generate a comprehensive, clear, and highly detailed health report for a food product. Use bullet points for all lists to ensure scannability. Your entire response MUST be a single, valid JSON object that conforms to the output schema. Do not include any text or explanations outside of this JSON object. If the provided information is insufficient for a complete analysis (e.g., blurry photo, cannot read ingredients), you MUST respond with a structured error. Set 'healthRating' to 1, 'summary' to 'Sorry, the provided information is unclear...', and all other fields to 'N/A' or sensible defaults that indicate an error. Ensure the output strictly adheres to the JSON schema.`,
+  prompt: `Analyze the following food product based on the provided information. Be extremely thorough and detailed in your explanations for each section.
 
   {{#if productName}}
   Product Name: {{productName}}
@@ -114,19 +112,19 @@ If the provided information is insufficient for a complete analysis (e.g., blurr
 
   1.  **Product Type**: Identify the product type (e.g., Snack, Beverage, Ready-to-eat meal).
   2.  **Overall Health Rating**: Assign a health rating from 1 (least healthy) to 5 (most healthy).
-  3.  **Summary**: A one-sentence executive summary of the product's health profile.
-  4.  **Green Flags** (as bullet points): 2-4 key positive aspects. If none, state "No significant positive aspects found."
-  5.  **Red Flags** (as bullet points): 2-4 key health concerns. If none, state "No significant health concerns found."
+  3.  **Summary**: A detailed 2-3 sentence executive summary of the product's health profile and your main recommendation.
+  4.  **Green Flags** (as bullet points): A detailed list of all significant positive aspects. For each, explain *why* it's a good thing (e.g., '* Rich in Whole Grains: Provides sustained energy and fiber, which is good for digestion.'). If none, state "No significant positive aspects were identified."
+  5.  **Red Flags** (as bullet points): A detailed list of all significant health concerns. For each, explain *why* it's a concern in simple terms (e.g., '* High in Sodium: Exceeds 20% of the recommended daily intake in one serving, which can contribute to high blood pressure over time.'). If none, state "No significant health concerns were identified."
   6.  **Detailed Analysis**:
-      *   **Processing Level**: Assess the processing level (e.g., 'Ultra-Processed') and briefly explain why.
-      *   **Macronutrient Profile**: Analyze the balance of protein, carbs, and fats.
-      *   **Micronutrient Highlights** (as bullet points): Mention any noteworthy vitamins or minerals. If none, state "No significant micronutrients to highlight."
-      *   **Sugar Analysis**: Specifically analyze the sugar content.
-  7.  **Best Suited For**: Describe the ideal consumer or occasion for this product.
-  8.  **Consumption Tips** (as bullet points): Provide actionable tips for healthier consumption. If none, state "No specific consumption tips."
-  9.  **Indian Diet Context**: Explain how this product fits into a balanced Indian diet.
-  10. **Healthier Alternatives** (as bullet points): Suggest 2-3 healthier Indian alternatives with brief reasons.
-  11. **Ingredient-by-Ingredient Deep Dive**: For each major ingredient, provide a 'description', 'riskLevel' ('Low', 'Medium', 'High', 'Neutral'), and a concise 'riskReason'. Populate this into the 'ingredientDeepDive' array.
+      *   **Processing Level**: Assess the processing level and provide a detailed but simple explanation of why, referencing ingredients if possible.
+      *   **Macronutrient Profile**: Provide a detailed analysis of the macronutrient balance and quality. Discuss implications for energy, satiety, and health.
+      *   **Micronutrient Highlights** (as bullet points): Detail any noteworthy vitamins or minerals and explain their benefits. If none, state "No significant micronutrients to highlight."
+      *   **Sugar Analysis**: Give a very specific and detailed analysis of the sugar content, comparing it to daily recommended limits if possible.
+  7.  **Best Suited For**: Provide specific recommendations for consumer types or occasions.
+  8.  **Consumption Tips** (as bullet points): Provide actionable, insightful tips for healthier consumption.
+  9.  **Indian Diet Context**: Give a detailed explanation of how this product fits into a balanced Indian diet.
+  10. **Healthier Alternatives** (as bullet points): Suggest 2-3 healthier Indian alternatives with clear, compelling reasons why they are better.
+  11. **Ingredient-by-Ingredient Deep Dive**: Analyze the top 5-7 most impactful ingredients. For each, provide a 'description', a 'riskLevel' ('Low', 'Medium', 'High', 'Neutral'), and a very clear 'riskReason'. Populate this into the 'ingredientDeepDive' array.
   12. **Numerical Ratings**: Provide ratings (1-5) and a short justification for Processing Level, Sugar Content, and Nutrient Density.
 
   Present all lists as bullet points starting with '*'.
