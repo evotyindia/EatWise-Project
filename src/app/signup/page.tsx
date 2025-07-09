@@ -55,8 +55,12 @@ export default function SignupPage() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const users = JSON.parse(localStorage.getItem("users") || "[]");
-      const emailExists = users.some((user: any) => user.email.toLowerCase() === values.email.toLowerCase());
-      const usernameExists = users.some((user: any) => user.username?.toLowerCase() === values.username.toLowerCase());
+      
+      const newUsername = values.username.toLowerCase();
+      const newEmail = values.email.toLowerCase();
+
+      const emailExists = users.some((user: any) => user.email.toLowerCase() === newEmail);
+      const usernameExists = users.some((user: any) => user.username?.toLowerCase() === newUsername);
 
       if (emailExists) {
         toast({
@@ -78,8 +82,8 @@ export default function SignupPage() {
 
       users.push({ 
         name: values.name, 
-        username: values.username,
-        email: values.email, 
+        username: newUsername,
+        email: newEmail, 
         phone: values.phone, 
         password: values.password 
       });

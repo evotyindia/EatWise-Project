@@ -105,7 +105,8 @@ export default function AccountPage() {
   function onUsernameSubmit(values: z.infer<typeof usernameFormSchema>) {
     try {
       let users = JSON.parse(localStorage.getItem("users") || "[]");
-      const usernameExists = users.some((u: any) => u.username?.toLowerCase() === values.username.toLowerCase());
+      const lowercasedUsername = values.username.toLowerCase();
+      const usernameExists = users.some((u: any) => u.username?.toLowerCase() === lowercasedUsername);
       if (usernameExists) {
         usernameForm.setError("username", { type: "manual", message: "This username is already taken." });
         return;
@@ -113,7 +114,7 @@ export default function AccountPage() {
       const userIndex = users.findIndex((u: any) => u.email === currentUser.email);
       if (userIndex === -1) throw new Error("User not found.");
 
-      users[userIndex].username = values.username;
+      users[userIndex].username = lowercasedUsername;
       localStorage.setItem("users", JSON.stringify(users));
       setCurrentUser(users[userIndex]);
       toast({ title: "Username Set!", description: "Your unique username has been saved." });
@@ -128,11 +129,13 @@ export default function AccountPage() {
       let users = JSON.parse(localStorage.getItem("users") || "[]");
       const userIndex = users.findIndex((u: any) => u.email === currentUser.email);
       if (userIndex === -1) throw new Error("User not found.");
-      if (values.email !== currentUser.email && users.some((u: any) => u.email === values.email)) {
+
+      const newEmail = values.email.toLowerCase();
+      if (newEmail !== currentUser.email && users.some((u: any) => u.email === newEmail)) {
         toast({ title: "Update Failed", description: "This email address is already in use.", variant: "destructive" });
         return;
       }
-      const updatedUser = { ...users[userIndex], name: values.name, email: values.email, phone: values.phone };
+      const updatedUser = { ...users[userIndex], name: values.name, email: newEmail, phone: values.phone };
       users[userIndex] = updatedUser;
       
       localStorage.setItem("users", JSON.stringify(users));
@@ -181,13 +184,10 @@ export default function AccountPage() {
 
   const handleDeleteAccount = () => {
     try {
-      // Clear history first
       handleClearHistory();
-      // Remove user
       let users = JSON.parse(localStorage.getItem("users") || "[]");
       const updatedUsers = users.filter((u: any) => u.email !== currentUser.email);
       localStorage.setItem("users", JSON.stringify(updatedUsers));
-      // Log out
       handleLogout(true);
       toast({ title: "Account Deleted", description: "Your account has been permanently deleted." });
     } catch (error) {
@@ -207,7 +207,6 @@ export default function AccountPage() {
     return null;
   }
 
-  // One-time username setup view
   if (!currentUser.username) {
     return (
        <div className="container mx-auto py-12 px-4 md:px-6 animate-fade-in-up flex justify-center items-center min-h-[calc(100vh-8rem)]">
@@ -241,7 +240,6 @@ export default function AccountPage() {
     );
   }
 
-  // Regular account settings view
   return (
     <div className="container mx-auto py-12 px-4 md:px-6 animate-fade-in-up">
       <div className="flex flex-col items-center mb-8">
@@ -314,52 +312,62 @@ export default function AccountPage() {
             <CardTitle className="text-destructive">Danger Zone</CardTitle>
             <CardDescription>These actions are irreversible. Please proceed with caution.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
+        <CardContent className="space-y-6 p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-                <p className="font-semibold">Clear All History</p>
-                <p className="text-sm text-muted-foreground">This will permanently delete all your saved reports.</p>
+              <p className="font-semibold">Clear All History</p>
+              <p className="text-sm text-muted-foreground">This will permanently delete all your saved reports.</p>
             </div>
             <AlertDialog>
-              <AlertDialogTrigger asChild><Button variant="outline"><Trash2 className="mr-2 h-4 w-4" /> Clear History</Button></AlertDialogTrigger>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" className="w-full sm:w-44 shrink-0">
+                  <Trash2 className="mr-2 h-4 w-4" /> Clear History
+                </Button>
+              </AlertDialogTrigger>
               <AlertDialogContent>
-                  <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete all your saved reports. This action cannot be undone.</AlertDialogDescription></AlertDialogHeader>
-                  <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={handleClearHistory}>Yes, Clear History</AlertDialogAction></AlertDialogFooter>
+                <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete all your saved reports. This action cannot be undone.</AlertDialogDescription></AlertDialogHeader>
+                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={handleClearHistory}>Yes, Clear History</AlertDialogAction></AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-        </CardContent>
-        <Separator className="max-w-4xl mx-auto" />
-        <CardContent className="pt-6 space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
+          </div>
+          <Separator />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-                <p className="font-semibold">Delete My Account</p>
-                <p className="text-sm text-muted-foreground">This will permanently delete your account and all associated data.</p>
+              <p className="font-semibold">Delete My Account</p>
+              <p className="text-sm text-muted-foreground">This will permanently delete your account and all associated data.</p>
             </div>
             <AlertDialog onOpenChange={(isOpen) => { if (!isOpen) setDeleteConfirmation(""); }}>
-              <AlertDialogTrigger asChild><Button variant="destructive"><Ban className="mr-2 h-4 w-4" /> Delete Account</Button></AlertDialogTrigger>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="w-full sm:w-44 shrink-0">
+                  <Ban className="mr-2 h-4 w-4" /> Delete Account
+                </Button>
+              </AlertDialogTrigger>
               <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action is permanent. To confirm, please type <strong className="text-foreground">@{currentUser.username}</strong> or <strong className="text-foreground">CONFIRM</strong> below.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <Input 
-                    value={deleteConfirmation}
-                    onChange={(e) => setDeleteConfirmation(e.target.value)}
-                    placeholder={`Type @${currentUser.username} or CONFIRM`}
-                    className="my-2"
-                  />
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction 
-                      className="bg-destructive hover:bg-destructive/90" 
-                      onClick={handleDeleteAccount}
-                      disabled={deleteConfirmation !== `@${currentUser.username}` && deleteConfirmation.toUpperCase() !== "CONFIRM"}
-                    >
-                      Yes, Delete My Account
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action is permanent. To confirm, please type <strong className="text-foreground">{currentUser.username}/CONFIRM</strong> below.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <Input 
+                  value={deleteConfirmation}
+                  onChange={(e) => setDeleteConfirmation(e.target.value)}
+                  placeholder={`Type ${currentUser.username}/CONFIRM`}
+                  className="my-2"
+                />
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    className="bg-destructive hover:bg-destructive/90" 
+                    onClick={handleDeleteAccount}
+                    disabled={deleteConfirmation !== `${currentUser.username}/CONFIRM`}
+                  >
+                    Yes, Delete My Account
+                  </AlertDialogAction>
+                </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+          </div>
         </CardContent>
       </Card>
       
