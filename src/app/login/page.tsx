@@ -73,7 +73,6 @@ function LoginContent() {
         if (userByUsername) {
           userEmail = userByUsername.email;
         } else {
-            // If username lookup fails, it's a non-existent account for sure.
             // This case handles a specific username that doesn't exist.
             toast({
                 title: "Account Not Found",
@@ -93,12 +92,21 @@ function LoginContent() {
       const authUser = userCredential.user;
 
       if (!authUser.emailVerified) {
-        await sendEmailVerification(authUser).catch(e => console.error("Failed to resend verification email:", e));
-        toast({
-          title: "Email Not Verified",
-          description: "We've sent another verification link to your inbox. Please check your email (and spam folder) to continue.",
-          variant: "destructive",
-        });
+        try {
+            await sendEmailVerification(authUser);
+            toast({
+                title: "Email Not Verified",
+                description: "We've sent another verification link to your inbox. Please check your email (and spam folder) to continue.",
+                variant: "destructive",
+            });
+        } catch (resendError: any) {
+            console.error("Failed to resend verification email:", resendError);
+            toast({
+                title: "Email Not Verified",
+                description: "Your email is not verified. We tried to send a new link, but it failed. Please try logging in again in a few minutes.",
+                variant: "destructive",
+            });
+        }
         await auth.signOut();
         return;
       }
