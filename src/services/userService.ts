@@ -23,8 +23,8 @@ export async function checkUsernameExists(username: string): Promise<boolean> {
         return docSnap.exists();
     } catch (error) {
         console.error("Error checking username existence: ", error);
-        // In case of error, default to true to prevent accidental overwrites
-        return true;
+        // On error, assume it does not exist to prevent users from getting stuck.
+        return false;
     }
 }
 
@@ -37,8 +37,8 @@ export async function checkEmailExists(email: string): Promise<boolean> {
         return !querySnapshot.empty;
     } catch (error) {
         console.error("Error checking email existence: ", error);
-        // In case of error, default to true to prevent accidental account creation issues
-        return true;
+        // On error, assume it does not exist to prevent users from getting stuck.
+        return false;
     }
 }
 
