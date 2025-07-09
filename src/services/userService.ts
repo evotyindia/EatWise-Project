@@ -2,7 +2,7 @@
 'use server';
 
 import { db, auth } from '@/lib/firebase';
-import { collection, addDoc, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc, limit } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc, limit, runTransaction } from 'firebase/firestore';
 import { 
     createUserWithEmailAndPassword, 
     sendEmailVerification,
@@ -21,7 +21,8 @@ export interface User {
 }
 
 // Check for existing user by username in Firestore
-async function checkExistingUsername(username: string): Promise<boolean> {
+// This function is now designed to be called by an authenticated user.
+async function isUsernameTaken(username: string): Promise<boolean> {
     const usersCollection = collection(db, 'users');
     const q = query(usersCollection, where("username", "==", username.toLowerCase()), limit(1));
     const querySnapshot = await getDocs(q);
@@ -29,14 +30,9 @@ async function checkExistingUsername(username: string): Promise<boolean> {
 }
 
 // Create a new user in Firebase Auth and Firestore
-export async function createUser(userData: Omit<User, 'id' | 'uid' | 'emailVerified'> & { password?: string }): Promise<void> {
+export async function createUser(userData: Omit<User, 'id' | 'uid' | 'emailVerified' | 'username'> & { password?: string }): Promise<void> {
     if (!userData.password) {
         throw new Error("Password is required to create a user.");
-    }
-
-    const usernameExists = await checkExistingUsername(userData.username);
-    if (usernameExists) {
-        throw new Error("This username is already taken.");
     }
     
     try {
@@ -49,10 +45,10 @@ export async function createUser(userData: Omit<User, 'id' | 'uid' | 'emailVerif
         await addDoc(usersCollection, {
             uid: user.uid,
             name: userData.name,
-            username: userData.username.toLowerCase(),
+            username: '', // Username is set later
             email: userData.email.toLowerCase(),
             phone: userData.phone || '',
-            emailVerified: false,
+            emailVerified: user.emailVerified, // Store initial state
         });
 
     } catch (error: any) {
@@ -67,7 +63,7 @@ export async function createUser(userData: Omit<User, 'id' | 'uid' | 'emailVerif
 // Sign in user with email and password
 export async function signInUser(email: string, password: string): Promise<User> {
     try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email.toLowerCase(), password);
         const user = userCredential.user;
 
         const userProfile = await getUserByUid(user.uid);
@@ -115,15 +111,6 @@ async function getUserByUid(uid: string): Promise<User | null> {
     return { id: userDoc.id, ...userDoc.data() } as User;
 }
 
-// Get user from Firestore by username
-async function getUserByUsername(username: string): Promise<User | null> {
-    const q = query(collection(db, "users"), where("username", "==", username.toLowerCase()), limit(1));
-    const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) return null;
-    const userDoc = querySnapshot.docs[0];
-    return { id: userDoc.id, ...userDoc.data() } as User;
-}
-
 // Get user by email only
 export async function getUserByEmail(email: string): Promise<User | null> {
     const q = query(collection(db, "users"), where("email", "==", email.toLowerCase()), limit(1));
@@ -143,19 +130,25 @@ export async function getUserById(userId: string): Promise<User | null> {
     return null;
 }
 
-// Update a user's details in Firestore
+// Update a user's details in Firestore, including setting the username for the first time.
 export async function updateUser(userId: string, dataToUpdate: Partial<Omit<User, 'id' | 'uid' | 'email' | 'emailVerified'>> & { username?: string }): Promise<void> {
+    const userDocRef = doc(db, 'users', userId);
+
+    // If a username is part of the update, it's the first time it's being set.
+    // We must check for uniqueness.
     if (dataToUpdate.username) {
-        const usernameExists = await checkExistingUsername(dataToUpdate.username);
-        const currentUser = await getUserById(userId);
-        if (usernameExists && currentUser?.username !== dataToUpdate.username.toLowerCase()) {
-            throw new Error("This username is already taken.");
+        const newUsername = dataToUpdate.username.toLowerCase();
+        
+        const usernameTaken = await isUsernameTaken(newUsername);
+        if (usernameTaken) {
+            throw new Error("This username is already taken. Please choose another one.");
         }
-        dataToUpdate.username = dataToUpdate.username.toLowerCase();
+        
+        // This is safe now because we're only updating one user's info.
+        dataToUpdate.username = newUsername;
     }
     
     try {
-        const userDocRef = doc(db, 'users', userId);
         await updateDoc(userDocRef, dataToUpdate);
     } catch (error) {
         console.error("Error updating user: ", error);
@@ -168,10 +161,7 @@ export async function deleteUser(userId: string): Promise<void> {
     try {
         const userDocRef = doc(db, 'users', userId);
         await deleteDoc(userDocRef);
-        // IMPORTANT: This only deletes the user from Firestore.
-        // In a production app, you must also delete the user from Firebase Authentication.
-        // This is a client-side operation that requires re-authentication for security.
-        // This function should be called AFTER the user is deleted from Auth on the client.
+        // Deleting from Firebase Auth is handled on the client-side for security.
     } catch (error) {
         console.error("Error deleting user from Firestore: ", error);
         throw new Error("Could not delete user account from the database.");

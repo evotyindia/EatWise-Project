@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { type User as UserType, getUserById, updateUser, deleteUser } from "@/services/userService";
 import { deleteReportsByUserId } from "@/services/reportService";
+import { getAuth, deleteUser as deleteAuthUser } from "firebase/auth";
 
 
 // Schema for setting username for the first time
@@ -144,14 +145,40 @@ export default function AccountPage() {
 
   const handleDeleteAccount = async () => {
     if (!currentUser?.id) return;
+
+    const auth = getAuth();
+    const authUser = auth.currentUser;
+
+    if (!authUser) {
+      toast({ title: "Error", description: "You must be logged in to delete your account. Please log out and log back in.", variant: "destructive" });
+      return;
+    }
+
     try {
-      await deleteReportsByUserId(currentUser.uid); // Use UID for consistency
-      await deleteUser(currentUser.id); // Deletes from Firestore
-      // NOTE: In a real app, you would also delete the user from Firebase Auth on the client side.
+      // Step 1: Delete all associated reports from Firestore
+      await deleteReportsByUserId(currentUser.uid);
+
+      // Step 2: Delete user from Firebase Authentication (client-side)
+      await deleteAuthUser(authUser);
+
+      // Step 3: Delete user record from Firestore (server-side)
+      await deleteUser(currentUser.id);
+      
       handleLogout(true);
-      toast({ title: "Account Deleted", description: "Your account and data have been deleted." });
-    } catch (error) {
-      toast({ title: "Error", description: "Could not delete account.", variant: "destructive" });
+      toast({ title: "Account Deleted", description: "Your account and all data have been permanently deleted." });
+
+    } catch (error: any) {
+      console.error("Account deletion error:", error);
+      // Handle re-authentication if required for deletion
+      if (error.code === 'auth/requires-recent-login') {
+        toast({
+          title: "Re-authentication Required",
+          description: "For security, please log out and log back in before deleting your account.",
+          variant: "destructive",
+        });
+      } else {
+        toast({ title: "Error", description: "Could not delete account. Please try again.", variant: "destructive" });
+      }
     }
   }
 

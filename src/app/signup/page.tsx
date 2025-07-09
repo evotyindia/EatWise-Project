@@ -23,7 +23,6 @@ import { createUser } from "@/services/userService";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  username: z.string().min(3, { message: "Username must be at least 3 characters." }).regex(/^[a-zA-Z0-9_]+$/, { message: "Username can only contain letters, numbers, and underscores." }),
   email: z.string().email({ message: "Invalid email address." }),
   phone: z.string().min(10, { message: "Please enter a valid 10-digit phone number." }).optional().or(z.literal('')),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
@@ -45,7 +44,6 @@ export default function SignupPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      username: "",
       email: emailFromQuery || "",
       phone: "",
       password: "",
@@ -57,7 +55,6 @@ export default function SignupPage() {
     try {
       const newUser = { 
         name: values.name, 
-        username: values.username,
         email: values.email, 
         phone: values.phone, 
         password: values.password 
@@ -104,19 +101,6 @@ export default function SignupPage() {
                     <FormLabel>Full Name</FormLabel>
                     <FormControl>
                       <Input placeholder="Your Name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-               <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input placeholder="your_unique_username" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
