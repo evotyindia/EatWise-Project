@@ -1,6 +1,5 @@
 
 import { getBlogPostBySlug, blogPosts } from "@/lib/blog-data";
-import Image from "next/image";
 import Link from "next/link"; 
 import { notFound } from "next/navigation";
 import { CalendarDays, Tag, ArrowLeft } from "lucide-react";
@@ -33,9 +32,9 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     };
   }
 
-  const imageUrl = post.featuredImage.startsWith('http')
+  const imageUrl = post.featuredImage && (post.featuredImage.startsWith('http')
     ? post.featuredImage
-    : `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : `/${post.featuredImage}`}`;
+    : `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : `/${post.featuredImage}`}`);
 
   return {
     title: `${post.title} | EatWise India Blogs`,
@@ -50,20 +49,20 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
       url: `${BASE_URL}/blogs/${post.slug}`,
       publishedTime: new Date(post.date).toISOString(),
       authors: [`${BASE_URL}/#organization`], 
-      images: [
+      images: imageUrl ? [
         {
           url: imageUrl,
           width: 1200, 
           height: 675,
           alt: post.title,
         }
-      ]
+      ] : [],
     },
     twitter: { 
         card: 'summary_large_image',
         title: post.title,
         description: post.preview,
-        images: [imageUrl],
+        images: imageUrl ? [imageUrl] : [],
     }
   };
 }
@@ -75,9 +74,9 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
     notFound();
   }
 
-  const imageUrl = post.featuredImage.startsWith('http')
+  const imageUrl = post.featuredImage && (post.featuredImage.startsWith('http')
     ? post.featuredImage
-    : `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : `/${post.featuredImage}`}`;
+    : `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : `/${post.featuredImage}`}`);
 
   const articleStructuredData: Article = {
     "@context": "https://schema.org",
@@ -88,7 +87,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
     },
     headline: post.title,
     description: post.preview,
-    image: imageUrl,
+    image: imageUrl || `${BASE_URL}/img/logo_512x512.png`,
     datePublished: new Date(post.date).toISOString(),
     dateModified: new Date(post.date).toISOString(), 
     author: {
@@ -164,27 +163,16 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
               <Badge variant="secondary">{post.category}</Badge>
             </div>
           </div>
-          <div className="overflow-hidden rounded-lg shadow-md mb-8">
-            <Image
-              src={post.featuredImage}
-              alt={post.title} 
-              width={1200}
-              height={675}
-              className="w-full object-cover aspect-video transition-transform duration-300 hover:scale-105"
-              priority
-              data-ai-hint={post.dataAiHint || ''}
-            />
-          </div>
         </div>
         
         <Separator className="my-8" />
 
         <div
           className="prose prose-lg dark:prose-invert max-w-none 
-                     prose-headings:font-headline prose-headings:text-primary dark:prose-headings:text-primary-foreground/90
+                     prose-headings:font-headline prose-headings:text-primary dark:prose-headings:text-primary
                      prose-p:text-foreground/90 dark:prose-p:text-foreground/80
                      prose-a:text-accent hover:prose-a:text-accent/80 dark:prose-a:text-accent dark:hover:prose-a:text-accent/80
-                     prose-strong:text-foreground dark:prose-strong:text-primary-foreground/90
+                     prose-strong:text-foreground dark:prose-strong:text-foreground
                      prose-ul:list-disc prose-ul:pl-6 prose-li:marker:text-accent
                      prose-ol:list-decimal prose-ol:pl-6 prose-li:marker:text-accent"
           dangerouslySetInnerHTML={{ __html: post.content }}
