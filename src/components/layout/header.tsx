@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail } from "lucide-react"
@@ -28,8 +29,9 @@ export function Header() {
       <div className="container flex h-16 max-w-screen-xl items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
           <Leaf className="h-7 w-7 text-primary" />
-          <span className="font-extrabold text-2xl sm:inline-block font-headline text-primary">
-            EatWise India
+          <span className="font-extrabold text-2xl sm:inline-block font-headline">
+            <span className="text-primary">EatWise</span>
+            <span className="text-accent"> India</span>
           </span>
         </Link>
 
