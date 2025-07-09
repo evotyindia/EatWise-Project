@@ -100,29 +100,31 @@
   .hero-section::before {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    right: -50%;
-    bottom: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, hsl(var(--secondary)), transparent 60%);
-    animation: pulse 10s ease-in-out infinite;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 15% 15%, hsl(var(--primary) / 0.25), transparent 45%),
+      radial-gradient(circle at 85% 85%, hsl(var(--accent) / 0.25), transparent 45%);
+    animation: pulse 12s ease-in-out infinite;
     z-index: 1;
     will-change: transform;
   }
   .dark .hero-section::before {
-    background: radial-gradient(circle, hsl(var(--secondary) / 0.5), transparent 60%);
+    background: 
+      radial-gradient(circle at 15% 15%, hsl(var(--primary) / 0.3), transparent 45%),
+      radial-gradient(circle at 85% 85%, hsl(var(--accent) / 0.3), transparent 45%);
   }
 }
 
 @keyframes pulse {
   0%, 100% {
     transform: scale(1);
-    opacity: 0.6;
+    opacity: 0.7;
   }
   50% {
-    transform: scale(1.1);
-    opacity: 0.8;
+    transform: scale(1.05);
+    opacity: 1;
   }
 }
