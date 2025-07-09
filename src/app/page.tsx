@@ -155,7 +155,7 @@ export default function Home() {
             <Button asChild size="lg" className="group transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 shadow-lg hover:shadow-primary/40">
               <Link href="/analyze">Start Analyzing <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" /></Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="group transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 border-2 border-accent hover:bg-accent/10 text-accent hover:text-accent-foreground dark:text-accent dark:hover:text-accent-foreground">
+            <Button asChild size="lg" variant="outline" className="group transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95 border-2 border-accent text-accent hover:bg-accent hover:text-accent-foreground">
               <Link href="/recipes">Find a Recipe <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" /></Link>
             </Button>
           </div>
