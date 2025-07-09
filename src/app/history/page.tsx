@@ -170,7 +170,7 @@ export default function HistoryPage() {
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="label">Label Reports</TabsTrigger>
           <TabsTrigger value="recipe">Recipes</TabsTrigger>
-          <TabsTrigger value="nutrition">Nutrients</TabsTrigger>
+          <TabsTrigger value="nutrition">Nutrient Reports</TabsTrigger>
         </TabsList>
         <TabsContent value="all" className="mt-6"><ReportList type="all" /></TabsContent>
         <TabsContent value="label" className="mt-6"><ReportList type="label" /></TabsContent>
