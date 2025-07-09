@@ -22,7 +22,7 @@ import { LogIn, LoaderCircle, CheckCircle2, XCircle } from "lucide-react";
 import { useEffect, Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getAndSyncUser, getUserByUsername, checkUsernameExists, checkEmailExists } from "@/services/userService";
+import { getAndSyncUser, getUserByUsername, checkUsernameExists } from "@/services/userService";
 import { useDebounce } from "@/hooks/use-debounce";
 
 const formSchema = z.object({
@@ -41,6 +41,8 @@ function LoginContent() {
   const [identifierStatus, setIdentifierStatus] = useState<"idle" | "exists" | "not_exists">("idle");
   const debouncedIdentifier = useDebounce(identifierToCheck, 500);
 
+  const isEmail = (str: string) => /\S+@\S+\.\S+/.test(str);
+
   useEffect(() => {
     const searchRedirect = searchParams.get("redirect");
     const localRedirect = localStorage.getItem("loginRedirect");
@@ -57,25 +59,30 @@ function LoginContent() {
     }
   }, [searchParams, toast]);
   
-  const isEmail = (str: string) => /\S+@\S+\.\S+/.test(str);
-
   useEffect(() => {
     const checkIdentifier = async () => {
-      if (debouncedIdentifier.length < 3) {
-        setIdentifierStatus("idle");
+      // If it looks like an email, we don't perform a live check for security reasons.
+      // The check will happen on submit. We'll mark it as 'exists' to enable the login button.
+      if (isEmail(debouncedIdentifier)) {
+        setIdentifierStatus("exists");
+        setIsChecking(false);
         return;
       }
+      
+      // If it doesn't look like an email and is too short, do nothing.
+      if (debouncedIdentifier.length < 3) {
+        setIdentifierStatus("idle");
+        setIsChecking(false);
+        return;
+      }
+      
+      // Perform the check for usernames.
       setIsChecking(true);
       try {
-        let exists = false;
-        if (isEmail(debouncedIdentifier)) {
-          exists = await checkEmailExists(debouncedIdentifier);
-        } else {
-          exists = await checkUsernameExists(debouncedIdentifier);
-        }
+        const exists = await checkUsernameExists(debouncedIdentifier);
         setIdentifierStatus(exists ? "exists" : "not_exists");
       } catch (error) {
-        setIdentifierStatus("not_exists"); // Default to not_exists on error for security/UX
+        setIdentifierStatus("not_exists"); 
         console.error("Error checking identifier:", error);
       }
       setIsChecking(false);
@@ -88,6 +95,7 @@ function LoginContent() {
     }
   }, [debouncedIdentifier]);
 
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -98,41 +106,38 @@ function LoginContent() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     form.clearErrors();
-    
-    if (identifierStatus === 'not_exists') {
-        toast({
-            title: "Account Not Found",
-            description: `No account found for ${values.identifier}. Please sign up.`,
-            variant: "destructive",
-        });
-        return;
-    }
-    
     let userEmail: string | undefined;
 
     try {
-        if (isEmail(values.identifier)) {
-            userEmail = values.identifier;
+      if (isEmail(values.identifier)) {
+        userEmail = values.identifier;
+      } else {
+        const userByUsername = await getUserByUsername(values.identifier);
+        if (userByUsername) {
+          userEmail = userByUsername.email;
         } else {
-            const userByUsername = await getUserByUsername(values.identifier);
-            if (userByUsername) {
-                userEmail = userByUsername.email;
-            }
-        }
-
-        if (!userEmail) {
             toast({
                 title: "Account Not Found",
-                description: `No account found for ${values.identifier}. Would you like to sign up?`,
+                description: `No account found for username '${values.identifier}'.`,
                 variant: "destructive",
-                action: (
-                  <Link href={`/signup?email=${isEmail(values.identifier) ? encodeURIComponent(values.identifier) : ''}`}>
-                    <Button variant="secondary" size="sm">Sign Up</Button>
-                  </Link>
-                ),
             });
             return;
         }
+      }
+
+      if (!userEmail) {
+        toast({
+            title: "Account Not Found",
+            description: `No account found. Would you like to sign up?`,
+            variant: "destructive",
+            action: (
+              <Link href={`/signup?email=${isEmail(values.identifier) ? encodeURIComponent(values.identifier) : ''}`}>
+                <Button variant="secondary" size="sm">Sign Up</Button>
+              </Link>
+            ),
+        });
+        return;
+      }
 
 
       const userCredential = await signInWithEmailAndPassword(auth, userEmail.toLowerCase(), values.password);
@@ -172,8 +177,12 @@ function LoginContent() {
       let errorTitle = "Login Failed";
       
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-        errorMessage = "The password you entered was incorrect. Please try again.";
-        errorTitle = "Incorrect Password";
+        errorMessage = "The username/email or password you entered was incorrect. Please try again.";
+        errorTitle = "Incorrect Credentials";
+      }
+      if (error.code === 'auth/user-not-found') {
+        errorMessage = "No account was found for this email address. Please sign up instead.";
+        errorTitle = "Account Not Found";
       }
       if (error.message.includes("Your user profile could not be found")) {
         errorMessage = error.message;
@@ -219,13 +228,13 @@ function LoginContent() {
                       </FormControl>
                        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                         {isChecking && <LoaderCircle className="h-5 w-5 text-muted-foreground animate-spin" />}
-                        {!isChecking && identifierStatus === 'exists' && <CheckCircle2 className="h-5 w-5 text-success" />}
-                        {!isChecking && identifierStatus === 'not_exists' && debouncedIdentifier && <XCircle className="h-5 w-5 text-destructive" />}
+                        {!isChecking && !isEmail(debouncedIdentifier) && identifierStatus === 'exists' && <CheckCircle2 className="h-5 w-5 text-success" />}
+                        {!isChecking && !isEmail(debouncedIdentifier) && identifierStatus === 'not_exists' && debouncedIdentifier && <XCircle className="h-5 w-5 text-destructive" />}
                       </div>
                     </div>
-                     {identifierStatus === 'not_exists' && debouncedIdentifier && (
+                     {!isEmail(debouncedIdentifier) && identifierStatus === 'not_exists' && debouncedIdentifier && (
                       <p className="text-sm font-medium text-destructive">
-                        Account not found. Please <Link href="/signup" className="underline">sign up</Link>.
+                        Username not found. Please <Link href="/signup" className="underline">sign up</Link>.
                       </p>
                     )}
                     <FormMessage />
@@ -254,7 +263,7 @@ function LoginContent() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting || identifierStatus !== 'exists'}>
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting || identifierStatus === 'not_exists'}>
                  {form.formState.isSubmitting ? "Logging in..." : "Log In"}
               </Button>
             </form>
