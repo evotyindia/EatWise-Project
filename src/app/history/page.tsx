@@ -90,7 +90,7 @@ export default function HistoryPage() {
           <div className="mt-1">{icons[report.type]}</div>
           <div>
             <CardTitle>{report.title}</CardTitle>
-            <CardDescription className="line-clamp-2">{report.summary}</CardDescription>
+            <CardDescription className="line-clamp-2 min-h-10">{report.summary}</CardDescription>
           </div>
         </CardHeader>
         <div className="flex-grow" />
