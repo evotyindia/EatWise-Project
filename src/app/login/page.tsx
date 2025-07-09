@@ -22,7 +22,7 @@ import { LogIn, LoaderCircle } from "lucide-react";
 import { useEffect, Suspense } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getAndSyncUser } from "@/services/userService";
+import { getAndSyncUser, createUserInFirestore } from "@/services/userService";
 
 
 const formSchema = z.object({
@@ -78,27 +78,44 @@ function LoginContent() {
         return;
       }
       
-      // Step 3: Call server action to get user profile from Firestore and sync verification status
-      const userProfile = await getAndSyncUser(authUser.uid);
+      // Step 3: Get user profile from Firestore and sync verification status
+      let userProfile = await getAndSyncUser(authUser.uid);
 
-      if (userProfile) {
-        localStorage.setItem("loggedInUser", JSON.stringify({ id: userProfile.id, email: userProfile.email, uid: userProfile.uid, username: userProfile.username }));
-        toast({
-          title: "Login Successful",
-          description: "Welcome back!",
-          variant: "success",
-        });
-        window.location.href = redirectUrl; // Use window.location to ensure a full page reload
-        localStorage.removeItem("loginRedirect");
-      } else {
-        throw new Error("Could not find user profile data. Please contact support.");
+      // Gracefully handle cases where the user exists in Auth but not in Firestore
+      if (!userProfile) {
+        console.warn(`User profile not found for UID: ${authUser.uid}. Attempting to create a fallback profile.`);
+        const defaultName = authUser.email?.split('@')[0] || 'New User';
+        const creationResult = await createUserInFirestore(authUser.uid, defaultName, authUser.email || '', undefined);
+
+        if (creationResult.success) {
+          userProfile = await getAndSyncUser(authUser.uid); // Try again
+        }
+        
+        if (!userProfile) {
+           // If it still fails after attempting to create, there's a more serious issue.
+           throw new Error("There was an issue accessing your user profile. Please contact support.");
+        }
       }
+
+      // If we have a user profile (either found or created), proceed with login
+      localStorage.setItem("loggedInUser", JSON.stringify({ id: userProfile.id, email: userProfile.email, uid: userProfile.uid, username: userProfile.username }));
+      toast({
+        title: "Login Successful",
+        description: "Welcome back!",
+        variant: "success",
+      });
+      window.location.href = redirectUrl;
+      localStorage.removeItem("loginRedirect");
 
     } catch (error: any) {
       console.error("Login error:", error);
       let errorMessage = "An error occurred during login. Please try again.";
       if (error.code === 'auth/invalid-credential') {
           errorMessage = "Invalid email or password.";
+      }
+      // Use the custom error message if it's one we threw
+      if (error.message.includes("accessing your user profile")) {
+        errorMessage = error.message;
       }
       toast({
         title: "Login Failed",
