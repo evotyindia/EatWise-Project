@@ -11,7 +11,7 @@ import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 import { RecipeDisplay } from "@/components/common/RecipeDisplay";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles, ChefHat, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, PlusCircle, ArrowRight, Search, Carrot, Leaf, Flame, Save } from "lucide-react";
+import { Lightbulb, Sparkles, ChefHat, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, PlusCircle, ArrowRight, Search, Carrot, Leaf, Flame, Save, Soup } from "lucide-react";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
