@@ -17,6 +17,18 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
+// Check if all necessary environment variables are defined.
+// This provides a clear error message if the .env file is not set up correctly.
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  let errorMessage = "Firebase configuration is missing or incomplete. ";
+  errorMessage += "Please ensure all NEXT_PUBLIC_FIREBASE_* variables are set in your .env file. ";
+  errorMessage += "If you have just set them, you may need to restart the development server.";
+  
+  // Throwing an error is more direct and stops execution, preventing cryptic downstream errors.
+  throw new Error(errorMessage);
+}
+
+
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
