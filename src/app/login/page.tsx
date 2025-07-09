@@ -22,7 +22,7 @@ import { LogIn, LoaderCircle, CheckCircle2, XCircle } from "lucide-react";
 import { useEffect, Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getAndSyncUser, getUserByUsername, getUserByEmail, checkUsernameExists, checkEmailExists } from "@/services/userService";
+import { getAndSyncUser, getUserByUsername, checkUsernameExists, checkEmailExists } from "@/services/userService";
 import { useDebounce } from "@/hooks/use-debounce";
 
 const formSchema = z.object({
@@ -75,7 +75,7 @@ function LoginContent() {
         }
         setIdentifierStatus(exists ? "exists" : "not_exists");
       } catch (error) {
-        setIdentifierStatus("idle");
+        setIdentifierStatus("not_exists"); // Default to not_exists on error for security/UX
         console.error("Error checking identifier:", error);
       }
       setIsChecking(false);
@@ -99,7 +99,6 @@ function LoginContent() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     form.clearErrors();
     
-    // Safety check in case the user submits before the async check completes
     if (identifierStatus === 'not_exists') {
         toast({
             title: "Account Not Found",
@@ -173,7 +172,8 @@ function LoginContent() {
       let errorTitle = "Login Failed";
       
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-        errorMessage = "The password was incorrect. Please try again.";
+        errorMessage = "The password you entered was incorrect. Please try again.";
+        errorTitle = "Incorrect Password";
       }
       if (error.message.includes("Your user profile could not be found")) {
         errorMessage = error.message;
@@ -220,10 +220,10 @@ function LoginContent() {
                        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                         {isChecking && <LoaderCircle className="h-5 w-5 text-muted-foreground animate-spin" />}
                         {!isChecking && identifierStatus === 'exists' && <CheckCircle2 className="h-5 w-5 text-success" />}
-                        {!isChecking && identifierStatus === 'not_exists' && <XCircle className="h-5 w-5 text-destructive" />}
+                        {!isChecking && identifierStatus === 'not_exists' && debouncedIdentifier && <XCircle className="h-5 w-5 text-destructive" />}
                       </div>
                     </div>
-                     {identifierStatus === 'not_exists' && (
+                     {identifierStatus === 'not_exists' && debouncedIdentifier && (
                       <p className="text-sm font-medium text-destructive">
                         Account not found. Please <Link href="/signup" className="underline">sign up</Link>.
                       </p>
