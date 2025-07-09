@@ -28,6 +28,19 @@ export async function checkUsernameExists(username: string): Promise<boolean> {
     }
 }
 
+// Check if an email already exists in the 'users' collection
+export async function checkEmailExists(email: string): Promise<boolean> {
+    const sanitizedEmail = email.toLowerCase();
+    const q = query(collection(db, "users"), where("email", "==", sanitizedEmail), limit(1));
+    try {
+        const querySnapshot = await getDocs(q);
+        return !querySnapshot.empty;
+    } catch (error) {
+        console.error("Error checking email existence: ", error);
+        // In case of error, default to true to prevent accidental account creation issues
+        return true;
+    }
+}
 
 // Create a new user profile in Firestore
 export async function createUserInFirestore(uid: string, name: string, email: string, phone: string | undefined): Promise<{ success: boolean; message?: string; }> {
@@ -109,7 +122,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
         if (querySnapshot.empty) return null;
         const userDoc = querySnapshot.docs[0];
         return { id: userDoc.id, ...userDoc.data() } as User;
-    } catch (error) {
+    } catch (error: any) {
         if (error.code === 'permission-denied') {
             console.error("Firestore Permission Denied on getUserByEmail:", error.message);
             throw new Error("You do not have permission to query user emails.");
