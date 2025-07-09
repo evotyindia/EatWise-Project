@@ -6,6 +6,8 @@ export interface BlogPost {
   date: string;
   preview: string;
   content: string; // Full content, can be markdown or HTML string
+  featuredImage: string;
+  dataAiHint: string;
 }
 
 export const blogPosts: BlogPost[] = [
@@ -15,6 +17,8 @@ export const blogPosts: BlogPost[] = [
     category: "Nutrition Basics",
     date: "2024-07-28",
     preview: "Confused by complex food labels? Learn how to read and understand them to make healthier choices in the Indian market.",
+    featuredImage: "https://placehold.co/1200x675.png",
+    dataAiHint: "food label",
     content: `
       <p>Navigating the aisles of an Indian supermarket can be overwhelming. Food labels are designed to inform, but they can often be confusing. Understanding these labels is the first step towards making conscious, healthy choices for you and your family. This guide will help you decode the common terms and figures you'll find on Indian food packaging.</p>
 
@@ -53,6 +57,8 @@ export const blogPosts: BlogPost[] = [
     category: "Healthy Eating",
     date: "2024-07-25",
     preview: "Many popular Indian snacks are loaded with hidden sugars. Discover how to identify them and find healthier alternatives.",
+    featuredImage: "https://placehold.co/1200x675.png",
+    dataAiHint: "sweet snacks",
     content: `
       <p>We all know that sweets, chocolates, and sodas are full of sugar. But what about the savory snacks, "healthy" breakfast cereals, and sauces we consume daily? Sugar is a master of disguise, and manufacturers often hide it in products you wouldn't expect, especially in the Indian market where it's used to balance flavors.</p>
 
@@ -94,6 +100,8 @@ export const blogPosts: BlogPost[] = [
     category: "Kids Nutrition",
     date: "2024-07-20",
     preview: "Packing a healthy and appealing tiffin box can be a challenge. Get creative ideas for nutritious meals your kids will love.",
+    featuredImage: "https://placehold.co/1200x675.png",
+    dataAiHint: "tiffin box",
     content: `
       <p>A child's tiffin box is more than just a midday meal; it's a vital source of energy and nutrients that fuels their concentration in class and their energy for play. For Indian parents, balancing tradition, nutrition, and a child's picky palate can be a daily challenge. Here are some ideas and principles to make tiffin time both healthy and exciting.</p>
 
@@ -131,6 +139,8 @@ export const blogPosts: BlogPost[] = [
     category: "Healthy Eating",
     date: "2024-07-15",
     preview: "Eating healthy doesn't have to be expensive. Explore common Indian superfoods that offer incredible nutritional benefits without breaking the bank.",
+    featuredImage: "https://placehold.co/1200x675.png",
+    dataAiHint: "superfoods vegetables",
     content: `
       <p>The term "superfood" often brings to mind exotic and pricey ingredients like quinoa, kale, or blueberries. However, the Indian kitchen has always been home to its own set of nutritional powerhouses that are both affordable and readily available. Here are some superfoods you can easily incorporate into your diet, often for under ₹50 (prices may vary by region and season).</p>
 
@@ -167,6 +177,8 @@ export const blogPosts: BlogPost[] = [
     category: "Healthy Eating",
     date: "2024-07-10",
     preview: "Rediscover the nutritional power of millets like Ragi, Jowar, and Bajra. Learn how to easily incorporate them into your daily meals for better health.",
+    featuredImage: "https://placehold.co/1200x675.png",
+    dataAiHint: "millets grains",
     content: `
       <p>For centuries, millets were a staple food across India. These hardy, ancient grains are now making a well-deserved comeback as a "smart food" – good for you, good for the farmer, and good for the planet. Let's explore why you should welcome these tiny grains back to your plate.</p>
 
@@ -205,6 +217,8 @@ export const blogPosts: BlogPost[] = [
     category: "Nutrition Basics",
     date: "2024-07-05",
     preview: "Not all fats are created equal. This guide breaks down saturated, unsaturated, and trans fats in the context of Indian diets and cooking oils.",
+    featuredImage: "https://placehold.co/1200x675.png",
+    dataAiHint: "cooking oil",
     content: `
       <p>For decades, fat has been demonized in the world of nutrition. This fear has led to a market flooded with "low-fat" products, which are often high in sugar and refined carbohydrates. The truth is, fat is an essential macronutrient vital for energy, hormone production, and the absorption of certain vitamins. The key is to understand the different types of fats and choose wisely, especially within the context of an Indian diet rich in diverse cooking oils and ghee.</p>
 
@@ -244,6 +258,8 @@ export const blogPosts: BlogPost[] = [
     category: "Nutrition Basics",
     date: "2024-07-01",
     preview: "Think you can't get enough protein on a vegetarian diet? Think again! Explore top plant-based protein sources available in India.",
+    featuredImage: "https://placehold.co/1200x675.png",
+    dataAiHint: "protein food",
     content: `
       <p>A common concern about vegetarian diets, particularly in India, is whether they provide enough protein. Protein is a crucial macronutrient, essential for building and repairing tissues, making enzymes and hormones, and supporting immune function. The great news is that a well-planned Indian vegetarian diet can be incredibly rich in protein.</p>
       <h2 class="text-xl font-semibold mt-4 mb-2">Why Protein is Important</h2>
@@ -268,6 +284,8 @@ export const blogPosts: BlogPost[] = [
     category: "Healthy Living",
     date: "2024-06-28",
     preview: "Staying hydrated is more than just drinking water. Discover delicious and refreshing Indian drinks and foods that help you beat the heat.",
+    featuredImage: "https://placehold.co/1200x675.png",
+    dataAiHint: "lemon water",
     content: `
       <p>In the often scorching heat and humidity of the Indian climate, staying hydrated is absolutely critical for health and well-being. Dehydration doesn't just make you feel thirsty; it can lead to fatigue, headaches, dizziness, and in severe cases, serious health issues like heatstroke. While drinking plain water is essential, there are many other traditional and tasty ways to maintain your fluid balance and replenish lost electrolytes.</p>
       <h2 class="text-xl font-semibold mt-4 mb-2">Early Signs of Dehydration to Watch For:</h2>
@@ -296,6 +314,8 @@ export const blogPosts: BlogPost[] = [
     category: "Nutrition Basics",
     date: "2024-06-25",
     preview: "Go beyond the ingredients list. This guide helps you understand the numbers on the nutrition facts table to make truly healthy choices.",
+    featuredImage: "https://placehold.co/1200x675.png",
+    dataAiHint: "nutrition facts",
     content: `
       <p>The nutrition facts table on packaged foods is a powerful tool for anyone looking to manage their health. At first glance, it might seem like a confusing jumble of numbers and percentages, but understanding it is simpler than you think. Learning to read it correctly allows you to see past marketing claims and make genuinely informed decisions about what you eat.</p>
       <h2 class="text-xl font-semibold mt-4 mb-2">Step 1: Start with the Serving Size</h2>
@@ -322,6 +342,8 @@ export const blogPosts: BlogPost[] = [
     category: "Healthy Living",
     date: "2024-06-20",
     preview: "Improve your digestion, satisfaction, and relationship with food. Learn the simple practice of mindful eating.",
+    featuredImage: "https://placehold.co/1200x675.png",
+    dataAiHint: "meditation food",
     content: `
       <p>In our hyper-connected, fast-paced lives, eating has often become a mindless act. We eat while working, watching TV, or scrolling through our phones, barely registering the taste or texture of our food. Mindful eating is the practice of bringing your full, compassionate attention to the entire experience of nourishment. It’s not a diet; it’s a way to cultivate a healthier and more joyful relationship with food.</p>
       <h2 class="text-xl font-semibold mt-4 mb-2">The Powerful Benefits of Mindful Eating:</h2>
@@ -355,6 +377,8 @@ export const blogPosts: BlogPost[] = [
     category: "Healthy Eating",
     date: "2024-06-15",
     preview: "Your masala dabba is a treasure chest of health benefits. Learn about the powerful medicinal properties of common Indian spices.",
+    featuredImage: "https://placehold.co/1200x675.png",
+    dataAiHint: "spices herbs",
     content: `
       <p>The Indian masala dabba (spice box) is the heart of our cuisine, a vibrant palette of flavors and aromas. But these spices do far more than just make our food delicious; they are a treasure chest of potent medicinal compounds. For centuries, Ayurveda has utilized these spices for their healing properties, and modern science is now beginning to confirm these ancient beliefs.</p>
       <h2 class="text-xl font-semibold mt-4 mb-2">The Pharmacy in Your Kitchen:</h2>
@@ -383,6 +407,8 @@ export const blogPosts: BlogPost[] = [
     category: "Healthy Eating",
     date: "2024-06-10",
     preview: "Ditch the unhealthy options and start your day right. Explore a variety of nutritious and easy-to-make Indian breakfast recipes.",
+    featuredImage: "https://placehold.co/1200x675.png",
+    dataAiHint: "indian breakfast",
     content: `
       <p>Breakfast, or 'nashta', is often called the most important meal of the day. A well-balanced breakfast kickstarts your metabolism, replenishes your energy stores after a night's sleep, improves focus, and can prevent unhealthy cravings later in the day. Fortunately, traditional Indian cuisine offers a wide array of breakfast options that are both delicious and nutritious.</p>
       <h2 class="text-xl font-semibold mt-4 mb-2">What Makes a Healthy Breakfast?</h2>

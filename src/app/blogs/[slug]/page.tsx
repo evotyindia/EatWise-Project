@@ -33,7 +33,9 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     };
   }
 
-  const imageUrl = `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : '/' + post.featuredImage}`;
+  const imageUrl = post.featuredImage.startsWith('http')
+    ? post.featuredImage
+    : `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : `/${post.featuredImage}`}`;
 
   return {
     title: `${post.title} | EatWise India Blogs`,
@@ -73,7 +75,9 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
     notFound();
   }
 
-  const imageUrl = `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : '/' + post.featuredImage}`;
+  const imageUrl = post.featuredImage.startsWith('http')
+    ? post.featuredImage
+    : `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : `/${post.featuredImage}`}`;
 
   const articleStructuredData: Article = {
     "@context": "https://schema.org",
