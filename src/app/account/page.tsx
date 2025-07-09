@@ -31,7 +31,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 
 // Schema for setting username for the first time
@@ -60,6 +59,7 @@ export default function AccountPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
   useEffect(() => {
     const loggedInUserEmail = JSON.parse(localStorage.getItem("loggedInUser") || "{}").email;
@@ -333,11 +333,31 @@ export default function AccountPage() {
                 <p className="font-semibold">Delete My Account</p>
                 <p className="text-sm text-muted-foreground">This will permanently delete your account and all associated data.</p>
             </div>
-            <AlertDialog>
+            <AlertDialog onOpenChange={(isOpen) => { if (!isOpen) setDeleteConfirmation(""); }}>
               <AlertDialogTrigger asChild><Button variant="destructive"><Ban className="mr-2 h-4 w-4" /> Delete Account</Button></AlertDialogTrigger>
               <AlertDialogContent>
-                  <AlertDialogHeader><AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle><AlertDialogDescription>This action is permanent and cannot be undone. All your account data and history will be lost forever.</AlertDialogDescription></AlertDialogHeader>
-                  <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="bg-destructive hover:bg-destructive/90" onClick={handleDeleteAccount}>Yes, Delete My Account</AlertDialogAction></AlertDialogFooter>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action is permanent. To confirm, please type <strong className="text-foreground">@{currentUser.username}</strong> or <strong className="text-foreground">CONFIRM</strong> below.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <Input 
+                    value={deleteConfirmation}
+                    onChange={(e) => setDeleteConfirmation(e.target.value)}
+                    placeholder={`Type @${currentUser.username} or CONFIRM`}
+                    className="my-2"
+                  />
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction 
+                      className="bg-destructive hover:bg-destructive/90" 
+                      onClick={handleDeleteAccount}
+                      disabled={deleteConfirmation !== `@${currentUser.username}` && deleteConfirmation.toUpperCase() !== "CONFIRM"}
+                    >
+                      Yes, Delete My Account
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
         </CardContent>
