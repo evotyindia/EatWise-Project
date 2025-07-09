@@ -1,6 +1,6 @@
 "use client"
 
-import { Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail, User, LogOut, UserCog } from "lucide-react"
+import { Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail, User, LogOut, UserCog, History } from "lucide-react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
@@ -15,6 +15,7 @@ const navItems = [
   { href: "/analyze", label: "Analyze Label", icon: <ScanLine className="h-5 w-5" /> },
   { href: "/recipes", label: "Recipes", icon: <CookingPot className="h-5 w-5" /> },
   { href: "/nutrition-check", label: "Nutrition Check", icon: <BarChart3 className="h-5 w-5" /> },
+  { href: "/history", label: "History", icon: <History className="h-5 w-5" /> },
   { href: "/blogs", label: "Blogs", icon: <BookOpen className="h-5 w-5" /> },
   { href: "/contact", label: "Contact", icon: <Mail className="h-5 w-5" />},
 ]
@@ -29,7 +30,7 @@ export function Header() {
     // Check localStorage for logged-in user
     const user = localStorage.getItem("loggedInUser");
     setIsLoggedIn(!!user);
-  }, []);
+  }, [pathname]); // Re-check on path change
 
   return (
     <header className={cn(
