@@ -9,6 +9,7 @@ import React from 'react';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils";
 import { ThemeToggleButton } from "../common/theme-toggle-button";
+import { Separator } from "../ui/separator";
 
 const mainNavItems = [
   { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
@@ -24,10 +25,20 @@ const moreNavItems = [
 
 export function BottomNavbar() {
   const pathname = usePathname();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 border-t shadow-[0_-1px_10px_rgba(0,0,0,0.05)] backdrop-blur-lg">
-      <div className="container flex items-center justify-around h-16 max-w-screen-xl px-0">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 border-t shadow-[0_-1px_10px_rgba(0,0,0,0.05)] backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
+      <div className="container flex items-center justify-around h-20 max-w-screen-xl px-0">
         {mainNavItems.map((item) => {
           const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
           return (
@@ -58,8 +69,11 @@ export function BottomNavbar() {
             </button>
           </SheetTrigger>
           <SheetContent side="bottom" className="w-full h-auto rounded-t-2xl">
-            <SheetHeader className="text-left mb-4">
-              <SheetTitle>More Options</SheetTitle>
+            <SheetHeader className="text-left mb-4 pr-12">
+              <div className="flex items-center justify-between">
+                <SheetTitle>More Options</SheetTitle>
+                <ThemeToggleButton />
+              </div>
               <SheetDescription>
                 Additional pages and settings.
               </SheetDescription>
