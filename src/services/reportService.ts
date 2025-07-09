@@ -22,7 +22,11 @@ export async function createReport(reportData: Omit<Report<any>, 'id'>): Promise
         const reportsCollection = collection(db, 'reports');
         const docRef = await addDoc(reportsCollection, reportData);
         return docRef.id;
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code === 'permission-denied') {
+            console.error("Firestore Permission Denied on createReport:", error.message);
+            throw new Error("You do not have permission to save reports. Please check Firestore rules.");
+        }
         console.error("Error creating report in Firestore: ", error);
         throw new Error("Could not save the report.");
     }
@@ -38,7 +42,11 @@ export async function getReportsByUid(uid: string): Promise<Report[]> {
             reports.push({ id: doc.id, ...doc.data() } as Report);
         });
         return reports;
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code === 'permission-denied') {
+            console.error("Firestore Permission Denied on getReportsByUid:", error.message);
+            throw new Error("You do not have permission to view this history. Please check Firestore rules.");
+        }
         console.error("Error fetching reports by user UID: ", error);
         throw new Error("Could not fetch reports.");
     }
@@ -58,7 +66,11 @@ export async function getReportById(reportId: string): Promise<Report | null> {
         } else {
             return null;
         }
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code === 'permission-denied') {
+            console.error("Firestore Permission Denied on getReportById:", error.message);
+            throw new Error("You do not have permission to view this report. Please check Firestore rules.");
+        }
         console.error("Error fetching report by ID: ", error);
         throw new Error("Could not fetch the specified report.");
     }
@@ -70,7 +82,11 @@ export async function deleteReport(reportId: string): Promise<void> {
     try {
         const reportDocRef = doc(db, 'reports', reportId);
         await deleteDoc(reportDocRef);
-    } catch (error) {
+    } catch (error: any) {
+         if (error.code === 'permission-denied') {
+            console.error("Firestore Permission Denied on deleteReport:", error.message);
+            throw new Error("You do not have permission to delete this report. Please check Firestore rules.");
+        }
         console.error("Error deleting report: ", error);
         throw new Error("Could not delete the report.");
     }
@@ -92,7 +108,11 @@ export async function deleteReportsByUserId(uid: string): Promise<void> {
         });
 
         await batch.commit();
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code === 'permission-denied') {
+            console.error("Firestore Permission Denied on deleteReportsByUserId:", error.message);
+            throw new Error("You do not have permission to clear this history. Please check Firestore rules.");
+        }
         console.error("Error deleting user's reports: ", error);
         throw new Error("Could not clear user history.");
     }
