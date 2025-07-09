@@ -54,7 +54,7 @@ export function Header() {
 
         {/* Desktop nav + theme toggle */}
         <div className="hidden md:flex items-center gap-4">
-            <nav className="items-center space-x-1 flex">
+            <nav className="flex items-center gap-1 flex-wrap">
                 {navItems.map((item) => {
                 const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
                 return (
