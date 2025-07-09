@@ -14,6 +14,21 @@ export interface User {
     emailVerified: boolean;
 }
 
+// Check if a username already exists in the 'usernames' collection
+export async function checkUsernameExists(username: string): Promise<boolean> {
+    const sanitizedUsername = username.toLowerCase();
+    const usernameDocRef = doc(db, "usernames", sanitizedUsername);
+    try {
+        const docSnap = await getDoc(usernameDocRef);
+        return docSnap.exists();
+    } catch (error) {
+        console.error("Error checking username existence: ", error);
+        // In case of error, default to true to prevent accidental overwrites
+        return true;
+    }
+}
+
+
 // Create a new user profile in Firestore
 export async function createUserInFirestore(uid: string, name: string, email: string, phone: string | undefined): Promise<{ success: boolean; message?: string; }> {
     try {
