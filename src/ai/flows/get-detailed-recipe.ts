@@ -53,6 +53,7 @@ const prompt = ai.definePrompt({
   name: 'getDetailedRecipePrompt',
   input: {schema: InternalGetDetailedRecipeInputSchema}, // Use internal schema
   output: {schema: GetDetailedRecipeOutputSchema},
+  config: { output: { format: 'json' } }, // Enforce JSON output
   system: `You are a recipe generation engine. Your ONLY purpose is to generate a JSON object matching the output schema. Adhere to all instructions precisely. Your entire response MUST be a single, valid JSON object that conforms to the output schema. No extra text or explanations.`,
   prompt: `
   TASK: Generate a detailed, delicious, and healthy Indian recipe for "{{dishName}}".
