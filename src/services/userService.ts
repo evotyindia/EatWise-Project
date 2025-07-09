@@ -1,5 +1,5 @@
 
-'use server';
+'use client';
 
 import { db } from '@/lib/firebase';
 import { collection, addDoc, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc, limit } from 'firebase/firestore';
@@ -36,9 +36,12 @@ export async function createUserInFirestore(uid: string, name: string, email: st
             emailVerified: false, // Email is not verified at the point of creation
         });
         return { success: true };
-    } catch (error) {
-        console.error("Error creating user profile in Firestore: ", error);
-        return { success: false, message: "Could not create user profile in database." };
+    } catch (error: any) {
+       console.error("Error creating user profile in Firestore: ", error);
+       if (error.code === 'auth/email-already-in-use') {
+           return { success: false, message: "An account with this email already exists." };
+       }
+       return { success: false, message: "Could not create user profile in database." };
     }
 }
 
@@ -65,7 +68,7 @@ export async function getAndSyncUser(uid: string): Promise<User | null> {
 }
 
 // Get user from Firestore by UID
-async function getUserByUid(uid: string): Promise<User | null> {
+export async function getUserByUid(uid: string): Promise<User | null> {
     const q = query(collection(db, "users"), where("uid", "==", uid), limit(1));
     const querySnapshot = await getDocs(q);
     if (querySnapshot.empty) return null;
