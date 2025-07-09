@@ -22,7 +22,7 @@ import { LogIn } from "lucide-react";
 import { useEffect, Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getAndSyncUser, getUserByUsername } from "@/services/userService";
+import { getAndSyncUser, getUserByUsername, getUserByUid } from "@/services/userService";
 
 const formSchema = z.object({
   identifier: z.string().min(3, { message: "Please enter a valid email or username." }),
