@@ -191,15 +191,24 @@ export function AnalyzerForm() {
     const lines = text.split('\n').map(line => line.trim()).filter(line => line !== "");
     if (lines.length === 0) return null;
 
+    const processMarkdown = (lineContent: string) => {
+      // Replace **bold** with <strong>bold</strong>
+      const bolded = lineContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      return bolded;
+    };
+
     return (
       <ul className="space-y-1.5 text-sm leading-relaxed">
         {lines.map((line, index) => {
-          const content = line.replace(/^(\*|-)\s*/, '');
-          if (!content) return null;
+          const contentWithoutMarker = line.replace(/^(\*|-)\s*/, '');
+          if (!contentWithoutMarker) return null;
+
+          const processedContent = processMarkdown(contentWithoutMarker);
+
           return (
             <li key={index} className="flex items-start">
               <span className="mr-3 mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
-              <span className="break-words">{content}</span>
+              <span className="break-words" dangerouslySetInnerHTML={{ __html: processedContent }} />
             </li>
           );
         })}
@@ -350,29 +359,25 @@ export function AnalyzerForm() {
                   <AlertDescription className="pl-7">{report.summary}</AlertDescription>
                 </Alert>
 
-                {renderFormattedText(report.greenFlags) && (
-                  <Alert variant="success">
-                    <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
-                      <ShieldCheck className="h-5 w-5 mr-2" />
-                      <span>Green Flags</span>
-                    </AlertTitle>
-                    <AlertDescription className="pl-7">
-                      {renderFormattedText(report.greenFlags)}
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {renderFormattedText(report.redFlags) && (
-                  <Alert variant="destructive">
-                    <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
-                      <ShieldAlert className="h-5 w-5 mr-2" />
-                      <span>Red Flags</span>
-                    </AlertTitle>
-                    <AlertDescription className="pl-7">
-                      {renderFormattedText(report.redFlags)}
-                    </AlertDescription>
-                  </Alert>
-                )}
+                <Alert variant="success">
+                  <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
+                    <ShieldCheck className="h-5 w-5 mr-2" />
+                    <span>Green Flags</span>
+                  </AlertTitle>
+                  <AlertDescription className="pl-7">
+                    {renderFormattedText(report.greenFlags) || <p className="text-sm">{report.greenFlags}</p>}
+                  </AlertDescription>
+                </Alert>
+                
+                <Alert variant="destructive">
+                  <AlertTitle className="font-semibold text-lg mb-1 flex items-center">
+                    <ShieldAlert className="h-5 w-5 mr-2" />
+                    <span>Red Flags</span>
+                  </AlertTitle>
+                  <AlertDescription className="pl-7">
+                    {renderFormattedText(report.redFlags) || <p className="text-sm">{report.redFlags}</p>}
+                  </AlertDescription>
+                </Alert>
 
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="detailed-analysis">
@@ -521,3 +526,5 @@ export function AnalyzerForm() {
     </div>
   );
 }
+
+    
