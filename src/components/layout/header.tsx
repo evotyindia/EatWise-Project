@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail } from "lucide-react"
@@ -15,7 +14,7 @@ const navItems = [
   { href: "/analyze", label: "Analyze Label", icon: <ScanLine className="h-5 w-5" /> },
   { href: "/recipes", label: "Recipes", icon: <CookingPot className="h-5 w-5" /> },
   { href: "/nutrition-check", label: "Nutrition Check", icon: <BarChart3 className="h-5 w-5" /> },
-  { href: "/blogs", label: "Blog", icon: <BookOpen className="h-5 w-5" /> },
+  { href: "/blogs", label: "Blogs", icon: <BookOpen className="h-5 w-5" /> },
   { href: "/contact", label: "Contact", icon: <Mail className="h-5 w-5" />},
 ]
 
