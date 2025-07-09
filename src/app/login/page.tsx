@@ -161,10 +161,9 @@ function LoginContent() {
       
       let errorMessage = "An error occurred during login. Please try again.";
       let errorTitle = "Login Failed";
-      let errorAction;
-
+      
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-        errorMessage = "Email/Username or password was incorrect. Please try again.";
+        errorMessage = "The password was incorrect. Please try again.";
       }
       if (error.message.includes("Your user profile could not be found")) {
         errorMessage = error.message;
@@ -174,7 +173,6 @@ function LoginContent() {
         title: errorTitle,
         description: errorMessage,
         variant: "destructive",
-        action: errorAction,
       });
     }
   }
@@ -255,7 +253,7 @@ function LoginContent() {
         <CardFooter className="mt-6 text-center text-sm">
             <p className="mx-auto">
                 Don't have an account?{" "}
-                <Link href="/signup" className="underline text-primary">
+                <Link href="/signup" className="underline text-primary font-semibold">
                 Sign up
                 </Link>
             </p>
