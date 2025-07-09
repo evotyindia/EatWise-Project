@@ -12,7 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 
 function AuthActionHandler() {
     const searchParams = useSearchParams();
-    const router = useRouter();
     const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
     const [message, setMessage] = useState("Verifying your email, please wait...");
 
@@ -35,13 +34,7 @@ function AuthActionHandler() {
                 await applyActionCode(auth, code);
                 
                 setStatus("success");
-                setMessage("Success! Your email has been verified.");
-
-                // Redirect to login after a short delay, passing a flag for the success toast.
-                setTimeout(() => {
-                    const redirectUrl = localStorage.getItem("loginRedirect") || "/";
-                    router.push(`/login?verified=true&redirect=${encodeURIComponent(redirectUrl)}`);
-                }, 3000);
+                setMessage("Success! Your email has been verified. You can now log in to your account.");
 
             } catch (error: any) {
                 setStatus("error");
@@ -55,7 +48,7 @@ function AuthActionHandler() {
         };
 
         handleVerifyEmail(oobCode);
-    }, [searchParams, router]);
+    }, [searchParams]);
 
     const statusInfo = {
         loading: { icon: <LoaderCircle className="w-16 h-16 text-primary animate-spin" />, title: "Verifying..." },
@@ -75,9 +68,14 @@ function AuthActionHandler() {
                 </CardContent>
                 <CardFooter className="flex justify-center">
                     {status === 'success' && (
-                        <Button asChild>
-                            <Link href="/login">Proceed to Login</Link>
-                        </Button>
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <Button asChild variant="outline">
+                                <Link href="/">Go to Homepage</Link>
+                            </Button>
+                            <Button asChild>
+                                <Link href="/login?verified=true">Go to Login</Link>
+                            </Button>
+                        </div>
                     )}
                      {status === 'error' && (
                         <Button asChild variant="destructive">
