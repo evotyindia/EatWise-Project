@@ -143,7 +143,7 @@ export function NutritionForm() {
 
     } catch (error) {
         console.error("Failed to save analysis:", error);
-        toast({ title: "Save Failed", description: "Could not save the analysis to the database.", variant: "destructive" });
+        toast({ title: "Save Failed", description: (error as Error).message || "Could not save the analysis to the database.", variant: "destructive" });
     }
   };
 
@@ -412,5 +412,3 @@ export function NutritionForm() {
     </div>
   );
 }
-
-    

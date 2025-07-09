@@ -308,7 +308,7 @@ export function RecipeForm() {
         setReportTitle("");
     } catch (error) {
         console.error("Failed to save recipe:", error);
-        toast({ title: "Save Failed", description: "Could not save the recipe to the database.", variant: "destructive" });
+        toast({ title: "Save Failed", description: (error as Error).message || "Could not save the recipe to the database.", variant: "destructive" });
     }
   };
   
@@ -625,5 +625,3 @@ export function RecipeForm() {
     </div>
   );
 }
-
-    
