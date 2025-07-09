@@ -19,7 +19,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserPlus } from "lucide-react";
-import { createUser } from "@/services/userService";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { createUserInFirestore } from "@/services/userService";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -52,28 +54,34 @@ export default function SignupPage() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const newUser = { 
-      name: values.name, 
-      email: values.email, 
-      phone: values.phone, 
-      password: values.password 
-    };
+    try {
+      // Step 1: Create user in Firebase Auth on the client
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email.toLowerCase(), values.password);
+      const user = userCredential.user;
 
-    const result = await createUser(newUser);
+      // Step 2: Send verification email from the client
+      await sendEmailVerification(user);
 
-    if (result.success) {
-      // Store the original redirect URL if it exists
+      // Step 3: Call server action to create the user profile in Firestore
+      await createUserInFirestore(user.uid, values.name, values.email, values.phone);
+      
+      // Step 4: Redirect and inform the user
       if (redirectUrl) {
         localStorage.setItem("loginRedirect", redirectUrl);
       }
-      // Redirect to the verify email page
       router.push(`/verify-email?email=${encodeURIComponent(values.email)}`);
-    } else {
+
+    } catch (error: any) {
+      let errorMessage = "Could not create your account. Please try again.";
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = "An account with this email already exists.";
+      }
       toast({
         title: "Signup Failed",
-        description: result.message || "Could not create your account. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
+      console.error("Signup error:", error);
     }
   }
 
