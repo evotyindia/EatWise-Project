@@ -21,6 +21,8 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { fileToDataUri } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 
 const numberPreprocess = (val: unknown) => (val === "" || val === null || val === undefined ? undefined : Number(val));
@@ -77,6 +79,9 @@ export function NutritionForm() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const [isSubmittingImage, setIsSubmittingImage] = useState(false); 
 
+  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+  const [reportTitle, setReportTitle] = useState("");
+
   const { toast } = useToast();
 
   const form = useForm<NutritionInputFormValues>({
@@ -121,7 +126,7 @@ export function NutritionForm() {
       id: crypto.randomUUID(),
       userId: loggedInUser.email,
       type: 'nutrition' as const,
-      title: currentInputContext.foodItemDescription || "Untitled Nutrition Analysis",
+      title: reportTitle.trim() || currentInputContext.foodItemDescription || "Untitled Nutrition Analysis",
       summary: analysisResult.overallAnalysis,
       createdAt: new Date().toISOString(),
       data: analysisResult,
@@ -136,6 +141,8 @@ export function NutritionForm() {
     localStorage.setItem("userReports", JSON.stringify(allUserReports));
 
     toast({ title: "Analysis Saved", description: "The nutrition analysis has been saved to your history." });
+    setIsSaveDialogOpen(false);
+    setReportTitle("");
   };
 
   const generateAnalysisSharedLogic = async (inputForAI: AnalyzeNutritionInput, inputForContext: AnalyzeNutritionInput, processingType: 'image' | 'manual') => {
@@ -343,17 +350,37 @@ export function NutritionForm() {
 
         {analysisResult && (
           <div className="space-y-8 animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
+            <div className="flex justify-end">
+              <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" onClick={() => setReportTitle(currentInputContext?.foodItemDescription || '')}>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save Analysis
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Save Analysis</DialogTitle>
+                      <DialogDescription>Give your analysis a name to easily find it later.</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="report-name" className="text-right">Name</Label>
+                        <Input id="report-name" value={reportTitle} onChange={(e) => setReportTitle(e.target.value)} className="col-span-3" />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button type="button" onClick={handleSaveAnalysis}>Save</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+            </div>
+
             <NutritionReportDisplay analysisResult={analysisResult} userInput={currentInputContext || undefined} />
 
             <Card>
               <CardHeader>
-                <div className="flex justify-between items-center">
                   <h3 className="font-semibold text-xl flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Analysis</h3>
-                  <Button variant="outline" size="sm" onClick={handleSaveAnalysis} disabled={!analysisResult}>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Analysis
-                  </Button>
-                </div>
                 <p className="text-sm text-muted-foreground pt-1">Ask about specific nutrients, comparisons, etc.</p>
               </CardHeader>
               <CardContent>

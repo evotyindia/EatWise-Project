@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import { LoaderCircle, History, FileText, CookingPot, BarChart3, Trash2 } from "lucide-react";
+import { LoaderCircle, History, FileText, CookingPot, BarChart3, Trash2, Search } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from 'date-fns';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -28,6 +29,7 @@ export default function HistoryPage() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [reports, setReports] = useState<Report[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
@@ -68,10 +70,11 @@ export default function HistoryPage() {
     toast({ title: "Report Deleted", description: "The report has been removed from your history." });
   };
 
-
   const filterReports = (type: string) => {
-    if (type === 'all') return reports;
-    return reports.filter(report => report.type === type);
+    return reports.filter(report =>
+      (type === 'all' || report.type === type) &&
+      (report.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
   };
 
   const ReportCard = ({ report }: { report: Report }) => {
@@ -125,7 +128,7 @@ export default function HistoryPage() {
   const ReportList = ({ type }: { type: 'all' | 'label' | 'recipe' | 'nutrition' }) => {
       const filtered = filterReports(type);
       if (filtered.length === 0) {
-          return <div className="text-center text-muted-foreground py-16">No reports found in this category.</div>;
+          return <div className="text-center text-muted-foreground py-16">No reports found matching your criteria.</div>;
       }
       return (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -150,6 +153,17 @@ export default function HistoryPage() {
         <History className="w-16 h-16 text-accent mb-4" />
         <h1 className="text-4xl font-bold tracking-tight">Your History</h1>
         <p className="mt-2 text-lg text-muted-foreground">Review your saved reports and recipes.</p>
+      </div>
+
+      <div className="relative mb-6 max-w-lg mx-auto">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <Input
+          type="search"
+          placeholder="Search reports by name..."
+          className="pl-10 w-full"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       <Tabs defaultValue="all" className="w-full">

@@ -113,6 +113,9 @@ export function RecipeForm() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+  const [reportTitle, setReportTitle] = useState("");
+
 
   const { toast } = useToast();
 
@@ -288,7 +291,7 @@ export function RecipeForm() {
       id: crypto.randomUUID(),
       userId: loggedInUser.email,
       type: 'recipe' as const,
-      title: detailedRecipe.recipeTitle,
+      title: reportTitle.trim() || detailedRecipe.recipeTitle,
       summary: detailedRecipe.description,
       createdAt: new Date().toISOString(),
       data: detailedRecipe,
@@ -303,6 +306,8 @@ export function RecipeForm() {
     localStorage.setItem("userReports", JSON.stringify(allUserReports));
 
     toast({ title: "Recipe Saved", description: "The recipe has been saved to your history." });
+    setIsSaveDialogOpen(false);
+    setReportTitle("");
   };
   
   const scrollToBottom = () => {
@@ -552,16 +557,37 @@ export function RecipeForm() {
         
         {detailedRecipe && (
           <div className="space-y-8 animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
+             <div className="flex justify-end">
+                <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" onClick={() => setReportTitle(detailedRecipe.recipeTitle)}>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save Recipe
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Save Recipe</DialogTitle>
+                      <DialogDescription>Give your recipe a name to easily find it later.</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="report-name" className="text-right">Name</Label>
+                        <Input id="report-name" value={reportTitle} onChange={(e) => setReportTitle(e.target.value)} className="col-span-3" />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button type="button" onClick={handleSaveRecipe}>Save</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+            </div>
+            
             <RecipeDisplay recipe={detailedRecipe} />
+
             <Card>
               <CardHeader>
-                <div className="flex justify-between items-center">
-                    <h3 className="font-semibold text-xl flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Recipe</h3>
-                    <Button variant="outline" size="sm" onClick={handleSaveRecipe} disabled={!detailedRecipe}>
-                        <Save className="mr-2 h-4 w-4" />
-                        Save Recipe
-                    </Button>
-                </div>
+                <h3 className="font-semibold text-xl flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Recipe</h3>
                 <p className="text-sm text-muted-foreground pt-1">Ask about substitutions, techniques, or nutrition.</p>
               </CardHeader>
               <CardContent>
