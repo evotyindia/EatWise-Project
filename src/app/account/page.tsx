@@ -17,8 +17,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserCog, LogOut, ShieldCheck, User, Trash2, Ban, AtSign, LoaderCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { UserCog, LogOut, ShieldCheck, User, Trash2, Ban, AtSign, LoaderCircle, CheckCircle2, XCircle } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
 import { Separator } from "@/components/ui/separator";
 import {
   AlertDialog,
@@ -31,10 +31,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { type User as UserType, updateUser, deleteUser, getUserByUid, setUsername } from "@/services/userService";
+import { type User as UserType, updateUser, deleteUser, getUserByUid, setUsername, checkUsernameExists } from "@/services/userService";
 import { deleteReportsByUserId } from "@/services/reportService";
 import { getAuth, deleteUser as deleteAuthUser, onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { useDebounce } from "@/hooks/use-debounce";
 
 
 // Schema for setting username for the first time
@@ -54,6 +55,12 @@ export default function AccountPage() {
   const [currentUser, setCurrentUser] = useState<UserType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
+
+  // State for real-time username validation
+  const [usernameToCheck, setUsernameToCheck] = useState("");
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<"idle" | "available" | "taken" | "invalid">("idle");
+  const debouncedUsername = useDebounce(usernameToCheck, 500);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
@@ -92,6 +99,33 @@ export default function AccountPage() {
     defaultValues: { username: "" },
   });
 
+  // Effect for debounced username check
+  useEffect(() => {
+    const checkUser = async () => {
+      if (debouncedUsername.length < 3 || !/^[a-zA-Z0-9_]+$/.test(debouncedUsername)) {
+        setUsernameStatus(debouncedUsername.length > 0 ? "invalid" : "idle");
+        setIsCheckingUsername(false);
+        return;
+      }
+      setIsCheckingUsername(true);
+      try {
+        const exists = await checkUsernameExists(debouncedUsername);
+        setUsernameStatus(exists ? "taken" : "available");
+      } catch (error) {
+        console.error("Username check error:", error);
+        setUsernameStatus("idle"); // Fallback on error
+      }
+      setIsCheckingUsername(false);
+    };
+
+    if (debouncedUsername) {
+      checkUser();
+    } else {
+      setUsernameStatus("idle");
+    }
+  }, [debouncedUsername]);
+
+
   useEffect(() => {
     if (currentUser) {
       profileForm.reset({
@@ -106,6 +140,11 @@ export default function AccountPage() {
 
   async function onUsernameSubmit(values: z.infer<typeof usernameFormSchema>) {
     if (!currentUser?.id || !currentUser?.uid) return;
+    if (usernameStatus !== 'available') {
+        toast({ title: "Username Invalid", description: "Please choose an available username.", variant: "destructive"});
+        return;
+    }
+
     const result = await setUsername(currentUser.uid, currentUser.id, values.username);
 
     if (result.success) {
@@ -225,12 +264,31 @@ export default function AccountPage() {
                      render={({ field }) => (
                        <FormItem>
                          <FormLabel>Username</FormLabel>
-                         <FormControl><Input placeholder="your_unique_username" {...field} /></FormControl>
+                         <div className="relative">
+                            <FormControl>
+                                <Input 
+                                    placeholder="your_unique_username" 
+                                    {...field} 
+                                    onChange={(e) => {
+                                        field.onChange(e);
+                                        setUsernameToCheck(e.target.value);
+                                    }}
+                                />
+                            </FormControl>
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                                {isCheckingUsername && <LoaderCircle className="h-5 w-5 text-muted-foreground animate-spin" />}
+                                {!isCheckingUsername && usernameStatus === 'available' && <CheckCircle2 className="h-5 w-5 text-success" />}
+                                {!isCheckingUsername && usernameStatus === 'taken' && <XCircle className="h-5 w-5 text-destructive" />}
+                                {!isCheckingUsername && usernameStatus === 'invalid' && <XCircle className="h-5 w-5 text-destructive" />}
+                            </div>
+                         </div>
+                         {usernameStatus === 'taken' && <p className="text-sm font-medium text-destructive">This username is already taken.</p>}
+                         {usernameStatus === 'invalid' && debouncedUsername.length > 0 && <p className="text-sm font-medium text-destructive">Must be at least 3 characters and only contain letters, numbers, or underscores.</p>}
                          <FormMessage />
                        </FormItem>
                      )}
                    />
-                 <Button type="submit" className="w-full" disabled={usernameForm.formState.isSubmitting}>
+                 <Button type="submit" className="w-full" disabled={usernameForm.formState.isSubmitting || usernameStatus !== 'available'}>
                    {usernameForm.formState.isSubmitting ? "Saving..." : "Save Username"}
                  </Button>
                </form>
