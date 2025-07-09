@@ -22,7 +22,7 @@ import { LogIn, LoaderCircle } from "lucide-react";
 import { useEffect, Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getAndSyncUser, createUserInFirestore } from "@/services/userService";
+import { getAndSyncUser } from "@/services/userService";
 
 
 const formSchema = z.object({
@@ -85,23 +85,14 @@ function LoginContent() {
       // Step 3: Get user profile from Firestore and sync verification status
       let userProfile = await getAndSyncUser(authUser.uid);
 
-      // Gracefully handle cases where the user exists in Auth but not in Firestore
+      // This is a data consistency check. If the user exists in Auth but not Firestore, something is wrong.
+      // We should not create a user here. The login should fail.
       if (!userProfile) {
-        console.warn(`User profile not found for UID: ${authUser.uid}. Attempting to create a fallback profile.`);
-        const defaultName = authUser.email?.split('@')[0] || 'New User';
-        const creationResult = await createUserInFirestore(authUser.uid, defaultName, authUser.email || '', undefined);
-
-        if (creationResult.success) {
-          userProfile = await getAndSyncUser(authUser.uid); // Try again
-        }
-        
-        if (!userProfile) {
-           // If it still fails after attempting to create, there's a more serious issue.
-           throw new Error("There was an issue accessing your user profile. Please contact support.");
-        }
+        await auth.signOut(); // Log the user out of Auth to be safe
+        throw new Error("Your user profile could not be found. Please contact support or try signing up again.");
       }
 
-      // If we have a user profile (either found or created), proceed with login
+      // If we have a user profile, proceed with login
       localStorage.setItem("loggedInUser", JSON.stringify({ id: userProfile.id, email: userProfile.email, uid: userProfile.uid, username: userProfile.username }));
       toast({
         title: "Login Successful",
@@ -118,7 +109,7 @@ function LoginContent() {
           errorMessage = "Invalid email or password.";
       }
       // Use the custom error message if it's one we threw
-      if (error.message.includes("accessing your user profile")) {
+      if (error.message.includes("Your user profile could not be found")) {
         errorMessage = error.message;
       }
       toast({
