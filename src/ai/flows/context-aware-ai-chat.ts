@@ -177,21 +177,17 @@ const contextAwareAIChatFlow = ai.defineFlow(
       }
       return output;
     } catch (error: any) {
-      const errorMessage = error.message?.toLowerCase() || '';
-      if (errorMessage.includes('api key not found') || errorMessage.includes('permission denied')) {
-          console.error("Authentication error in contextAwareAIChatFlow:", error);
-          throw new Error("Authentication Error: The AI service API key is missing or invalid. Please check your server environment variables.");
+      // Log the full, detailed error to the server console (Vercel logs) for debugging.
+      console.error(`An error occurred in contextAwareAIChatFlow:`, error);
+
+      // Provide a clear error message for the most common deployment issue.
+      if (error.message?.toLowerCase().includes('api key')) {
+          throw new Error('AI service configuration error. The API key is not set or invalid in the deployment environment.');
       }
 
-      const isApiError = (error.cause as any)?.status >= 500;
-      const finalErrorMessage = isApiError
-          ? "I'm sorry, the AI service is currently busy or unavailable. Please try again in a moment."
-          : error.message || "An unexpected error occurred during the chat.";
-
-      console.error(`An error occurred in contextAwareAIChatFlow: ${finalErrorMessage}`, error);
-
-      // Re-throw with a more specific message for the front end.
-      throw new Error(finalErrorMessage);
+      // For any other errors, throw a generic but helpful message to the user.
+      // The specific error details are available in the server logs.
+      throw new Error('An unexpected error occurred while communicating with the AI service. Please try again later.');
     }
   }
 );

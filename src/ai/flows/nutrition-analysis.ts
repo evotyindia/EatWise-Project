@@ -121,14 +121,17 @@ const analyzeNutritionFlow = ai.defineFlow(
         }
         return output;
     } catch (error: any) {
-        const errorMessage = error.message?.toLowerCase() || '';
-        if (errorMessage.includes('api key not found') || errorMessage.includes('permission denied')) {
-            console.error("Authentication error in analyzeNutritionFlow:", error);
-            throw new Error("Authentication Error: The AI service API key is missing or invalid. Please check your server environment variables.");
+        // Log the full, detailed error to the server console (Vercel logs) for debugging.
+        console.error(`An error occurred in analyzeNutritionFlow:`, error);
+
+        // Provide a clear error message for the most common deployment issue.
+        if (error.message?.toLowerCase().includes('api key')) {
+            throw new Error('AI service configuration error. The API key is not set or invalid in the deployment environment.');
         }
-        
-        console.error("An API error occurred in analyzeNutritionFlow:", error);
-        throw new Error("Failed to analyze nutrition. The AI service may be temporarily unavailable.");
+
+        // For any other errors, throw a generic but helpful message to the user.
+        // The specific error details are available in the server logs.
+        throw new Error('An unexpected error occurred while communicating with the AI service. Please try again later.');
     }
   }
 );
