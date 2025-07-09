@@ -22,7 +22,7 @@ import { LogIn } from "lucide-react";
 import { useEffect, Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getAndSyncUser, getUserByUsername, getUserByEmail } from "@/services/userService";
+import { getAndSyncUser, getUserByUsername } from "@/services/userService";
 
 const formSchema = z.object({
   identifier: z.string().min(3, { message: "Please enter a valid email or username." }),
@@ -69,20 +69,18 @@ function LoginContent() {
     let userEmail: string | undefined;
 
     try {
-        // First, try to find a user whose email matches the identifier.
-        const userByEmail = await getUserByEmail(values.identifier);
-
-        if (userByEmail) {
-            userEmail = userByEmail.email;
-        } else {
-            // If no user is found by email, try to find one by username.
+        // If the identifier is NOT an email, assume it's a username and fetch the corresponding user profile to get the email.
+        if (!isEmail(values.identifier)) {
             const userByUsername = await getUserByUsername(values.identifier);
             if (userByUsername) {
                 userEmail = userByUsername.email;
             }
+        } else {
+            // If it IS an email, use it directly.
+            userEmail = values.identifier;
         }
 
-        // If after both checks, we still don't have an email, the user doesn't exist.
+        // If after checking, we still don't have an email, the user doesn't exist or the username was wrong.
         if (!userEmail) {
             toast({
                 title: "Account Not Found",
