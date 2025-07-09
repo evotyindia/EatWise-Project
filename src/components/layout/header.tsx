@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail, User, LogOut, UserCog, History, Menu } from "lucide-react"
@@ -10,6 +11,14 @@ import { cn } from "@/lib/utils";
 import '../common/theme-toggle-button.css';
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const navItems = [
   { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
@@ -85,11 +94,29 @@ export function Header() {
             {/* Account and theme buttons */}
             <div className="flex items-center gap-2">
                 {mounted && isLoggedIn ? (
-                    <Button asChild variant="outline" size="sm">
-                    <Link href="/account">
-                        <UserCog className="mr-2 h-4 w-4" /> Account
-                    </Link>
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <UserCog className="mr-2 h-4 w-4" />
+                          <span>Account</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/account" className="cursor-pointer">
+                            <UserCog className="mr-2 h-4 w-4" />
+                            <span>Account Dashboard</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer focus:bg-destructive/10 focus:text-destructive">
+                          <LogOut className="mr-2 h-4 w-4" />
+                          <span>Logout</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                 ) : (
                     mounted && <Button asChild size="sm">
                     <Link href="/login">
