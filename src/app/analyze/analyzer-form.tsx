@@ -26,7 +26,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const manualInputSchema = z.object({
   productName: z.string().optional(),
@@ -205,13 +205,6 @@ export function AnalyzerForm() {
         })}
       </ul>
     );
-  };
-
-  const riskBadgeVariantMap: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-    High: 'destructive',
-    Medium: 'secondary',
-    Low: 'default',
-    Neutral: 'outline',
   };
 
   return (
@@ -449,30 +442,48 @@ export function AnalyzerForm() {
                 )}
 
                 {report.ingredientDeepDive && report.ingredientDeepDive.length > 0 && (
-                  <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="ingredient-deep-dive">
-                      <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                        <div className="flex items-center">
-                          <Microscope className="mr-2 h-5 w-5 text-primary" />
-                          <span>Ingredient Deep Dive</span>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="space-y-4 pt-2">
-                          {report.ingredientDeepDive.map((item, index) => (
-                            <div key={index} className="p-3 rounded-md border bg-muted/50">
-                              <div className="flex items-center justify-between w-full mb-2">
-                                <h4 className="font-semibold">{item.ingredientName}</h4>
-                                <Badge variant={riskBadgeVariantMap[item.riskLevel] || 'outline'} className="ml-2 shrink-0">{item.riskLevel}</Badge>
-                              </div>
-                              <p className="text-sm text-muted-foreground mb-1">{item.description}</p>
-                              <p className="text-xs"><strong className="font-semibold">Justification:</strong> {item.riskReason}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
+                  <div className="w-full pt-2">
+                    <h3 className="text-lg font-semibold mb-3 flex items-center">
+                      <Microscope className="mr-2 h-5 w-5 text-primary" />
+                      <span>Ingredient Deep Dive</span>
+                    </h3>
+                    <div className="rounded-lg border overflow-hidden">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-1/4">Ingredient</TableHead>
+                            <TableHead className="w-1/5">Risk Level</TableHead>
+                            <TableHead>Explanation</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {report.ingredientDeepDive.map((item, index) => {
+                            const riskColorClass = {
+                              'High': 'text-destructive',
+                              'Medium': 'text-orange-500 dark:text-orange-400',
+                              'Low': 'text-success',
+                              'Neutral': 'text-muted-foreground',
+                            }[item.riskLevel] || 'text-muted-foreground';
+
+                            return (
+                              <TableRow key={index} className="bg-background">
+                                <TableCell className="font-semibold">{item.ingredientName}</TableCell>
+                                <TableCell className={cn("font-bold", riskColorClass)}>
+                                  {item.riskLevel}
+                                </TableCell>
+                                <TableCell>
+                                  <p className="text-sm font-medium">{item.description}</p>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    {item.riskReason}
+                                  </p>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
                 )}
               </CardContent>
               <CardFooter className="flex flex-col items-start pt-4 border-t">
