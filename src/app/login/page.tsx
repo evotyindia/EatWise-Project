@@ -1,4 +1,3 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -86,7 +85,7 @@ function LoginContent() {
       let userProfile = await getAndSyncUser(authUser.uid);
 
       // This is a data consistency check. If the user exists in Auth but not Firestore, something is wrong.
-      // We should not create a user here. The login should fail.
+      // The login should fail to prompt the user to contact support or re-register.
       if (!userProfile) {
         await auth.signOut(); // Log the user out of Auth to be safe
         throw new Error("Your user profile could not be found. Please contact support or try signing up again.");
@@ -104,10 +103,14 @@ function LoginContent() {
 
     } catch (error: any) {
       console.error("Login error:", error);
-      let errorMessage = "An error occurred during login. Please try again.";
+      
       if (error.code === 'auth/invalid-credential') {
-          errorMessage = "Invalid email or password.";
+        // If credentials are bad, redirect to signup, pre-filling their email.
+        router.push(`/signup?email=${encodeURIComponent(values.email)}`);
+        return; // Stop further execution
       }
+
+      let errorMessage = "An error occurred during login. Please try again.";
       // Use the custom error message if it's one we threw
       if (error.message.includes("Your user profile could not be found")) {
         errorMessage = error.message;
