@@ -172,13 +172,13 @@ export default function AccountPage() {
     }
   }
 
-  const handleClearHistory = async () => {
+  const handleClearBookmarks = async () => {
     if (!currentUser?.uid) return;
     try {
       await deleteReportsByUserId(currentUser.uid); // Use UID for report queries now
-      toast({ title: "History Cleared", description: "All your saved reports have been deleted." });
+      toast({ title: "Bookmarks Cleared", description: "All your saved reports have been deleted." });
     } catch (error) {
-      toast({ title: "Error", description: "Could not clear history.", variant: "destructive" });
+      toast({ title: "Error", description: "Could not clear bookmarks.", variant: "destructive" });
     }
   }
 
@@ -368,18 +368,18 @@ export default function AccountPage() {
         <CardContent className="space-y-6 p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <p className="font-semibold">Clear All History</p>
-              <p className="text-sm text-muted-foreground">This will permanently delete all your saved reports.</p>
+              <p className="font-semibold">Clear All Bookmarks</p>
+              <p className="text-sm text-muted-foreground">This will permanently delete all your saved reports and analyses.</p>
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" className="w-full sm:w-auto shrink-0">
-                  <Trash2 className="mr-2 h-4 w-4" /> Clear History
+                  <Trash2 className="mr-2 h-4 w-4" /> Clear Bookmarks
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
-                <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete all your saved reports. This action cannot be undone.</AlertDialogDescription></AlertDialogHeader>
-                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={handleClearHistory}>Yes, Clear History</AlertDialogAction></AlertDialogFooter>
+                <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete all your saved bookmarks. This action cannot be undone.</AlertDialogDescription></AlertDialogHeader>
+                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={handleClearBookmarks}>Yes, Clear Bookmarks</AlertDialogAction></AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           </div>
