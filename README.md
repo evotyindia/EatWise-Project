@@ -110,7 +110,15 @@ Make sure to add this to your `.env` file for local development. For production 
 
 This Next.js application can be deployed to any platform that supports Next.js, such as Vercel, Netlify, or Firebase App Hosting (an `apphosting.yaml` is included).
 
-For Genkit flows to work in production, ensure your deployment environment has the `GOOGLE_API_KEY` environment variable set.
+**Important:** For Genkit AI flows to work in production, you MUST set the `GOOGLE_API_KEY` environment variable in your deployment environment's settings.
+
+### Deploying on Vercel
+
+1.  Push your code to a GitHub repository.
+2.  Import the repository into Vercel.
+3.  In the Vercel project settings, navigate to the **Environment Variables** section.
+4.  Add a new environment variable with the name `GOOGLE_API_KEY` and paste your key as the value.
+5.  Redeploy your application. The AI features should now work correctly.
 
 ## Contributing
 
