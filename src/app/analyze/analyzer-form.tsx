@@ -90,13 +90,13 @@ export function AnalyzerForm() {
 
     try {
       const user = await getUserByEmail(loggedInUserEmail);
-      if (!user?.id) {
+      if (!user?.uid) {
         toast({ title: "User Not Found", description: "Could not find your user account to save the report.", variant: "destructive" });
         return;
       }
       
       const newReportData = {
-        userId: user.id,
+        uid: user.uid,
         type: 'label' as const,
         title: reportTitle.trim() || report.productType || manualForm.getValues("productName") || "Untitled Label Report",
         summary: report.summary,

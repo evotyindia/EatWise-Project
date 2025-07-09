@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from 'date-fns';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { getReportsByUserId, deleteReport, type Report } from "@/services/reportService";
+import { getReportsByUid, deleteReport, type Report } from "@/services/reportService";
 import { getUserByEmail } from "@/services/userService";
 
 export default function HistoryPage() {
@@ -20,7 +20,7 @@ export default function HistoryPage() {
   const pathname = usePathname();
   const { toast } = useToast();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [userUid, setUserUid] = useState<string | null>(null);
   const [reports, setReports] = useState<Report[]>([]);
   const [isLoadingReports, setIsLoadingReports] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,9 +35,9 @@ export default function HistoryPage() {
     async function fetchInitialData() {
       try {
         const user = await getUserByEmail(loggedInUserEmail);
-        if (user?.id) {
-          setUserId(user.id);
-          const userReports = await getReportsByUserId(user.id);
+        if (user?.uid) {
+          setUserUid(user.uid);
+          const userReports = await getReportsByUid(user.uid);
           userReports.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
           setReports(userReports);
         } else {
@@ -58,7 +58,7 @@ export default function HistoryPage() {
   }, [router, pathname, toast]);
   
   const handleDeleteReport = async (reportId: string) => {
-    if (!userId) return;
+    if (!userUid) return;
 
     try {
       await deleteReport(reportId);

@@ -23,7 +23,7 @@ import { signInUser } from "@/services/userService";
 import { useEffect } from "react";
 
 const formSchema = z.object({
-  identifier: z.string().min(1, { message: "Email or Username is required." }),
+  email: z.string().email({ message: "Please enter a valid email address." }),
   password: z.string().min(1, { message: "Password is required." }),
 });
 
@@ -51,14 +51,14 @@ export default function LoginPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      identifier: "",
+      email: "",
       password: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const user = await signInUser(values.identifier, values.password);
+      const user = await signInUser(values.email, values.password);
 
       if (user) {
         localStorage.setItem("loggedInUser", JSON.stringify({ id: user.id, email: user.email }));
@@ -80,14 +80,6 @@ export default function LoginPage() {
         description: (error as Error).message || "Could not log you in. Please try again.",
         variant: "destructive",
       });
-      // Graceful redirect to signup if account not found
-      if ((error as Error).message.includes("Account not found")) {
-        const isEmail = z.string().email().safeParse(values.identifier).success;
-        const redirectQuery = redirectUrl ? `&redirect=${encodeURIComponent(redirectUrl)}` : '';
-        const signupUrl = `/signup?${isEmail ? `email=${encodeURIComponent(values.identifier)}` : ''}${redirectQuery}`;
-        
-        router.push(signupUrl);
-      }
     }
   }
 
@@ -106,12 +98,12 @@ export default function LoginPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
-                name="identifier"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email or Username</FormLabel>
+                    <FormLabel>Email Address</FormLabel>
                     <FormControl>
-                      <Input placeholder="your_username or you@example.com" {...field} />
+                      <Input placeholder="you@example.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

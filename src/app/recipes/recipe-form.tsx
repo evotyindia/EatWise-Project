@@ -292,13 +292,13 @@ export function RecipeForm() {
 
     try {
         const user = await getUserByEmail(loggedInUserEmail);
-        if (!user?.id) {
+        if (!user?.uid) {
             toast({ title: "User Not Found", description: "Could not find your user account to save the recipe.", variant: "destructive" });
             return;
         }
 
         const newReport = {
-          userId: user.id,
+          uid: user.uid,
           type: 'recipe' as const,
           title: reportTitle.trim() || detailedRecipe.recipeTitle,
           summary: detailedRecipe.description,
