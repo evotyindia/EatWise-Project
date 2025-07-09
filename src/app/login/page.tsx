@@ -18,12 +18,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { LogIn, LoaderCircle, CheckCircle2, XCircle } from "lucide-react";
+import { LogIn } from "lucide-react";
 import { useEffect, Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getAndSyncUser, getUserByUsername, checkUsernameExists, getUserByEmail } from "@/services/userService";
-import { useDebounce } from "@/hooks/use-debounce";
+import { getAndSyncUser, getUserByUsername, getUserByEmail } from "@/services/userService";
 
 const formSchema = z.object({
   identifier: z.string().min(3, { message: "Please enter a valid email or username." }),
@@ -36,11 +35,6 @@ function LoginContent() {
   const { toast } = useToast();
 
   const [redirectUrl, setRedirectUrl] = useState("/");
-  const [identifierToCheck, setIdentifierToCheck] = useState("");
-  const [isChecking, setIsChecking] = useState(false);
-  const [identifierStatus, setIdentifierStatus] = useState<"idle" | "exists" | "not_exists">("idle");
-  const debouncedIdentifier = useDebounce(identifierToCheck, 500);
-
   const isEmail = (str: string) => /\S+@\S+\.\S+/.test(str);
 
   useEffect(() => {
@@ -58,41 +52,6 @@ function LoginContent() {
       localStorage.removeItem("loginRedirect");
     }
   }, [searchParams, toast]);
-  
-  useEffect(() => {
-    const checkIdentifier = async () => {
-      // If it looks like an email, we skip the live check due to security rules for unauthenticated users.
-      // We will mark it as "exists" to enable the login button, and validation will occur on submit.
-      if (isEmail(debouncedIdentifier)) {
-        setIdentifierStatus("exists"); 
-        setIsChecking(false);
-        return;
-      }
-      
-      if (debouncedIdentifier.length < 3) {
-        setIdentifierStatus("idle");
-        setIsChecking(false);
-        return;
-      }
-      
-      setIsChecking(true);
-      try {
-        const exists = await checkUsernameExists(debouncedIdentifier);
-        setIdentifierStatus(exists ? "exists" : "not_exists");
-      } catch (error) {
-        setIdentifierStatus("idle");
-        console.error("Error checking identifier:", error);
-      }
-      setIsChecking(false);
-    };
-
-    if (debouncedIdentifier) {
-      checkIdentifier();
-    } else {
-      setIdentifierStatus("idle");
-    }
-  }, [debouncedIdentifier]);
-
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -105,27 +64,28 @@ function LoginContent() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     form.clearErrors();
     let userEmail: string | undefined;
-    let userExists = false;
 
+    // Step 1: Find the user's email, whether they entered an email or username.
     try {
       if (isEmail(values.identifier)) {
+        // If it's an email, we'll use it directly. We still need to check if the user exists.
         const userByEmail = await getUserByEmail(values.identifier);
         if (userByEmail) {
-          userEmail = userByEmail.email;
-          userExists = true;
+            userEmail = userByEmail.email;
         }
       } else {
+        // If it's a username, find the corresponding user to get their email.
         const userByUsername = await getUserByUsername(values.identifier);
         if (userByUsername) {
           userEmail = userByUsername.email;
-          userExists = true;
         }
       }
 
-      if (!userExists || !userEmail) {
+      // If after all checks, we couldn't find an email, the user doesn't exist.
+      if (!userEmail) {
         toast({
             title: "Account Not Found",
-            description: "No account found with that identifier.",
+            description: "No account found with that identifier. Please sign up.",
             variant: "destructive",
             action: (
               <Button variant="secondary" size="sm" asChild>
@@ -136,9 +96,11 @@ function LoginContent() {
         return;
       }
 
+      // Step 2: Attempt to sign in with the found email and the provided password.
       const userCredential = await signInWithEmailAndPassword(auth, userEmail, values.password);
       const authUser = userCredential.user;
 
+      // Step 3: Handle post-login logic (email verification, profile sync).
       if (!authUser.emailVerified) {
         await sendEmailVerification(authUser).catch(e => console.error("Failed to resend verification email:", e));
         toast({
@@ -167,8 +129,9 @@ function LoginContent() {
       localStorage.removeItem("loginRedirect");
 
     } catch (error: any) {
-      console.error("Login error:", error);
+      console.error("Login process error:", error);
       
+      // Step 4: Handle specific errors from the login attempt.
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
         toast({
           title: "Incorrect Credentials",
@@ -181,26 +144,24 @@ function LoginContent() {
             ),
         });
       } else if (error.message.includes("Your user profile could not be found")) {
-        toast({
-          title: "Login Failed",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else if (!userExists) { // This case is already handled above, but as a fallback.
+         toast({ title: "Login Failed", description: error.message, variant: "destructive" });
+      } else if (error.code !== 'auth/invalid-credential' && error.code !== 'auth/wrong-password' && !userEmail) {
+        // This is a fallback case if the initial user check somehow failed before the login attempt.
          toast({
             title: "Account Not Found",
-            description: "No account found with that identifier.",
+            description: "No account found with that identifier. Please sign up.",
             variant: "destructive",
              action: (
               <Button variant="secondary" size="sm" asChild>
-                  <Link href="/signup">Sign Up</Link>
+                  <Link href={`/signup?email=${isEmail(values.identifier) ? encodeURIComponent(values.identifier) : ''}`}>Sign Up</Link>
               </Button>
             ),
         });
-      } else {
+      }
+      else {
          toast({
           title: "Login Failed",
-          description: "An unexpected error occurred during login. Please try again.",
+          description: "An unexpected error occurred. Please try again.",
           variant: "destructive",
         });
       }
@@ -226,28 +187,12 @@ function LoginContent() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Email or Username</FormLabel>
-                    <div className="relative">
                       <FormControl>
                         <Input 
                           placeholder="you@example.com or your_username" 
                           {...field}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            setIdentifierToCheck(e.target.value);
-                          }}
                         />
                       </FormControl>
-                       <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                        {isChecking && <LoaderCircle className="h-5 w-5 text-muted-foreground animate-spin" />}
-                        {!isChecking && !isEmail(debouncedIdentifier) && identifierStatus === 'exists' && <CheckCircle2 className="h-5 w-5 text-success" />}
-                        {!isChecking && !isEmail(debouncedIdentifier) && identifierStatus === 'not_exists' && debouncedIdentifier.length > 2 && <XCircle className="h-5 w-5 text-destructive" />}
-                      </div>
-                    </div>
-                     {!isEmail(debouncedIdentifier) && identifierStatus === 'not_exists' && debouncedIdentifier.length > 2 && (
-                      <p className="text-sm font-medium text-destructive">
-                        Username not found. Please <Link href="/signup" className="underline">sign up</Link>.
-                      </p>
-                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -274,7 +219,7 @@ function LoginContent() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting || identifierStatus === 'not_exists'}>
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                  {form.formState.isSubmitting ? "Logging in..." : "Log In"}
               </Button>
             </form>
