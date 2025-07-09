@@ -6,19 +6,18 @@ import { collection, addDoc, query, where, getDocs, doc, getDoc, deleteDoc, writ
 import type { GenerateHealthReportOutput } from "@/ai/flows/generate-health-report";
 import type { GetDetailedRecipeOutput } from "@/ai/flows/get-detailed-recipe";
 import type { AnalyzeNutritionOutput } from "@/ai/flows/nutrition-analysis";
-import { getUserByEmail, getUserById } from './userService';
+import { getUserById } from './userService';
 
 // Define a unified report structure for state management
-export interface Report<T> {
+export interface Report<T = any> {
   id: string; // Firestore document ID
-  userId: string;
+  uid: string; // Firebase Auth User ID
   type: 'label' | 'recipe' | 'nutrition';
   title: string;
   summary: string;
   createdAt: string; // ISO string
   data: T; // The full AI output
   userInput: any; // The original input to the AI flow
-  userEmail?: string; // For linking back if needed
 }
 
 // Create a new report in Firestore
@@ -34,13 +33,13 @@ export async function createReport(reportData: Omit<Report<any>, 'id'>) {
 }
 
 // Get all reports for a specific user
-export async function getReportsByUserId(userId: string): Promise<Report<any>[]> {
+export async function getReportsByUserId(uid: string): Promise<Report[]> {
     try {
-        const reports: Report<any>[] = [];
-        const q = query(collection(db, "reports"), where("userId", "==", userId));
+        const reports: Report[] = [];
+        const q = query(collection(db, "reports"), where("uid", "==", uid));
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
-            reports.push({ id: doc.id, ...doc.data() } as Report<any>);
+            reports.push({ id: doc.id, ...doc.data() } as Report);
         });
         return reports;
     } catch (error) {
@@ -50,19 +49,16 @@ export async function getReportsByUserId(userId: string): Promise<Report<any>[]>
 }
 
 // Get a single report by its document ID
-export async function getReportById(reportId: string): Promise<Report<any> | null> {
+export async function getReportById(reportId: string): Promise<Report | null> {
     try {
         const reportDocRef = doc(db, 'reports', reportId);
         const reportDoc = await getDoc(reportDocRef);
 
         if (reportDoc.exists()) {
-            const reportData = reportDoc.data();
-            const user = await getUserById(reportData.userId);
             return {
                 id: reportDoc.id,
-                ...reportData,
-                userEmail: user?.email, // Append user email for authorization check
-            } as Report<any>;
+                ...reportDoc.data(),
+            } as Report;
         } else {
             return null;
         }
@@ -85,9 +81,9 @@ export async function deleteReport(reportId: string): Promise<void> {
 }
 
 // Delete all reports for a specific user
-export async function deleteReportsByUserId(userId: string): Promise<void> {
+export async function deleteReportsByUserId(uid: string): Promise<void> {
     try {
-        const q = query(collection(db, "reports"), where("userId", "==", userId));
+        const q = query(collection(db, "reports"), where("uid", "==", uid));
         const querySnapshot = await getDocs(q);
         
         if (querySnapshot.empty) {

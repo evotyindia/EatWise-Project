@@ -22,6 +22,7 @@ import type { GetDetailedRecipeOutput } from "@/ai/flows/get-detailed-recipe";
 import type { AnalyzeNutritionOutput } from "@/ai/flows/nutrition-analysis";
 import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aware-ai-chat";
 import { getReportById, type Report } from "@/services/reportService";
+import { getUserById } from "@/services/userService";
 
 
 export default function IndividualHistoryPage() {
@@ -124,8 +125,8 @@ export default function IndividualHistoryPage() {
 
   useEffect(() => {
     if (id) {
-        const loggedInUserEmail = JSON.parse(localStorage.getItem("loggedInUser") || "{}").email;
-        if (!loggedInUserEmail) {
+        const loggedInUserId = JSON.parse(localStorage.getItem("loggedInUser") || "{}").id;
+        if (!loggedInUserId) {
             router.replace('/login');
             return;
         }
@@ -133,13 +134,10 @@ export default function IndividualHistoryPage() {
         async function fetchReport() {
             try {
                 const foundReport = await getReportById(id);
-                if (foundReport && foundReport.userId) {
-                    // Basic authorization check: does this report belong to the logged-in user?
-                    // This check should ideally be stronger, e.g., using user IDs instead of emails.
-                    // For now, we'll fetch the user and compare emails.
-                    // A proper implementation would use user ID from a session.
-                    // Since we store email in session, this is the best we can do without auth refactor.
-                    if (foundReport.userEmail?.toLowerCase() === loggedInUserEmail.toLowerCase()) {
+                if (foundReport) {
+                    // Authorization check: does this report's UID match the logged-in user's UID?
+                    const user = await getUserById(loggedInUserId);
+                    if (user && foundReport.uid === user.uid) {
                          setReport(foundReport);
                          initiateChatWithWelcome(foundReport);
                     } else {

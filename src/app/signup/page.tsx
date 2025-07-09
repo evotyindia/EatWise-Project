@@ -57,21 +57,21 @@ export default function SignupPage() {
     try {
       const newUser = { 
         name: values.name, 
-        username: values.username.toLowerCase(),
-        email: values.email.toLowerCase(), 
+        username: values.username,
+        email: values.email, 
         phone: values.phone, 
         password: values.password 
       };
 
       await createUser(newUser);
 
-      toast({
-        title: "Signup Successful",
-        description: "You can now log in with your new account.",
-      });
-      
-      const loginUrl = `/login${redirectUrl ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}`;
-      router.push(loginUrl);
+      // Store the original redirect URL if it exists
+      if (redirectUrl) {
+        localStorage.setItem("loginRedirect", redirectUrl);
+      }
+
+      // Redirect to the verify email page
+      router.push(`/verify-email?email=${encodeURIComponent(values.email)}`);
 
     } catch (error) {
       console.error("Signup error:", error);

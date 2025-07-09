@@ -31,7 +31,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { type User as UserType, getUserByEmail, updateUser, deleteUser } from "@/services/userService";
+import { type User as UserType, getUserById, updateUser, deleteUser } from "@/services/userService";
 import { deleteReportsByUserId } from "@/services/reportService";
 
 
@@ -43,18 +43,7 @@ const usernameFormSchema = z.object({
 // Schema for updating personal details
 const profileFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Invalid email address." }),
   phone: z.string().min(10, { message: "Phone number must be at least 10 digits." }).optional().or(z.literal('')),
-});
-
-// Schema for updating password
-const passwordFormSchema = z.object({
-  currentPassword: z.string().min(1, { message: "Current password is required." }),
-  newPassword: z.string().min(6, { message: "New password must be at least 6 characters." }),
-  confirmPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "New passwords don't match",
-  path: ["confirmPassword"],
 });
 
 export default function AccountPage() {
@@ -65,15 +54,15 @@ export default function AccountPage() {
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
   useEffect(() => {
-    const loggedInUserEmail = JSON.parse(localStorage.getItem("loggedInUser") || "{}").email;
-    if (!loggedInUserEmail) {
+    const loggedInUserId = JSON.parse(localStorage.getItem("loggedInUser") || "{}").id;
+    if (!loggedInUserId) {
       router.replace('/login');
       return;
     }
 
     async function fetchUser() {
       try {
-        const user = await getUserByEmail(loggedInUserEmail);
+        const user = await getUserById(loggedInUserId);
         if (user) {
           setCurrentUser(user);
         } else {
@@ -91,18 +80,14 @@ export default function AccountPage() {
     }
 
     fetchUser();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues: { name: "", email: "", phone: "" },
+    defaultValues: { name: "", phone: "" },
   });
 
-  const passwordForm = useForm<z.infer<typeof passwordFormSchema>>({
-    resolver: zodResolver(passwordFormSchema),
-    defaultValues: { currentPassword: "", newPassword: "", confirmPassword: "" },
-  });
-  
   const usernameForm = useForm<z.infer<typeof usernameFormSchema>>({
     resolver: zodResolver(usernameFormSchema),
     defaultValues: { username: "" },
@@ -112,7 +97,6 @@ export default function AccountPage() {
     if (currentUser) {
       profileForm.reset({
         name: currentUser.name || "",
-        email: currentUser.email || "",
         phone: currentUser.phone || "",
       });
     }
@@ -121,12 +105,9 @@ export default function AccountPage() {
   async function onUsernameSubmit(values: z.infer<typeof usernameFormSchema>) {
     if (!currentUser?.id) return;
     try {
-      const lowercasedUsername = values.username.toLowerCase();
-      // The uniqueness check should be done server-side, but a client check is a good first step.
-      // Assume `updateUser` will throw an error if the username is taken.
-      await updateUser(currentUser.id, { username: lowercasedUsername });
+      await updateUser(currentUser.id, { username: values.username });
       
-      const updatedUser = { ...currentUser, username: lowercasedUsername };
+      const updatedUser = { ...currentUser, username: values.username };
       setCurrentUser(updatedUser);
       toast({ title: "Username Set!", description: "Your unique username has been saved." });
     } catch (error) {
@@ -138,19 +119,11 @@ export default function AccountPage() {
   async function onProfileSubmit(values: z.infer<typeof profileFormSchema>) {
      if (!currentUser?.id) return;
     try {
-      const newEmail = values.email.toLowerCase();
-      
-      // Update user in Firestore
-      const updatedData: Partial<UserType> = { name: values.name, email: newEmail, phone: values.phone };
+      const updatedData: Partial<UserType> = { name: values.name, phone: values.phone };
       await updateUser(currentUser.id, updatedData);
 
       const updatedUser = { ...currentUser, ...updatedData };
       setCurrentUser(updatedUser);
-
-      // Update session if email changed
-      if (newEmail !== currentUser.email) {
-        localStorage.setItem("loggedInUser", JSON.stringify({ email: updatedUser.email }));
-      }
       
       toast({ title: "Profile Updated", description: "Your details have been successfully saved." });
     } catch (error) {
@@ -159,28 +132,10 @@ export default function AccountPage() {
     }
   }
 
-  async function onPasswordSubmit(values: z.infer<typeof passwordFormSchema>) {
-     if (!currentUser?.id || !currentUser.password) return;
-    try {
-        if (currentUser.password !== values.currentPassword) {
-            passwordForm.setError("currentPassword", { type: "manual", message: "Incorrect current password." });
-            return;
-        }
-        await updateUser(currentUser.id, { password: values.newPassword });
-        setCurrentUser({ ...currentUser, password: values.newPassword });
-
-        toast({ title: "Password Changed", description: "Your password has been successfully updated." });
-        passwordForm.reset();
-    } catch (error) {
-         console.error("Password update error:", error);
-         toast({ title: "An Error Occurred", description: "Could not change your password.", variant: "destructive" });
-    }
-  }
-
   const handleClearHistory = async () => {
     if (!currentUser?.id) return;
     try {
-      await deleteReportsByUserId(currentUser.id);
+      await deleteReportsByUserId(currentUser.uid); // Use UID for report queries now
       toast({ title: "History Cleared", description: "All your saved reports have been deleted." });
     } catch (error) {
       toast({ title: "Error", description: "Could not clear history.", variant: "destructive" });
@@ -190,10 +145,11 @@ export default function AccountPage() {
   const handleDeleteAccount = async () => {
     if (!currentUser?.id) return;
     try {
-      await deleteReportsByUserId(currentUser.id);
-      await deleteUser(currentUser.id);
+      await deleteReportsByUserId(currentUser.uid); // Use UID for consistency
+      await deleteUser(currentUser.id); // Deletes from Firestore
+      // NOTE: In a real app, you would also delete the user from Firebase Auth on the client side.
       handleLogout(true);
-      toast({ title: "Account Deleted", description: "Your account has been permanently deleted." });
+      toast({ title: "Account Deleted", description: "Your account and data have been deleted." });
     } catch (error) {
       toast({ title: "Error", description: "Could not delete account.", variant: "destructive" });
     }
@@ -201,6 +157,7 @@ export default function AccountPage() {
 
   const handleLogout = (isDeletion = false) => {
     localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("loginRedirect");
     if (!isDeletion) {
       toast({ title: "Logged Out", description: "You have been successfully logged out." });
     }
@@ -216,7 +173,6 @@ export default function AccountPage() {
   }
 
   if (!currentUser) {
-    // This case should be handled by the initial check, but as a fallback
     return (
         <div className="container mx-auto py-12 px-4 md:px-6 text-center">
             <h1 className="text-2xl font-bold">User not found.</h1>
@@ -280,11 +236,13 @@ export default function AccountPage() {
                     <Input value={`@${currentUser.username}`} readOnly disabled />
                     <p className="text-xs text-muted-foreground">Username cannot be changed.</p>
                 </div>
+                <div className="space-y-2">
+                    <FormLabel>Email Address</FormLabel>
+                    <Input value={currentUser.email} readOnly disabled />
+                    <p className="text-xs text-muted-foreground">Email cannot be changed.</p>
+                </div>
                  <FormField control={profileForm.control} name="name" render={({ field }) => (
                     <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Your Name" {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                <FormField control={profileForm.control} name="email" render={({ field }) => (
-                    <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input placeholder="you@example.com" {...field} /></FormControl><FormMessage /></FormItem>
                   )} />
                  <FormField control={profileForm.control} name="phone" render={({ field }) => (
                     <FormItem><FormLabel>Phone Number (Optional)</FormLabel><FormControl><Input type="tel" placeholder="9876543210" {...field} /></FormControl><FormMessage /></FormItem>
@@ -299,26 +257,18 @@ export default function AccountPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center"><ShieldCheck className="mr-2 h-5 w-5 text-primary" /> Change Password</CardTitle>
-            <CardDescription>Update your login password.</CardDescription>
+            <CardTitle className="flex items-center"><ShieldCheck className="mr-2 h-5 w-5 text-primary" /> Security</CardTitle>
+            <CardDescription>Security settings for your account.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Form {...passwordForm}>
-              <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-6">
-                <FormField control={passwordForm.control} name="currentPassword" render={({ field }) => (
-                    <FormItem><FormLabel>Current Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                <FormField control={passwordForm.control} name="newPassword" render={({ field }) => (
-                    <FormItem><FormLabel>New Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                <FormField control={passwordForm.control} name="confirmPassword" render={({ field }) => (
-                    <FormItem><FormLabel>Confirm New Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                <Button type="submit" className="w-full" disabled={passwordForm.formState.isSubmitting}>
-                  {passwordForm.formState.isSubmitting ? "Updating..." : "Update Password"}
-                </Button>
-              </form>
-            </Form>
+          <CardContent className="space-y-4">
+             <div className="p-4 rounded-lg bg-muted border">
+                <p className="font-semibold">Password Management</p>
+                 <p className="text-sm text-muted-foreground">To change your password, please use the "Forgot Password" link on the login page. This ensures your account remains secure.</p>
+             </div>
+             <div className="p-4 rounded-lg bg-muted border">
+                <p className="font-semibold">Email Verification Status</p>
+                 <p className="text-sm text-muted-foreground">Your email is <span className={currentUser.emailVerified ? "font-bold text-success" : "font-bold text-destructive"}>{currentUser.emailVerified ? "Verified" : "Not Verified"}</span>.</p>
+             </div>
           </CardContent>
         </Card>
       </div>
@@ -364,7 +314,7 @@ export default function AccountPage() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action is permanent. To confirm, please type <strong className="text-foreground">{currentUser.username}/CONFIRM</strong> below.
+                    This action is permanent and cannot be undone. To confirm, please type <strong className="text-foreground">{currentUser.username}/CONFIRM</strong> below.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <Input 

@@ -1,138 +1,167 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
 import { collection, addDoc, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc, limit } from 'firebase/firestore';
+import { 
+    createUserWithEmailAndPassword, 
+    sendEmailVerification,
+    signInWithEmailAndPassword,
+} from 'firebase/auth';
 
 export interface User {
     id: string; // This will be the Firestore document ID
+    uid: string; // This will be the Firebase Auth user ID
     name: string;
     username: string;
     email: string;
     phone?: string;
-    password?: string; // Note: Storing passwords in plaintext is insecure. Use Firebase Auth in a real app.
+    emailVerified: boolean;
 }
 
-// Check for existing user by email or username
-async function checkExistingUser(email?: string, username?: string): Promise<boolean> {
+// Check for existing user by username in Firestore
+async function checkExistingUsername(username: string): Promise<boolean> {
     const usersCollection = collection(db, 'users');
-    let q;
-    if (email) {
-        q = query(usersCollection, where("email", "==", email.toLowerCase()), limit(1));
-    } else if (username) {
-        q = query(usersCollection, where("username", "==", username.toLowerCase()), limit(1));
-    } else {
-        return false;
-    }
-    
+    const q = query(usersCollection, where("username", "==", username.toLowerCase()), limit(1));
     const querySnapshot = await getDocs(q);
     return !querySnapshot.empty;
 }
 
-// Create a new user
-export async function createUser(userData: Omit<User, 'id'>): Promise<string> {
-    // Check if email or username already exists
-    const emailExists = await checkExistingUser(userData.email);
-    if (emailExists) {
-        throw new Error("An account with this email already exists.");
+// Create a new user in Firebase Auth and Firestore
+export async function createUser(userData: Omit<User, 'id' | 'uid' | 'emailVerified'> & { password?: string }): Promise<void> {
+    if (!userData.password) {
+        throw new Error("Password is required to create a user.");
     }
-    const usernameExists = await checkExistingUser(undefined, userData.username);
+
+    const usernameExists = await checkExistingUsername(userData.username);
     if (usernameExists) {
         throw new Error("This username is already taken.");
     }
-
+    
     try {
+        const userCredential = await createUserWithEmailAndPassword(auth, userData.email.toLowerCase(), userData.password);
+        const user = userCredential.user;
+
+        await sendEmailVerification(user);
+
         const usersCollection = collection(db, 'users');
-        // Ensure email and username are stored in lowercase for consistency
-        const docRef = await addDoc(usersCollection, {
-            ...userData,
-            email: userData.email.toLowerCase(),
+        await addDoc(usersCollection, {
+            uid: user.uid,
+            name: userData.name,
             username: userData.username.toLowerCase(),
+            email: userData.email.toLowerCase(),
+            phone: userData.phone || '',
+            emailVerified: false,
         });
-        return docRef.id;
-    } catch (error) {
-        console.error("Error creating user in Firestore: ", error);
-        throw new Error("Could not create user account.");
+
+    } catch (error: any) {
+        if (error.code === 'auth/email-already-in-use') {
+            throw new Error("An account with this email already exists.");
+        }
+        console.error("Error creating user: ", error);
+        throw new Error("Could not create user account. Please try again.");
     }
 }
 
-// Get user by email or username (for login)
-export async function getUserByEmailOrUsername(identifier: string): Promise<User | null> {
+// Sign in user with email/username and password
+export async function signInUser(identifier: string, password: string): Promise<User> {
     const lowercasedIdentifier = identifier.toLowerCase();
-    const usersCollection = collection(db, 'users');
-    
-    // Check if identifier is an email
+    let userEmail = lowercasedIdentifier;
+
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lowercasedIdentifier);
-    
-    const q = isEmail
-      ? query(usersCollection, where("email", "==", lowercasedIdentifier), limit(1))
-      : query(usersCollection, where("username", "==", lowercasedIdentifier), limit(1));
+    if (!isEmail) {
+        const userByUsername = await getUserByUsername(lowercasedIdentifier);
+        if (!userByUsername) {
+            throw new Error("Account not found. Please check your details or sign up.");
+        }
+        userEmail = userByUsername.email;
+    }
 
     try {
-        const querySnapshot = await getDocs(q);
-        if (querySnapshot.empty) {
-            return null;
+        const userCredential = await signInWithEmailAndPassword(auth, userEmail, password);
+        const user = userCredential.user;
+
+        if (!user.emailVerified) {
+            await sendEmailVerification(user).catch(e => console.error("Failed to resend verification email:", e));
+            throw new Error("Your email is not verified. We've sent another verification link to your inbox. Please check your email (and spam folder) to continue.");
         }
-        const userDoc = querySnapshot.docs[0];
-        return { id: userDoc.id, ...userDoc.data() } as User;
-    } catch (error) {
-        console.error("Error fetching user: ", error);
-        throw new Error("Database error while fetching user.");
+        
+        const userProfile = await getUserByUid(user.uid);
+        if (!userProfile) {
+            throw new Error("Could not find user profile data.");
+        }
+        
+        return userProfile;
+    } catch (error: any) {
+        if (error.code === 'auth/invalid-credential') {
+            throw new Error("Invalid username/email or password.");
+        }
+        if (error.message.includes("Your email is not verified")) {
+            throw error;
+        }
+        console.error("Error signing in: ", error);
+        throw new Error("An error occurred during login. Please try again.");
     }
+}
+
+// Update user email as verified in Firestore
+export async function markEmailAsVerified(email: string): Promise<void> {
+    const user = await getUserByEmail(email);
+    if (user && user.id) {
+        const userDocRef = doc(db, 'users', user.id);
+        await updateDoc(userDocRef, { emailVerified: true });
+    }
+}
+
+
+// Get user from Firestore by UID
+async function getUserByUid(uid: string): Promise<User | null> {
+    const q = query(collection(db, "users"), where("uid", "==", uid), limit(1));
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) return null;
+    const userDoc = querySnapshot.docs[0];
+    return { id: userDoc.id, ...userDoc.data() } as User;
+}
+
+// Get user from Firestore by username
+async function getUserByUsername(username: string): Promise<User | null> {
+    const q = query(collection(db, "users"), where("username", "==", username.toLowerCase()), limit(1));
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) return null;
+    const userDoc = querySnapshot.docs[0];
+    return { id: userDoc.id, ...userDoc.data() } as User;
 }
 
 // Get user by email only
 export async function getUserByEmail(email: string): Promise<User | null> {
-     try {
-        const q = query(collection(db, "users"), where("email", "==", email.toLowerCase()), limit(1));
-        const querySnapshot = await getDocs(q);
-        if (querySnapshot.empty) {
-            return null;
-        }
-        const userDoc = querySnapshot.docs[0];
-        return { id: userDoc.id, ...userDoc.data() } as User;
-    } catch (error) {
-        console.error("Error fetching user by email: ", error);
-        throw new Error("Could not retrieve user data.");
-    }
+    const q = query(collection(db, "users"), where("email", "==", email.toLowerCase()), limit(1));
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) return null;
+    const userDoc = querySnapshot.docs[0];
+    return { id: userDoc.id, ...userDoc.data() } as User;
 }
 
-// Get user by ID
+// Get user by ID (Firestore doc ID)
 export async function getUserById(userId: string): Promise<User | null> {
-     try {
-        const userDocRef = doc(db, 'users', userId);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-             return { id: userDoc.id, ...userDoc.data() } as User;
-        }
-        return null;
-    } catch (error) {
-        console.error("Error fetching user by ID: ", error);
-        throw new Error("Could not retrieve user data.");
+    const userDocRef = doc(db, 'users', userId);
+    const userDoc = await getDoc(userDocRef);
+    if (userDoc.exists()) {
+        return { id: userDoc.id, ...userDoc.data() } as User;
     }
+    return null;
 }
 
-
-// Update a user's details
-export async function updateUser(userId: string, dataToUpdate: Partial<Omit<User, 'id'>>): Promise<void> {
-    
-    if (dataToUpdate.email) {
-        const emailExists = await checkExistingUser(dataToUpdate.email);
-        const currentUser = await getUserById(userId);
-        if (emailExists && currentUser?.email !== dataToUpdate.email.toLowerCase()) {
-            throw new Error("This email address is already in use.");
-        }
-        dataToUpdate.email = dataToUpdate.email.toLowerCase();
-    }
+// Update a user's details in Firestore
+export async function updateUser(userId: string, dataToUpdate: Partial<Omit<User, 'id' | 'uid' | 'email' | 'emailVerified'>> & { username?: string }): Promise<void> {
     if (dataToUpdate.username) {
-        const usernameExists = await checkExistingUser(undefined, dataToUpdate.username);
+        const usernameExists = await checkExistingUsername(dataToUpdate.username);
         const currentUser = await getUserById(userId);
         if (usernameExists && currentUser?.username !== dataToUpdate.username.toLowerCase()) {
             throw new Error("This username is already taken.");
         }
         dataToUpdate.username = dataToUpdate.username.toLowerCase();
     }
-
+    
     try {
         const userDocRef = doc(db, 'users', userId);
         await updateDoc(userDocRef, dataToUpdate);
@@ -142,13 +171,17 @@ export async function updateUser(userId: string, dataToUpdate: Partial<Omit<User
     }
 }
 
-// Delete a user
+// Delete a user from Firestore
 export async function deleteUser(userId: string): Promise<void> {
     try {
         const userDocRef = doc(db, 'users', userId);
         await deleteDoc(userDocRef);
+        // IMPORTANT: This only deletes the user from Firestore.
+        // In a production app, you must also delete the user from Firebase Authentication.
+        // This is a client-side operation that requires re-authentication for security.
+        // This function should be called AFTER the user is deleted from Auth on the client.
     } catch (error) {
-        console.error("Error deleting user: ", error);
-        throw new Error("Could not delete user account.");
+        console.error("Error deleting user from Firestore: ", error);
+        throw new Error("Could not delete user account from the database.");
     }
 }
