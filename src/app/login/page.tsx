@@ -35,24 +35,22 @@ function LoginContent() {
   const { toast } = useToast();
 
   const [redirectUrl, setRedirectUrl] = useState("/");
-  const isVerified = searchParams.get("verified");
-
+  
   useEffect(() => {
-    // This effect runs only on the client, so localStorage is available.
     const searchRedirect = searchParams.get("redirect");
     const localRedirect = localStorage.getItem("loginRedirect");
     setRedirectUrl(searchRedirect || localRedirect || "/");
 
+    const isVerified = searchParams.get("verified");
     if(isVerified) {
       toast({
         title: "Email Verified!",
         description: "You can now log in to your account.",
         variant: "success",
       });
-      // Clear the redirect from local storage if it exists, so it's only used once
       localStorage.removeItem("loginRedirect");
     }
-  }, [isVerified, searchParams, toast]);
+  }, [searchParams, toast]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,11 +63,9 @@ function LoginContent() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     form.clearErrors();
     try {
-      // Step 1: Sign in on the client using Firebase Auth
       const userCredential = await signInWithEmailAndPassword(auth, values.email.toLowerCase(), values.password);
       const authUser = userCredential.user;
 
-      // Step 2: Check if the user's email is verified in Firebase Auth
       if (!authUser.emailVerified) {
         await sendEmailVerification(authUser).catch(e => console.error("Failed to resend verification email:", e));
         toast({
@@ -77,21 +73,17 @@ function LoginContent() {
           description: "We've sent another verification link to your inbox. Please check your email (and spam folder) to continue.",
           variant: "destructive",
         });
-        await auth.signOut(); // Log them out so they can't proceed
+        await auth.signOut();
         return;
       }
       
-      // Step 3: Get user profile from Firestore and sync verification status
-      let userProfile = await getAndSyncUser(authUser.uid);
+      const userProfile = await getAndSyncUser(authUser.uid);
 
-      // This is a data consistency check. If the user exists in Auth but not Firestore, something is wrong.
-      // The login should fail to prompt the user to contact support or re-register.
       if (!userProfile) {
-        await auth.signOut(); // Log the user out of Auth to be safe
+        await auth.signOut();
         throw new Error("Your user profile could not be found. Please contact support or try signing up again.");
       }
 
-      // If we have a user profile, proceed with login
       localStorage.setItem("loggedInUser", JSON.stringify({ id: userProfile.id, email: userProfile.email, uid: userProfile.uid, username: userProfile.username }));
       toast({
         title: "Login Successful",
@@ -104,27 +96,31 @@ function LoginContent() {
     } catch (error: any) {
       console.error("Login error:", error);
       
-      // This is the key change: on invalid credential, redirect to signup with email pre-filled.
+      let errorMessage = "An error occurred during login. Please try again.";
+      let toastAction: React.ReactNode | undefined = undefined;
+
       if (error.code === 'auth/invalid-credential') {
-        toast({
-          title: "Account Not Found",
-          description: "Redirecting to sign up...",
-          variant: "default",
-        });
-        const signupUrl = `/signup?email=${encodeURIComponent(values.email)}&redirect=${encodeURIComponent(redirectUrl)}`;
-        router.push(signupUrl);
-        return;
+        errorMessage = "Email or password was incorrect. Please try again.";
+        toastAction = (
+          <Button 
+            variant="secondary" 
+            size="sm" 
+            onClick={() => router.push(`/signup?email=${encodeURIComponent(values.email)}&redirect=${encodeURIComponent(redirectUrl)}`)}
+          >
+            Sign Up
+          </Button>
+        );
       }
 
-      let errorMessage = "An error occurred during login. Please try again.";
-      // Use the custom error message if it's one we threw
       if (error.message.includes("Your user profile could not be found")) {
         errorMessage = error.message;
       }
+
       toast({
         title: "Login Failed",
         description: errorMessage,
         variant: "destructive",
+        action: toastAction,
       });
     }
   }
