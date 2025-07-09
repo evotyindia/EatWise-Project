@@ -96,21 +96,6 @@ export async function getUserByUid(uid: string): Promise<User | null> {
     }
 }
 
-// Get user by email
-export async function getUserByEmail(email: string): Promise<User | null> {
-    const sanitizedEmail = email.toLowerCase();
-    try {
-        const q = query(collection(db, "users"), where("email", "==", sanitizedEmail), limit(1));
-        const querySnapshot = await getDocs(q);
-        if (querySnapshot.empty) return null;
-        const userDoc = querySnapshot.docs[0];
-        return { id: userDoc.id, ...userDoc.data() } as User;
-    } catch (error) {
-        console.error("Error fetching user by email:", error);
-        return null;
-    }
-}
-
 // Get user by username by first looking up UID in the 'usernames' collection
 export async function getUserByUsername(username: string): Promise<User | null> {
     const sanitizedUsername = username.toLowerCase();
