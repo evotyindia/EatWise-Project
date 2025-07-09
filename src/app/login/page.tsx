@@ -22,7 +22,7 @@ import { LogIn } from "lucide-react";
 import { useEffect, Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getAndSyncUser, getUserByUsername } from "@/services/userService";
+import { getAndSyncUser, getUserByUsername, getUserByEmail } from "@/services/userService";
 
 const formSchema = z.object({
   identifier: z.string().min(3, { message: "Please enter a valid email or username." }),
@@ -66,26 +66,37 @@ function LoginContent() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     form.clearErrors();
     
-    let userEmail = values.identifier;
-    
+    let userEmail: string | undefined;
+
     try {
-      if (!isEmail(values.identifier)) {
-        const userProfile = await getUserByUsername(values.identifier);
-        if (!userProfile) {
-           toast({
-              title: "Account Not Found",
-              description: "No account found with that username.",
-              variant: "destructive",
-              action: (
-                <Link href="/signup">
-                  <Button variant="secondary" size="sm">Sign Up</Button>
-                </Link>
-              ),
-            });
-          return;
+        // First, try to find a user whose email matches the identifier.
+        const userByEmail = await getUserByEmail(values.identifier);
+
+        if (userByEmail) {
+            userEmail = userByEmail.email;
+        } else {
+            // If no user is found by email, try to find one by username.
+            const userByUsername = await getUserByUsername(values.identifier);
+            if (userByUsername) {
+                userEmail = userByUsername.email;
+            }
         }
-        userEmail = userProfile.email;
-      }
+
+        // If after both checks, we still don't have an email, the user doesn't exist.
+        if (!userEmail) {
+            toast({
+                title: "Account Not Found",
+                description: `No account found for ${values.identifier}. Would you like to sign up?`,
+                variant: "destructive",
+                action: (
+                  <Link href={`/signup?email=${isEmail(values.identifier) ? encodeURIComponent(values.identifier) : ''}`}>
+                    <Button variant="secondary" size="sm">Sign Up</Button>
+                  </Link>
+                ),
+            });
+            return;
+        }
+
 
       const userCredential = await signInWithEmailAndPassword(auth, userEmail.toLowerCase(), values.password);
       const authUser = userCredential.user;
