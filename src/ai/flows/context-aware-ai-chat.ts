@@ -91,8 +91,10 @@ export async function contextAwareAIChat(input: ContextAwareAIChatInput): Promis
 const prompt = ai.definePrompt({
   name: 'contextAwareAIChatPrompt',
   input: {schema: InternalPromptInputSchema}, // Uses the internal schema with boolean flags
-  output: {schema: ContextAwareAIChatOutputSchema},
-  config: { output: { format: 'json' } }, // Enforce JSON output
+  output: {
+    schema: ContextAwareAIChatOutputSchema,
+    format: 'json',
+  },
   system: `You are "EatWise AI Advisor", a friendly and knowledgeable AI assistant for Swasth Bharat Advisor, an app helping users with Indian food choices.
 Your responses should be helpful, concise, and directly address the user's question based on the provided context and chat history.
 Do not generate any disclaimers or safety warnings unless specifically asked about safety. Avoid weasel words.
