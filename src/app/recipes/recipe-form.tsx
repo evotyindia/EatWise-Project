@@ -8,9 +8,10 @@ import type { GetDetailedRecipeInput, GetDetailedRecipeOutput } from "@/ai/flows
 import { getDetailedRecipe } from "@/ai/flows/get-detailed-recipe";
 import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aware-ai-chat";
 import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
+import { RecipeDisplay } from "@/components/common/RecipeDisplay";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lightbulb, Sparkles, ChefHat, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, FileText, Check, Clock, Soup, Users, PlusCircle, BookOpen, ListChecks, ArrowRight, Search, Carrot, Leaf, Flame } from "lucide-react";
+import { Lightbulb, Sparkles, ChefHat, WheatIcon, HeartCrack, Scale, User, UserCog, Baby, Send, MessageCircle, PlusCircle, ArrowRight, Search, Carrot, Leaf, Flame, Save } from "lucide-react";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
@@ -22,12 +23,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
+import { Check } from "lucide-react";
 
 
 const diseaseOptions: { id: Disease; label: string; icon: React.ElementType }[] = [
@@ -272,6 +271,38 @@ export function RecipeForm() {
       setChatHistory(prev => [...prev, { role: "assistant", content: "Sorry, I couldn't process that. Please try again." }]);
     }
     setIsChatLoading(false);
+  };
+
+  const handleSaveRecipe = () => {
+    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+    if (!loggedInUser.email) {
+      toast({ title: "Login Required", description: "You must be logged in to save recipes.", variant: "destructive" });
+      return;
+    }
+    if (!detailedRecipe || !currentFormInputs) {
+      toast({ title: "No Recipe", description: "Generate a recipe before saving.", variant: "destructive" });
+      return;
+    }
+
+    const newReport = {
+      id: crypto.randomUUID(),
+      userId: loggedInUser.email,
+      type: 'recipe' as const,
+      title: detailedRecipe.recipeTitle,
+      summary: detailedRecipe.description,
+      createdAt: new Date().toISOString(),
+      data: detailedRecipe,
+      userInput: currentFormInputs
+    };
+
+    const allUserReports = JSON.parse(localStorage.getItem("userReports") || "{}");
+    if (!allUserReports[loggedInUser.email]) {
+      allUserReports[loggedInUser.email] = [];
+    }
+    allUserReports[loggedInUser.email].push(newReport);
+    localStorage.setItem("userReports", JSON.stringify(allUserReports));
+
+    toast({ title: "Recipe Saved", description: "The recipe has been saved to your history." });
   };
   
   const scrollToBottom = () => {
@@ -520,57 +551,20 @@ export function RecipeForm() {
         )}
         
         {detailedRecipe && (
-          <Card className="transition-shadow animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
-            <CardHeader>
-                <CardTitle className="text-3xl font-bold flex items-center"><FileText className="mr-3 h-7 w-7 text-primary"/> {detailedRecipe.recipeTitle}</CardTitle>
-                {detailedRecipe.description && <CardDescription className="mt-1 text-base">{detailedRecipe.description}</CardDescription>}
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm p-4 bg-muted/60 rounded-lg border">
-                <div className="flex items-center gap-2"><Clock className="h-5 w-5 text-accent"/><div><div className="font-semibold">Prep Time</div><div>{detailedRecipe.prepTime}</div></div></div>
-                <div className="flex items-center gap-2"><Soup className="h-5 w-5 text-accent"/><div><div className="font-semibold">Cook Time</div><div>{detailedRecipe.cookTime}</div></div></div>
-                <div className="flex items-center gap-2"><Users className="h-5 w-5 text-accent"/><div><div className="font-semibold">Servings</div><div>{detailedRecipe.servingsDescription}</div></div></div>
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-x-8 gap-y-6 pt-4">
-                  <div className="lg:col-span-2">
-                    <h3 className="font-semibold text-xl mb-3 border-b pb-2 flex items-center gap-2"><ListChecks /> Ingredients</h3>
-                    <ul className="space-y-2.5 text-sm">
-                      {detailedRecipe.adjustedIngredients.map((ing, i) => (
-                        <li key={i} className="flex items-start">
-                          <Check className="h-4 w-4 text-green-500 mr-2.5 mt-1 shrink-0" />
-                          <div>
-                            <span className="font-medium">{ing.name}</span>: <span>{ing.quantity}</span>
-                            <div className="text-xs text-muted-foreground">({ing.notes})</div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="lg:col-span-3">
-                    <h3 className="font-semibold text-xl mb-3 border-b pb-2 flex items-center gap-2"><BookOpen /> Instructions</h3>
-                    <ol className="list-decimal list-outside space-y-3.5 text-sm pl-5 marker:text-primary marker:font-semibold">
-                      {detailedRecipe.instructions.map((step, i) => <li key={i} className="pl-2 leading-relaxed">{step}</li>)}
-                    </ol>
-                  </div>
-              </div>
-              <Alert variant="success">
-                <Lightbulb className="h-5 w-5" />
-                <AlertTitle>Health Notes &amp; Tips</AlertTitle>
-                <AlertDescription className="whitespace-pre-line text-sm">
-                  {detailedRecipe.healthNotes}
-                </AlertDescription>
-              </Alert>
-              <Alert>
-                  <Lightbulb className="h-5 w-5" />
-                  <AlertTitle>Storage &amp; Serving Tips</AlertTitle>
-                  <AlertDescription className="whitespace-pre-line text-sm">
-                    {detailedRecipe.storageOrServingTips}
-                  </AlertDescription>
-              </Alert>
-            </CardContent>
-            <CardFooter className="flex flex-col items-start pt-4 border-t mt-4">
-                <h3 className="font-semibold text-xl mb-2 flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Recipe</h3>
-                <p className="text-sm text-muted-foreground mb-4">Ask about substitutions, techniques, or nutrition.</p>
+          <div className="space-y-8 animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
+            <RecipeDisplay recipe={detailedRecipe} />
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                    <h3 className="font-semibold text-xl flex items-center"><MessageCircle className="mr-2 h-5 w-5"/> Chat about this Recipe</h3>
+                    <Button variant="outline" size="sm" onClick={handleSaveRecipe} disabled={!detailedRecipe}>
+                        <Save className="mr-2 h-4 w-4" />
+                        Save Recipe
+                    </Button>
+                </div>
+                <p className="text-sm text-muted-foreground pt-1">Ask about substitutions, techniques, or nutrition.</p>
+              </CardHeader>
+              <CardContent>
                 <ScrollArea className="h-[200px] w-full rounded-md border p-4 mb-4 bg-muted/50">
                   {chatHistory.map((msg, index) => (
                     <div key={index} className={`mb-3 p-3 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
@@ -585,8 +579,9 @@ export function RecipeForm() {
                   <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background/50"/>
                   <Button type="submit" disabled={isChatLoading || !chatInput.trim()}><Send className="h-4 w-4" /></Button>
                 </form>
-            </CardFooter>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         )}
         
         {!isLoadingSuggestions && !dishSuggestions && !detailedRecipe && !isLoadingRecipe &&(

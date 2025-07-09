@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, ScanLine, CookingPot, BookOpen, Menu, BarChart3, Mail, User, LogOut, UserCog } from "lucide-react"
+import { Home, ScanLine, CookingPot, BookOpen, Menu, BarChart3, Mail, User, LogOut, UserCog, History } from "lucide-react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
@@ -14,10 +14,11 @@ const mainNavItems = [
   { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
   { href: "/analyze", label: "Analyze", icon: <ScanLine className="h-5 w-5" /> },
   { href: "/recipes", label: "Recipes", icon: <CookingPot className="h-5 w-5" /> },
-  { href: "/nutrition-check", label: "Nutrient", icon: <BarChart3 className="h-5 w-5" /> },
+  { href: "/history", label: "History", icon: <History className="h-5 w-5" /> },
 ];
 
 const moreNavItems = [
+    { href: "/nutrition-check", label: "Nutrition Check", icon: <BarChart3 className="h-5 w-5" /> },
     { href: "/blogs", label: "Blogs", icon: <BookOpen className="h-5 w-5" /> },
     { href: "/contact", label: "Contact", icon: <Mail className="h-5 w-5" />},
 ];
@@ -31,7 +32,7 @@ export function BottomNavbar() {
     setMounted(true);
     const user = localStorage.getItem("loggedInUser");
     setIsLoggedIn(!!user);
-  }, []);
+  }, [pathname]); // Re-check on path change
 
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");
