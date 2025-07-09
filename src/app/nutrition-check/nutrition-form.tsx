@@ -126,13 +126,13 @@ export function NutritionForm() {
     
     try {
         const user = await getUserByEmail(loggedInUserEmail);
-        if (!user?.id) {
+        if (!user?.uid) {
             toast({ title: "User Not Found", description: "Could not find your user account to save the analysis.", variant: "destructive" });
             return;
         }
 
         const newReportData = {
-          userId: user.id,
+          uid: user.uid,
           type: 'nutrition' as const,
           title: reportTitle.trim() || currentInputContext.foodItemDescription || "Untitled Nutrition Analysis",
           summary: analysisResult.overallAnalysis,

@@ -63,22 +63,10 @@ export async function createUser(userData: Omit<User, 'id' | 'uid' | 'emailVerif
     }
 }
 
-// Sign in user with email/username and password
-export async function signInUser(identifier: string, password: string): Promise<User> {
-    const lowercasedIdentifier = identifier.toLowerCase();
-    let userEmail = lowercasedIdentifier;
-
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lowercasedIdentifier);
-    if (!isEmail) {
-        const userByUsername = await getUserByUsername(lowercasedIdentifier);
-        if (!userByUsername) {
-            throw new Error("Account not found. Please check your details or sign up.");
-        }
-        userEmail = userByUsername.email;
-    }
-
+// Sign in user with email and password
+export async function signInUser(email: string, password: string): Promise<User> {
     try {
-        const userCredential = await signInWithEmailAndPassword(auth, userEmail, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
         if (!user.emailVerified) {
@@ -94,7 +82,7 @@ export async function signInUser(identifier: string, password: string): Promise<
         return userProfile;
     } catch (error: any) {
         if (error.code === 'auth/invalid-credential') {
-            throw new Error("Invalid username/email or password.");
+            throw new Error("Invalid email or password.");
         }
         if (error.message.includes("Your email is not verified")) {
             throw error;

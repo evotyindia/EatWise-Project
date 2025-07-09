@@ -32,8 +32,8 @@ export async function createReport(reportData: Omit<Report<any>, 'id'>) {
     }
 }
 
-// Get all reports for a specific user
-export async function getReportsByUserId(uid: string): Promise<Report[]> {
+// Get all reports for a specific user by their Auth UID
+export async function getReportsByUid(uid: string): Promise<Report[]> {
     try {
         const reports: Report[] = [];
         const q = query(collection(db, "reports"), where("uid", "==", uid));
@@ -43,7 +43,7 @@ export async function getReportsByUserId(uid: string): Promise<Report[]> {
         });
         return reports;
     } catch (error) {
-        console.error("Error fetching reports by user ID: ", error);
+        console.error("Error fetching reports by user UID: ", error);
         throw new Error("Could not fetch reports.");
     }
 }
