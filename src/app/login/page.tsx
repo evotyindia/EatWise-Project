@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogIn } from "lucide-react";
-import { useEffect } from "react";
+import { LogIn, LoaderCircle } from "lucide-react";
+import { useEffect, Suspense } from "react";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getAndSyncUser } from "@/services/userService";
@@ -30,7 +30,7 @@ const formSchema = z.object({
   password: z.string().min(1, { message: "Password is required." }),
 });
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -82,7 +82,7 @@ export default function LoginPage() {
       const userProfile = await getAndSyncUser(authUser.uid);
 
       if (userProfile) {
-        localStorage.setItem("loggedInUser", JSON.stringify({ id: userProfile.id, email: userProfile.email }));
+        localStorage.setItem("loggedInUser", JSON.stringify({ id: userProfile.id, email: userProfile.email, uid: userProfile.uid, username: userProfile.username }));
         toast({
           title: "Login Successful",
           description: "Welcome back!",
@@ -162,4 +162,17 @@ export default function LoginPage() {
       </Card>
     </div>
   );
+}
+
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
+                <LoaderCircle className="w-12 h-12 animate-spin text-primary" />
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
+    )
 }
