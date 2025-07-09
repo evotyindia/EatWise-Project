@@ -30,9 +30,9 @@ async function isUsernameTaken(username: string): Promise<boolean> {
 }
 
 // Create a new user in Firebase Auth and Firestore
-export async function createUser(userData: Omit<User, 'id' | 'uid' | 'emailVerified' | 'username'> & { password?: string }): Promise<void> {
+export async function createUser(userData: Omit<User, 'id' | 'uid' | 'emailVerified' | 'username'> & { password?: string }): Promise<{ success: boolean, message?: string }> {
     if (!userData.password) {
-        throw new Error("Password is required to create a user.");
+        return { success: false, message: "Password is required to create a user." };
     }
     
     try {
@@ -50,13 +50,15 @@ export async function createUser(userData: Omit<User, 'id' | 'uid' | 'emailVerif
             phone: userData.phone || '',
             emailVerified: user.emailVerified, // Store initial state
         });
+        
+        return { success: true };
 
     } catch (error: any) {
         if (error.code === 'auth/email-already-in-use') {
-            throw new Error("An account with this email already exists.");
+            return { success: false, message: "An account with this email already exists." };
         }
         console.error("Error creating user: ", error);
-        throw new Error("Could not create user account. Please try again.");
+        return { success: false, message: "Could not create user account. Please try again." };
     }
 }
 
