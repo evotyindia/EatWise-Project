@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,7 +21,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { LogIn } from "lucide-react";
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
+  identifier: z.string().min(1, { message: "Email or Username is required." }),
   password: z.string().min(1, { message: "Password is required." }),
 });
 
@@ -33,7 +34,7 @@ export default function LoginPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
+      identifier: "",
       password: "",
     },
   });
@@ -42,7 +43,9 @@ export default function LoginPage() {
     try {
       const users = JSON.parse(localStorage.getItem("users") || "[]");
       const user = users.find(
-        (u: any) => u.email === values.email && u.password === values.password
+        (u: any) =>
+          (u.email.toLowerCase() === values.identifier.toLowerCase() || u.username?.toLowerCase() === values.identifier.toLowerCase()) &&
+          u.password === values.password
       );
 
       if (user) {
@@ -51,16 +54,19 @@ export default function LoginPage() {
           title: "Login Successful",
           description: "Welcome back!",
         });
-        // Force a page reload to update header state
         window.location.href = redirectUrl || "/";
       } else {
         toast({
           title: "Account Not Found",
-          description: "Please create an account to continue.",
+          description: "Please check your details or create an account to continue.",
           variant: "destructive",
         });
+        
+        const isEmail = z.string().email().safeParse(values.identifier).success;
         const redirectQuery = redirectUrl ? `&redirect=${encodeURIComponent(redirectUrl)}` : '';
-        router.push(`/signup?email=${encodeURIComponent(values.email)}${redirectQuery}`);
+        const signupUrl = `/signup?${isEmail ? `email=${encodeURIComponent(values.identifier)}` : ''}${redirectQuery}`;
+        
+        router.push(signupUrl);
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -87,12 +93,12 @@ export default function LoginPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
-                name="email"
+                name="identifier"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Email or Username</FormLabel>
                     <FormControl>
-                      <Input placeholder="you@example.com" {...field} />
+                      <Input placeholder="your_username or you@example.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,6 +22,7 @@ import { UserPlus } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  username: z.string().min(3, { message: "Username must be at least 3 characters." }).regex(/^[a-zA-Z0-9_]+$/, { message: "Username can only contain letters, numbers, and underscores." }),
   email: z.string().email({ message: "Invalid email address." }),
   phone: z.string().min(10, { message: "Please enter a valid 10-digit phone number." }).optional().or(z.literal('')),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
@@ -42,6 +44,7 @@ export default function SignupPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      username: "",
       email: emailFromQuery || "",
       phone: "",
       password: "",
@@ -52,9 +55,10 @@ export default function SignupPage() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const users = JSON.parse(localStorage.getItem("users") || "[]");
-      const userExists = users.some((user: any) => user.email === values.email);
+      const emailExists = users.some((user: any) => user.email.toLowerCase() === values.email.toLowerCase());
+      const usernameExists = users.some((user: any) => user.username?.toLowerCase() === values.username.toLowerCase());
 
-      if (userExists) {
+      if (emailExists) {
         toast({
           title: "Signup Failed",
           description: "An account with this email already exists.",
@@ -62,8 +66,23 @@ export default function SignupPage() {
         });
         return;
       }
+      
+      if (usernameExists) {
+        toast({
+          title: "Signup Failed",
+          description: "This username is already taken. Please choose another one.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      users.push({ name: values.name, email: values.email, phone: values.phone, password: values.password });
+      users.push({ 
+        name: values.name, 
+        username: values.username,
+        email: values.email, 
+        phone: values.phone, 
+        password: values.password 
+      });
       localStorage.setItem("users", JSON.stringify(users));
 
       toast({
@@ -105,6 +124,19 @@ export default function SignupPage() {
                     <FormLabel>Full Name</FormLabel>
                     <FormControl>
                       <Input placeholder="Your Name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input placeholder="your_unique_username" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
