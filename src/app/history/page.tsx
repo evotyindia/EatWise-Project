@@ -87,7 +87,7 @@ export default function HistoryPage() {
 
     return (
       <Card className="flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
-        <CardHeader>
+        <CardHeader className="p-6">
           <div className="flex items-start gap-4">
             <div className="mt-1">{icons[report.type]}</div>
             <div>
@@ -99,7 +99,7 @@ export default function HistoryPage() {
           </div>
         </CardHeader>
         <div className="flex-grow" />
-        <CardFooter className="flex justify-between items-center">
+        <CardFooter className="flex justify-between items-center p-6 pt-0">
           <p className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(report.createdAt), { addSuffix: true })}</p>
           <div className="flex items-center gap-2">
             <AlertDialog>
@@ -160,7 +160,7 @@ export default function HistoryPage() {
         <p className="mt-2 text-lg text-muted-foreground">Review your saved reports and recipes.</p>
       </div>
 
-      <div className="relative mb-6 max-w-lg mx-auto">
+      <div className="relative mb-6 max-w-lg md:max-w-2xl mx-auto">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           type="search"
@@ -173,10 +173,10 @@ export default function HistoryPage() {
 
       <Tabs defaultValue="all" className="w-full">
         <TabsList className="h-auto w-full flex-wrap justify-center">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="label">Label Reports</TabsTrigger>
-          <TabsTrigger value="recipe">Recipes</TabsTrigger>
-          <TabsTrigger value="nutrition">Nutrient Reports</TabsTrigger>
+          <TabsTrigger value="all" className="md:px-4 md:py-2 md:text-base">All</TabsTrigger>
+          <TabsTrigger value="label" className="md:px-4 md:py-2 md:text-base">Label Reports</TabsTrigger>
+          <TabsTrigger value="recipe" className="md:px-4 md:py-2 md:text-base">Recipes</TabsTrigger>
+          <TabsTrigger value="nutrition" className="md:px-4 md:py-2 md:text-base">Nutrient Reports</TabsTrigger>
         </TabsList>
         <TabsContent value="all" className="mt-6"><ReportList type="all" /></TabsContent>
         <TabsContent value="label" className="mt-6"><ReportList type="label" /></TabsContent>
