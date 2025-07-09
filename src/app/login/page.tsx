@@ -19,7 +19,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogIn } from "lucide-react";
-import { getUserByEmailOrUsername } from "@/services/userService";
+import { signInUser } from "@/services/userService";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   identifier: z.string().min(1, { message: "Email or Username is required." }),
@@ -30,7 +31,22 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
-  const redirectUrl = searchParams.get("redirect");
+
+  const redirectUrl = searchParams.get("redirect") || localStorage.getItem("loginRedirect") || "/";
+  const isVerified = searchParams.get("verified");
+
+  useEffect(() => {
+    if(isVerified) {
+      toast({
+        title: "Email Verified!",
+        description: "You can now log in to your account.",
+        variant: "success",
+      });
+      // Clear the redirect from local storage if it exists, so it's only used once
+      localStorage.removeItem("loginRedirect");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isVerified]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,35 +58,36 @@ export default function LoginPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const user = await getUserByEmailOrUsername(values.identifier.toLowerCase());
+      const user = await signInUser(values.identifier, values.password);
 
-      if (user && user.password === values.password) {
-        localStorage.setItem("loggedInUser", JSON.stringify({ email: user.email }));
+      if (user) {
+        localStorage.setItem("loggedInUser", JSON.stringify({ id: user.id, email: user.email }));
         toast({
           title: "Login Successful",
           description: "Welcome back!",
+          variant: "success",
         });
-        window.location.href = redirectUrl || "/";
+        window.location.href = redirectUrl;
+        localStorage.removeItem("loginRedirect");
       } else {
-        toast({
-          title: "Account Not Found",
-          description: "Please check your details or create an account to continue.",
-          variant: "destructive",
-        });
-        
+        // This case should not be reached if signInUser throws an error, but as a fallback
+        throw new Error("Login failed. Please check your credentials.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast({
+        title: "Login Failed",
+        description: (error as Error).message || "Could not log you in. Please try again.",
+        variant: "destructive",
+      });
+      // Graceful redirect to signup if account not found
+      if ((error as Error).message.includes("Account not found")) {
         const isEmail = z.string().email().safeParse(values.identifier).success;
         const redirectQuery = redirectUrl ? `&redirect=${encodeURIComponent(redirectUrl)}` : '';
         const signupUrl = `/signup?${isEmail ? `email=${encodeURIComponent(values.identifier)}` : ''}${redirectQuery}`;
         
         router.push(signupUrl);
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      toast({
-        title: "An Error Occurred",
-        description: (error as Error).message || "Could not log you in. Please try again.",
-        variant: "destructive",
-      });
     }
   }
 
