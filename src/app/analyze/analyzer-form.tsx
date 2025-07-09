@@ -107,7 +107,7 @@ export function AnalyzerForm() {
 
     } catch(error) {
         console.error("Failed to save report:", error);
-        toast({ title: "Save Failed", description: "Could not save the report to the database.", variant: "destructive" });
+        toast({ title: "Save Failed", description: (error as Error).message || "Could not save the report to the database.", variant: "destructive" });
     }
   };
 
@@ -344,5 +344,3 @@ export function AnalyzerForm() {
     </div>
   );
 }
-
-    
