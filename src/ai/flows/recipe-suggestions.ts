@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Recipe suggestion AI agent that suggests healthy Indian meal ideas based on user-entered ingredients, health concerns, and household size.
@@ -97,7 +96,7 @@ const getRecipeSuggestionsFlow = ai.defineFlow(
 
         // Provide a clear error message for common deployment/server issues.
         if (error.message?.toLowerCase().includes('api key') || /5\d\d/.test(error.message)) {
-            throw new Error('AI service configuration error or service is temporarily unavailable. Please check API key and try again later.');
+            throw new Error('The AI service is not configured. This is likely because the GOOGLE_API_KEY is missing from your .env file. Please add it and restart the server.');
         }
 
         // For other errors (like safety blocks), re-throw the original message for better client-side feedback.
