@@ -166,7 +166,7 @@ export default function HistoryPage() {
       </div>
 
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="h-auto w-full flex-wrap">
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="label">Label Reports</TabsTrigger>
           <TabsTrigger value="recipe">Recipes</TabsTrigger>
