@@ -106,16 +106,15 @@ export default function AccountPage() {
 
   async function onUsernameSubmit(values: z.infer<typeof usernameFormSchema>) {
     if (!currentUser?.id || !currentUser?.uid) return;
-    try {
-      await setUsername(currentUser.uid, currentUser.id, values.username);
-      
-      const updatedUser = { ...currentUser, username: values.username.toLowerCase() };
-      setCurrentUser(updatedUser);
-      localStorage.setItem("loggedInUser", JSON.stringify({ id: updatedUser.id, email: updatedUser.email, uid: updatedUser.uid, username: updatedUser.username }));
-      toast({ title: "Username Set!", description: "Your unique username has been saved." });
-    } catch (error) {
-       console.error("Username update error:", error);
-       toast({ title: "An Error Occurred", description: (error as Error).message || "Could not set your username.", variant: "destructive" });
+    const result = await setUsername(currentUser.uid, currentUser.id, values.username);
+
+    if (result.success) {
+        const updatedUser = { ...currentUser, username: values.username.toLowerCase() };
+        setCurrentUser(updatedUser);
+        localStorage.setItem("loggedInUser", JSON.stringify({ id: updatedUser.id, email: updatedUser.email, uid: updatedUser.uid, username: updatedUser.username }));
+        toast({ title: "Username Set!", description: "Your unique username has been saved." });
+    } else {
+        toast({ title: "An Error Occurred", description: result.message || "Could not set your username.", variant: "destructive" });
     }
   }
 
@@ -378,3 +377,5 @@ export default function AccountPage() {
     </div>
   );
 }
+
+    
