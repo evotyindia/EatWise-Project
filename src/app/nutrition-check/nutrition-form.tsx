@@ -23,6 +23,8 @@ import { fileToDataUri } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { getUserByEmail } from "@/services/userService";
+import { createReport } from "@/services/reportService";
 
 
 const numberPreprocess = (val: unknown) => (val === "" || val === null || val === undefined ? undefined : Number(val));
@@ -111,9 +113,9 @@ export function NutritionForm() {
     }
   };
 
-  const handleSaveAnalysis = () => {
-    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
-    if (!loggedInUser.email) {
+  const handleSaveAnalysis = async () => {
+    const loggedInUserEmail = JSON.parse(localStorage.getItem("loggedInUser") || "{}").email;
+    if (!loggedInUserEmail) {
       toast({ title: "Login Required", description: "You must be logged in to save analyses.", variant: "destructive" });
       return;
     }
@@ -121,28 +123,34 @@ export function NutritionForm() {
       toast({ title: "No Report", description: "Generate an analysis before saving.", variant: "destructive" });
       return;
     }
+    
+    try {
+        const user = await getUserByEmail(loggedInUserEmail);
+        if (!user?.id) {
+            toast({ title: "User Not Found", description: "Could not find your user account to save the analysis.", variant: "destructive" });
+            return;
+        }
 
-    const newReport = {
-      id: crypto.randomUUID(),
-      userId: loggedInUser.email,
-      type: 'nutrition' as const,
-      title: reportTitle.trim() || currentInputContext.foodItemDescription || "Untitled Nutrition Analysis",
-      summary: analysisResult.overallAnalysis,
-      createdAt: new Date().toISOString(),
-      data: analysisResult,
-      userInput: currentInputContext
-    };
+        const newReportData = {
+          userId: user.id,
+          type: 'nutrition' as const,
+          title: reportTitle.trim() || currentInputContext.foodItemDescription || "Untitled Nutrition Analysis",
+          summary: analysisResult.overallAnalysis,
+          createdAt: new Date().toISOString(),
+          data: analysisResult,
+          userInput: currentInputContext
+        };
 
-    const allUserReports = JSON.parse(localStorage.getItem("userReports") || "{}");
-    if (!allUserReports[loggedInUser.email]) {
-      allUserReports[loggedInUser.email] = [];
+        await createReport(newReportData);
+
+        toast({ title: "Analysis Saved", description: "The nutrition analysis has been saved to your history." });
+        setIsSaveDialogOpen(false);
+        setReportTitle("");
+
+    } catch (error) {
+        console.error("Failed to save analysis:", error);
+        toast({ title: "Save Failed", description: "Could not save the analysis to the database.", variant: "destructive" });
     }
-    allUserReports[loggedInUser.email].push(newReport);
-    localStorage.setItem("userReports", JSON.stringify(allUserReports));
-
-    toast({ title: "Analysis Saved", description: "The nutrition analysis has been saved to your history." });
-    setIsSaveDialogOpen(false);
-    setReportTitle("");
   };
 
   const generateAnalysisSharedLogic = async (inputForAI: AnalyzeNutritionInput, inputForContext: AnalyzeNutritionInput, processingType: 'image' | 'manual') => {
@@ -264,13 +272,13 @@ export function NutritionForm() {
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatHistory.length > 1) { // Only scroll on new messages after welcome
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   useEffect(() => {
-    if (chatHistory.length > 1) {
-      scrollToBottom();
-    }
+    scrollToBottom();
   }, [chatHistory]);
 
   return (

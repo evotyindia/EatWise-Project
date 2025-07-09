@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserCog, LogOut, ShieldCheck, User, Trash2, Ban, AtSign } from "lucide-react";
+import { UserCog, LogOut, ShieldCheck, User, Trash2, Ban, AtSign, LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -31,6 +31,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { type User as UserType, getUserByEmail, updateUser, deleteUser } from "@/services/userService";
+import { deleteReportsByUserId } from "@/services/reportService";
 
 
 // Schema for setting username for the first time
@@ -58,7 +60,8 @@ const passwordFormSchema = z.object({
 export default function AccountPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<UserType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
   useEffect(() => {
@@ -68,13 +71,26 @@ export default function AccountPage() {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    const user = users.find((u: any) => u.email === loggedInUserEmail);
-    if (user) {
-      setCurrentUser(user);
-    } else {
-      router.replace('/login');
+    async function fetchUser() {
+      try {
+        const user = await getUserByEmail(loggedInUserEmail);
+        if (user) {
+          setCurrentUser(user);
+        } else {
+          // This case might happen if user is deleted from DB but session remains
+          handleLogout(true);
+          router.replace('/login');
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+        toast({ title: "Error", description: "Could not load your account details.", variant: "destructive" });
+        router.replace('/');
+      } finally {
+        setIsLoading(false);
+      }
     }
+
+    fetchUser();
   }, [router]);
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
@@ -102,63 +118,57 @@ export default function AccountPage() {
     }
   }, [currentUser, profileForm]);
 
-  function onUsernameSubmit(values: z.infer<typeof usernameFormSchema>) {
+  async function onUsernameSubmit(values: z.infer<typeof usernameFormSchema>) {
+    if (!currentUser?.id) return;
     try {
-      let users = JSON.parse(localStorage.getItem("users") || "[]");
       const lowercasedUsername = values.username.toLowerCase();
-      const usernameExists = users.some((u: any) => u.username?.toLowerCase() === lowercasedUsername);
-      if (usernameExists) {
-        usernameForm.setError("username", { type: "manual", message: "This username is already taken." });
-        return;
-      }
-      const userIndex = users.findIndex((u: any) => u.email === currentUser.email);
-      if (userIndex === -1) throw new Error("User not found.");
-
-      users[userIndex].username = lowercasedUsername;
-      localStorage.setItem("users", JSON.stringify(users));
-      setCurrentUser(users[userIndex]);
+      // The uniqueness check should be done server-side, but a client check is a good first step.
+      // Assume `updateUser` will throw an error if the username is taken.
+      await updateUser(currentUser.id, { username: lowercasedUsername });
+      
+      const updatedUser = { ...currentUser, username: lowercasedUsername };
+      setCurrentUser(updatedUser);
       toast({ title: "Username Set!", description: "Your unique username has been saved." });
     } catch (error) {
        console.error("Username update error:", error);
-       toast({ title: "An Error Occurred", description: "Could not set your username.", variant: "destructive" });
+       toast({ title: "An Error Occurred", description: (error as Error).message || "Could not set your username.", variant: "destructive" });
     }
   }
 
-  function onProfileSubmit(values: z.infer<typeof profileFormSchema>) {
+  async function onProfileSubmit(values: z.infer<typeof profileFormSchema>) {
+     if (!currentUser?.id) return;
     try {
-      let users = JSON.parse(localStorage.getItem("users") || "[]");
-      const userIndex = users.findIndex((u: any) => u.email === currentUser.email);
-      if (userIndex === -1) throw new Error("User not found.");
-
       const newEmail = values.email.toLowerCase();
-      if (newEmail !== currentUser.email && users.some((u: any) => u.email === newEmail)) {
-        toast({ title: "Update Failed", description: "This email address is already in use.", variant: "destructive" });
-        return;
-      }
-      const updatedUser = { ...users[userIndex], name: values.name, email: newEmail, phone: values.phone };
-      users[userIndex] = updatedUser;
       
-      localStorage.setItem("users", JSON.stringify(users));
-      localStorage.setItem("loggedInUser", JSON.stringify({ email: updatedUser.email }));
+      // Update user in Firestore
+      const updatedData: Partial<UserType> = { name: values.name, email: newEmail, phone: values.phone };
+      await updateUser(currentUser.id, updatedData);
+
+      const updatedUser = { ...currentUser, ...updatedData };
       setCurrentUser(updatedUser);
+
+      // Update session if email changed
+      if (newEmail !== currentUser.email) {
+        localStorage.setItem("loggedInUser", JSON.stringify({ email: updatedUser.email }));
+      }
+      
       toast({ title: "Profile Updated", description: "Your details have been successfully saved." });
     } catch (error) {
       console.error("Profile update error:", error);
-      toast({ title: "An Error Occurred", description: "Could not update your profile.", variant: "destructive" });
+      toast({ title: "An Error Occurred", description: (error as Error).message || "Could not update your profile.", variant: "destructive" });
     }
   }
 
-  function onPasswordSubmit(values: z.infer<typeof passwordFormSchema>) {
+  async function onPasswordSubmit(values: z.infer<typeof passwordFormSchema>) {
+     if (!currentUser?.id || !currentUser.password) return;
     try {
         if (currentUser.password !== values.currentPassword) {
             passwordForm.setError("currentPassword", { type: "manual", message: "Incorrect current password." });
             return;
         }
-        let users = JSON.parse(localStorage.getItem("users") || "[]");
-        const userIndex = users.findIndex((u: any) => u.email === currentUser.email);
-        if (userIndex === -1) throw new Error("User not found.");
-        users[userIndex].password = values.newPassword;
-        localStorage.setItem("users", JSON.stringify(users));
+        await updateUser(currentUser.id, { password: values.newPassword });
+        setCurrentUser({ ...currentUser, password: values.newPassword });
+
         toast({ title: "Password Changed", description: "Your password has been successfully updated." });
         passwordForm.reset();
     } catch (error) {
@@ -167,27 +177,21 @@ export default function AccountPage() {
     }
   }
 
-  const handleClearHistory = () => {
+  const handleClearHistory = async () => {
+    if (!currentUser?.id) return;
     try {
-      let allReports = JSON.parse(localStorage.getItem("userReports") || "{}");
-      if(allReports[currentUser.email]) {
-        delete allReports[currentUser.email];
-        localStorage.setItem("userReports", JSON.stringify(allReports));
-        toast({ title: "History Cleared", description: "All your saved reports have been deleted." });
-      } else {
-        toast({ title: "No History Found", description: "There was no history to clear." });
-      }
+      await deleteReportsByUserId(currentUser.id);
+      toast({ title: "History Cleared", description: "All your saved reports have been deleted." });
     } catch (error) {
       toast({ title: "Error", description: "Could not clear history.", variant: "destructive" });
     }
   }
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
+    if (!currentUser?.id) return;
     try {
-      handleClearHistory();
-      let users = JSON.parse(localStorage.getItem("users") || "[]");
-      const updatedUsers = users.filter((u: any) => u.email !== currentUser.email);
-      localStorage.setItem("users", JSON.stringify(updatedUsers));
+      await deleteReportsByUserId(currentUser.id);
+      await deleteUser(currentUser.id);
       handleLogout(true);
       toast({ title: "Account Deleted", description: "Your account has been permanently deleted." });
     } catch (error) {
@@ -203,8 +207,22 @@ export default function AccountPage() {
     window.location.href = "/";
   };
   
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
+        <LoaderCircle className="w-12 h-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   if (!currentUser) {
-    return null;
+    // This case should be handled by the initial check, but as a fallback
+    return (
+        <div className="container mx-auto py-12 px-4 md:px-6 text-center">
+            <h1 className="text-2xl font-bold">User not found.</h1>
+            <p className="text-muted-foreground">Redirecting to login...</p>
+        </div>
+    );
   }
 
   if (!currentUser.username) {
@@ -213,7 +231,7 @@ export default function AccountPage() {
          <Card className="w-full max-w-lg">
            <CardHeader>
              <CardTitle className="flex items-center"><AtSign className="mr-2 h-6 w-6 text-primary" /> Set Your Username</CardTitle>
-             <CardDescription>Choose a unique username for your account. This can only be set once.</CardDescription>
+             <CardDescription>Choose a unique username for your account. This is a one-time action and cannot be changed later.</CardDescription>
            </CardHeader>
            <CardContent>
              <Form {...usernameForm}>

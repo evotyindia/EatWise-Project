@@ -28,6 +28,8 @@ import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Check } from "lucide-react";
+import { getUserByEmail } from "@/services/userService";
+import { createReport } from "@/services/reportService";
 
 
 const diseaseOptions: { id: Disease; label: string; icon: React.ElementType }[] = [
@@ -277,9 +279,9 @@ export function RecipeForm() {
     setIsChatLoading(false);
   };
 
-  const handleSaveRecipe = () => {
-    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
-    if (!loggedInUser.email) {
+  const handleSaveRecipe = async () => {
+    const loggedInUserEmail = JSON.parse(localStorage.getItem("loggedInUser") || "{}").email;
+    if (!loggedInUserEmail) {
       toast({ title: "Login Required", description: "You must be logged in to save recipes.", variant: "destructive" });
       return;
     }
@@ -288,37 +290,42 @@ export function RecipeForm() {
       return;
     }
 
-    const newReport = {
-      id: crypto.randomUUID(),
-      userId: loggedInUser.email,
-      type: 'recipe' as const,
-      title: reportTitle.trim() || detailedRecipe.recipeTitle,
-      summary: detailedRecipe.description,
-      createdAt: new Date().toISOString(),
-      data: detailedRecipe,
-      userInput: currentFormInputs
-    };
+    try {
+        const user = await getUserByEmail(loggedInUserEmail);
+        if (!user?.id) {
+            toast({ title: "User Not Found", description: "Could not find your user account to save the recipe.", variant: "destructive" });
+            return;
+        }
 
-    const allUserReports = JSON.parse(localStorage.getItem("userReports") || "{}");
-    if (!allUserReports[loggedInUser.email]) {
-      allUserReports[loggedInUser.email] = [];
+        const newReport = {
+          userId: user.id,
+          type: 'recipe' as const,
+          title: reportTitle.trim() || detailedRecipe.recipeTitle,
+          summary: detailedRecipe.description,
+          createdAt: new Date().toISOString(),
+          data: detailedRecipe,
+          userInput: currentFormInputs
+        };
+
+        await createReport(newReport);
+
+        toast({ title: "Recipe Saved", description: "The recipe has been saved to your history." });
+        setIsSaveDialogOpen(false);
+        setReportTitle("");
+    } catch (error) {
+        console.error("Failed to save recipe:", error);
+        toast({ title: "Save Failed", description: "Could not save the recipe to the database.", variant: "destructive" });
     }
-    allUserReports[loggedInUser.email].push(newReport);
-    localStorage.setItem("userReports", JSON.stringify(allUserReports));
-
-    toast({ title: "Recipe Saved", description: "The recipe has been saved to your history." });
-    setIsSaveDialogOpen(false);
-    setReportTitle("");
   };
   
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatHistory.length > 1) { // Only scroll on user's first message and onwards
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   useEffect(() => {
-    if (chatHistory.length > 1) {
-      scrollToBottom();
-    }
+    scrollToBottom();
   }, [chatHistory]);
 
 

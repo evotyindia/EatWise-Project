@@ -12,63 +12,62 @@ import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from 'date-fns';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-
-// Define the structure of a report
-interface Report {
-  id: string;
-  userId: string;
-  type: 'label' | 'recipe' | 'nutrition';
-  title: string;
-  summary: string;
-  createdAt: string; // ISO string
-  // 'data' and 'userInput' will also be there but not needed for the list view
-}
+import { getReportsByUserId, deleteReport, type Report } from "@/services/reportService";
+import { getUserByEmail } from "@/services/userService";
 
 export default function HistoryPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [reports, setReports] = useState<Report[]>([]);
+  const [isLoadingReports, setIsLoadingReports] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
-    if (!loggedInUser.email) {
+    const loggedInUserEmail = JSON.parse(localStorage.getItem("loggedInUser") || "{}").email;
+    if (!loggedInUserEmail) {
       router.replace(`/login?redirect=${pathname}`);
-    } else {
-      setUserEmail(loggedInUser.email);
-      loadReports(loggedInUser.email);
-      setIsCheckingAuth(false);
+      return;
     }
-  }, [router, pathname]);
+    
+    async function fetchInitialData() {
+      try {
+        const user = await getUserByEmail(loggedInUserEmail);
+        if (user?.id) {
+          setUserId(user.id);
+          const userReports = await getReportsByUserId(user.id);
+          userReports.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          setReports(userReports);
+        } else {
+            // User not found in DB, maybe deleted. Log them out.
+            localStorage.removeItem("loggedInUser");
+            router.replace('/login');
+        }
+      } catch (error) {
+          console.error("Failed to load initial history data:", error);
+          toast({ title: "Error", description: "Could not load your history.", variant: "destructive" });
+      } finally {
+        setIsCheckingAuth(false);
+        setIsLoadingReports(false);
+      }
+    }
 
-  const loadReports = (email: string) => {
-    const allUserReports = JSON.parse(localStorage.getItem("userReports") || "{}");
-    const userReports = allUserReports[email] || [];
-    // Sort by most recent first
-    userReports.sort((a: Report, b: Report) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    setReports(userReports);
-  };
+    fetchInitialData();
+  }, [router, pathname, toast]);
   
-  const handleDeleteReport = (reportId: string) => {
-    if (!userEmail) return;
+  const handleDeleteReport = async (reportId: string) => {
+    if (!userId) return;
 
-    let allUserReports = JSON.parse(localStorage.getItem("userReports") || "{}");
-    let userReports = allUserReports[userEmail] || [];
-    
-    // Filter out the report to be deleted
-    const updatedReports = userReports.filter((report: Report) => report.id !== reportId);
-    
-    // Update the storage
-    allUserReports[userEmail] = updatedReports;
-    localStorage.setItem("userReports", JSON.stringify(allUserReports));
-    
-    // Update the state
-    setReports(updatedReports);
-    
-    toast({ title: "Report Deleted", description: "The report has been removed from your history." });
+    try {
+      await deleteReport(reportId);
+      setReports(prevReports => prevReports.filter(report => report.id !== reportId));
+      toast({ title: "Report Deleted", description: "The report has been removed from your history." });
+    } catch (error) {
+       console.error("Failed to delete report:", error);
+       toast({ title: "Error", description: "Could not delete the report.", variant: "destructive" });
+    }
   };
 
   const filterReports = (type: string) => {
@@ -131,6 +130,13 @@ export default function HistoryPage() {
   };
   
   const ReportList = ({ type }: { type: 'all' | 'label' | 'recipe' | 'nutrition' }) => {
+      if (isLoadingReports) {
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => <Card key={i} className="h-[200px] animate-pulse bg-muted"></Card>)}
+          </div>
+        )
+      }
       const filtered = filterReports(type);
       if (filtered.length === 0) {
           return <div className="text-center text-muted-foreground py-16">No reports found matching your criteria.</div>;
