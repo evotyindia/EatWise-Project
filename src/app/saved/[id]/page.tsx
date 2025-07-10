@@ -41,6 +41,7 @@ export default function IndividualSavedItemPage() {
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const [editableSlug, setEditableSlug] = useState("");
@@ -62,7 +63,7 @@ export default function IndividualSavedItemPage() {
         return;
       }
 
-      if (debouncedSlug.length < 3 || !/^[a-zA-Z0-9-]+$/.test(debouncedSlug)) {
+      if (debouncedSlug.length < 3 || debouncedSlug.length > 15 || !/^[a-zA-Z0-9-]+$/.test(debouncedSlug)) {
         setSlugStatus("invalid");
         return;
       }
@@ -266,9 +267,13 @@ export default function IndividualSavedItemPage() {
   }, [id, router]);
   
   const scrollToBottom = () => {
-    setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    if (chatContainerRef.current) {
+      requestAnimationFrame(() => {
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+      });
+    }
   };
 
   useEffect(() => {
@@ -389,8 +394,8 @@ export default function IndividualSavedItemPage() {
                   <div>
                     <Label htmlFor="public-link">Your public link</Label>
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="flex w-full items-center rounded-md border border-input bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-background p-2 flex-wrap">
-                          <span className="text-sm text-muted-foreground shrink-0">{typeof window !== 'undefined' ? `${window.location.origin}/${currentUser.username}/` : `.../${currentUser.username}/`}</span>
+                      <div className="flex w-full flex-wrap items-center rounded-md border border-input bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-background p-2">
+                          <span className="text-sm text-muted-foreground break-all">{typeof window !== 'undefined' ? `${window.location.origin}/${currentUser.username}/` : `.../${currentUser.username}/`}</span>
                           <div className="flex-1 relative min-w-[150px]">
                               <Input 
                                 id="public-link"
@@ -437,14 +442,15 @@ export default function IndividualSavedItemPage() {
                   <CardDescription className="text-sm text-muted-foreground pt-1">Ask follow-up questions about this saved report.</CardDescription>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[250px] w-full rounded-md border p-3 mb-4 bg-muted/50">
-                  {chatHistory.map((msg, index) => (
-                    <div key={index} className={`mb-2 p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
-                      <span className="font-semibold capitalize">{msg.role === 'user' ? 'You' : 'AI Advisor'}: </span>{msg.content}
-                    </div>
-                  ))}
-                  {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Advisor is typing...</div>}
-                  <div ref={messagesEndRef} />
+                <ScrollArea ref={chatContainerRef} className="h-[250px] w-full rounded-md border p-3 mb-4 bg-muted/50">
+                  <div ref={messagesEndRef} className="space-y-3">
+                    {chatHistory.map((msg, index) => (
+                      <div key={index} className={`p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
+                        <span className="font-semibold capitalize">{msg.role === 'user' ? 'You' : 'AI Advisor'}: </span>{msg.content}
+                      </div>
+                    ))}
+                    {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Advisor is typing...</div>}
+                  </div>
                 </ScrollArea>
                 <form onSubmit={handleChatSubmit} className="w-full flex gap-2">
                   <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background/50" />
@@ -457,4 +463,3 @@ export default function IndividualSavedItemPage() {
     </div>
   );
 }
-
