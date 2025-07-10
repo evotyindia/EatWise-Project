@@ -115,7 +115,7 @@ export function RecipeForm() {
   const [currentFormInputs, setCurrentFormInputs] = useState<RecipePageFormValues | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const saveButtonRef = useRef<HTMLDivElement>(null);
-  const searchTerm = "";
+  const [searchTerm, setSearchTerm] = useState("");
   const loadingAreaRef = useRef<HTMLDivElement>(null);
 
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
@@ -379,7 +379,7 @@ export function RecipeForm() {
                             <Input
                               placeholder="Search for ingredients..."
                               value={searchTerm}
-                              onChange={(e) => {}}
+                              onChange={(e) => setSearchTerm(e.target.value)}
                               className="pl-10"
                             />
                           </div>
@@ -401,7 +401,7 @@ export function RecipeForm() {
                                                               "rounded-full h-auto px-3 py-1.5 text-xs font-medium transition-colors duration-200 ease-in-out",
                                                               isSelected 
                                                                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                                                                  : "hover:bg-muted/70"
+                                                                  : "hover:bg-accent/10 hover:text-accent"
                                                           )}
                                                           onClick={() => toggleIngredient(ingredient)}
                                                       >
@@ -642,5 +642,3 @@ export function RecipeForm() {
     </div>
   );
 }
-
-    
