@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { LoaderCircle, FileText, ArrowLeft, MessageCircle, Send, Globe, Share2, Copy, Check, Save as SaveIcon, AlertTriangle } from "lucide-react";
+import { LoaderCircle, FileText, ArrowLeft, MessageCircle, Send, Globe, Share2, Copy, Check, Save as SaveIcon, AlertTriangle, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -295,7 +295,7 @@ export default function IndividualSavedItemPage() {
   const getSlugStatusIndicator = () => {
     if (isCheckingSlug) return <LoaderCircle className="h-5 w-5 text-muted-foreground animate-spin" />;
     if (debouncedSlug === report?.publicSlug) return null;
-    if (slugStatus === 'available') return <Check className="h-5 w-5 text-success" />;
+    if (slugStatus === 'available') return <CheckCircle2 className="h-5 w-5 text-success" />;
     if (slugStatus === 'taken' || slugStatus === 'invalid') return <AlertTriangle className="h-5 w-5 text-destructive" />;
     return null;
   };
@@ -388,15 +388,17 @@ export default function IndividualSavedItemPage() {
                   <div>
                     <Label htmlFor="public-link">Your public link</Label>
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="flex w-full items-center rounded-md border border-input bg-background ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                          <span className="pl-3 pr-2 text-sm text-muted-foreground">{currentUser.username}/</span>
+                      <div className="flex w-full items-center rounded-md border border-input bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-background relative">
+                          <span className="pl-3 pr-1 text-sm text-muted-foreground shrink-0">{currentUser.username}/</span>
                           <Input 
                             id="public-link"
                             value={editableSlug}
                             onChange={(e) => setEditableSlug(e.target.value)}
-                            className="flex-1 border-0 bg-transparent p-0 pl-0 pr-10 focus-visible:ring-0 focus-visible:ring-offset-0 h-9"
+                            className="flex-1 border-0 bg-transparent h-9 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 pr-8"
                           />
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2 mr-8">{getSlugStatusIndicator()}</div>
+                          <div className="absolute inset-y-0 right-0 flex items-center pr-2">
+                             {getSlugStatusIndicator()}
+                          </div>
                       </div>
                       <Button onClick={handleSlugChange} disabled={slugStatus !== 'available' || isSavingSlug} size="icon">
                         <SaveIcon className="h-4 w-4" />
@@ -450,3 +452,4 @@ export default function IndividualSavedItemPage() {
     </div>
   );
 }
+
