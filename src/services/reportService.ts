@@ -46,7 +46,7 @@ export async function getReportsByUid(uid: string): Promise<Report[]> {
     } catch (error: any) {
         if (error.code === 'permission-denied') {
             console.error("Firestore Permission Denied on getReportsByUid:", error.message);
-            throw new Error("You do not have permission to view bookmarks. Please check Firestore rules.");
+            throw new Error("You do not have permission to view saved items. Please check Firestore rules.");
         }
         console.error("Error fetching reports by user UID: ", error);
         throw new Error("Could not fetch reports.");
@@ -154,9 +154,9 @@ export async function deleteReportsByUserId(uid: string): Promise<void> {
     } catch (error: any) {
         if (error.code === 'permission-denied') {
             console.error("Firestore Permission Denied on deleteReportsByUserId:", error.message);
-            throw new Error("You do not have permission to clear bookmarks. Please check Firestore rules.");
+            throw new Error("You do not have permission to clear saved items. Please check Firestore rules.");
         }
         console.error("Error deleting user's reports: ", error);
-        throw new Error("Could not clear user bookmarks.");
+        throw new Error("Could not clear user saved items.");
     }
 }

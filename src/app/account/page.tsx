@@ -121,13 +121,13 @@ export default function AccountPage() {
     }
   }
 
-  const handleClearBookmarks = async () => {
+  const handleClearSavedItems = async () => {
     if (!currentUser?.uid) return;
     try {
       await deleteReportsByUserId(currentUser.uid);
-      toast({ title: "Bookmarks Cleared", description: "All your saved reports have been deleted." });
+      toast({ title: "Saved Items Cleared", description: "All your saved reports have been deleted." });
     } catch (error) {
-      toast({ title: "Error", description: "Could not clear bookmarks.", variant: "destructive" });
+      toast({ title: "Error", description: "Could not clear saved items.", variant: "destructive" });
     }
   }
 
@@ -281,18 +281,18 @@ export default function AccountPage() {
         <CardContent className="space-y-6 p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <p className="font-semibold">Clear All Bookmarks</p>
+              <p className="font-semibold">Clear All Saved Items</p>
               <p className="text-sm text-muted-foreground">This will permanently delete all your saved reports and analyses.</p>
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" className="w-full sm:w-auto shrink-0">
-                  <Trash2 className="mr-2 h-4 w-4" /> Clear Bookmarks
+                  <Trash2 className="mr-2 h-4 w-4" /> Clear Saved Items
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
-                <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete all your saved bookmarks. This action cannot be undone.</AlertDialogDescription></AlertDialogHeader>
-                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={handleClearBookmarks}>Yes, Clear Bookmarks</AlertDialogAction></AlertDialogFooter>
+                <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete all your saved items. This action cannot be undone.</AlertDialogDescription></AlertDialogHeader>
+                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={handleClearSavedItems}>Yes, Clear Saved Items</AlertDialogAction></AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           </div>

@@ -1,7 +1,8 @@
 
+
 "use client"
 
-import { Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail, User, LogOut, UserCog, Bookmark, Menu } from "lucide-react"
+import { Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail, User, LogOut, UserCog, Menu, Save } from "lucide-react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
@@ -25,7 +26,7 @@ const navItems = [
   { href: "/analyze", label: "Analyze Label", icon: <ScanLine className="h-5 w-5" /> },
   { href: "/recipes", label: "Recipes", icon: <CookingPot className="h-5 w-5" /> },
   { href: "/nutrition-check", label: "Nutrition Check", icon: <BarChart3 className="h-5 w-5" /> },
-  { href: "/bookmarks", label: "Bookmarks", icon: <Bookmark className="h-5 w-5" /> },
+  { href: "/saved", label: "Saved", icon: <Save className="h-5 w-5" /> },
   { href: "/blogs", label: "Blogs", icon: <BookOpen className="h-5 w-5" /> },
   { href: "/contact", label: "Contact", icon: <Mail className="h-5 w-5" />},
 ]
