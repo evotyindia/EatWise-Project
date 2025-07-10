@@ -9,7 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StarRating } from "@/components/common/star-rating";
 import { cn } from "@/lib/utils";
-import { FileText, HeartPulse, Zap, Wheat, Sparkles, Info, ShieldCheck, ShieldAlert, ClipboardList, UserCheck, Lightbulb, CookingPot, Microscope } from "lucide-react";
+import { FileText, HeartPulse, Zap, Wheat, Sparkles, Info, ShieldCheck, ShieldAlert, ClipboardList, UserCheck, Lightbulb, CookingPot, Microscope, ChevronDown } from "lucide-react";
 
 interface LabelReportDisplayProps {
   report: GenerateHealthReportOutput;
