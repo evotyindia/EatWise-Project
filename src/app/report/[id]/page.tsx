@@ -31,7 +31,7 @@ export default function PublicReportPage() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const getChatContext = (report: Report<any>): Omit<ContextAwareAIChatInput, 'userQuestion' | 'chatHistory'> => {
@@ -41,7 +41,7 @@ export default function PublicReportPage() {
         return {
           contextType: "labelAnalysis",
           labelContext: {
-            productName: labelData.productType || report.userInput.productName || "the product",
+            productName: report.userInput?.productName || labelData.productType || "the product",
             ingredients: report.userInput.ingredients || (report.userInput.photoDataUri ? "from scanned image" : "N/A"),
             healthReportSummary: labelData.summary,
           },
@@ -63,7 +63,7 @@ export default function PublicReportPage() {
           contextType: "nutritionAnalysis",
           nutritionContext: {
             nutritionReportSummary: nutritionData.overallAnalysis,
-            foodItemDescription: report.userInput.foodItemDescription || (report.userInput.nutritionDataUri ? "Scanned food item" : "Manually entered data"),
+            foodItemDescription: report.userInput?.foodItemDescription || (report.userInput.nutritionDataUri ? "Scanned food item" : "Manually entered data"),
           },
         };
       default:
@@ -142,7 +142,14 @@ export default function PublicReportPage() {
   }, [id]);
   
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollAreaViewportRef.current) {
+      requestAnimationFrame(() => {
+        const scrollContainer = scrollAreaViewportRef.current;
+        if(scrollContainer) {
+          scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        }
+      });
+    }
   };
 
   useEffect(() => {
@@ -195,8 +202,16 @@ export default function PublicReportPage() {
       <div className="max-w-4xl mx-auto space-y-8">
         <Card className="bg-primary/5 border-primary/20">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Globe className="h-5 w-5 text-primary"/> A Public Report from EatWise India</CardTitle>
-            <CardDescription>This report was shared publicly by a user. You can explore the analysis and even interact with the AI chat below.</CardDescription>
+            <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+              <Globe className="h-6 w-6 text-primary"/> 
+              {report?.title || "Public Report"}
+            </CardTitle>
+            <CardDescription>
+                This report was shared publicly. Explore the analysis and interact with the AI chat below.
+                {(report?.type === 'label' || report?.type === 'nutrition') && report?.userInput?.productName && (
+                  <span className="block mt-1">Product: <span className="font-semibold text-foreground">{report.userInput.productName}</span></span>
+                )}
+            </CardDescription>
           </CardHeader>
         </Card>
 
@@ -209,16 +224,17 @@ export default function PublicReportPage() {
                   <CardDescription className="text-sm text-muted-foreground pt-1">Ask follow-up questions about this report.</CardDescription>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[250px] w-full rounded-md border p-3 mb-4 bg-muted/50">
-                  {chatHistory.map((msg, index) => (
-                    <div key={index} className={`mb-2 p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
-                      <span className="font-semibold capitalize">{msg.role === 'user' ? 'You' : 'AI Advisor'}: </span>{msg.content}
-                    </div>
-                  ))}
-                  {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Advisor is typing...</div>}
-                  <div ref={messagesEndRef} />
+                <ScrollArea className="h-[250px] w-full" viewportRef={scrollAreaViewportRef}>
+                  <div className="space-y-3 p-3">
+                    {chatHistory.map((msg, index) => (
+                      <div key={index} className={`p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
+                        <span className="font-semibold capitalize">{msg.role === 'user' ? 'You' : 'AI Advisor'}: </span>{msg.content}
+                      </div>
+                    ))}
+                    {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Advisor is typing...</div>}
+                  </div>
                 </ScrollArea>
-                <form onSubmit={handleChatSubmit} className="w-full flex gap-2">
+                <form onSubmit={handleChatSubmit} className="w-full flex gap-2 mt-4">
                   <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background/50" />
                   <Button type="submit" disabled={isChatLoading || !chatInput.trim()}><Send className="h-4 w-4" /></Button>
                 </form>

@@ -120,7 +120,7 @@ export default function PublicReportPage() {
 
   useEffect(() => {
     if (!username || !slug) {
-        setError("Invalid URL.");
+        setError("Invalid URL. The link seems to be incomplete.");
         setIsLoading(false);
         return;
     }

@@ -82,6 +82,29 @@ export async function getReportById(reportId: string): Promise<Report | null> {
     }
 }
 
+// Get a single PUBLIC report by its document ID
+export async function getPublicReportById(reportId: string): Promise<Report | null> {
+    try {
+        const reportDocRef = doc(db, 'reports', reportId);
+        const reportDoc = await getDoc(reportDocRef);
+
+        if (reportDoc.exists() && reportDoc.data().isPublic === true) {
+            return {
+                id: reportDoc.id,
+                ...reportDoc.data(),
+            } as Report;
+        } else {
+            // Returns null if the report doesn't exist or isn't public
+            return null;
+        }
+    } catch (error: any) {
+        // This function should be accessible without auth, so we don't check for permission denied.
+        console.error("Error fetching public report by ID: ", error);
+        throw new Error("An unexpected error occurred while fetching the shared report.");
+    }
+}
+
+
 // Get a single PUBLIC report by username and slug
 export async function getPublicReportBySlug(username: string, slug: string): Promise<Report | null> {
     const sanitizedUsername = username.toLowerCase();
