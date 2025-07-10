@@ -284,19 +284,17 @@ export default function AccountPage() {
               <p className="font-semibold">Clear All Saved Items</p>
               <p className="text-sm text-muted-foreground">This will permanently delete all your saved reports and analyses.</p>
             </div>
-            <div className="w-full sm:w-[200px] flex-shrink-0">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" className="w-full">
-                      <Trash2 className="mr-2 h-4 w-4" /> Clear Saved Items
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete all your saved items. This action cannot be undone.</AlertDialogDescription></AlertDialogHeader>
-                    <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={handleClearSavedItems}>Yes, Clear Saved Items</AlertDialogAction></AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-            </div>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" className="w-full sm:w-auto flex-shrink-0">
+                  <Trash2 className="mr-2 h-4 w-4" /> Clear Saved Items
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete all your saved items. This action cannot be undone.</AlertDialogDescription></AlertDialogHeader>
+                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={handleClearSavedItems}>Yes, Clear Saved Items</AlertDialogAction></AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
           <Separator />
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -304,39 +302,37 @@ export default function AccountPage() {
               <p className="font-semibold">Delete My Account</p>
               <p className="text-sm text-muted-foreground">This will permanently delete your account and all associated data.</p>
             </div>
-            <div className="w-full sm:w-[200px] flex-shrink-0">
-                <AlertDialog onOpenChange={(isOpen) => { if (!isOpen) setDeleteConfirmation(""); }}>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive" className="w-full">
-                      <Ban className="mr-2 h-4 w-4" /> Delete Account
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action is permanent and cannot be undone. To confirm, please type <strong className="text-foreground">{currentUser.username}/CONFIRM</strong> below.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <Input 
-                      value={deleteConfirmation}
-                      onChange={(e) => setDeleteConfirmation(e.target.value)}
-                      placeholder={`Type ${currentUser.username}/CONFIRM`}
-                      className="my-2"
-                    />
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction 
-                        className="bg-destructive hover:bg-destructive/90" 
-                        onClick={handleDeleteAccount}
-                        disabled={deleteConfirmation !== `${currentUser.username}/CONFIRM`}
-                      >
-                        Yes, Delete My Account
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-            </div>
+            <AlertDialog onOpenChange={(isOpen) => { if (!isOpen) setDeleteConfirmation(""); }}>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="w-full sm:w-auto flex-shrink-0">
+                  <Ban className="mr-2 h-4 w-4" /> Delete Account
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action is permanent and cannot be undone. To confirm, please type <strong className="text-foreground">{currentUser.username}/CONFIRM</strong> below.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <Input 
+                  value={deleteConfirmation}
+                  onChange={(e) => setDeleteConfirmation(e.target.value)}
+                  placeholder={`Type ${currentUser.username}/CONFIRM`}
+                  className="my-2"
+                />
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    className="bg-destructive hover:bg-destructive/90" 
+                    onClick={handleDeleteAccount}
+                    disabled={deleteConfirmation !== `${currentUser.username}/CONFIRM`}
+                  >
+                    Yes, Delete My Account
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </CardContent>
       </Card>

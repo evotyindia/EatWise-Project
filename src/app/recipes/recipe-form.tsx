@@ -113,7 +113,7 @@ export function RecipeForm() {
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [currentFormInputs, setCurrentFormInputs] = useState<RecipePageFormValues | null>(null);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
   const saveButtonRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const loadingAreaRef = useRef<HTMLDivElement>(null);
@@ -328,9 +328,9 @@ export function RecipeForm() {
   };
   
   useEffect(() => {
-    if (chatHistory.length > 1 && scrollAreaRef.current) {
+    if (chatHistory.length > 1 && scrollAreaViewportRef.current) {
         requestAnimationFrame(() => {
-            const scrollContainer = scrollAreaRef.current;
+            const scrollContainer = scrollAreaViewportRef.current;
             if (scrollContainer) {
                 scrollContainer.scrollTop = scrollContainer.scrollHeight;
             }
@@ -609,7 +609,7 @@ export function RecipeForm() {
                 <p className="text-sm text-muted-foreground pt-1">Ask about substitutions, techniques, or nutrition.</p>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[200px] w-full" viewportRef={scrollAreaRef}>
+                <ScrollArea className="h-[200px] w-full" viewportRef={scrollAreaViewportRef}>
                   <div className="space-y-3 p-4">
                     {chatHistory.map((msg, index) => (
                       <div key={index} className={`p-3 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>

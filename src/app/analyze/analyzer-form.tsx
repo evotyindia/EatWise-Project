@@ -8,7 +8,7 @@ import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 import { LabelReportDisplay } from "@/components/common/LabelReportDisplay";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadCloud, Sparkles, MessageCircle, Send, Save, ArrowRight } from "lucide-react";
+import { UploadCloud, Sparkles, MessageCircle, Send, Save, ArrowRight, ShieldAlert, ScanSearch } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -92,7 +92,7 @@ export function AnalyzerForm() {
     }
 
     try {
-      const finalReportTitle = reportTitleForSave.trim() || `Label_Not_Found.()🦋`;
+      const finalReportTitle = reportTitleForSave.trim() || `Label Analysis: ${productNameForSave.trim() || new Date().toLocaleString()}`;
       const finalProductName = productNameForSave.trim();
       
       const newReportData = {
@@ -300,12 +300,24 @@ export function AnalyzerForm() {
 
         <div>
           {isLoading && !report && (
-            <Card className="flex items-center justify-center h-full min-h-[300px]">
-              <div className="text-center">
-                <Sparkles className="mx-auto h-12 w-12 text-accent animate-spin mb-4" />
-                <p className="text-lg font-semibold">Generating AI Report...</p>
-                <p className="text-sm text-muted-foreground mt-1">Our AI is carefully analyzing the data. This may take a few moments.</p>
-              </div>
+            <Card className="flex flex-col items-center justify-center h-full min-h-[400px] text-center overflow-hidden">
+                <CardHeader>
+                    <CardTitle className="text-2xl font-bold">Generating AI Report...</CardTitle>
+                    <CardDescription>Our AI is carefully analyzing the data. This may take a few moments.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex items-center justify-center p-8">
+                    <div className="relative flex items-center justify-center w-48 h-48">
+                        <ScanSearch className="w-28 h-28 text-primary animate-pulse" />
+                        <div className="absolute inset-0">
+                            <ShieldAlert className="absolute top-4 left-10 w-8 h-8 text-destructive/70 animate-toss" style={{ animationDelay: '0s' }}/>
+                            <Sparkles className="absolute top-8 right-8 w-8 h-8 text-accent/70 animate-toss" style={{ animationDelay: '0.5s' }}/>
+                            <Check className="absolute top-12 left-4 w-8 h-8 text-success/70 animate-toss" style={{ animationDelay: '1s' }}/>
+                        </div>
+                    </div>
+                </CardContent>
+                <CardFooter>
+                    <p className="text-sm text-muted-foreground">Scanning for insights...</p>
+                </CardFooter>
             </Card>
           )}
 
@@ -315,8 +327,9 @@ export function AnalyzerForm() {
                   <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
                     <DialogTrigger asChild>
                       <Button variant="outline" onClick={() => {
-                          setReportTitleForSave(report.productType || manualForm.getValues("productName") || '');
-                          setProductNameForSave(report.productType || manualForm.getValues("productName") || '');
+                          const detectedName = report.productType || manualForm.getValues("productName") || '';
+                          setReportTitleForSave(detectedName ? `Analysis for ${detectedName}` : 'Food Label Analysis');
+                          setProductNameForSave(detectedName);
                       }}>
                         <Save className="mr-2 h-4 w-4" />
                         Save Report

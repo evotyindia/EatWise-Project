@@ -127,7 +127,7 @@ export function Header() {
         </div>
 
         {/* Tablet/Desktop Sidebar Trigger (MD up to lg-1050) */}
-        <div className="hidden md:block lg-1050:hidden">
+        <div className="hidden md:flex lg-1050:hidden items-center">
             <Sheet>
                 <SheetTrigger asChild>
                     <Button variant="ghost" size="icon">
