@@ -30,6 +30,7 @@ import { Label } from "@/components/ui/label";
 import { Check } from "lucide-react";
 import { createReport } from "@/services/reportService";
 import { auth } from "@/lib/firebase";
+import Link from "next/link";
 
 
 const diseaseOptions: { id: Disease; label: string; icon: React.ElementType }[] = [
@@ -305,7 +306,16 @@ export function RecipeForm() {
 
         await createReport(newReport);
 
-        toast({ title: "Recipe Saved", description: "The recipe has been saved.", variant: "success" });
+        toast({ 
+          title: "Recipe Saved!", 
+          description: "You can find all your saved items on the 'Saved' page.",
+          variant: "success",
+          action: (
+            <Button asChild variant="secondary" size="sm">
+              <Link href="/saved">View Saved Items <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
+          )
+        });
         setIsSaveDialogOpen(false);
         setReportTitle("");
     } catch (error) {
