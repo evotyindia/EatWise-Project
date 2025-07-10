@@ -126,7 +126,8 @@ export function NutritionForm() {
     }
     
     try {
-        const reportTitle = foodItemNameForSave.trim() || currentInputContext.foodItemDescription || "Untitled Nutrition Analysis";
+        const finalFoodItemName = foodItemNameForSave.trim();
+        const reportTitle = finalFoodItemName || `Label_Not_Found.()🦋`;
         
         const newReportData = {
           uid: authUser.uid,
@@ -135,8 +136,7 @@ export function NutritionForm() {
           summary: analysisResult.overallAnalysis,
           createdAt: new Date().toISOString(),
           data: analysisResult,
-          // Save the user-provided name explicitly in userInput
-          userInput: { ...currentInputContext, foodItemDescription: foodItemNameForSave.trim() }
+          userInput: { ...currentInputContext, foodItemDescription: finalFoodItemName }
         };
 
         await createReport(newReportData);
