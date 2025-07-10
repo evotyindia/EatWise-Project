@@ -4,47 +4,42 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Allow logged-in users to read and write their own user data
+    // Users can be read by anyone to allow for username->uid lookups for public reports.
+    // Writes are still protected, only the user can modify their own data.
     match /users/{userId} {
-      allow read, delete: if request.auth != null && request.auth.uid == resource.data.uid;
-      // Allow creation only if the UID in the document matches the creator's UID
+      allow read: if true;
       allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
-      // Allow updates only by the owner
-      allow update: if request.auth != null && request.auth.uid == resource.data.uid;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.uid;
     }
 
-    // Usernames collection for unique username checks
+    // Usernames can be read by anyone to check for existence or find a user.
+    // Writes are protected to prevent squatting or theft.
     match /usernames/{username} {
-      // Anyone can check if a username exists
       allow get: if true;
-      // Only the authenticated user can create their own username entry
-      // The UID in the document must match the creator's UID
       allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
-      // Only the user who owns the username can delete it
       allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
-      // Prevent updating a username document
       allow update: if false;
     }
 
-    // Reports Collection Rules
+    // Rules for the 'reports' collection
     match /reports/{reportId} {
-      // Allow anyone to read a report IF it is public and has a public slug
-      allow get: if resource.data.isPublic == true && resource.data.publicSlug != null;
+      // ANYONE can read a single report document IF it is public.
+      // This is used by the public /<username>/<slug> page after it has the UID.
+      allow get: if resource.data.isPublic == true;
 
-      // Allow a logged-in user to read their own reports
+      // AUTHENTICATED USERS can list their OWN reports.
+      // This is used by the /saved page. The query in the app must be `where("uid", "==", request.auth.uid)`.
       allow list: if request.auth != null && request.auth.uid == request.query.where.uid;
+
+      // AUTHENTICATED USERS can read any of their own reports, public or private.
+      // This is used on the /saved/[id] page.
       allow read: if request.auth != null && request.auth.uid == resource.data.uid;
 
-      // Allow creation for any logged-in user, as long as they set themselves as owner
+      // AUTHENTICATED USERS can create reports for themselves.
       allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
-      
-      // Allow updates (like making public or changing slug) only by the owner
-      allow update: if request.auth != null && request.auth.uid == resource.data.uid;
 
-      // Allow deletion only by the owner
-      allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
+      // AUTHENTICATED USERS can update or delete their own reports.
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.uid;
     }
   }
 }
-
-  
