@@ -1,6 +1,6 @@
 
 import { db } from '@/lib/firebase';
-import { collection, addDoc, query, where, getDocs, doc, getDoc, deleteDoc, writeBatch, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, doc, getDoc, deleteDoc, writeBatch, updateDoc, limit } from 'firebase/firestore';
 
 // This is now a CLIENT-SIDE service. It should NOT have 'use server'.
 // The Firebase SDK on the client will automatically handle user authentication.
@@ -14,14 +14,19 @@ export interface Report<T = any> {
   createdAt: string; // ISO string
   data: T; // The full AI output
   userInput: any; // The original input to the AI flow
-  isPublic?: boolean; // New field for public sharing
+  isPublic?: boolean;
+  publicSlug?: string | null; // e.g., "my-favorite-recipe"
 }
 
 // Create a new report in Firestore
-export async function createReport(reportData: Omit<Report<any>, 'id'>): Promise<string> {
+export async function createReport(reportData: Omit<Report<any>, 'id' | 'isPublic' | 'publicSlug'>): Promise<string> {
     try {
         const reportsCollection = collection(db, 'reports');
-        const docRef = await addDoc(reportsCollection, { ...reportData, isPublic: false }); // Ensure isPublic is false on creation
+        const docRef = await addDoc(reportsCollection, { 
+            ...reportData, 
+            isPublic: false,
+            publicSlug: null 
+        });
         return docRef.id;
     } catch (error: any) {
         if (error.code === 'permission-denied') {
@@ -77,46 +82,90 @@ export async function getReportById(reportId: string): Promise<Report | null> {
     }
 }
 
-// Get a single PUBLIC report by its document ID (for public access)
-export async function getPublicReportById(reportId: string): Promise<Report | null> {
-    try {
-        const reportDocRef = doc(db, 'reports', reportId);
-        const reportDoc = await getDoc(reportDocRef);
+// Get a single PUBLIC report by username and slug
+export async function getPublicReportBySlug(username: string, slug: string): Promise<Report | null> {
+    const sanitizedUsername = username.toLowerCase();
+    const sanitizedSlug = slug.toLowerCase();
 
-        if (reportDoc.exists()) {
-            const reportData = reportDoc.data() as Report;
-            if (reportData.isPublic) {
-                return { id: reportDoc.id, ...reportData };
-            }
+    try {
+        const usernameDocRef = doc(db, "usernames", sanitizedUsername);
+        const usernameDoc = await getDoc(usernameDocRef);
+
+        if (!usernameDoc.exists()) {
+            return null; // User not found
         }
-        return null; // Return null if not public or doesn't exist
-    } catch (error: any) {
-        // This is a critical change. Firestore security rules for public access might deny reads
-        // for unauthenticated users on the general collection. Instead of throwing, we treat it as "not found".
-        if (error.code === 'permission-denied') {
-            console.warn("Permission denied while fetching public report. This likely means the Firestore rules are correctly preventing a collection scan, and the document is not public or does not exist.");
+        const { uid } = usernameDoc.data();
+        
+        const q = query(
+            collection(db, "reports"), 
+            where("uid", "==", uid), 
+            where("publicSlug", "==", sanitizedSlug),
+            where("isPublic", "==", true),
+            limit(1)
+        );
+
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
             return null;
         }
-        console.error("Error fetching public report by ID:", error);
-        // We re-throw for other unexpected errors so it can be caught by the page.
+        
+        const reportDoc = querySnapshot.docs[0];
+        return { id: reportDoc.id, ...reportDoc.data() } as Report;
+
+    } catch (error: any) {
+        console.error("Error fetching public report by slug:", error);
         throw new Error("An unexpected error occurred while fetching the report.");
     }
 }
 
 
-// Update a report's public status
-export async function updateReportPublicStatus(reportId: string, isPublic: boolean): Promise<void> {
+// Update a report's public status and generate a slug if it's the first time
+export async function updateReportPublicStatus(reportId: string, isPublic: boolean): Promise<Report> {
+    const reportDocRef = doc(db, 'reports', reportId);
     try {
-        const reportDocRef = doc(db, 'reports', reportId);
-        await updateDoc(reportDocRef, { isPublic });
-    } catch (error: any) {
-        if (error.code === 'permission-denied') {
-            console.error("Firestore Permission Denied on updateReportPublicStatus:", error.message);
-            throw new Error("You do not have permission to change this report's status.");
+        const reportDoc = await getDoc(reportDocRef);
+        if (!reportDoc.exists()) throw new Error("Report not found.");
+
+        const currentData = reportDoc.data() as Report;
+        let newSlug = currentData.publicSlug;
+        
+        if (isPublic && !currentData.publicSlug) {
+            // Generate a short random slug if it doesn't exist
+            newSlug = Math.random().toString(36).substring(2, 9);
         }
+
+        await updateDoc(reportDocRef, { isPublic, publicSlug: newSlug });
+        return { ...currentData, id: reportId, isPublic, publicSlug: newSlug };
+
+    } catch (error: any) {
         console.error("Error updating report status:", error);
         throw new Error("Could not update the report's public status.");
     }
+}
+
+
+// Check if a slug is available for a given user
+export async function isSlugAvailableForUser(uid: string, slug: string, currentReportId: string): Promise<boolean> {
+    const sanitizedSlug = slug.toLowerCase();
+    const q = query(
+        collection(db, "reports"), 
+        where("uid", "==", uid), 
+        where("publicSlug", "==", sanitizedSlug)
+    );
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+        return true; // No reports with this slug for this user
+    }
+    // If a report was found, check if it's the one we're currently editing
+    const foundReportId = querySnapshot.docs[0].id;
+    return foundReportId === currentReportId;
+}
+
+// Update a report's public slug
+export async function updateReportSlug(reportId: string, newSlug: string): Promise<void> {
+    const reportDocRef = doc(db, 'reports', reportId);
+    await updateDoc(reportDocRef, { publicSlug: newSlug.toLowerCase() });
 }
 
 

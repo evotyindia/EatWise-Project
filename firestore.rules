@@ -4,45 +4,47 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- Users Collection ---
-    // Users can only manage their own profile.
+    // Allow logged-in users to read and write their own user data
     match /users/{userId} {
-      // A user can only create a profile document for their own UID.
+      allow read, delete: if request.auth != null && request.auth.uid == resource.data.uid;
+      // Allow creation only if the UID in the document matches the creator's UID
       allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
-      
-      // A user can read, update, or delete their own profile.
-      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.uid;
+      // Allow updates only by the owner
+      allow update: if request.auth != null && request.auth.uid == resource.data.uid;
     }
 
-    // --- Usernames Collection ---
-    // This collection ensures usernames are unique.
+    // Usernames collection for unique username checks
     match /usernames/{username} {
-      // Anyone can check if a username exists. This is safe and necessary for the signup form.
+      // Anyone can check if a username exists
       allow get: if true;
-      
-      // A user can only create a username document that points to their own UID.
+      // Only the authenticated user can create their own username entry
+      // The UID in the document must match the creator's UID
       allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
-      
-      // A user can only delete their own username reservation.
-      // This is important when an account is deleted.
+      // Only the user who owns the username can delete it
       allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
-      
-      // Usernames cannot be updated to point to a different user.
+      // Prevent updating a username document
       allow update: if false;
     }
 
-    // --- Reports Collection ---
-    // Manages user-generated health reports, recipes, etc.
+    // Reports Collection Rules
     match /reports/{reportId} {
-      // PUBLIC READ: Anyone (even unauthenticated users) can read a report if `isPublic` is true.
-      allow get: if resource.data.isPublic == true;
-      
-      // PRIVATE READ: An authenticated user can read any of their own reports, regardless of public status.
+      // Allow anyone to read a report IF it is public and has a public slug
+      allow get: if resource.data.isPublic == true && resource.data.publicSlug != null;
+
+      // Allow a logged-in user to read their own reports
+      allow list: if request.auth != null && request.auth.uid == request.query.where.uid;
       allow read: if request.auth != null && request.auth.uid == resource.data.uid;
 
-      // WRITE PERMISSIONS (Create, Update, Delete)
-      // Only the authenticated owner of a report can create, update, or delete it.
-      allow write: if request.auth != null && request.auth.uid == request.resource.data.uid;
+      // Allow creation for any logged-in user, as long as they set themselves as owner
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
+      
+      // Allow updates (like making public or changing slug) only by the owner
+      allow update: if request.auth != null && request.auth.uid == resource.data.uid;
+
+      // Allow deletion only by the owner
+      allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
     }
   }
 }
+
+  

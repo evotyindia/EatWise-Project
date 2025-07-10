@@ -3,13 +3,14 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { LoaderCircle, FileText, ArrowLeft, MessageCircle, Send, Globe, Share2, Copy, Check } from "lucide-react";
+import { LoaderCircle, FileText, ArrowLeft, MessageCircle, Send, Globe, Share2, Copy, Check, Save as SaveIcon } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { useDebounce } from "@/hooks/use-debounce";
 import { LabelReportDisplay } from "@/components/common/LabelReportDisplay";
 import { RecipeDisplay } from "@/components/common/RecipeDisplay";
 import { NutritionReportDisplay } from "@/components/common/NutritionReportDisplay";
@@ -18,7 +19,7 @@ import type { GenerateHealthReportOutput } from "@/ai/flows/generate-health-repo
 import type { GetDetailedRecipeOutput } from "@/ai/flows/get-detailed-recipe";
 import type { AnalyzeNutritionOutput } from "@/ai/flows/nutrition-analysis";
 import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aware-ai-chat";
-import { getReportById, updateReportPublicStatus, type Report } from "@/services/reportService";
+import { getReportById, updateReportPublicStatus, updateReportSlug, type Report, isSlugAvailableForUser } from "@/services/reportService";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -31,6 +32,7 @@ export default function IndividualSavedItemPage() {
   const id = params.id as string;
   
   const [report, setReport] = useState<Report<any> | null>(null);
+  const [currentUser, setCurrentUser] = useState<{uid: string, username: string} | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
@@ -42,11 +44,60 @@ export default function IndividualSavedItemPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
+  const [editableSlug, setEditableSlug] = useState("");
+  const debouncedSlug = useDebounce(editableSlug, 500);
+  const [isCheckingSlug, setIsCheckingSlug] = useState(false);
+  const [slugStatus, setSlugStatus] = useState<"idle" | "available" | "taken" | "invalid">("idle");
+  const [isSavingSlug, setIsSavingSlug] = useState(false);
+
+  useEffect(() => {
+    if (report && report.publicSlug) {
+      setEditableSlug(report.publicSlug);
+    }
+  }, [report]);
+
+  useEffect(() => {
+    const checkSlug = async () => {
+      if (!currentUser || !report || debouncedSlug === report.publicSlug) {
+        setSlugStatus("idle");
+        return;
+      }
+
+      if (debouncedSlug.length < 3 || !/^[a-zA-Z0-9-]+$/.test(debouncedSlug)) {
+        setSlugStatus("invalid");
+        return;
+      }
+      
+      setIsCheckingSlug(true);
+      const available = await isSlugAvailableForUser(currentUser.uid, debouncedSlug, report.id);
+      setSlugStatus(available ? "available" : "taken");
+      setIsCheckingSlug(false);
+    };
+    checkSlug();
+  }, [debouncedSlug, currentUser, report]);
+
+  const handleSlugChange = async () => {
+    if (!report || slugStatus !== 'available') {
+      toast({ title: "Cannot Save Slug", description: "The new slug is invalid or already taken.", variant: "destructive" });
+      return;
+    }
+    setIsSavingSlug(true);
+    try {
+      await updateReportSlug(report.id, debouncedSlug);
+      setReport(prev => prev ? { ...prev, publicSlug: debouncedSlug } : null);
+      toast({ title: "Link Updated!", description: "Your custom share link has been saved." });
+      setSlugStatus("idle");
+    } catch(error: any) {
+      toast({ title: "Error", description: error.message || "Could not update the link.", variant: "destructive" });
+    }
+    setIsSavingSlug(false);
+  };
+
   const handlePublicToggle = async (isPublic: boolean) => {
     if (!report) return;
     try {
-      await updateReportPublicStatus(report.id, isPublic);
-      setReport(prev => prev ? { ...prev, isPublic } : null);
+      const updatedReport = await updateReportPublicStatus(report.id, isPublic);
+      setReport(updatedReport);
       toast({
         title: `Report is now ${isPublic ? 'Public' : 'Private'}`,
         description: isPublic ? "Anyone with the link can now view this report." : "This report is no longer publicly accessible.",
@@ -58,11 +109,14 @@ export default function IndividualSavedItemPage() {
   };
 
   const getPublicUrl = () => {
-    return `${window.location.origin}/report/${id}`;
+    if (!currentUser?.username || !report?.publicSlug) return "";
+    return `${window.location.origin}/${currentUser.username}/${report.publicSlug}`;
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(getPublicUrl()).then(() => {
+    const url = getPublicUrl();
+    if (!url) return;
+    navigator.clipboard.writeText(url).then(() => {
       setIsCopied(true);
       toast({ title: "Link Copied!", description: "The public link has been copied to your clipboard." });
       setTimeout(() => setIsCopied(false), 2000);
@@ -70,21 +124,21 @@ export default function IndividualSavedItemPage() {
   };
 
   const handleShare = async () => {
+    const url = getPublicUrl();
+    if (!url) return;
     const shareData = {
       title: `EatWise Report: ${report?.title}`,
       text: `Check out this health report I generated with EatWise India: ${report?.summary}`,
-      url: getPublicUrl(),
+      url: url,
     };
     try {
       if (navigator.share) {
         await navigator.share(shareData);
       } else {
-        // Fallback for browsers that don't support Web Share API
         handleCopyLink();
       }
     } catch (error) {
       console.error("Share failed:", error);
-      // Fallback to copy link if sharing is cancelled or fails
       handleCopyLink();
     }
   };
@@ -178,9 +232,16 @@ export default function IndividualSavedItemPage() {
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
         if (authUser) {
             try {
+                const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+                if (loggedInUser.uid !== authUser.uid) {
+                    setError("Authentication mismatch.");
+                    setIsLoading(false);
+                    return;
+                }
+                setCurrentUser({ uid: authUser.uid, username: loggedInUser.username });
+                
                 const foundReport = await getReportById(id);
                 if (foundReport) {
-                    // Authorization check: does this report's UID match the logged-in user's UID?
                     if (foundReport.uid === authUser.uid) {
                          setIsOwner(true);
                          setReport(foundReport);
@@ -230,6 +291,21 @@ export default function IndividualSavedItemPage() {
         return <p>Unknown report type.</p>;
     }
   };
+
+  const getSlugStatusIndicator = () => {
+    if (isCheckingSlug) return <LoaderCircle className="h-5 w-5 text-muted-foreground animate-spin" />;
+    if (debouncedSlug === report?.publicSlug) return null;
+    if (slugStatus === 'available') return <Check className="h-5 w-5 text-success" />;
+    if (slugStatus === 'taken' || slugStatus === 'invalid') return <AlertTriangle className="h-5 w-5 text-destructive" />;
+    return null;
+  };
+  
+  const getSlugStatusMessage = () => {
+    if (debouncedSlug === report?.publicSlug) return null;
+    if (slugStatus === 'invalid') return <p className="text-xs text-destructive mt-1">Use 3+ characters, letters, numbers, and hyphens only.</p>;
+    if (slugStatus === 'taken') return <p className="text-xs text-destructive mt-1">This link ending is already taken.</p>;
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -281,7 +357,6 @@ export default function IndividualSavedItemPage() {
                     <Switch
                         id="public-toggle-switch"
                         checked={report.isPublic}
-                        // This onCheckedChange is just for visual trigger, logic is in AlertDialog
                         onCheckedChange={() => {}} 
                       />
                       <Label htmlFor="public-toggle-switch" className="cursor-pointer">
@@ -308,16 +383,38 @@ export default function IndividualSavedItemPage() {
                 </AlertDialogContent>
               </AlertDialog>
               
-              {report.isPublic && (
-                <div className="flex flex-col sm:flex-row gap-2 mt-4 animate-fade-in-up">
-                  <Button onClick={handleCopyLink} variant="outline" className="flex-1">
-                    {isCopied ? <Check className="mr-2 h-4 w-4 text-success" /> : <Copy className="mr-2 h-4 w-4" />}
-                    {isCopied ? 'Link Copied!' : 'Copy Link'}
-                  </Button>
-                  <Button onClick={handleShare} className="flex-1">
-                    <Share2 className="mr-2 h-4 w-4" />
-                    Share Report
-                  </Button>
+              {report.isPublic && currentUser?.username && (
+                <div className="space-y-3 pt-2 animate-fade-in-up">
+                  <div>
+                    <Label htmlFor="public-link">Your public link</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="relative flex-grow">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{currentUser.username}/</span>
+                        <Input 
+                          id="public-link"
+                          value={editableSlug}
+                          onChange={(e) => setEditableSlug(e.target.value)}
+                          className={`pl-[calc(1ch*${currentUser.username.length+2})] pr-10`}
+                        />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">{getSlugStatusIndicator()}</div>
+                      </div>
+                      <Button onClick={handleSlugChange} disabled={slugStatus !== 'available' || isSavingSlug} size="icon">
+                        <SaveIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    {getSlugStatusMessage()}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button onClick={handleCopyLink} variant="outline" className="flex-1">
+                      {isCopied ? <Check className="mr-2 h-4 w-4 text-success" /> : <Copy className="mr-2 h-4 w-4" />}
+                      {isCopied ? 'Link Copied!' : 'Copy Link'}
+                    </Button>
+                    <Button onClick={handleShare} className="flex-1">
+                      <Share2 className="mr-2 h-4 w-4" />
+                      Share Report
+                    </Button>
+                  </div>
                 </div>
               )}
             </CardContent>

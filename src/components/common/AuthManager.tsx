@@ -15,13 +15,17 @@ export function AuthManager({ children }: { children: React.ReactNode }) {
         const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
             if (authUser && authUser.emailVerified) {
                 // If user is authenticated and verified, check their profile
-                const userProfile = await getUserByUid(authUser.uid);
-                if (userProfile) {
-                    setCurrentUser(userProfile);
-                    // If they don't have a username, open the modal
-                    if (!userProfile.username) {
-                        setIsUsernameModalOpen(true);
+                try {
+                    const userProfile = await getUserByUid(authUser.uid);
+                    if (userProfile) {
+                        setCurrentUser(userProfile);
+                        // If they don't have a username, open the modal
+                        if (!userProfile.username) {
+                            setIsUsernameModalOpen(true);
+                        }
                     }
+                } catch(e) {
+                    console.error("AuthManager: Failed to get user profile", e);
                 }
             } else {
                 // If user logs out or is not verified, reset state
