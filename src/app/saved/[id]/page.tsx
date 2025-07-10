@@ -388,15 +388,15 @@ export default function IndividualSavedItemPage() {
                   <div>
                     <Label htmlFor="public-link">Your public link</Label>
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="relative flex-grow">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{currentUser.username}/</span>
-                        <Input 
-                          id="public-link"
-                          value={editableSlug}
-                          onChange={(e) => setEditableSlug(e.target.value)}
-                          className={`pl-[calc(1ch*${currentUser.username.length+2})] pr-10`}
-                        />
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2">{getSlugStatusIndicator()}</div>
+                      <div className="flex w-full items-center rounded-md border border-input bg-background ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                          <span className="pl-3 pr-2 text-sm text-muted-foreground">{currentUser.username}/</span>
+                          <Input 
+                            id="public-link"
+                            value={editableSlug}
+                            onChange={(e) => setEditableSlug(e.target.value)}
+                            className="flex-1 border-0 bg-transparent p-0 pl-0 pr-10 focus-visible:ring-0 focus-visible:ring-offset-0 h-9"
+                          />
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 mr-8">{getSlugStatusIndicator()}</div>
                       </div>
                       <Button onClick={handleSlugChange} disabled={slugStatus !== 'available' || isSavingSlug} size="icon">
                         <SaveIcon className="h-4 w-4" />
