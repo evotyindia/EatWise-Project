@@ -25,7 +25,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
-export default function IndividualBookmarkPage() {
+export default function IndividualSavedItemPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
@@ -186,14 +186,14 @@ export default function IndividualBookmarkPage() {
                          setReport(foundReport);
                          initiateChatWithWelcome(foundReport);
                     } else {
-                         setError("You do not have permission to view this bookmark.");
+                         setError("You do not have permission to view this item.");
                     }
                 } else {
-                    setError("Bookmark not found. It may have been deleted or the link is incorrect.");
+                    setError("Saved item not found. It may have been deleted or the link is incorrect.");
                 }
             } catch (e) {
                 console.error("Failed to load report from Firestore:", e);
-                setError("An error occurred while trying to load the bookmark.");
+                setError("An error occurred while trying to load the saved item.");
             } finally {
                 setIsLoading(false);
             }
@@ -235,7 +235,7 @@ export default function IndividualBookmarkPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background">
         <LoaderCircle className="w-16 h-16 text-accent animate-spin mb-4" />
-        <h1 className="text-2xl font-bold">Loading Bookmark...</h1>
+        <h1 className="text-2xl font-bold">Loading Saved Item...</h1>
       </div>
     );
   }
@@ -244,12 +244,12 @@ export default function IndividualBookmarkPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background text-center p-4">
         <FileText className="w-16 h-16 text-destructive mb-4" />
-        <h1 className="text-2xl font-bold text-destructive">Error Loading Bookmark</h1>
+        <h1 className="text-2xl font-bold text-destructive">Error Loading Item</h1>
         <p className="mt-2 text-lg text-muted-foreground">{error}</p>
         <Button asChild className="mt-8">
-          <Link href="/bookmarks">
+          <Link href="/saved">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Bookmarks
+            Back to Saved Items
           </Link>
         </Button>
       </div>
@@ -261,9 +261,9 @@ export default function IndividualBookmarkPage() {
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="mb-6 flex justify-between items-center">
             <Button asChild variant="outline">
-                <Link href="/bookmarks">
+                <Link href="/saved">
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to All Bookmarks
+                  Back to All Saved Items
                 </Link>
             </Button>
         </div>

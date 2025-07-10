@@ -101,13 +101,13 @@ export function AnalyzerForm() {
 
       await createReport(newReportData);
 
-      toast({ title: "Report Bookmarked", description: "The health report has been saved to your bookmarks.", variant: "success" });
+      toast({ title: "Report Saved", description: "The health report has been saved.", variant: "success" });
       setIsSaveDialogOpen(false);
       setReportTitle("");
 
     } catch(error) {
         console.error("Failed to save report:", error);
-        toast({ title: "Bookmark Failed", description: (error as Error).message || "Could not save the report.", variant: "destructive" });
+        toast({ title: "Save Failed", description: (error as Error).message || "Could not save the report.", variant: "destructive" });
     }
   };
 
@@ -288,13 +288,13 @@ export function AnalyzerForm() {
                     <DialogTrigger asChild>
                       <Button variant="outline" onClick={() => setReportTitle(report.productType || manualForm.getValues("productName") || '')}>
                         <Save className="mr-2 h-4 w-4" />
-                        Bookmark Report
+                        Save Report
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Bookmark Report</DialogTitle>
-                        <DialogDescription>Give your report a name to easily find it later in your bookmarks.</DialogDescription>
+                        <DialogTitle>Save Report</DialogTitle>
+                        <DialogDescription>Give your report a name to easily find it later in your saved items.</DialogDescription>
                       </DialogHeader>
                       <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
@@ -303,7 +303,7 @@ export function AnalyzerForm() {
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button type="button" onClick={handleSaveReport}>Save Bookmark</Button>
+                        <Button type="button" onClick={handleSaveReport}>Save Report</Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>

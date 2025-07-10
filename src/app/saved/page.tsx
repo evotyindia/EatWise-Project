@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import { LoaderCircle, Bookmark, FileText, CookingPot, BarChart3, Trash2, Search } from "lucide-react";
+import { LoaderCircle, Save, FileText, CookingPot, BarChart3, Trash2, Search } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { getReportsByUid, deleteReport, type Report } from "@/services/reportSer
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
-export default function BookmarksPage() {
+export default function SavedItemsPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
@@ -36,8 +36,8 @@ export default function BookmarksPage() {
           userReports.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
           setReports(userReports);
         } catch (error) {
-          console.error("Failed to load bookmarks data:", error);
-          toast({ title: "Error", description: "Could not load your bookmarks.", variant: "destructive" });
+          console.error("Failed to load saved items data:", error);
+          toast({ title: "Error", description: "Could not load your saved items.", variant: "destructive" });
         } finally {
           setIsLoadingReports(false);
         }
@@ -53,7 +53,7 @@ export default function BookmarksPage() {
     try {
       await deleteReport(reportId);
       setReports(prevReports => prevReports.filter(report => report.id !== reportId));
-      toast({ title: "Bookmark Deleted", description: "The report has been removed from your bookmarks.", variant: "success" });
+      toast({ title: "Item Deleted", description: "The report has been removed from your saved items.", variant: "success" });
     } catch (error) {
        console.error("Failed to delete report:", error);
        toast({ title: "Error", description: "Could not delete the report.", variant: "destructive" });
@@ -101,7 +101,7 @@ export default function BookmarksPage() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete this bookmark.
+                    This action cannot be undone. This will permanently delete this saved item.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -111,7 +111,7 @@ export default function BookmarksPage() {
               </AlertDialogContent>
             </AlertDialog>
             <Button asChild size="sm">
-              <Link href={`/bookmarks/${report.id}`}>View Bookmark</Link>
+              <Link href={`/saved/${report.id}`}>View Item</Link>
             </Button>
           </div>
         </CardFooter>
@@ -129,7 +129,7 @@ export default function BookmarksPage() {
       }
       const filtered = filterReports(type);
       if (filtered.length === 0) {
-          return <div className="text-center text-muted-foreground py-16">No bookmarks found matching your criteria.</div>;
+          return <div className="text-center text-muted-foreground py-16">No saved items found matching your criteria.</div>;
       }
       return (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -143,7 +143,7 @@ export default function BookmarksPage() {
     return (
       <div className="container mx-auto py-8 flex flex-col items-center justify-center min-h-[calc(100vh-10rem)]">
         <LoaderCircle className="w-16 h-16 text-accent animate-spin mb-4" />
-        <h1 className="text-2xl font-bold">Loading Bookmarks...</h1>
+        <h1 className="text-2xl font-bold">Loading Saved Items...</h1>
       </div>
     );
   }
@@ -151,8 +151,8 @@ export default function BookmarksPage() {
   return (
     <div className="container mx-auto py-8 animate-fade-in-up">
       <div className="flex flex-col items-center mb-8 text-center">
-        <Bookmark className="w-16 h-16 text-accent mb-4" />
-        <h1 className="text-4xl font-bold tracking-tight">Your Bookmarks</h1>
+        <Save className="w-16 h-16 text-accent mb-4" />
+        <h1 className="text-4xl font-bold tracking-tight">Your Saved Items</h1>
         <p className="mt-2 text-lg text-muted-foreground">Review your saved reports and recipes.</p>
       </div>
 
@@ -160,7 +160,7 @@ export default function BookmarksPage() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Search bookmarks by name..."
+          placeholder="Search saved items by name..."
           className="pl-10 w-full"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}

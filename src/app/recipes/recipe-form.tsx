@@ -305,12 +305,12 @@ export function RecipeForm() {
 
         await createReport(newReport);
 
-        toast({ title: "Recipe Bookmarked", description: "The recipe has been saved to your bookmarks.", variant: "success" });
+        toast({ title: "Recipe Saved", description: "The recipe has been saved.", variant: "success" });
         setIsSaveDialogOpen(false);
         setReportTitle("");
     } catch (error) {
         console.error("Failed to save recipe:", error);
-        toast({ title: "Bookmark Failed", description: (error as Error).message || "Could not save the recipe.", variant: "destructive" });
+        toast({ title: "Save Failed", description: (error as Error).message || "Could not save the recipe.", variant: "destructive" });
     }
   };
   
@@ -566,12 +566,12 @@ export function RecipeForm() {
                   <DialogTrigger asChild>
                     <Button variant="outline" onClick={() => setReportTitle(detailedRecipe.recipeTitle)}>
                       <Save className="mr-2 h-4 w-4" />
-                      Bookmark Recipe
+                      Save Recipe
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Bookmark Recipe</DialogTitle>
+                      <DialogTitle>Save Recipe</DialogTitle>
                       <DialogDescription>Give your recipe a name to easily find it later.</DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -581,7 +581,7 @@ export function RecipeForm() {
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button type="button" onClick={handleSaveRecipe}>Save Bookmark</Button>
+                      <Button type="button" onClick={handleSaveRecipe}>Save Recipe</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>

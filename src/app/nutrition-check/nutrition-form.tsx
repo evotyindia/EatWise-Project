@@ -137,13 +137,13 @@ export function NutritionForm() {
 
         await createReport(newReportData);
 
-        toast({ title: "Analysis Bookmarked", description: "The nutrition analysis has been saved to your bookmarks.", variant: "success" });
+        toast({ title: "Analysis Saved", description: "The nutrition analysis has been saved.", variant: "success" });
         setIsSaveDialogOpen(false);
         setReportTitle("");
 
     } catch (error) {
         console.error("Failed to save analysis:", error);
-        toast({ title: "Bookmark Failed", description: (error as Error).message || "Could not save the analysis.", variant: "destructive" });
+        toast({ title: "Save Failed", description: (error as Error).message || "Could not save the analysis.", variant: "destructive" });
     }
   };
 
@@ -357,12 +357,12 @@ export function NutritionForm() {
                   <DialogTrigger asChild>
                     <Button variant="outline" onClick={() => setReportTitle(currentInputContext?.foodItemDescription || '')}>
                       <Save className="mr-2 h-4 w-4" />
-                      Bookmark Analysis
+                      Save Analysis
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Bookmark Analysis</DialogTitle>
+                      <DialogTitle>Save Analysis</DialogTitle>
                       <DialogDescription>Give your analysis a name to easily find it later.</DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -372,7 +372,7 @@ export function NutritionForm() {
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button type="button" onClick={handleSaveAnalysis}>Save Bookmark</Button>
+                      <Button type="button" onClick={handleSaveAnalysis}>Save Analysis</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
