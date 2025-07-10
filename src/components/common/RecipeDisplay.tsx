@@ -53,8 +53,10 @@ export const RecipeDisplay: React.FC<RecipeDisplayProps> = ({ recipe }) => {
         {breakdown && (
             <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="nutritional-breakdown">
-                    <AccordionTrigger className="text-lg font-semibold hover:no-underline"><div className="flex items-center"><ClipboardList className="mr-2 h-5 w-5 text-primary"/>Detailed Nutritional Breakdown</div></AccordionTrigger>
-                    <AccordionContent>
+                    <AccordionTrigger className="text-lg font-semibold hover:no-underline bg-muted/50 border px-4 py-3 rounded-lg hover:bg-muted/80">
+                        <div className="flex items-center"><ClipboardList className="mr-2 h-5 w-5 text-primary"/>Detailed Nutritional Breakdown</div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-2">
                         <div className="overflow-x-auto">
                             <Table className="mt-2 text-sm">
                                 <TableHeader>

@@ -67,7 +67,10 @@ export const NutritionReportDisplay: React.FC<NutritionReportDisplayProps> = ({ 
           </div>
         </div>
         <Accordion type="single" collapsible className="w-full border-t pt-6">
-          <AccordionItem value="nutrient-breakdown" className="border-b-0"><AccordionTrigger className="text-xl font-semibold hover:no-underline py-0"><div className="flex items-center"><Microscope className="mr-2 h-5 w-5 text-primary" /><span>Nutrient-by-Nutrient Breakdown</span></div></AccordionTrigger>
+          <AccordionItem value="nutrient-breakdown" className="border-b-0">
+            <AccordionTrigger className="text-xl font-semibold hover:no-underline bg-muted/50 border px-4 py-3 rounded-lg hover:bg-muted/80">
+                <div className="flex items-center"><Microscope className="mr-2 h-5 w-5 text-primary" /><span>Nutrient-by-Nutrient Breakdown</span></div>
+            </AccordionTrigger>
             <AccordionContent className="pt-4">
               {analysisResult.nutrientAnalysisTable && analysisResult.nutrientAnalysisTable.length > 0 ? (<div className="rounded-lg border overflow-hidden"><Table><TableHeader><TableRow><TableHead className="font-semibold">Nutrient</TableHead><TableHead className="font-semibold">Amount</TableHead><TableHead className="font-semibold">Verdict</TableHead></TableRow></TableHeader><TableBody>{analysisResult.nutrientAnalysisTable.map((item, index) => {const verdict = (item.verdict || "").toLowerCase(); const colorClass = verdict.includes('good') || verdict.includes('low') ? 'text-success' : verdict.includes('high') ? 'text-destructive' : verdict.includes('okay') ? 'text-orange-500 dark:text-orange-400' : 'text-muted-foreground'; return (<TableRow key={index} className="bg-background"><TableCell className="font-semibold">{item.nutrient}</TableCell><TableCell>{item.value}</TableCell><TableCell><div className={cn("font-bold", colorClass)}>{item.verdict}</div><p className="text-xs text-muted-foreground mt-1">{item.comment}</p></TableCell></TableRow>);})}</TableBody></Table></div>) : (<p className="text-sm text-muted-foreground text-center py-4">No specific nutrient data was available for breakdown.</p>)}
             </AccordionContent>
