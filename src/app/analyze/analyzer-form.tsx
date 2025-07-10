@@ -50,7 +50,9 @@ export function AnalyzerForm() {
   const saveButtonRef = useRef<HTMLDivElement>(null);
 
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+  const [reportTitleForSave, setReportTitleForSave] = useState("");
   const [productNameForSave, setProductNameForSave] = useState("");
+
 
   const { toast } = useToast();
 
@@ -90,13 +92,13 @@ export function AnalyzerForm() {
     }
 
     try {
+      const finalReportTitle = reportTitleForSave.trim() || `Label_Not_Found.()🦋`;
       const finalProductName = productNameForSave.trim();
-      const reportTitle = finalProductName || `Label_Not_Found.()🦋`;
       
       const newReportData = {
         uid: authUser.uid,
         type: 'label' as const,
-        title: reportTitle,
+        title: finalReportTitle,
         summary: report.summary,
         createdAt: new Date().toISOString(),
         data: report,
@@ -121,6 +123,8 @@ export function AnalyzerForm() {
       });
       setIsSaveDialogOpen(false);
       setProductNameForSave("");
+      setReportTitleForSave("");
+
 
     } catch(error) {
         console.error("Failed to save report:", error);
@@ -310,7 +314,10 @@ export function AnalyzerForm() {
               <div ref={saveButtonRef} className="flex justify-end">
                   <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button variant="outline" onClick={() => setProductNameForSave(report.productType || manualForm.getValues("productName") || '')}>
+                      <Button variant="outline" onClick={() => {
+                          setReportTitleForSave(report.productType || manualForm.getValues("productName") || '');
+                          setProductNameForSave(report.productType || manualForm.getValues("productName") || '');
+                      }}>
                         <Save className="mr-2 h-4 w-4" />
                         Save Report
                       </Button>
@@ -318,12 +325,16 @@ export function AnalyzerForm() {
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Save Report</DialogTitle>
-                        <DialogDescription>Give your report a name to easily find it later. This will be the public title if you share it.</DialogDescription>
+                        <DialogDescription>Give your report a title and confirm the product name to easily find it later.</DialogDescription>
                       </DialogHeader>
                       <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="report-name" className="text-right">Product Name</Label>
-                          <Input id="report-name" value={productNameForSave} onChange={(e) => setProductNameForSave(e.target.value)} className="col-span-3" />
+                          <Label htmlFor="report-title" className="text-right">Report Title</Label>
+                          <Input id="report-title" value={reportTitleForSave} onChange={(e) => setReportTitleForSave(e.target.value)} className="col-span-3" placeholder="e.g., Evening Snack Analysis" />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="product-name" className="text-right">Product Name</Label>
+                          <Input id="product-name" value={productNameForSave} onChange={(e) => setProductNameForSave(e.target.value)} className="col-span-3" placeholder="e.g., Maggi Noodles" />
                         </div>
                       </div>
                       <DialogFooter>
