@@ -41,7 +41,6 @@ export default function IndividualSavedItemPage() {
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const chatContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const [editableSlug, setEditableSlug] = useState("");
@@ -267,17 +266,10 @@ export default function IndividualSavedItemPage() {
   }, [id, router]);
   
   const scrollToBottom = () => {
-    if (chatContainerRef.current) {
-      requestAnimationFrame(() => {
-        if (chatContainerRef.current) {
-          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-      });
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
-    // Only scroll if there is more than one message (i.e., not on the initial welcome message)
     if (chatHistory.length > 1) {
       scrollToBottom();
     }
@@ -331,7 +323,7 @@ export default function IndividualSavedItemPage() {
         <Button asChild className="mt-8">
           <Link href="/saved">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Saved Items
+            Back to All Saved Items
           </Link>
         </Button>
       </div>
@@ -442,14 +434,15 @@ export default function IndividualSavedItemPage() {
                   <CardDescription className="text-sm text-muted-foreground pt-1">Ask follow-up questions about this saved report.</CardDescription>
               </CardHeader>
               <CardContent>
-                <ScrollArea ref={chatContainerRef} className="h-[250px] w-full rounded-md border p-3 mb-4 bg-muted/50">
-                  <div ref={messagesEndRef} className="space-y-3">
+                <ScrollArea className="h-[250px] w-full rounded-md border p-3 mb-4 bg-muted/50">
+                  <div className="space-y-3">
                     {chatHistory.map((msg, index) => (
                       <div key={index} className={`p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
                         <span className="font-semibold capitalize">{msg.role === 'user' ? 'You' : 'AI Advisor'}: </span>{msg.content}
                       </div>
                     ))}
                     {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Advisor is typing...</div>}
+                    <div ref={messagesEndRef} />
                   </div>
                 </ScrollArea>
                 <form onSubmit={handleChatSubmit} className="w-full flex gap-2">

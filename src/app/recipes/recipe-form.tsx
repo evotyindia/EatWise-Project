@@ -328,13 +328,11 @@ export function RecipeForm() {
   };
   
   const scrollToBottom = () => {
-    setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
-    if (chatHistory.length > 0) {
+    if (chatHistory.length > 1) {
       scrollToBottom();
     }
   }, [chatHistory]);
@@ -611,14 +609,16 @@ export function RecipeForm() {
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[200px] w-full rounded-md border p-4 mb-4 bg-muted/50">
-                  {chatHistory.map((msg, index) => (
-                    <div key={index} className={`mb-3 p-3 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
-                      <span className="font-semibold capitalize block mb-1">{msg.role === 'user' ? 'You' : 'AI Chef'}:</span>
-                      <span>{msg.content}</span>
-                    </div>
-                  ))}
-                  {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Chef is typing...</div>}
-                  <div ref={messagesEndRef} />
+                  <div className="space-y-3">
+                    {chatHistory.map((msg, index) => (
+                      <div key={index} className={`p-3 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
+                        <span className="font-semibold capitalize block mb-1">{msg.role === 'user' ? 'You' : 'AI Chef'}:</span>
+                        <span>{msg.content}</span>
+                      </div>
+                    ))}
+                    {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Chef is typing...</div>}
+                    <div ref={messagesEndRef} />
+                  </div>
                 </ScrollArea>
                 <form onSubmit={handleChatSubmit} className="w-full flex gap-2">
                   <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background/50"/>
