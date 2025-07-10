@@ -72,12 +72,21 @@ export const RecipeDisplay: React.FC<RecipeDisplayProps> = ({ recipe }) => {
                  {/* Mobile Card List */}
                 <div className="grid grid-cols-1 gap-4 md:hidden">
                     {(Object.keys(breakdown.average.nutrients) as Array<keyof typeof breakdown.average.nutrients>).map((nutrient) => (
-                    <div key={nutrient} className="rounded-lg border bg-background p-4">
-                        <h4 className="font-bold capitalize">{nutrient}</h4>
-                        <div className="mt-2 space-y-1 text-sm">
-                            <p><strong className="w-20 inline-block">Kid:</strong> {breakdown.kid.nutrients[nutrient]}</p>
-                            <p><strong className="w-20 inline-block">Adult:</strong> {breakdown.adult.nutrients[nutrient]}</p>
-                            <p><strong className="w-20 inline-block">Average:</strong> {breakdown.average.nutrients[nutrient]}</p>
+                    <div key={nutrient} className="rounded-lg border bg-background p-4 shadow-sm">
+                        <h4 className="font-bold capitalize text-base text-primary">{nutrient}</h4>
+                        <div className="mt-2 space-y-1.5 text-sm">
+                            <div className="flex justify-between">
+                                <span className="text-muted-foreground">Kid:</span>
+                                <span className="font-medium">{breakdown.kid.nutrients[nutrient]}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-muted-foreground">Adult:</span>
+                                <span className="font-medium">{breakdown.adult.nutrients[nutrient]}</span>
+                            </div>
+                             <div className="flex justify-between">
+                                <span className="text-muted-foreground">Average:</span>
+                                <span className="font-medium">{breakdown.average.nutrients[nutrient]}</span>
+                            </div>
                         </div>
                     </div>
                     ))}
@@ -92,3 +101,4 @@ export const RecipeDisplay: React.FC<RecipeDisplayProps> = ({ recipe }) => {
     </Card>
   );
 };
+
