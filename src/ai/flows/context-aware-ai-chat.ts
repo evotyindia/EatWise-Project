@@ -179,16 +179,15 @@ const contextAwareAIChatFlow = ai.defineFlow(
       }
       return output;
     } catch (error: any) {
-      // Log the full, detailed error to the server console (Vercel logs) for debugging.
       console.error(`An error occurred in contextAwareAIChatFlow:`, error);
-
-      // Provide a clear error message for the most common deployment issue.
-      if (error.message?.toLowerCase().includes('api key') || /5\d\d/.test(error.message)) {
-          throw new Error('The AI service is not configured. This is likely because the GOOGLE_API_KEY is missing from your .env file. Please add it and restart the server.');
+      const errorMessage = error.message || 'An unexpected error occurred.';
+      if (errorMessage.toLowerCase().includes('api key')) {
+          throw new Error('The AI service is not configured. This is likely because the GOOGLE_API_KEY is missing from your .env file.');
       }
-
-      // For other errors (like safety blocks), re-throw the original message for better client-side feedback.
-      throw new Error(error.message || 'An unexpected error occurred while communicating with the AI service.');
+      if (errorMessage.toLowerCase().includes('safety')) {
+          throw new Error('The AI response was blocked due to safety settings. Please modify your query and try again.');
+      }
+      throw new Error(errorMessage);
     }
   }
 );
