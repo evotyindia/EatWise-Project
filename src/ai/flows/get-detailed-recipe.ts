@@ -31,6 +31,28 @@ const IngredientDetailSchema = z.object({
   notes: z.string().describe("Specific preparation notes, e.g., 'finely chopped', 'soaked overnight', 'optional', or 'Essential staple: add if available'.")
 });
 
+const NutrientValueSchema = z.object({
+    calories: z.string().describe("Estimated calories (e.g., '150-200 kcal')."),
+    protein: z.string().describe("Estimated protein (e.g., '8-10g')."),
+    carbs: z.string().describe("Estimated carbohydrates (e.g., '20-25g')."),
+    fat: z.string().describe("Estimated fat (e.g., '5-7g').")
+});
+
+const NutritionalBreakdownSchema = z.object({
+    kid: z.object({
+        servingSize: z.string().describe("A typical serving size for a child (e.g., '1 small bowl, approx 150g')."),
+        nutrients: NutrientValueSchema
+    }).describe("Nutritional estimates for a child's serving."),
+    adult: z.object({
+        servingSize: z.string().describe("A typical serving size for an adult (e.g., '1 medium bowl, approx 250g')."),
+        nutrients: NutrientValueSchema
+    }).describe("Nutritional estimates for an adult's serving."),
+    average: z.object({
+        servingSize: z.string().describe("The average serving size across all household members (e.g., 'Approx 220g')."),
+        nutrients: NutrientValueSchema
+    }).describe("Average nutritional estimates per serving for this recipe."),
+});
+
 const GetDetailedRecipeOutputSchema = z.object({
   recipeTitle: z.string().describe("The full title of the recipe, e.g., 'Healthy Palak Paneer'."),
   description: z.string().describe("A brief 2-3 sentence description of the dish, highlighting its healthiness or key features."),
@@ -40,7 +62,8 @@ const GetDetailedRecipeOutputSchema = z.object({
   adjustedIngredients: z.array(IngredientDetailSchema).describe("List of ingredients with quantities adjusted for the household and preparation notes. Focus on using the 'availableIngredients' provided by the user primarily. If essential common pantry staples are missing but absolutely necessary, they can be added with a clear note."),
   instructions: z.array(z.string()).describe("Step-by-step cooking instructions. Each step as a separate string in the array."),
   healthNotes: z.string().describe("Specific health considerations, tips, or modifications for this recipe based on the provided 'diseaseConcerns' (e.g., 'For diabetes, ensure to use minimal oil and monitor carbohydrate content. This recipe uses whole grains which is beneficial.'). If no specific concerns, provide general health benefits."),
-  storageOrServingTips: z.string().describe("Tips for storing leftovers or creative serving suggestions.")
+  storageOrServingTips: z.string().describe("Tips for storing leftovers or creative serving suggestions."),
+  nutritionalBreakdown: NutritionalBreakdownSchema.optional().describe("A detailed per-serving nutritional breakdown for different age groups.")
 });
 export type GetDetailedRecipeOutput = z.infer<typeof GetDetailedRecipeOutputSchema>;
 
@@ -74,6 +97,13 @@ const prompt = ai.definePrompt({
   - You must calculate a scaling multiplier: **Multiplier = {{totalPeople}} / 2**.
   - Example: If a 2-person recipe needs 1 cup of dal, a 4-person household (Multiplier=2) requires 2 cups of dal. A 1-person household (Multiplier=0.5) requires 1/2 cup of dal.
   - This scaling is **NON-NEGOTIABLE**. Failure to scale every single ingredient quantity and the cooking times correctly means you have failed the entire task.
+
+  **NUTRITIONAL ANALYSIS (New Requirement):**
+  After generating the recipe, you MUST provide an estimated nutritional breakdown per serving.
+  - Analyze the final ingredients and quantities.
+  - Provide estimated values for Calories, Protein, Carbs, and Fat.
+  - Define a typical serving size for a kid, an adult, and an average person for this specific dish.
+  - Populate the 'nutritionalBreakdown' object in the output schema with these estimates. Provide values as ranges (e.g., '150-200 kcal') to reflect the estimation.
 
   **USER-PROVIDED CONTEXT:**
   - Available Ingredients: {{availableIngredients}}

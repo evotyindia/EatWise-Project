@@ -4,13 +4,17 @@ import React from "react";
 import type { GetDetailedRecipeOutput } from "@/ai/flows/get-detailed-recipe";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { FileText, Clock, Soup, Users, ListChecks, BookOpen, Lightbulb, Check } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { FileText, Clock, Soup, Users, ListChecks, BookOpen, Lightbulb, Check, ClipboardList, ChevronDown } from "lucide-react";
 
 interface RecipeDisplayProps {
   recipe: GetDetailedRecipeOutput;
 }
 
 export const RecipeDisplay: React.FC<RecipeDisplayProps> = ({ recipe }) => {
+  const breakdown = recipe.nutritionalBreakdown;
+
   return (
     <Card>
       <CardHeader>
@@ -45,6 +49,56 @@ export const RecipeDisplay: React.FC<RecipeDisplayProps> = ({ recipe }) => {
             </ol>
           </div>
         </div>
+        
+        {breakdown && (
+            <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="nutritional-breakdown">
+                    <AccordionTrigger className="text-lg font-semibold hover:no-underline"><div className="flex items-center"><ClipboardList className="mr-2 h-5 w-5 text-primary"/>Detailed Nutritional Breakdown</div></AccordionTrigger>
+                    <AccordionContent>
+                        <div className="overflow-x-auto">
+                            <Table className="mt-2 text-sm">
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="font-semibold">Nutrient</TableHead>
+                                        <TableHead className="font-semibold text-center">For a Kid <span className="block text-xs font-normal text-muted-foreground">({breakdown.kid.servingSize})</span></TableHead>
+                                        <TableHead className="font-semibold text-center">For an Adult <span className="block text-xs font-normal text-muted-foreground">({breakdown.adult.servingSize})</span></TableHead>
+                                        <TableHead className="font-semibold text-center">Average Serving <span className="block text-xs font-normal text-muted-foreground">({breakdown.average.servingSize})</span></TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell>Calories</TableCell>
+                                        <TableCell className="text-center">{breakdown.kid.nutrients.calories}</TableCell>
+                                        <TableCell className="text-center">{breakdown.adult.nutrients.calories}</TableCell>
+                                        <TableCell className="text-center">{breakdown.average.nutrients.calories}</TableCell>
+                                    </TableRow>
+                                     <TableRow>
+                                        <TableCell>Protein</TableCell>
+                                        <TableCell className="text-center">{breakdown.kid.nutrients.protein}</TableCell>
+                                        <TableCell className="text-center">{breakdown.adult.nutrients.protein}</TableCell>
+                                        <TableCell className="text-center">{breakdown.average.nutrients.protein}</TableCell>
+                                    </TableRow>
+                                     <TableRow>
+                                        <TableCell>Carbohydrates</TableCell>
+                                        <TableCell className="text-center">{breakdown.kid.nutrients.carbs}</TableCell>
+                                        <TableCell className="text-center">{breakdown.adult.nutrients.carbs}</TableCell>
+                                        <TableCell className="text-center">{breakdown.average.nutrients.carbs}</TableCell>
+                                    </TableRow>
+                                     <TableRow>
+                                        <TableCell>Fat</TableCell>
+                                        <TableCell className="text-center">{breakdown.kid.nutrients.fat}</TableCell>
+                                        <TableCell className="text-center">{breakdown.adult.nutrients.fat}</TableCell>
+                                        <TableCell className="text-center">{breakdown.average.nutrients.fat}</TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-3 text-center">Note: These are estimated values per serving and can vary based on specific ingredients and cooking methods.</p>
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
+        )}
+
         <Alert variant="success"><Lightbulb className="h-5 w-5" /><AlertTitle>Health Notes &amp; Tips</AlertTitle><AlertDescription className="whitespace-pre-line text-sm">{recipe.healthNotes}</AlertDescription></Alert>
         <Alert><Lightbulb className="h-5 w-5" /><AlertTitle>Storage &amp; Serving Tips</AlertTitle><AlertDescription className="whitespace-pre-line text-sm">{recipe.storageOrServingTips}</AlertDescription></Alert>
       </CardContent>
