@@ -389,19 +389,22 @@ export default function IndividualSavedItemPage() {
                   <div>
                     <Label htmlFor="public-link">Your public link</Label>
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="flex w-full items-center rounded-md border border-input bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-background relative overflow-hidden">
-                          <span className="pl-3 pr-1 text-sm text-muted-foreground shrink-0">{typeof window !== 'undefined' ? `${window.location.origin}/${currentUser.username}/` : `.../${currentUser.username}/`}</span>
-                          <Input 
-                            id="public-link"
-                            value={editableSlug}
-                            onChange={(e) => setEditableSlug(e.target.value)}
-                            maxLength={15}
-                            className="flex-1 border-0 bg-transparent h-9 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 pr-8"
-                          />
-                          <div className="absolute inset-y-0 right-0 flex items-center pr-2">
-                             {getSlugStatusIndicator()}
+                      <div className="flex w-full items-center rounded-md border border-input bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-background p-2 flex-wrap">
+                          <span className="text-sm text-muted-foreground shrink-0">{typeof window !== 'undefined' ? `${window.location.origin}/${currentUser.username}/` : `.../${currentUser.username}/`}</span>
+                          <div className="flex-1 relative min-w-[150px]">
+                              <Input 
+                                id="public-link"
+                                value={editableSlug}
+                                onChange={(e) => setEditableSlug(e.target.value)}
+                                maxLength={15}
+                                className="border-0 bg-transparent h-auto p-0 focus-visible:ring-0 focus-visible:ring-offset-0 w-full"
+                              />
+                              <div className="absolute inset-y-0 right-0 flex items-center pr-1">
+                                 {getSlugStatusIndicator()}
+                              </div>
                           </div>
                       </div>
+
                       <Button onClick={handleSlugChange} disabled={slugStatus !== 'available' || isSavingSlug} size="icon">
                         <SaveIcon className="h-4 w-4" />
                       </Button>
@@ -454,3 +457,4 @@ export default function IndividualSavedItemPage() {
     </div>
   );
 }
+
