@@ -60,8 +60,11 @@ export const LabelReportDisplay: React.FC<LabelReportDisplayProps> = ({ report }
         <Alert variant="success"><AlertTitle className="font-semibold text-lg mb-1 flex items-center"><ShieldCheck className="h-5 w-5 mr-2" /><span>Green Flags</span></AlertTitle><AlertDescription className="pl-7">{renderFormattedText(report.greenFlags) || <p className="text-sm">{report.greenFlags}</p>}</AlertDescription></Alert>
         <Alert variant="destructive"><AlertTitle className="font-semibold text-lg mb-1 flex items-center"><ShieldAlert className="h-5 w-5 mr-2" /><span>Red Flags</span></AlertTitle><AlertDescription className="pl-7">{renderFormattedText(report.redFlags) || <p className="text-sm">{report.redFlags}</p>}</AlertDescription></Alert>
         <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="detailed-analysis"><AccordionTrigger className="text-lg font-semibold hover:no-underline"><div className="flex items-center"><ClipboardList className="mr-2 h-5 w-5 text-primary" /><span>Detailed Nutritional Breakdown</span></div></AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
+          <AccordionItem value="detailed-analysis">
+            <AccordionTrigger className="text-lg font-semibold hover:no-underline bg-muted/50 border px-4 py-3 rounded-lg hover:bg-muted/80">
+                <div className="flex items-center"><ClipboardList className="mr-2 h-5 w-5 text-primary" /><span>Detailed Nutritional Breakdown</span></div>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-4 pt-4">
               <div className="p-3 rounded-md border bg-muted/50"><h4 className="font-semibold mb-1">Processing Level</h4><p className="text-sm text-muted-foreground">{report.detailedAnalysis.processingLevel}</p></div>
               <div className="p-3 rounded-md border bg-muted/50"><h4 className="font-semibold mb-1">Macronutrient Profile</h4><p className="text-sm text-muted-foreground">{report.detailedAnalysis.macronutrientProfile}</p></div>
               <div className="p-3 rounded-md border bg-muted/50"><h4 className="font-semibold mb-1">Sugar Analysis</h4><p className="text-sm text-muted-foreground">{report.detailedAnalysis.sugarAnalysis}</p></div>
@@ -73,7 +76,23 @@ export const LabelReportDisplay: React.FC<LabelReportDisplayProps> = ({ report }
         {renderFormattedText(report.consumptionTips) && (<Alert variant="default" className="bg-secondary/70"><AlertTitle className="font-semibold text-lg mb-1 flex items-center"><Lightbulb className="h-5 w-5 mr-2 text-primary" /><span>Healthy Consumption Tips</span></AlertTitle><AlertDescription className="pl-7">{renderFormattedText(report.consumptionTips)}</AlertDescription></Alert>)}
         <Alert variant="default" className="bg-secondary/70"><AlertTitle className="font-semibold text-lg mb-1 flex items-center"><CookingPot className="h-5 w-5 mr-2 text-primary" /><span>Role in an Indian Diet</span></AlertTitle><AlertDescription className="pl-7">{report.indianDietContext}</AlertDescription></Alert>
         {renderFormattedText(report.healthierAlternatives) && (<Alert variant="default" className="bg-secondary"><AlertTitle className="font-semibold text-lg mb-1 flex items-center"><Info className="h-5 w-5 mr-2 text-primary" /><span>Healthier Indian Alternatives</span></AlertTitle><AlertDescription className="pl-7">{renderFormattedText(report.healthierAlternatives)}</AlertDescription></Alert>)}
-        {report.ingredientDeepDive && report.ingredientDeepDive.length > 0 && (<Accordion type="single" collapsible className="w-full"><AccordionItem value="ingredient-deep-dive"><AccordionTrigger className="text-lg font-semibold hover:no-underline"><div className="flex items-center"><Microscope className="mr-2 h-5 w-5 text-primary" /><span>Ingredient Deep Dive</span></div></AccordionTrigger><AccordionContent><div className="rounded-lg border overflow-hidden"><Table><TableHeader><TableRow><TableHead className="w-1/4">Ingredient</TableHead><TableHead className="w-1/5">Risk Level</TableHead><TableHead>Explanation</TableHead></TableRow></TableHeader><TableBody>{report.ingredientDeepDive.map((item, index) => {const riskColorClass = {'High': 'text-destructive','Medium': 'text-orange-500 dark:text-orange-400','Low': 'text-success','Neutral': 'text-muted-foreground',}[item.riskLevel] || 'text-muted-foreground'; return (<TableRow key={index} className="bg-background"><TableCell className="font-semibold">{item.ingredientName}</TableCell><TableCell className={cn("font-bold", riskColorClass)}>{item.riskLevel}</TableCell><TableCell><p className="text-sm font-medium">{item.description}</p><p className="text-xs text-muted-foreground mt-1">{item.riskReason}</p></TableCell></TableRow>);})}</TableBody></Table></div></AccordionContent></AccordionItem></Accordion>)}
+        {report.ingredientDeepDive && report.ingredientDeepDive.length > 0 && (
+            <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="ingredient-deep-dive">
+                    <AccordionTrigger className="text-lg font-semibold hover:no-underline bg-muted/50 border px-4 py-3 rounded-lg hover:bg-muted/80">
+                        <div className="flex items-center"><Microscope className="mr-2 h-5 w-5 text-primary" /><span>Ingredient Deep Dive</span></div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                        <div className="rounded-lg border overflow-hidden mt-2">
+                            <Table>
+                                <TableHeader><TableRow><TableHead className="w-1/4">Ingredient</TableHead><TableHead className="w-1/5">Risk Level</TableHead><TableHead>Explanation</TableHead></TableRow></TableHeader>
+                                <TableBody>{report.ingredientDeepDive.map((item, index) => {const riskColorClass = {'High': 'text-destructive','Medium': 'text-orange-500 dark:text-orange-400','Low': 'text-success','Neutral': 'text-muted-foreground',}[item.riskLevel] || 'text-muted-foreground'; return (<TableRow key={index} className="bg-background"><TableCell className="font-semibold">{item.ingredientName}</TableCell><TableCell className={cn("font-bold", riskColorClass)}>{item.riskLevel}</TableCell><TableCell><p className="text-sm font-medium">{item.description}</p><p className="text-xs text-muted-foreground mt-1">{item.riskReason}</p></TableCell></TableRow>);})}</TableBody>
+                            </Table>
+                        </div>
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
+        )}
       </CardContent>
     </Card>
   );
