@@ -48,7 +48,7 @@ export const LabelReportDisplay: React.FC<LabelReportDisplayProps> = ({ report }
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Alert variant="default" className="bg-muted/60"><HeartPulse className="h-5 w-5 text-accent" /><AlertTitle className="font-semibold">Overall Health Rating</AlertTitle><AlertDescription><div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-2"><div className="flex items-center gap-2"><StarRating rating={report.healthRating} variant="good" /><span className="font-medium text-sm">({report.healthRating}/5)</span></div><span className="text-xs text-muted-foreground ml-auto">(Higher is better)</span></div></AlertDescription></Alert>
           {report.processingLevelRating?.rating !== undefined && (<Alert variant="default" className="bg-muted/60"><Zap className="h-5 w-5 text-accent" /><AlertTitle className="font-semibold">Processing Level</AlertTitle><AlertDescription><div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-2"><div className="flex items-center gap-2"><StarRating rating={report.processingLevelRating.rating} variant="bad" /><span className="font-medium text-sm">({report.processingLevelRating.rating}/5)</span></div><span className="text-xs text-muted-foreground ml-auto">(Lower is better)</span></div></AlertDescription></Alert>)}
@@ -59,7 +59,7 @@ export const LabelReportDisplay: React.FC<LabelReportDisplayProps> = ({ report }
         <Alert variant="default" className="bg-background/30"><AlertTitle className="font-semibold text-lg mb-1 flex items-center"><Info className="h-5 w-5 mr-2 text-primary" /><span>Summary</span></AlertTitle><AlertDescription className="pl-7">{report.summary}</AlertDescription></Alert>
         <Alert variant="success"><AlertTitle className="font-semibold text-lg mb-1 flex items-center"><ShieldCheck className="h-5 w-5 mr-2" /><span>Green Flags</span></AlertTitle><AlertDescription className="pl-7">{renderFormattedText(report.greenFlags) || <p className="text-sm">{report.greenFlags}</p>}</AlertDescription></Alert>
         <Alert variant="destructive"><AlertTitle className="font-semibold text-lg mb-1 flex items-center"><ShieldAlert className="h-5 w-5 mr-2" /><span>Red Flags</span></AlertTitle><AlertDescription className="pl-7">{renderFormattedText(report.redFlags) || <p className="text-sm">{report.redFlags}</p>}</AlertDescription></Alert>
-        <Accordion type="single" collapsible className="w-full">
+        <Accordion type="single" collapsible className="w-full space-y-4">
           <AccordionItem value="detailed-analysis">
             <AccordionTrigger className="text-lg font-semibold hover:no-underline bg-muted/50 border px-4 py-3 rounded-lg hover:bg-muted/80">
                 <div className="flex items-center"><ClipboardList className="mr-2 h-5 w-5 text-primary" /><span>Detailed Nutritional Breakdown</span></div>
@@ -71,46 +71,43 @@ export const LabelReportDisplay: React.FC<LabelReportDisplayProps> = ({ report }
               {renderFormattedText(report.detailedAnalysis.micronutrientHighlights) && (<div className="p-3 rounded-md border bg-muted/50"><h4 className="font-semibold mb-1">Micronutrient Highlights</h4><div className="text-sm text-muted-foreground">{renderFormattedText(report.detailedAnalysis.micronutrientHighlights)}</div></div>)}
             </AccordionContent>
           </AccordionItem>
+          {report.ingredientDeepDive && report.ingredientDeepDive.length > 0 && (
+            <AccordionItem value="ingredient-deep-dive">
+                <AccordionTrigger className="text-lg font-semibold hover:no-underline bg-muted/50 border px-4 py-3 rounded-lg hover:bg-muted/80">
+                    <div className="flex items-center"><Microscope className="mr-2 h-5 w-5 text-primary" /><span>Ingredient Deep Dive</span></div>
+                </AccordionTrigger>
+                <AccordionContent className="pt-2">
+                    <Table className="hidden md:table">
+                        <TableHeader><TableRow><TableHead className="w-1/4 font-bold">Ingredient</TableHead><TableHead className="w-1/5 font-bold">Risk Level</TableHead><TableHead className="font-bold">Explanation</TableHead></TableRow></TableHeader>
+                        <TableBody>{report.ingredientDeepDive.map((item, index) => {const riskColorClass = {'High': 'text-destructive','Medium': 'text-orange-500 dark:text-orange-400','Low': 'text-success','Neutral': 'text-muted-foreground',}[item.riskLevel] || 'text-muted-foreground'; return (<TableRow key={index} className="bg-background"><TableCell className="font-semibold">{item.ingredientName}</TableCell><TableCell className={cn("font-bold", riskColorClass)}>{item.riskLevel}</TableCell><TableCell><p className="text-sm font-medium">{item.description}</p><p className="text-xs text-muted-foreground mt-1">{item.riskReason}</p></TableCell></TableRow>);})}</TableBody>
+                    </Table>
+                    <div className="grid grid-cols-1 gap-4 md:hidden">
+                        {report.ingredientDeepDive.map((item, index) => {
+                            const riskColorClass = {'High': 'text-destructive','Medium': 'text-orange-500 dark:text-orange-400','Low': 'text-success','Neutral': 'text-muted-foreground',}[item.riskLevel] || 'text-muted-foreground';
+                            return (
+                            <div key={index} className="rounded-lg border bg-background p-4 shadow-sm">
+                                <h4 className="font-bold text-base text-primary mb-2">{item.ingredientName}</h4>
+                                <div className="grid grid-cols-[auto,1fr] items-baseline gap-x-2 text-sm">
+                                    <span className="font-semibold text-muted-foreground text-right">Risk Level:</span>
+                                    <span className={cn("font-bold", riskColorClass)}>{item.riskLevel}</span>
+                                </div>
+                                <Separator className="my-2" />
+                                <div>
+                                    <p className="text-sm leading-relaxed">{item.description}</p>
+                                    <p className="text-xs text-muted-foreground mt-2">{item.riskReason}</p>
+                                </div>
+                            </div>
+                        )})}
+                    </div>
+                </AccordionContent>
+            </AccordionItem>
+         )}
         </Accordion>
+        <Separator />
         <Alert variant="default" className="bg-secondary/70"><AlertTitle className="font-semibold text-lg mb-1 flex items-center"><UserCheck className="h-5 w-5 mr-2 text-primary" /><span>Best Suited For</span></AlertTitle><AlertDescription className="pl-7">{report.bestSuitedFor}</AlertDescription></Alert>
         {renderFormattedText(report.consumptionTips) && (<Alert variant="default" className="bg-secondary/70"><AlertTitle className="font-semibold text-lg mb-1 flex items-center"><Lightbulb className="h-5 w-5 mr-2 text-primary" /><span>Healthy Consumption Tips</span></AlertTitle><AlertDescription className="pl-7">{renderFormattedText(report.consumptionTips)}</AlertDescription></Alert>)}
         <Alert variant="default" className="bg-secondary/70"><AlertTitle className="font-semibold text-lg mb-1 flex items-center"><CookingPot className="h-5 w-5 mr-2 text-primary" /><span>Role in an Indian Diet</span></AlertTitle><AlertDescription className="pl-7">{report.indianDietContext}</AlertDescription></Alert>
         {renderFormattedText(report.healthierAlternatives) && (<Alert variant="default" className="bg-secondary"><AlertTitle className="font-semibold text-lg mb-1 flex items-center"><Info className="h-5 w-5 mr-2 text-primary" /><span>Healthier Indian Alternatives</span></AlertTitle><AlertDescription className="pl-7">{renderFormattedText(report.healthierAlternatives)}</AlertDescription></Alert>)}
-        {report.ingredientDeepDive && report.ingredientDeepDive.length > 0 && (
-            <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="ingredient-deep-dive">
-                    <AccordionTrigger className="text-lg font-semibold hover:no-underline bg-muted/50 border px-4 py-3 rounded-lg hover:bg-muted/80">
-                        <div className="flex items-center"><Microscope className="mr-2 h-5 w-5 text-primary" /><span>Ingredient Deep Dive</span></div>
-                    </AccordionTrigger>
-                    <AccordionContent className="pt-2">
-                        {/* Desktop Table */}
-                        <Table className="hidden md:table">
-                            <TableHeader><TableRow><TableHead className="w-1/4 font-bold">Ingredient</TableHead><TableHead className="w-1/5 font-bold">Risk Level</TableHead><TableHead className="font-bold">Explanation</TableHead></TableRow></TableHeader>
-                            <TableBody>{report.ingredientDeepDive.map((item, index) => {const riskColorClass = {'High': 'text-destructive','Medium': 'text-orange-500 dark:text-orange-400','Low': 'text-success','Neutral': 'text-muted-foreground',}[item.riskLevel] || 'text-muted-foreground'; return (<TableRow key={index} className="bg-background"><TableCell className="font-semibold">{item.ingredientName}</TableCell><TableCell className={cn("font-bold", riskColorClass)}>{item.riskLevel}</TableCell><TableCell><p className="text-sm font-medium">{item.description}</p><p className="text-xs text-muted-foreground mt-1">{item.riskReason}</p></TableCell></TableRow>);})}</TableBody>
-                        </Table>
-                         {/* Mobile Card List */}
-                        <div className="grid grid-cols-1 gap-4 md:hidden">
-                            {report.ingredientDeepDive.map((item, index) => {
-                                const riskColorClass = {'High': 'text-destructive','Medium': 'text-orange-500 dark:text-orange-400','Low': 'text-success','Neutral': 'text-muted-foreground',}[item.riskLevel] || 'text-muted-foreground';
-                                return (
-                                <div key={index} className="rounded-lg border bg-background p-4 space-y-2 shadow-sm">
-                                    <h4 className="font-bold text-base text-primary">{item.ingredientName}</h4>
-                                    <div className="grid grid-cols-[auto,1fr] items-baseline gap-x-2 text-sm">
-                                        <span className="font-semibold text-muted-foreground text-right">Risk Level:</span>
-                                        <span className={cn("font-bold", riskColorClass)}>{item.riskLevel}</span>
-                                    </div>
-                                    <Separator />
-                                    <div>
-                                        <p className="text-sm leading-relaxed">{item.description}</p>
-                                        <p className="text-xs text-muted-foreground mt-2">{item.riskReason}</p>
-                                    </div>
-                                </div>
-                            )})}
-                        </div>
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
-        )}
       </CardContent>
     </Card>
   );
