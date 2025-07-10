@@ -90,8 +90,8 @@ export function AnalyzerForm() {
     }
 
     try {
-      // Use the saved product name for the title, fallback to the AI's product type.
-      const reportTitle = productNameForSave.trim() || report.productType || "Untitled Label Report";
+      const finalProductName = productNameForSave.trim();
+      const reportTitle = finalProductName || `Label_Not_Found.()🦋`;
       
       const newReportData = {
         uid: authUser.uid,
@@ -100,10 +100,9 @@ export function AnalyzerForm() {
         summary: report.summary,
         createdAt: new Date().toISOString(),
         data: report,
-        // Save the user-provided product name explicitly in userInput
         userInput: { 
           ...manualForm.getValues(),
-          productName: productNameForSave.trim(),
+          productName: finalProductName,
           photoDataUri: uploadedImage ? "Image Uploaded" : undefined 
         }
       };
