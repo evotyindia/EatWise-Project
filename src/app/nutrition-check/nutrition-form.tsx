@@ -80,7 +80,7 @@ export function NutritionForm() {
   const [isChatLoading, setIsChatLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const saveButtonRef = useRef<HTMLDivElement>(null);
-  const [isSubmittingImage, setIsSubmittingImage] = useState(false); 
+  const isSubmittingImage = false; 
 
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [reportTitle, setReportTitle] = useState("");
@@ -199,7 +199,6 @@ export function NutritionForm() {
       toast({ title: "No Image", description: "Please upload an image first.", variant: "destructive" });
       return;
     }
-    setIsSubmittingImage(true); 
     form.clearErrors(); 
     
     const nutritionDataUri = await fileToDataUri(imageFile);
@@ -221,7 +220,6 @@ export function NutritionForm() {
         nutritionDataUri: "Image Uploaded",
     }; 
     await generateAnalysisSharedLogic(aiInputFromFormData, inputForContext, 'image');
-    setIsSubmittingImage(false);
   };
 
   const initiateChatWithWelcome = async (contextType: "nutritionAnalysis", contextData: any) => {
@@ -276,13 +274,15 @@ export function NutritionForm() {
   };
 
   const scrollToBottom = () => {
-    if (chatHistory.length > 1) { // Only scroll on new messages after welcome
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
+    setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (chatHistory.length > 0) {
+      scrollToBottom();
+    }
   }, [chatHistory]);
 
   return (

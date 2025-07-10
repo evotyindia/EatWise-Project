@@ -115,7 +115,8 @@ export function RecipeForm() {
   const [currentFormInputs, setCurrentFormInputs] = useState<RecipePageFormValues | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const saveButtonRef = useRef<HTMLDivElement>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchTerm = "";
+  const loadingAreaRef = useRef<HTMLDivElement>(null);
 
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [reportTitle, setReportTitle] = useState("");
@@ -173,6 +174,11 @@ export function RecipeForm() {
     setDetailedRecipe(null);
     setChatHistory([]);
     setCurrentFormInputs(data); 
+
+    setTimeout(() => {
+      loadingAreaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+
     try {
       const diseases = data.diseaseConcerns?.length ? data.diseaseConcerns : [DiseaseEnum.enum.none];
       const input: GetRecipeSuggestionsInput = {
@@ -322,13 +328,15 @@ export function RecipeForm() {
   };
   
   const scrollToBottom = () => {
-    if (chatHistory.length > 1) { // Only scroll on user's first message and onwards
+    setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
+    }, 100);
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (chatHistory.length > 0) {
+      scrollToBottom();
+    }
   }, [chatHistory]);
 
 
@@ -372,7 +380,7 @@ export function RecipeForm() {
                             <Input
                               placeholder="Search for ingredients..."
                               value={searchTerm}
-                              onChange={(e) => setSearchTerm(e.target.value)}
+                              onChange={(e) => {}}
                               className="pl-10"
                             />
                           </div>
@@ -489,7 +497,7 @@ export function RecipeForm() {
       </div>
 
 
-      <div className="lg:col-span-8 space-y-8">
+      <div className="lg:col-span-8 space-y-8" ref={loadingAreaRef}>
         {isLoadingSuggestions && (
           <Card className="flex flex-col items-center justify-center min-h-[400px] text-center overflow-hidden">
             <CardHeader>
