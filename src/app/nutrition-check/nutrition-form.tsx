@@ -8,7 +8,7 @@ import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 import { NutritionReportDisplay } from "@/components/common/NutritionReportDisplay";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Sparkles, MessageCircle, Send, ListChecks, Save } from "lucide-react";
+import { Sparkles, MessageCircle, Send, ListChecks, Save, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -25,6 +25,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { createReport } from "@/services/reportService";
 import { auth } from "@/lib/firebase";
+import Link from "next/link";
 
 
 const numberPreprocess = (val: unknown) => (val === "" || val === null || val === undefined ? undefined : Number(val));
@@ -137,7 +138,16 @@ export function NutritionForm() {
 
         await createReport(newReportData);
 
-        toast({ title: "Analysis Saved", description: "The nutrition analysis has been saved.", variant: "success" });
+        toast({ 
+          title: "Analysis Saved!", 
+          description: "You can find all your saved items on the 'Saved' page.",
+          variant: "success",
+          action: (
+            <Button asChild variant="secondary" size="sm">
+              <Link href="/saved">View Saved Items <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
+          )
+        });
         setIsSaveDialogOpen(false);
         setReportTitle("");
 

@@ -8,7 +8,7 @@ import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 import { LabelReportDisplay } from "@/components/common/LabelReportDisplay";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadCloud, Sparkles, MessageCircle, Send, Save } from "lucide-react";
+import { UploadCloud, Sparkles, MessageCircle, Send, Save, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -26,6 +26,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { createReport } from "@/services/reportService";
 import { auth } from "@/lib/firebase";
+import Link from "next/link";
 
 const manualInputSchema = z.object({
   productName: z.string().optional(),
@@ -101,7 +102,16 @@ export function AnalyzerForm() {
 
       await createReport(newReportData);
 
-      toast({ title: "Report Saved", description: "The health report has been saved.", variant: "success" });
+      toast({ 
+        title: "Report Saved!", 
+        description: "You can find all your saved items on the 'Saved' page.",
+        variant: "success",
+        action: (
+          <Button asChild variant="secondary" size="sm">
+            <Link href="/saved">View Saved Items <ArrowRight className="ml-2 h-4 w-4" /></Link>
+          </Button>
+        )
+      });
       setIsSaveDialogOpen(false);
       setReportTitle("");
 
