@@ -9,7 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StarRating } from "@/components/common/star-rating";
 import { cn } from "@/lib/utils";
-import { FileText, HeartPulse, Zap, Wheat, Sparkles, Info, ShieldCheck, ShieldAlert, ClipboardList, UserCheck, Lightbulb, CookingPot, Microscope, ChevronDown } from "lucide-react";
+import { FileText, HeartPulse, Zap, Wheat, Sparkles, Info, ShieldCheck, ShieldAlert, ClipboardList, UserCheck, Lightbulb, CookingPot, Microscope } from "lucide-react";
 
 interface LabelReportDisplayProps {
   report: GenerateHealthReportOutput;
@@ -93,11 +93,17 @@ export const LabelReportDisplay: React.FC<LabelReportDisplayProps> = ({ report }
                             {report.ingredientDeepDive.map((item, index) => {
                                 const riskColorClass = {'High': 'text-destructive','Medium': 'text-orange-500 dark:text-orange-400','Low': 'text-success','Neutral': 'text-muted-foreground',}[item.riskLevel] || 'text-muted-foreground';
                                 return (
-                                <div key={index} className="rounded-lg border bg-background p-4 space-y-2">
-                                    <h4 className="font-bold">{item.ingredientName}</h4>
-                                    <div><strong className="text-sm">Risk Level: </strong><span className={cn("font-bold", riskColorClass)}>{item.riskLevel}</span></div>
-                                    <p className="text-sm"><strong className="text-sm">Description:</strong> {item.description}</p>
-                                    <p className="text-xs text-muted-foreground"><strong className="text-xs">Reason:</strong> {item.riskReason}</p>
+                                <div key={index} className="rounded-lg border bg-background p-4 space-y-2 shadow-sm">
+                                    <h4 className="font-bold text-base text-primary">{item.ingredientName}</h4>
+                                    <div className="flex justify-between items-baseline text-sm">
+                                        <span className="font-semibold text-muted-foreground">Risk Level:</span>
+                                        <span className={cn("font-bold", riskColorClass)}>{item.riskLevel}</span>
+                                    </div>
+                                    <Separator />
+                                    <div>
+                                        <p className="text-sm leading-relaxed">{item.description}</p>
+                                        <p className="text-xs text-muted-foreground mt-2">{item.riskReason}</p>
+                                    </div>
                                 </div>
                             )})}
                         </div>
@@ -109,3 +115,4 @@ export const LabelReportDisplay: React.FC<LabelReportDisplayProps> = ({ report }
     </Card>
   );
 };
+

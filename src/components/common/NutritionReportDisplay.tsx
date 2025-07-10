@@ -9,7 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StarRating } from "@/components/common/star-rating";
 import { cn } from "@/lib/utils";
-import { FileText, Sparkles, Info, Microscope, ChevronDown } from "lucide-react";
+import { FileText, Sparkles, Info, Microscope } from "lucide-react";
 
 interface NutritionReportDisplayProps {
   analysisResult: AnalyzeNutritionOutput;
@@ -106,11 +106,17 @@ export const NutritionReportDisplay: React.FC<NutritionReportDisplayProps> = ({ 
                            const verdict = (item.verdict || "").toLowerCase(); 
                            const colorClass = verdict.includes('good') || verdict.includes('low') ? 'text-success' : verdict.includes('high') ? 'text-destructive' : verdict.includes('okay') ? 'text-orange-500 dark:text-orange-400' : 'text-muted-foreground'; 
                           return (
-                          <div key={index} className="rounded-lg border bg-background p-4 space-y-2">
-                              <h4 className="font-bold">{item.nutrient}</h4>
-                              <p><strong className="text-sm">Amount: </strong>{item.value}</p>
-                              <div><strong className="text-sm">Verdict: </strong><span className={cn("font-bold", colorClass)}>{item.verdict}</span></div>
-                              <p className="text-xs text-muted-foreground">{item.comment}</p>
+                          <div key={index} className="rounded-lg border bg-background p-4 space-y-2 shadow-sm">
+                              <h4 className="font-bold text-base text-primary">{item.nutrient}</h4>
+                              <div className="flex justify-between items-baseline text-sm">
+                                  <span className="text-muted-foreground">Amount:</span>
+                                  <span className="font-medium">{item.value}</span>
+                              </div>
+                              <div className="flex justify-between items-baseline text-sm">
+                                  <span className="text-muted-foreground">Verdict:</span>
+                                  <span className={cn("font-bold", colorClass)}>{item.verdict}</span>
+                              </div>
+                              <p className="text-xs text-muted-foreground pt-2 border-t mt-2">{item.comment}</p>
                           </div>
                       )})}
                   </div>
@@ -123,3 +129,4 @@ export const NutritionReportDisplay: React.FC<NutritionReportDisplayProps> = ({ 
     </Card>
   );
 };
+
