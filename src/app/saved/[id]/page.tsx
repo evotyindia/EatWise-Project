@@ -62,7 +62,7 @@ export default function IndividualSavedItemPage() {
         return;
       }
 
-      if (debouncedSlug.length < 3 || debouncedSlug.length > 15 || !/^[a-zA-Z0-9-]+$/.test(debouncedSlug)) {
+      if (debouncedSlug.length < 3 || !/^[a-zA-Z0-9-]+$/.test(debouncedSlug)) {
         setSlugStatus("invalid");
         return;
       }
@@ -272,7 +272,8 @@ export default function IndividualSavedItemPage() {
   };
 
   useEffect(() => {
-    if (chatHistory.length > 0) {
+    // Only scroll if there is more than one message (i.e., not on the initial welcome message)
+    if (chatHistory.length > 1) {
       scrollToBottom();
     }
   }, [chatHistory]);
