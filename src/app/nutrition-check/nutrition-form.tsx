@@ -83,7 +83,9 @@ export function NutritionForm() {
   const isSubmittingImage = false; 
 
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+  const [reportTitleForSave, setReportTitleForSave] = useState("");
   const [foodItemNameForSave, setFoodItemNameForSave] = useState("");
+
 
   const { toast } = useToast();
 
@@ -126,13 +128,13 @@ export function NutritionForm() {
     }
     
     try {
+        const finalReportTitle = reportTitleForSave.trim() || `Analysis_Not_Found.()🦋`;
         const finalFoodItemName = foodItemNameForSave.trim();
-        const reportTitle = finalFoodItemName || `Label_Not_Found.()🦋`;
         
         const newReportData = {
           uid: authUser.uid,
           type: 'nutrition' as const,
-          title: reportTitle,
+          title: finalReportTitle,
           summary: analysisResult.overallAnalysis,
           createdAt: new Date().toISOString(),
           data: analysisResult,
@@ -153,6 +155,8 @@ export function NutritionForm() {
         });
         setIsSaveDialogOpen(false);
         setFoodItemNameForSave("");
+        setReportTitleForSave("");
+
 
     } catch (error) {
         console.error("Failed to save analysis:", error);
@@ -373,7 +377,10 @@ export function NutritionForm() {
             <div ref={saveButtonRef} className="flex justify-end">
               <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" onClick={() => setFoodItemNameForSave(currentInputContext?.foodItemDescription?.replace("IGNORE_VALIDATION_FOR_IMAGE_SUBMIT_INTERNAL_MARKER", "").trim() || '')}>
+                    <Button variant="outline" onClick={() => {
+                        setReportTitleForSave(form.getValues("foodItemDescription") || 'Nutrition Analysis');
+                        setFoodItemNameForSave(form.getValues("foodItemDescription") || '');
+                    }}>
                       <Save className="mr-2 h-4 w-4" />
                       Save Analysis
                     </Button>
@@ -381,12 +388,16 @@ export function NutritionForm() {
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>Save Analysis</DialogTitle>
-                      <DialogDescription>Give your analysis a name to easily find it later. This will be the public title if you share it.</DialogDescription>
+                      <DialogDescription>Give your analysis a title and confirm the food item name to easily find it later.</DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="report-name" className="text-right">Food Item Name</Label>
-                        <Input id="report-name" value={foodItemNameForSave} onChange={(e) => setFoodItemNameForSave(e.target.value)} className="col-span-3" />
+                          <Label htmlFor="report-title" className="text-right">Report Title</Label>
+                          <Input id="report-title" value={reportTitleForSave} onChange={(e) => setReportTitleForSave(e.target.value)} className="col-span-3" placeholder="e.g., Post-Workout Meal Analysis"/>
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="food-item-name" className="text-right">Food Item Name</Label>
+                        <Input id="food-item-name" value={foodItemNameForSave} onChange={(e) => setFoodItemNameForSave(e.target.value)} className="col-span-3" placeholder="e.g., Homemade Chicken Salad"/>
                       </div>
                     </div>
                     <DialogFooter>
