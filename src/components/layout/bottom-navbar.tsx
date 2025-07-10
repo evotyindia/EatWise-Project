@@ -57,14 +57,15 @@ export function BottomNavbar() {
                  isActive ? "text-primary font-semibold" : "text-muted-foreground hover:text-primary"
               )}
             >
-              <div className={cn(
-                "flex items-center justify-center gap-1.5 rounded-full px-4 py-1.5 transition-all duration-300",
-                isActive ? "bg-secondary" : "bg-transparent"
-              )}>
+              <div
+                className={cn(
+                  "flex items-center justify-center rounded-full px-4 py-1.5 transition-all duration-300",
+                  isActive ? "bg-secondary" : "bg-transparent"
+                )}
+              >
                 <Icon className="h-5 w-5" />
-                {isActive && <span className="text-xs">{item.label}</span>}
               </div>
-               {!isActive && <span className="text-xs">{item.label}</span>}
+              <span className="text-xs">{item.label}</span>
             </Link>
           );
         })}
