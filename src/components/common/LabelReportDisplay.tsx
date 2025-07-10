@@ -95,8 +95,8 @@ export const LabelReportDisplay: React.FC<LabelReportDisplayProps> = ({ report }
                                 return (
                                 <div key={index} className="rounded-lg border bg-background p-4 space-y-2 shadow-sm">
                                     <h4 className="font-bold text-base text-primary">{item.ingredientName}</h4>
-                                    <div className="flex justify-between items-baseline text-sm">
-                                        <span className="font-semibold text-muted-foreground">Risk Level:</span>
+                                    <div className="grid grid-cols-[auto,1fr] items-baseline gap-x-2 text-sm">
+                                        <span className="font-semibold text-muted-foreground text-right">Risk Level:</span>
                                         <span className={cn("font-bold", riskColorClass)}>{item.riskLevel}</span>
                                     </div>
                                     <Separator />
@@ -115,4 +115,3 @@ export const LabelReportDisplay: React.FC<LabelReportDisplayProps> = ({ report }
     </Card>
   );
 };
-

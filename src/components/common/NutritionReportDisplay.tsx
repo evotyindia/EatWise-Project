@@ -106,15 +106,14 @@ export const NutritionReportDisplay: React.FC<NutritionReportDisplayProps> = ({ 
                            const verdict = (item.verdict || "").toLowerCase(); 
                            const colorClass = verdict.includes('good') || verdict.includes('low') ? 'text-success' : verdict.includes('high') ? 'text-destructive' : verdict.includes('okay') ? 'text-orange-500 dark:text-orange-400' : 'text-muted-foreground'; 
                           return (
-                          <div key={index} className="rounded-lg border bg-background p-4 space-y-2 shadow-sm">
-                              <h4 className="font-bold text-base text-primary">{item.nutrient}</h4>
-                              <div className="flex justify-between items-baseline text-sm">
-                                  <span className="text-muted-foreground">Amount:</span>
-                                  <span className="font-medium">{item.value}</span>
-                              </div>
-                              <div className="flex justify-between items-baseline text-sm">
-                                  <span className="text-muted-foreground">Verdict:</span>
-                                  <span className={cn("font-bold", colorClass)}>{item.verdict}</span>
+                          <div key={index} className="rounded-lg border bg-background p-4 shadow-sm">
+                              <h4 className="font-bold text-base text-primary mb-2">{item.nutrient}</h4>
+                              <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-sm">
+                                <span className="text-muted-foreground">Amount:</span>
+                                <span className="font-medium text-right">{item.value}</span>
+
+                                <span className="text-muted-foreground">Verdict:</span>
+                                <span className={cn("font-bold text-right", colorClass)}>{item.verdict}</span>
                               </div>
                               <p className="text-xs text-muted-foreground pt-2 border-t mt-2">{item.comment}</p>
                           </div>
@@ -129,4 +128,3 @@ export const NutritionReportDisplay: React.FC<NutritionReportDisplayProps> = ({ 
     </Card>
   );
 };
-
