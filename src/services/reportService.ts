@@ -168,6 +168,45 @@ export async function updateReportSlug(reportId: string, newSlug: string): Promi
     await updateDoc(reportDocRef, { publicSlug: newSlug.toLowerCase() });
 }
 
+// NEW FUNCTION: Update report title and product name
+export async function updateReportDetails(reportId: string, newTitle: string, newProductName: string): Promise<Report> {
+    const reportDocRef = doc(db, 'reports', reportId);
+    try {
+        const reportDoc = await getDoc(reportDocRef);
+        if (!reportDoc.exists()) {
+            throw new Error("Report not found.");
+        }
+        const currentData = reportDoc.data() as Omit<Report, 'id'>;
+
+        // Create the updated userInput object
+        const updatedUserInput = { ...currentData.userInput };
+        if (currentData.type === 'label' || currentData.type === 'nutrition') {
+            updatedUserInput.productName = newProductName;
+            // Also update foodItemDescription if it exists for nutrition reports
+            if ('foodItemDescription' in updatedUserInput) {
+                updatedUserInput.foodItemDescription = newProductName;
+            }
+        }
+
+        await updateDoc(reportDocRef, {
+            title: newTitle,
+            userInput: updatedUserInput
+        });
+
+        // Return the full updated report object for local state update
+        return {
+            ...currentData,
+            id: reportId,
+            title: newTitle,
+            userInput: updatedUserInput
+        };
+
+    } catch (error: any) {
+        console.error("Error updating report details:", error);
+        throw new Error("Could not update the report details.");
+    }
+}
+
 
 // Delete a single report by its ID
 export async function deleteReport(reportId: string): Promise<void> {
