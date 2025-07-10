@@ -32,7 +32,7 @@ export default function PublicReportPage() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const getChatContext = (report: Report<any>): Omit<ContextAwareAIChatInput, 'userQuestion' | 'chatHistory'> => {
@@ -146,13 +146,14 @@ export default function PublicReportPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username, slug]);
   
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   useEffect(() => {
-    if (chatHistory.length > 1) {
-      scrollToBottom();
+    if (chatHistory.length > 1 && scrollAreaRef.current) {
+        requestAnimationFrame(() => {
+            const scrollContainer = scrollAreaRef.current;
+            if (scrollContainer) {
+                scrollContainer.scrollTop = scrollContainer.scrollHeight;
+            }
+        });
     }
   }, [chatHistory]);
 
@@ -214,18 +215,17 @@ export default function PublicReportPage() {
                   <CardDescription className="text-sm text-muted-foreground pt-1">Ask follow-up questions about this report.</CardDescription>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[250px] w-full rounded-md border p-3 mb-4 bg-muted/50">
-                  <div className="space-y-3">
+                <ScrollArea className="h-[250px] w-full" viewportRef={scrollAreaRef}>
+                  <div className="space-y-3 p-3">
                     {chatHistory.map((msg, index) => (
                       <div key={index} className={`p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
                         <span className="font-semibold capitalize">{msg.role === 'user' ? 'You' : 'AI Advisor'}: </span>{msg.content}
                       </div>
                     ))}
                     {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Advisor is typing...</div>}
-                    <div ref={messagesEndRef} />
                   </div>
                 </ScrollArea>
-                <form onSubmit={handleChatSubmit} className="w-full flex gap-2">
+                <form onSubmit={handleChatSubmit} className="w-full flex gap-2 mt-4">
                   <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background/50" />
                   <Button type="submit" disabled={isChatLoading || !chatInput.trim()}><Send className="h-4 w-4" /></Button>
                 </form>
@@ -236,3 +236,5 @@ export default function PublicReportPage() {
     </div>
   );
 }
+
+    
