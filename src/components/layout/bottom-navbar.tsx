@@ -24,6 +24,8 @@ const moreNavItems = [
     { href: "/contact", label: "Contact", icon: Mail},
 ];
 
+const moreNavPaths = moreNavItems.map(item => item.href).concat(['/account']);
+
 export function BottomNavbar() {
   const pathname = usePathname();
   const [mounted, setMounted] = React.useState(false);
@@ -41,7 +43,8 @@ export function BottomNavbar() {
     setIsLoggedIn(false);
     window.location.href = "/";
   };
-
+  
+  const isMoreSectionActive = mounted && moreNavPaths.some(path => pathname.startsWith(path));
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 border-t shadow-[0_-1px_10px_rgba(0,0,0,0.05)] backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
@@ -75,11 +78,20 @@ export function BottomNavbar() {
         })}
         <Sheet>
           <SheetTrigger asChild>
-            <button className="flex flex-col items-center justify-center gap-1 w-full h-full text-muted-foreground hover:text-primary transition-colors duration-200">
-                <div className="flex items-center justify-center rounded-full px-4 py-1.5 transition-all duration-300">
+             <button className={cn(
+                "flex flex-col items-center justify-center gap-1 w-full h-full transition-colors duration-200",
+                isMoreSectionActive ? "text-primary" : "text-muted-foreground hover:text-primary"
+              )}>
+                <div className={cn(
+                    "flex items-center justify-center rounded-full py-1.5 transition-all duration-300",
+                    isMoreSectionActive ? "bg-secondary px-6" : "bg-transparent px-4"
+                )}>
                     <Menu className="h-5 w-5" />
                 </div>
-                <span className="text-xs">More</span>
+                <span className={cn(
+                    "text-xs",
+                    isMoreSectionActive ? "font-semibold" : "font-normal"
+                )}>More</span>
             </button>
           </SheetTrigger>
           <SheetContent side="bottom" className="w-full h-auto rounded-t-2xl">
@@ -119,16 +131,17 @@ export function BottomNavbar() {
                      <Link
                       href="/account"
                       className={cn(
-                        "flex items-center gap-3 rounded-lg p-3 text-base font-medium transition-colors text-foreground hover:bg-muted"
+                        "flex items-center gap-3 rounded-lg p-3 text-base font-medium transition-colors text-foreground hover:bg-muted",
+                         mounted && pathname.startsWith('/account') && "bg-primary text-primary-foreground"
                       )}
                     >
-                      <UserCog />
+                      <UserCog className="h-5 w-5" />
                       <span>Account Settings</span>
                     </Link>
                   </SheetClose>
                   <SheetClose asChild>
                      <Button variant="ghost" onClick={handleLogout} className="flex items-center justify-start gap-3 rounded-lg p-3 text-base font-medium text-destructive hover:bg-destructive/10 hover:text-destructive">
-                      <LogOut />
+                      <LogOut className="h-5 w-5" />
                       <span>Logout</span>
                     </Button>
                   </SheetClose>
@@ -141,7 +154,7 @@ export function BottomNavbar() {
                         "flex items-center gap-3 rounded-lg p-3 text-base font-medium transition-colors text-foreground hover:bg-muted"
                       )}
                     >
-                      <User />
+                      <User className="h-5 w-5" />
                       <span>Login / Signup</span>
                     </Link>
                   </SheetClose>
