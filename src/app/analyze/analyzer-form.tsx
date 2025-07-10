@@ -46,11 +46,11 @@ export function AnalyzerForm() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
   const saveButtonRef = useRef<HTMLDivElement>(null);
 
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
-  const [reportTitle, setReportTitle] = useState("");
+  const [productNameForSave, setProductNameForSave] = useState("");
 
   const { toast } = useToast();
 
@@ -90,14 +90,22 @@ export function AnalyzerForm() {
     }
 
     try {
+      // Use the saved product name for the title, fallback to the AI's product type.
+      const reportTitle = productNameForSave.trim() || report.productType || "Untitled Label Report";
+      
       const newReportData = {
         uid: authUser.uid,
         type: 'label' as const,
-        title: reportTitle.trim() || report.productType || manualForm.getValues("productName") || "Untitled Label Report",
+        title: reportTitle,
         summary: report.summary,
         createdAt: new Date().toISOString(),
         data: report,
-        userInput: { ...manualForm.getValues(), photoDataUri: uploadedImage ? "Image Uploaded" : undefined }
+        // Save the user-provided product name explicitly in userInput
+        userInput: { 
+          ...manualForm.getValues(),
+          productName: productNameForSave.trim(),
+          photoDataUri: uploadedImage ? "Image Uploaded" : undefined 
+        }
       };
 
       await createReport(newReportData);
@@ -113,7 +121,7 @@ export function AnalyzerForm() {
         )
       });
       setIsSaveDialogOpen(false);
-      setReportTitle("");
+      setProductNameForSave("");
 
     } catch(error) {
         console.error("Failed to save report:", error);
@@ -222,14 +230,20 @@ export function AnalyzerForm() {
     setIsChatLoading(false);
   };
 
+  const scrollToBottom = () => {
+    if (scrollAreaViewportRef.current) {
+      requestAnimationFrame(() => {
+        const scrollContainer = scrollAreaViewportRef.current;
+        if(scrollContainer) {
+          scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        }
+      });
+    }
+  };
+
   useEffect(() => {
-    if (chatHistory.length > 1 && scrollAreaRef.current) {
-        requestAnimationFrame(() => {
-            const scrollContainer = scrollAreaRef.current;
-            if(scrollContainer) {
-              scrollContainer.scrollTop = scrollContainer.scrollHeight;
-            }
-        });
+    if (chatHistory.length > 1) {
+      scrollToBottom();
     }
   }, [chatHistory]);
 
@@ -297,7 +311,7 @@ export function AnalyzerForm() {
               <div ref={saveButtonRef} className="flex justify-end">
                   <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button variant="outline" onClick={() => setReportTitle(report.productType || manualForm.getValues("productName") || '')}>
+                      <Button variant="outline" onClick={() => setProductNameForSave(report.productType || manualForm.getValues("productName") || '')}>
                         <Save className="mr-2 h-4 w-4" />
                         Save Report
                       </Button>
@@ -305,12 +319,12 @@ export function AnalyzerForm() {
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Save Report</DialogTitle>
-                        <DialogDescription>Give your report a name to easily find it later in your saved items.</DialogDescription>
+                        <DialogDescription>Give your report a name to easily find it later. This will be the public title if you share it.</DialogDescription>
                       </DialogHeader>
                       <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="report-name" className="text-right">Name</Label>
-                          <Input id="report-name" value={reportTitle} onChange={(e) => setReportTitle(e.target.value)} className="col-span-3" />
+                          <Label htmlFor="report-name" className="text-right">Product Name</Label>
+                          <Input id="report-name" value={productNameForSave} onChange={(e) => setProductNameForSave(e.target.value)} className="col-span-3" />
                         </div>
                       </div>
                       <DialogFooter>
@@ -328,7 +342,7 @@ export function AnalyzerForm() {
                     <p className="text-sm text-muted-foreground pt-1">Ask questions about this report.</p>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-[200px] w-full" viewportRef={scrollAreaRef}>
+                  <ScrollArea className="h-[200px] w-full" viewportRef={scrollAreaViewportRef}>
                     <div className="space-y-3 p-3">
                       {chatHistory.map((msg, index) => (
                         <div key={index} className={`p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
@@ -356,5 +370,3 @@ export function AnalyzerForm() {
     </div>
   );
 }
-
-    

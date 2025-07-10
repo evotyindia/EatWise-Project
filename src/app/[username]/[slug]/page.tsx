@@ -32,7 +32,7 @@ export default function PublicReportPage() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const getChatContext = (report: Report<any>): Omit<ContextAwareAIChatInput, 'userQuestion' | 'chatHistory'> => {
@@ -42,7 +42,7 @@ export default function PublicReportPage() {
         return {
           contextType: "labelAnalysis",
           labelContext: {
-            productName: labelData.productType || report.userInput.productName || "the product",
+            productName: report.userInput?.productName || labelData.productType || "the product",
             ingredients: report.userInput.ingredients || (report.userInput.photoDataUri ? "from scanned image" : "N/A"),
             healthReportSummary: labelData.summary,
           },
@@ -64,7 +64,7 @@ export default function PublicReportPage() {
           contextType: "nutritionAnalysis",
           nutritionContext: {
             nutritionReportSummary: nutritionData.overallAnalysis,
-            foodItemDescription: report.userInput.foodItemDescription || (report.userInput.nutritionDataUri ? "Scanned food item" : "Manually entered data"),
+            foodItemDescription: report.userInput?.foodItemDescription || (report.userInput.nutritionDataUri ? "Scanned food item" : "Manually entered data"),
           },
         };
       default:
@@ -146,14 +146,20 @@ export default function PublicReportPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username, slug]);
   
+  const scrollToBottom = () => {
+    if (scrollAreaViewportRef.current) {
+      requestAnimationFrame(() => {
+        const scrollContainer = scrollAreaViewportRef.current;
+        if(scrollContainer) {
+          scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        }
+      });
+    }
+  };
+
   useEffect(() => {
-    if (chatHistory.length > 1 && scrollAreaRef.current) {
-        requestAnimationFrame(() => {
-            const scrollContainer = scrollAreaRef.current;
-            if (scrollContainer) {
-                scrollContainer.scrollTop = scrollContainer.scrollHeight;
-            }
-        });
+    if (chatHistory.length > 1) {
+      scrollToBottom();
     }
   }, [chatHistory]);
 
@@ -205,7 +211,12 @@ export default function PublicReportPage() {
               <Globe className="h-6 w-6 text-primary"/> 
               {report?.title || "Public Report"}
             </CardTitle>
-            <CardDescription>This report was shared publicly by a user from EatWise India. You can explore the analysis and even interact with the AI chat below.</CardDescription>
+            <CardDescription>
+                This report was shared publicly by <span className="font-semibold text-foreground">@{username}</span>. Explore the analysis and interact with the AI chat below.
+                {(report?.type === 'label' || report?.type === 'nutrition') && report?.userInput?.productName && (
+                  <span className="block mt-1">Product: <span className="font-semibold text-foreground">{report.userInput.productName}</span></span>
+                )}
+            </CardDescription>
           </CardHeader>
         </Card>
 
@@ -218,7 +229,7 @@ export default function PublicReportPage() {
                   <CardDescription className="text-sm text-muted-foreground pt-1">Ask follow-up questions about this report.</CardDescription>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[250px] w-full" viewportRef={scrollAreaRef}>
+                <ScrollArea className="h-[250px] w-full" viewportRef={scrollAreaViewportRef}>
                   <div className="space-y-3 p-3">
                     {chatHistory.map((msg, index) => (
                       <div key={index} className={`p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
@@ -239,7 +250,3 @@ export default function PublicReportPage() {
     </div>
   );
 }
-
-    
-
-    
