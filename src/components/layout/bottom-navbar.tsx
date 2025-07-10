@@ -1,8 +1,7 @@
 
-
 "use client"
 
-import { Home, ScanLine, CookingPot, BookOpen, Menu, BarChart3, Mail, User, LogOut, UserCog, Save } from "lucide-react"
+import { Home, ScanLine, CookingPot, Menu, BarChart3, Mail, User, LogOut, UserCog, Save, BookOpen } from "lucide-react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
@@ -56,7 +55,7 @@ export function BottomNavbar() {
               href={item.href}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 w-full h-full transition-colors duration-200",
-                 isActive ? "text-primary font-semibold" : "text-muted-foreground hover:text-primary"
+                 isActive ? "text-primary" : "text-muted-foreground hover:text-primary"
               )}
             >
               <div
@@ -67,14 +66,19 @@ export function BottomNavbar() {
               >
                 <Icon className="h-5 w-5" />
               </div>
-              <span className="text-xs">{item.label}</span>
+              <span className={cn(
+                "text-xs",
+                isActive ? "font-semibold" : "font-normal"
+              )}>{item.label}</span>
             </Link>
           );
         })}
         <Sheet>
           <SheetTrigger asChild>
             <button className="flex flex-col items-center justify-center gap-1 w-full h-full text-muted-foreground hover:text-primary transition-colors duration-200">
-                <Menu className="h-5 w-5" />
+                <div className="flex items-center justify-center rounded-full px-4 py-1.5 transition-all duration-300">
+                    <Menu className="h-5 w-5" />
+                </div>
                 <span className="text-xs">More</span>
             </button>
           </SheetTrigger>
