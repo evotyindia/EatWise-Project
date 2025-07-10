@@ -35,7 +35,7 @@ export default function IndividualSavedItemPage() {
   const [currentUser, setCurrentUser] = useState<{uid: string, username: string} | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isOwner, setIsOwner] = useState(false);
+  const isOwner = false;
   const [isCopied, setIsCopied] = useState(false);
 
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
@@ -243,7 +243,6 @@ export default function IndividualSavedItemPage() {
                 const foundReport = await getReportById(id);
                 if (foundReport) {
                     if (foundReport.uid === authUser.uid) {
-                         setIsOwner(true);
                          setReport(foundReport);
                          initiateChatWithWelcome(foundReport);
                     } else {
@@ -268,11 +267,13 @@ export default function IndividualSavedItemPage() {
   }, [id, router]);
   
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
   useEffect(() => {
-    if (chatHistory.length > 1) {
+    if (chatHistory.length > 0) {
       scrollToBottom();
     }
   }, [chatHistory]);
@@ -344,7 +345,7 @@ export default function IndividualSavedItemPage() {
             </Button>
         </div>
         
-        {isOwner && report && (
+        {report && (
           <Card className="bg-secondary/50 border-primary/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><Globe className="h-5 w-5 text-primary"/> Sharing Settings</CardTitle>

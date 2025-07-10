@@ -147,11 +147,13 @@ export default function PublicReportPage() {
   }, [username, slug]);
   
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
   useEffect(() => {
-    if (chatHistory.length > 1) {
+    if (chatHistory.length > 0) {
       scrollToBottom();
     }
   }, [chatHistory]);

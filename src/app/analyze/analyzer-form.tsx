@@ -223,13 +223,15 @@ export function AnalyzerForm() {
   };
 
   const scrollToBottom = () => {
-    if (chatHistory.length > 1) { // Only scroll after the first user message
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
+    setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (chatHistory.length > 0) {
+      scrollToBottom();
+    }
   }, [chatHistory]);
 
   return (
