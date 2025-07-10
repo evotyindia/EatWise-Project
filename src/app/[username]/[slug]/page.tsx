@@ -153,7 +153,8 @@ export default function PublicReportPage() {
   };
 
   useEffect(() => {
-    if (chatHistory.length > 0) {
+    // Only scroll if there is more than one message (i.e., not on the initial welcome message)
+    if (chatHistory.length > 1) {
       scrollToBottom();
     }
   }, [chatHistory]);
