@@ -1,0 +1,46 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Rules for user profiles
+    match /users/{userId} {
+      // Any authenticated user can create their own profile document
+      allow create: if request.auth != null;
+      
+      // Only the owner of the profile can read, update, or delete it
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.uid;
+    }
+    
+    // Rules for ensuring unique usernames
+    match /usernames/{username} {
+      // Anyone can check if a username exists
+      allow get;
+      
+      // A user can only create a username document for themselves,
+      // and only if they are creating a new one (not overwriting).
+      // The transaction in the client code handles the atomic check.
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
+
+      // No one should be able to update or delete username records directly
+      // This will be handled by a Cloud Function or manually if needed
+      allow update, delete: if false;
+    }
+
+    // Rules for reports
+    match /reports/{reportId} {
+      // READ: A report can be read if EITHER:
+      // 1. The user is the owner of the report.
+      // 2. The report is marked as public.
+      allow read: if (request.auth != null && request.auth.uid == resource.data.uid) || resource.data.isPublic == true;
+      
+      // CREATE: A user can only create a report for themselves.
+      // The `uid` in the new document must match their own authenticated `uid`.
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      
+      // UPDATE, DELETE: Only the owner of the report can update or delete it.
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.uid;
+    }
+  }
+}
