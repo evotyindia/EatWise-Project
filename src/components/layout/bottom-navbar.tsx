@@ -60,8 +60,8 @@ export function BottomNavbar() {
             >
               <div
                 className={cn(
-                  "flex items-center justify-center rounded-full px-4 py-1.5 transition-all duration-300",
-                  isActive ? "bg-secondary" : "bg-transparent"
+                  "flex items-center justify-center rounded-full py-1.5 transition-all duration-300",
+                  isActive ? "bg-secondary px-6" : "bg-transparent px-4"
                 )}
               >
                 <Icon className="h-5 w-5" />
