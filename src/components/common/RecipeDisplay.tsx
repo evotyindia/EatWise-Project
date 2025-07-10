@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FileText, Clock, Soup, Users, ListChecks, BookOpen, Lightbulb, Check, BarChart3 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface RecipeDisplayProps {
   recipe: GetDetailedRecipeOutput;
@@ -70,23 +71,19 @@ export const RecipeDisplay: React.FC<RecipeDisplayProps> = ({ recipe }) => {
                     </TableBody>
                 </Table>
                  {/* Mobile Card List */}
-                <div className="grid grid-cols-1 gap-4 md:hidden">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
                     {(Object.keys(breakdown.average.nutrients) as Array<keyof typeof breakdown.average.nutrients>).map((nutrient) => (
                     <div key={nutrient} className="rounded-lg border bg-background p-4 shadow-sm">
-                        <h4 className="font-bold capitalize text-base text-primary">{nutrient}</h4>
-                        <div className="mt-2 space-y-1.5 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Kid:</span>
-                                <span className="font-medium">{breakdown.kid.nutrients[nutrient]}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Adult:</span>
-                                <span className="font-medium">{breakdown.adult.nutrients[nutrient]}</span>
-                            </div>
-                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Average:</span>
-                                <span className="font-medium">{breakdown.average.nutrients[nutrient]}</span>
-                            </div>
+                        <h4 className="font-bold capitalize text-base text-primary mb-2">{nutrient}</h4>
+                        <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-sm">
+                            <span className="text-muted-foreground">Kid:</span>
+                            <span className="font-medium text-right">{breakdown.kid.nutrients[nutrient]}</span>
+                            
+                            <span className="text-muted-foreground">Adult:</span>
+                            <span className="font-medium text-right">{breakdown.adult.nutrients[nutrient]}</span>
+
+                            <span className="text-muted-foreground">Average:</span>
+                            <span className="font-medium text-right">{breakdown.average.nutrients[nutrient]}</span>
                         </div>
                     </div>
                     ))}
@@ -101,4 +98,3 @@ export const RecipeDisplay: React.FC<RecipeDisplayProps> = ({ recipe }) => {
     </Card>
   );
 };
-
