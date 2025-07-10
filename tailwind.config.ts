@@ -20,7 +20,7 @@ export default {
     },
     extend: {
       screens: {
-        'lg-900': '900px',
+        'lg-1000': '1000px',
       },
       fontFamily: {
         sans: ["var(--font-inter)", ...fontFamily.sans],
