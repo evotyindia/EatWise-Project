@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { Home, ScanLine, CookingPot, BookOpen, Menu, BarChart3, Mail, User, LogOut, UserCog, Save } from "lucide-react"
@@ -30,6 +31,7 @@ export function BottomNavbar() {
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
 
   React.useEffect(() => {
+    // This code runs only on the client, after the component has mounted.
     setMounted(true);
     const user = localStorage.getItem("loggedInUser");
     setIsLoggedIn(!!user);
@@ -46,7 +48,7 @@ export function BottomNavbar() {
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 border-t shadow-[0_-1px_10px_rgba(0,0,0,0.05)] backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
       <div className="container flex items-center justify-around h-20 max-w-screen-xl px-2">
         {mainNavItems.map((item) => {
-          const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
+          const isActive = mounted && ((item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href)));
           const Icon = item.icon;
           return (
             <Link
@@ -88,7 +90,7 @@ export function BottomNavbar() {
             </SheetHeader>
             <div className="flex flex-col space-y-2">
               {moreNavItems.map((item) => {
-                const isActive = pathname.startsWith(item.href);
+                const isActive = mounted && pathname.startsWith(item.href);
                 const Icon = item.icon;
                 return (
                   <SheetClose asChild key={item.href}>

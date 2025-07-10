@@ -37,11 +37,11 @@ export function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    // This code runs only on the client, after the component has mounted.
     setMounted(true);
-    // Check localStorage for logged-in user
     const user = localStorage.getItem("loggedInUser");
     setIsLoggedIn(!!user);
-  }, [pathname]); // Re-check on path change
+  }, [pathname]); // Re-check on path change to update login status if needed.
 
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");
@@ -57,15 +57,10 @@ export function Header() {
         <Link href="/" className="flex items-center space-x-2">
           <Leaf className="h-7 w-7 text-primary" />
           <span className="font-extrabold text-2xl sm:inline-block font-headline">
-            {mounted ? (
-              <>
-                <span className="text-primary">EatWise</span>
-                <span className="text-accent"> India</span>
-              </>
-            ) : (
-              // This placeholder renders on the server and initial client render, avoiding mismatch.
-              <span className="text-primary">EatWise India</span>
-            )}
+            <>
+              <span className="text-primary">EatWise</span>
+              <span className="text-accent"> India</span>
+            </>
           </span>
         </Link>
         
@@ -74,16 +69,16 @@ export function Header() {
             {/* Desktop nav */}
             <nav className="flex items-center gap-1 flex-wrap">
                 {navItems.map((item) => {
-                const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
+                const isActive = mounted && ((item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href)));
                 return (
                     <Link
                     key={item.href}
                     href={item.href}
                     className={cn(
-                        "px-3 py-1.5 text-sm transition-colors duration-300 rounded-full",
+                        "px-3 py-1.5 text-sm font-medium transition-colors duration-300 rounded-md",
                         isActive 
                         ? "bg-secondary text-primary font-semibold"
-                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground font-medium"
+                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                     )}
                     >
                     {item.label}
@@ -94,7 +89,8 @@ export function Header() {
             
             {/* Account and theme buttons */}
             <div className="flex items-center gap-2">
-                {mounted && isLoggedIn ? (
+                {mounted && (
+                  isLoggedIn ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="sm">
@@ -118,12 +114,13 @@ export function Header() {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                ) : (
-                    mounted && <Button asChild size="sm">
-                    <Link href="/login">
-                        <User className="mr-2 h-4 w-4" /> Login
-                    </Link>
+                  ) : (
+                    <Button asChild size="sm">
+                      <Link href="/login">
+                          <User className="mr-2 h-4 w-4" /> Login
+                      </Link>
                     </Button>
+                  )
                 )}
                 <ThemeToggleButton />
             </div>
@@ -154,7 +151,7 @@ export function Header() {
                         </div>
                         <nav className="flex flex-col gap-2 flex-grow">
                             {navItems.map((item) => {
-                                const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
+                                const isActive = mounted && ((item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href)));
                                 return (
                                 <SheetClose asChild key={item.href}>
                                     <Link
@@ -172,7 +169,8 @@ export function Header() {
                             })}
                         </nav>
                         <div className="border-t pt-4 mt-4 space-y-3">
-                           {mounted && isLoggedIn ? (
+                           {mounted && (
+                             isLoggedIn ? (
                                 <>
                                 <SheetClose asChild>
                                     <Link href="/account" className="flex items-center gap-3 rounded-md p-3 text-base font-medium transition-colors text-foreground hover:bg-muted">
@@ -191,7 +189,8 @@ export function Header() {
                                         <User /> Login / Signup
                                     </Link>
                                 </SheetClose>
-                            )}
+                            )
+                           )}
                             <div className="flex justify-center pt-2">
                                 <ThemeToggleButton />
                             </div>
