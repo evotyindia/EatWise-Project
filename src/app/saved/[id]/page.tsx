@@ -109,7 +109,7 @@ export default function IndividualSavedItemPage() {
   };
 
   const getPublicUrl = () => {
-    if (!currentUser?.username || !report?.publicSlug) return "";
+    if (typeof window === 'undefined' || !currentUser?.username || !report?.publicSlug) return "";
     return `${window.location.origin}/${currentUser.username}/${report.publicSlug}`;
   };
 
@@ -389,7 +389,7 @@ export default function IndividualSavedItemPage() {
                     <Label htmlFor="public-link">Your public link</Label>
                     <div className="flex items-center gap-2 mt-1">
                       <div className="flex w-full items-center rounded-md border border-input bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-background relative">
-                          <span className="pl-3 pr-1 text-sm text-muted-foreground shrink-0">{currentUser.username}/</span>
+                          <span className="pl-3 pr-1 text-sm text-muted-foreground shrink-0">{typeof window !== 'undefined' ? `${window.location.origin}/${currentUser.username}/` : `.../${currentUser.username}/`}</span>
                           <Input 
                             id="public-link"
                             value={editableSlug}
@@ -452,4 +452,3 @@ export default function IndividualSavedItemPage() {
     </div>
   );
 }
-
