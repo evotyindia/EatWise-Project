@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import { Home, ScanLine, CookingPot, BookOpen, Menu, BarChart3, Mail, User, LogOut, UserCog, Save } from "lucide-react"
@@ -45,7 +44,7 @@ export function BottomNavbar() {
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 border-t shadow-[0_-1px_10px_rgba(0,0,0,0.05)] backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
-      <div className="container flex items-center justify-around h-20 max-w-screen-xl px-0">
+      <div className="container flex items-center justify-around h-20 max-w-screen-xl px-2">
         {mainNavItems.map((item) => {
           const isActive = (item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href));
           const Icon = item.icon;
@@ -55,15 +54,15 @@ export function BottomNavbar() {
               href={item.href}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 w-full h-full transition-colors duration-200",
-                 isActive ? "text-accent" : "text-muted-foreground hover:text-accent"
+                 isActive ? "text-primary font-semibold" : "text-muted-foreground hover:text-primary"
               )}
             >
               <div className={cn(
-                "flex items-center justify-center gap-2 rounded-full px-4 py-1.5 transition-all duration-300",
-                isActive ? "bg-accent text-accent-foreground shadow-lg" : ""
+                "flex items-center justify-center gap-1.5 rounded-full px-4 py-1.5 transition-all duration-300",
+                isActive ? "bg-secondary" : "bg-transparent"
               )}>
                 <Icon className="h-5 w-5" />
-                {isActive && <span className="text-xs font-bold">{item.label}</span>}
+                {isActive && <span className="text-xs">{item.label}</span>}
               </div>
                {!isActive && <span className="text-xs">{item.label}</span>}
             </Link>
