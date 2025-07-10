@@ -114,7 +114,7 @@ export function RecipeForm() {
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [currentFormInputs, setCurrentFormInputs] = useState<RecipePageFormValues | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const resultsRef = useRef<HTMLDivElement>(null);
+  const saveButtonRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
@@ -188,9 +188,6 @@ export function RecipeForm() {
       const result = await getRecipeSuggestions(input);
       setDishSuggestions(result);
       toast({ title: "Dish Ideas Ready!", description: result.initialContextualGuidance || "Click a dish for its recipe." });
-      if (result.suggestions.length > 0) {
-        setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-      }
     } catch (error: any) {
       console.error("Error getting dish suggestions:", error);
       toast({ title: "Suggestion Failed", description: error.message || "Could not get dish suggestions.", variant: "destructive" });
@@ -222,7 +219,7 @@ export function RecipeForm() {
       setDetailedRecipe(result);
       toast({ title: `Recipe for ${result.recipeTitle} Generated!`, description: "Scroll down to view the recipe and chat." });
       if (result) {
-        setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+        setTimeout(() => saveButtonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
         initiateChatWithWelcome("recipe", { dishName: result.recipeTitle, recipeIngredients: result.adjustedIngredients.map(i => `${i.quantity} ${i.name}`).join(', '), currentRecipeHealthNotes: result.healthNotes });
       }
     } catch (error: any) {
@@ -516,7 +513,7 @@ export function RecipeForm() {
         )}
         
         {dishSuggestions && !detailedRecipe && !isLoadingRecipe && (
-          <Card ref={resultsRef} className="animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
+          <Card className="animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
             <CardHeader>
               <CardTitle className="text-xl flex items-center"><Lightbulb className="mr-2 h-5 w-5 text-accent"/> Suggested Dishes</CardTitle>
               {dishSuggestions.initialContextualGuidance && <CardDescription>{dishSuggestions.initialContextualGuidance}</CardDescription>}
@@ -571,7 +568,7 @@ export function RecipeForm() {
         
         {detailedRecipe && (
           <div className="space-y-8 animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
-             <div ref={resultsRef} className="flex justify-end">
+             <div ref={saveButtonRef} className="flex justify-end">
                 <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
                   <DialogTrigger asChild>
                     <Button variant="outline" onClick={() => setReportTitle(detailedRecipe.recipeTitle)}>

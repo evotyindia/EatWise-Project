@@ -9,7 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StarRating } from "@/components/common/star-rating";
 import { cn } from "@/lib/utils";
-import { FileText, Sparkles, Info, Microscope } from "lucide-react";
+import { FileText, Sparkles, Info, Microscope, ChevronDown } from "lucide-react";
 
 interface NutritionReportDisplayProps {
   analysisResult: AnalyzeNutritionOutput;
@@ -72,7 +72,50 @@ export const NutritionReportDisplay: React.FC<NutritionReportDisplayProps> = ({ 
                 <div className="flex items-center"><Microscope className="mr-2 h-5 w-5 text-primary" /><span>Nutrient-by-Nutrient Breakdown</span></div>
             </AccordionTrigger>
             <AccordionContent className="pt-4">
-              {analysisResult.nutrientAnalysisTable && analysisResult.nutrientAnalysisTable.length > 0 ? (<div className="rounded-lg border overflow-hidden"><Table><TableHeader><TableRow><TableHead className="font-semibold">Nutrient</TableHead><TableHead className="font-semibold">Amount</TableHead><TableHead className="font-semibold">Verdict</TableHead></TableRow></TableHeader><TableBody>{analysisResult.nutrientAnalysisTable.map((item, index) => {const verdict = (item.verdict || "").toLowerCase(); const colorClass = verdict.includes('good') || verdict.includes('low') ? 'text-success' : verdict.includes('high') ? 'text-destructive' : verdict.includes('okay') ? 'text-orange-500 dark:text-orange-400' : 'text-muted-foreground'; return (<TableRow key={index} className="bg-background"><TableCell className="font-semibold">{item.nutrient}</TableCell><TableCell>{item.value}</TableCell><TableCell><div className={cn("font-bold", colorClass)}>{item.verdict}</div><p className="text-xs text-muted-foreground mt-1">{item.comment}</p></TableCell></TableRow>);})}</TableBody></Table></div>) : (<p className="text-sm text-muted-foreground text-center py-4">No specific nutrient data was available for breakdown.</p>)}
+              {analysisResult.nutrientAnalysisTable && analysisResult.nutrientAnalysisTable.length > 0 ? (
+                <div>
+                  {/* Desktop Table */}
+                  <Table className="hidden md:table">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="font-semibold">Nutrient</TableHead>
+                        <TableHead className="font-semibold">Amount</TableHead>
+                        <TableHead className="font-semibold">Verdict</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {analysisResult.nutrientAnalysisTable.map((item, index) => {
+                        const verdict = (item.verdict || "").toLowerCase(); 
+                        const colorClass = verdict.includes('good') || verdict.includes('low') ? 'text-success' : verdict.includes('high') ? 'text-destructive' : verdict.includes('okay') ? 'text-orange-500 dark:text-orange-400' : 'text-muted-foreground'; 
+                        return (
+                          <TableRow key={index} className="bg-background">
+                            <TableCell className="font-semibold">{item.nutrient}</TableCell>
+                            <TableCell>{item.value}</TableCell>
+                            <TableCell>
+                              <div className={cn("font-bold", colorClass)}>{item.verdict}</div>
+                              <p className="text-xs text-muted-foreground mt-1">{item.comment}</p>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                  {/* Mobile Card List */}
+                  <div className="grid grid-cols-1 gap-4 md:hidden">
+                      {analysisResult.nutrientAnalysisTable.map((item, index) => {
+                           const verdict = (item.verdict || "").toLowerCase(); 
+                           const colorClass = verdict.includes('good') || verdict.includes('low') ? 'text-success' : verdict.includes('high') ? 'text-destructive' : verdict.includes('okay') ? 'text-orange-500 dark:text-orange-400' : 'text-muted-foreground'; 
+                          return (
+                          <div key={index} className="rounded-lg border bg-background p-4 space-y-2">
+                              <h4 className="font-bold">{item.nutrient}</h4>
+                              <p><strong className="text-sm">Amount: </strong>{item.value}</p>
+                              <div><strong className="text-sm">Verdict: </strong><span className={cn("font-bold", colorClass)}>{item.verdict}</span></div>
+                              <p className="text-xs text-muted-foreground">{item.comment}</p>
+                          </div>
+                      )})}
+                  </div>
+                </div>
+              ) : (<p className="text-sm text-muted-foreground text-center py-4">No specific nutrient data was available for breakdown.</p>)}
             </AccordionContent>
           </AccordionItem>
         </Accordion>
