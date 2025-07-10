@@ -153,14 +153,14 @@ export default function SavedItemsPage() {
       <div className="flex flex-col items-center mb-8 text-center">
         <Save className="w-16 h-16 text-accent mb-4" />
         <h1 className="text-4xl font-bold tracking-tight">Your Saved Items</h1>
-        <p className="mt-2 text-lg text-muted-foreground">Review your saved reports and recipes.</p>
+        <p className="mt-2 text-lg text-muted-foreground">Review and manage your saved reports, recipes, and analyses.</p>
       </div>
 
       <div className="relative mb-6 max-w-lg md:max-w-2xl mx-auto">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Search saved items by name..."
+          placeholder="Search saved items by title..."
           className="pl-10 w-full"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}

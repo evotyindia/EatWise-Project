@@ -8,7 +8,7 @@ import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 import { NutritionReportDisplay } from "@/components/common/NutritionReportDisplay";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Sparkles, MessageCircle, Send, ListChecks, Save, ArrowRight } from "lucide-react";
+import { Sparkles, MessageCircle, Send, ListChecks, Save, ArrowRight, BarChart3, Calculator } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -128,7 +128,7 @@ export function NutritionForm() {
     }
     
     try {
-        const finalReportTitle = reportTitleForSave.trim() || `Analysis_Not_Found.()🦋`;
+        const finalReportTitle = reportTitleForSave.trim() || `Nutrition Analysis: ${foodItemNameForSave.trim() || new Date().toLocaleString()}`;
         const finalFoodItemName = foodItemNameForSave.trim();
         
         const newReportData = {
@@ -363,13 +363,25 @@ export function NutritionForm() {
 
       <div>
         {isLoading && !analysisResult && (
-           <Card className="flex items-center justify-center h-full min-h-[300px]">
-              <div className="text-center">
-                  <Sparkles className="mx-auto h-12 w-12 text-accent animate-spin mb-4" />
-                  <p className="text-lg font-semibold">Generating Analysis...</p>
-                  <p className="text-sm text-muted-foreground mt-1">The AI is performing a detailed nutritional breakdown.</p>
-              </div>
-          </Card>
+           <Card className="flex flex-col items-center justify-center h-full min-h-[400px] text-center overflow-hidden">
+                <CardHeader>
+                    <CardTitle className="text-2xl font-bold">Generating Analysis...</CardTitle>
+                    <CardDescription>The AI is performing a detailed nutritional breakdown.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex items-center justify-center p-8">
+                     <div className="relative flex items-center justify-center w-48 h-48">
+                        <Calculator className="w-28 h-28 text-primary animate-pulse" />
+                        <div className="absolute inset-0">
+                            <Sparkles className="absolute top-4 right-10 w-8 h-8 text-accent/70 animate-toss" style={{ animationDelay: '0s' }}/>
+                            <BarChart3 className="absolute bottom-8 right-8 w-8 h-8 text-green-500/70 animate-toss" style={{ animationDelay: '0.5s' }}/>
+                            <ListChecks className="absolute top-12 left-4 w-8 h-8 text-primary/70 animate-toss" style={{ animationDelay: '1s' }}/>
+                        </div>
+                    </div>
+                </CardContent>
+                <CardFooter>
+                    <p className="text-sm text-muted-foreground">Crunching the numbers...</p>
+                </CardFooter>
+            </Card>
         )}
 
         {analysisResult && (
@@ -378,8 +390,9 @@ export function NutritionForm() {
               <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
                   <DialogTrigger asChild>
                     <Button variant="outline" onClick={() => {
-                        setReportTitleForSave(form.getValues("foodItemDescription") || 'Nutrition Analysis');
-                        setFoodItemNameForSave(form.getValues("foodItemDescription") || '');
+                        const detectedName = form.getValues("foodItemDescription") || '';
+                        setReportTitleForSave(detectedName ? `Nutrition for ${detectedName}` : 'Nutrition Analysis');
+                        setFoodItemNameForSave(detectedName);
                     }}>
                       <Save className="mr-2 h-4 w-4" />
                       Save Analysis
