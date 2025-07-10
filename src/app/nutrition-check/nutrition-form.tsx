@@ -79,7 +79,7 @@ export function NutritionForm() {
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const resultsRef = useRef<HTMLDivElement>(null);
+  const saveButtonRef = useRef<HTMLDivElement>(null);
   const [isSubmittingImage, setIsSubmittingImage] = useState(false); 
 
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
@@ -171,7 +171,7 @@ export function NutritionForm() {
       setAnalysisResult(result);
       toast({ title: "Analysis Complete", description: "Nutritional insights generated." });
       if (result) {
-        setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+        setTimeout(() => saveButtonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
         initiateChatWithWelcome("nutritionAnalysis", {
           nutritionReportSummary: result.overallAnalysis,
           foodItemDescription: inputForContext.foodItemDescription || (inputForAI.nutritionDataUri ? "Scanned food item" : "Manually entered data")
@@ -362,7 +362,7 @@ export function NutritionForm() {
 
         {analysisResult && (
           <div className="space-y-8 animate-fade-in-up opacity-0" style={{animationFillMode: 'forwards'}}>
-            <div ref={resultsRef} className="flex justify-end">
+            <div ref={saveButtonRef} className="flex justify-end">
               <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
                   <DialogTrigger asChild>
                     <Button variant="outline" onClick={() => setReportTitle(currentInputContext?.foodItemDescription || '')}>

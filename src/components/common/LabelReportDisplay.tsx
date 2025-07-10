@@ -82,12 +82,24 @@ export const LabelReportDisplay: React.FC<LabelReportDisplayProps> = ({ report }
                     <AccordionTrigger className="text-lg font-semibold hover:no-underline bg-muted/50 border px-4 py-3 rounded-lg hover:bg-muted/80">
                         <div className="flex items-center"><Microscope className="mr-2 h-5 w-5 text-primary" /><span>Ingredient Deep Dive</span></div>
                     </AccordionTrigger>
-                    <AccordionContent>
-                        <div className="rounded-lg border overflow-hidden mt-2">
-                            <Table>
-                                <TableHeader><TableRow><TableHead className="w-1/4">Ingredient</TableHead><TableHead className="w-1/5">Risk Level</TableHead><TableHead>Explanation</TableHead></TableRow></TableHeader>
-                                <TableBody>{report.ingredientDeepDive.map((item, index) => {const riskColorClass = {'High': 'text-destructive','Medium': 'text-orange-500 dark:text-orange-400','Low': 'text-success','Neutral': 'text-muted-foreground',}[item.riskLevel] || 'text-muted-foreground'; return (<TableRow key={index} className="bg-background"><TableCell className="font-semibold">{item.ingredientName}</TableCell><TableCell className={cn("font-bold", riskColorClass)}>{item.riskLevel}</TableCell><TableCell><p className="text-sm font-medium">{item.description}</p><p className="text-xs text-muted-foreground mt-1">{item.riskReason}</p></TableCell></TableRow>);})}</TableBody>
-                            </Table>
+                    <AccordionContent className="pt-2">
+                        {/* Desktop Table */}
+                        <Table className="hidden md:table">
+                            <TableHeader><TableRow><TableHead className="w-1/4 font-bold">Ingredient</TableHead><TableHead className="w-1/5 font-bold">Risk Level</TableHead><TableHead className="font-bold">Explanation</TableHead></TableRow></TableHeader>
+                            <TableBody>{report.ingredientDeepDive.map((item, index) => {const riskColorClass = {'High': 'text-destructive','Medium': 'text-orange-500 dark:text-orange-400','Low': 'text-success','Neutral': 'text-muted-foreground',}[item.riskLevel] || 'text-muted-foreground'; return (<TableRow key={index} className="bg-background"><TableCell className="font-semibold">{item.ingredientName}</TableCell><TableCell className={cn("font-bold", riskColorClass)}>{item.riskLevel}</TableCell><TableCell><p className="text-sm font-medium">{item.description}</p><p className="text-xs text-muted-foreground mt-1">{item.riskReason}</p></TableCell></TableRow>);})}</TableBody>
+                        </Table>
+                         {/* Mobile Card List */}
+                        <div className="grid grid-cols-1 gap-4 md:hidden">
+                            {report.ingredientDeepDive.map((item, index) => {
+                                const riskColorClass = {'High': 'text-destructive','Medium': 'text-orange-500 dark:text-orange-400','Low': 'text-success','Neutral': 'text-muted-foreground',}[item.riskLevel] || 'text-muted-foreground';
+                                return (
+                                <div key={index} className="rounded-lg border bg-background p-4 space-y-2">
+                                    <h4 className="font-bold">{item.ingredientName}</h4>
+                                    <div><strong className="text-sm">Risk Level: </strong><span className={cn("font-bold", riskColorClass)}>{item.riskLevel}</span></div>
+                                    <p className="text-sm"><strong className="text-sm">Description:</strong> {item.description}</p>
+                                    <p className="text-xs text-muted-foreground"><strong className="text-xs">Reason:</strong> {item.riskReason}</p>
+                                </div>
+                            )})}
                         </div>
                     </AccordionContent>
                 </AccordionItem>

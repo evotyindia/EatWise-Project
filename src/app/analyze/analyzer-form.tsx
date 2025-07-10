@@ -47,7 +47,7 @@ export function AnalyzerForm() {
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const resultsRef = useRef<HTMLDivElement>(null);
+  const saveButtonRef = useRef<HTMLDivElement>(null);
 
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [reportTitle, setReportTitle] = useState("");
@@ -134,7 +134,7 @@ export function AnalyzerForm() {
       setReport(result);
       toast({ title: "Report Generated", description: "AI analysis complete." });
       if (result) {
-        setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+        setTimeout(() => saveButtonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
         initiateChatWithWelcome("labelAnalysis", {
           productName: result.productType || input.productName || "the product",
           ingredients: input.ingredients || (input.photoDataUri ? "from scanned image" : "N/A"),
@@ -293,7 +293,7 @@ export function AnalyzerForm() {
 
           {report && (
             <div className="animate-fade-in-up opacity-0 space-y-8" style={{ animationFillMode: 'forwards' }}>
-              <div ref={resultsRef} className="flex justify-end">
+              <div ref={saveButtonRef} className="flex justify-end">
                   <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
                     <DialogTrigger asChild>
                       <Button variant="outline" onClick={() => setReportTitle(report.productType || manualForm.getValues("productName") || '')}>
