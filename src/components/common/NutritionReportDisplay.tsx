@@ -66,7 +66,7 @@ export const NutritionReportDisplay: React.FC<NutritionReportDisplayProps> = ({ 
             <Alert><Info className="h-4 w-4" /><AlertTitle className="font-semibold">Serving Size Context</AlertTitle><AlertDescription>{renderFormattedAnalysisText(analysisResult.servingSizeContext)}</AlertDescription></Alert>
           </div>
         </div>
-        <Accordion type="single" collapsible className="w-full border-t pt-6">
+        <Accordion type="single" collapsible className="w-full pt-6">
           <AccordionItem value="nutrient-breakdown" className="border-b-0">
             <AccordionTrigger className="text-xl font-semibold hover:no-underline bg-muted/50 border px-4 py-3 rounded-lg hover:bg-muted/80">
                 <div className="flex items-center"><Microscope className="mr-2 h-5 w-5 text-primary" /><span>Nutrient-by-Nutrient Breakdown</span></div>
