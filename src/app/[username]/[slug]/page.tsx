@@ -201,8 +201,11 @@ export default function PublicReportPage() {
       <div className="max-w-4xl mx-auto space-y-8">
         <Card className="bg-primary/5 border-primary/20">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Globe className="h-5 w-5 text-primary"/> A Public Report from EatWise India</CardTitle>
-            <CardDescription>This report was shared publicly by a user. You can explore the analysis and even interact with the AI chat below.</CardDescription>
+            <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+              <Globe className="h-6 w-6 text-primary"/> 
+              {report?.title || "Public Report"}
+            </CardTitle>
+            <CardDescription>This report was shared publicly by a user from EatWise India. You can explore the analysis and even interact with the AI chat below.</CardDescription>
           </CardHeader>
         </Card>
 
@@ -236,5 +239,7 @@ export default function PublicReportPage() {
     </div>
   );
 }
+
+    
 
     
