@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { LoaderCircle, FileText, ArrowLeft, MessageCircle, Send, Globe, Share2, Copy, Check, Save as SaveIcon, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { LoaderCircle, FileText, ArrowLeft, MessageCircle, Send, Globe, Share2, Copy, Check, Save as SaveIcon, AlertTriangle, CheckCircle2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -19,7 +19,7 @@ import type { GenerateHealthReportOutput } from "@/ai/flows/generate-health-repo
 import type { GetDetailedRecipeOutput } from "@/ai/flows/get-detailed-recipe";
 import type { AnalyzeNutritionOutput } from "@/ai/flows/nutrition-analysis";
 import type { ContextAwareAIChatInput, ChatMessage } from "@/ai/flows/context-aware-ai-chat";
-import { getReportById, updateReportPublicStatus, updateReportSlug, type Report, isSlugAvailableForUser } from "@/services/reportService";
+import { getReportById, updateReportPublicStatus, updateReportSlug, type Report, isSlugAvailableForUser, updateReportDetails } from "@/services/reportService";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -49,11 +49,32 @@ export default function IndividualSavedItemPage() {
   const [slugStatus, setSlugStatus] = useState<"idle" | "available" | "taken" | "invalid">("idle");
   const [isSavingSlug, setIsSavingSlug] = useState(false);
 
+  // New state for editable report details
+  const [editableTitle, setEditableTitle] = useState("");
+  const [editableProductName, setEditableProductName] = useState("");
+  const [isDetailsDirty, setIsDetailsDirty] = useState(false);
+  const [isSavingDetails, setIsSavingDetails] = useState(false);
+
+  // Effect to initialize editable fields and reset dirty state when report loads
   useEffect(() => {
-    if (report && report.publicSlug) {
-      setEditableSlug(report.publicSlug);
+    if (report) {
+      setEditableTitle(report.title);
+      setEditableProductName(report.userInput?.productName || report.userInput?.foodItemDescription || "");
+      if (report.publicSlug) {
+        setEditableSlug(report.publicSlug);
+      }
+      setIsDetailsDirty(false); // Reset dirty state on new report load
     }
   }, [report]);
+
+  // Effect to check if details have changed
+  useEffect(() => {
+    if (!report) return;
+    const titleChanged = editableTitle !== report.title;
+    const productNameChanged = editableProductName !== (report.userInput?.productName || report.userInput?.foodItemDescription || "");
+    setIsDetailsDirty(titleChanged || productNameChanged);
+  }, [editableTitle, editableProductName, report]);
+
 
   useEffect(() => {
     const checkSlug = async () => {
@@ -74,6 +95,23 @@ export default function IndividualSavedItemPage() {
     };
     checkSlug();
   }, [debouncedSlug, currentUser, report]);
+
+  const handleDetailsSave = async () => {
+    if (!report || !isDetailsDirty) return;
+    setIsSavingDetails(true);
+    try {
+      const finalTitle = editableTitle.trim() || `Label_Not_Found.()🦋`;
+      const finalProductName = editableProductName.trim();
+
+      const updatedReport = await updateReportDetails(report.id, finalTitle, finalProductName);
+      setReport(updatedReport); // Update local state with the full returned report
+      toast({ title: "Details Updated!", description: "Your changes have been saved." });
+      setIsDetailsDirty(false); // Reset dirty state
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message || "Could not update report details.", variant: "destructive" });
+    }
+    setIsSavingDetails(false);
+  };
 
   const handleSlugChange = async () => {
     if (!report || slugStatus !== 'available') {
@@ -347,11 +385,43 @@ export default function IndividualSavedItemPage() {
                   Back to All Saved Items
                 </Link>
             </Button>
-            { (report?.type === 'label' || report?.type === 'nutrition') && report?.userInput?.productName && (
-                  <div className="text-sm text-right">Product: <span className="font-semibold text-foreground">{report.userInput.productName}</span></div>
-            )}
         </div>
         
+        {report && (
+          <Card className="bg-secondary/50 border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Pencil className="h-5 w-5 text-primary"/> Report Details</CardTitle>
+              <CardDescription>You can edit the title and product name for this report.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+               <div>
+                  <Label htmlFor="report-title">Report Title</Label>
+                  <Input 
+                    id="report-title"
+                    value={editableTitle}
+                    onChange={(e) => setEditableTitle(e.target.value)}
+                    className="mt-1"
+                  />
+               </div>
+               {report.type !== 'recipe' && (
+                 <div>
+                    <Label htmlFor="product-name">Product Name</Label>
+                    <Input
+                      id="product-name"
+                      value={editableProductName}
+                      onChange={(e) => setEditableProductName(e.target.value)}
+                      className="mt-1"
+                    />
+                 </div>
+               )}
+               <Button onClick={handleDetailsSave} disabled={!isDetailsDirty || isSavingDetails}>
+                 {isSavingDetails ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <SaveIcon className="mr-2 h-4 w-4" />}
+                 Save Changes
+               </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {report && (
           <Card className="bg-secondary/50 border-primary/20">
             <CardHeader>
