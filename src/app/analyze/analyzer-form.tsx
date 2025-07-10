@@ -8,7 +8,7 @@ import { contextAwareAIChat } from "@/ai/flows/context-aware-ai-chat";
 import { LabelReportDisplay } from "@/components/common/LabelReportDisplay";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadCloud, Sparkles, MessageCircle, Send, Save, ArrowRight, ShieldAlert, ScanSearch } from "lucide-react";
+import { UploadCloud, Sparkles, MessageCircle, Send, Save, ArrowRight, ShieldAlert, ScanSearch, Check } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
