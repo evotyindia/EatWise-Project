@@ -70,7 +70,7 @@ export function Header() {
         </Link>
         
         {/* Wrapper for right-aligned desktop nav and buttons */}
-        <div className="hidden lg:flex items-center gap-4">
+        <div className="hidden xl-1600:flex items-center gap-4">
             {/* Desktop nav */}
             <nav className="flex items-center gap-1 flex-wrap">
                 {navItems.map((item) => {
@@ -129,8 +129,8 @@ export function Header() {
             </div>
         </div>
 
-        {/* Tablet Sidebar Trigger (MD to LG) */}
-        <div className="hidden md:block lg:hidden">
+        {/* Tablet/Desktop Sidebar Trigger (MD up to xl-1600) */}
+        <div className="hidden md:block xl-1600:hidden">
             <Sheet>
                 <SheetTrigger asChild>
                     <Button variant="ghost" size="icon">

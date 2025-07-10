@@ -19,6 +19,9 @@ export default {
       },
     },
     extend: {
+      screens: {
+        'xl-1600': '1600px',
+      },
       fontFamily: {
         sans: ["var(--font-inter)", ...fontFamily.sans],
         body: ["var(--font-inter)", ...fontFamily.sans],
