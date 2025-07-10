@@ -35,7 +35,6 @@ export default function IndividualSavedItemPage() {
   const [currentUser, setCurrentUser] = useState<{uid: string, username: string} | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const isOwner = false;
   const [isCopied, setIsCopied] = useState(false);
 
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
@@ -63,7 +62,7 @@ export default function IndividualSavedItemPage() {
         return;
       }
 
-      if (debouncedSlug.length < 3 || !/^[a-zA-Z0-9-]+$/.test(debouncedSlug)) {
+      if (debouncedSlug.length < 3 || debouncedSlug.length > 15 || !/^[a-zA-Z0-9-]+$/.test(debouncedSlug)) {
         setSlugStatus("invalid");
         return;
       }
@@ -303,7 +302,7 @@ export default function IndividualSavedItemPage() {
   
   const getSlugStatusMessage = () => {
     if (debouncedSlug === report?.publicSlug) return null;
-    if (slugStatus === 'invalid') return <p className="text-xs text-destructive mt-1">Use 3+ characters, letters, numbers, and hyphens only.</p>;
+    if (slugStatus === 'invalid') return <p className="text-xs text-destructive mt-1">Use 3-15 characters: letters, numbers, and hyphens only.</p>;
     if (slugStatus === 'taken') return <p className="text-xs text-destructive mt-1">This link ending is already taken.</p>;
     return null;
   }
@@ -389,12 +388,13 @@ export default function IndividualSavedItemPage() {
                   <div>
                     <Label htmlFor="public-link">Your public link</Label>
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="flex w-full items-center rounded-md border border-input bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-background relative">
+                      <div className="flex w-full items-center rounded-md border border-input bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-background relative overflow-hidden">
                           <span className="pl-3 pr-1 text-sm text-muted-foreground shrink-0">{typeof window !== 'undefined' ? `${window.location.origin}/${currentUser.username}/` : `.../${currentUser.username}/`}</span>
                           <Input 
                             id="public-link"
                             value={editableSlug}
                             onChange={(e) => setEditableSlug(e.target.value)}
+                            maxLength={15}
                             className="flex-1 border-0 bg-transparent h-9 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 pr-8"
                           />
                           <div className="absolute inset-y-0 right-0 flex items-center pr-2">
