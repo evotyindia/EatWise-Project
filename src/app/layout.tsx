@@ -8,7 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Poppins, Inter } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { BottomNavbar } from '@/components/layout/bottom-navbar';
-import { AuthManager } from '@/components/common/AuthManager';
+import { AuthProvider } from '@/components/common/AuthManager';
 
 const fontPoppins = Poppins({
   subsets: ['latin'],
@@ -80,7 +80,7 @@ export default function RootLayout({
           }}
         />
         <CustomThemeProvider>
-          <AuthManager>
+          <AuthProvider>
             <Header />
             <main className="flex-grow">
               {children}
@@ -88,7 +88,7 @@ export default function RootLayout({
             <Footer />
             <Toaster />
             <BottomNavbar />
-          </AuthManager>
+          </AuthProvider>
         </CustomThemeProvider>
       </body>
     </html>

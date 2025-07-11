@@ -1,4 +1,5 @@
 
+
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -12,42 +13,43 @@ import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from 'date-fns';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { getReportsByUid, deleteReport, type Report } from "@/services/reportService";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { useAuth } from "@/components/common/AuthManager";
 
 export default function SavedItemsPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [userUid, setUserUid] = useState<string | null>(null);
+  const { currentUser, isLoading: isAuthLoading } = useAuth();
+  
   const [reports, setReports] = useState<Report[]>([]);
-  const [isLoadingReports, setIsLoadingReports] = useState(false);
+  const [isLoadingReports, setIsLoadingReports] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
-      if (authUser) {
-        setUserUid(authUser.uid);
-        setIsCheckingAuth(false);
-        setIsLoadingReports(true);
-        try {
-          const userReports = await getReportsByUid(authUser.uid);
-          userReports.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-          setReports(userReports);
-        } catch (error) {
-          console.error("Failed to load saved items data:", error);
-          toast({ title: "Error", description: "Could not load your saved items.", variant: "destructive" });
-        } finally {
-          setIsLoadingReports(false);
-        }
-      } else {
-        router.replace(`/login?redirect=${pathname}`);
-      }
-    });
+    if (isAuthLoading) {
+      return; // Wait until authentication check is complete
+    }
+    
+    if (!currentUser) {
+      router.replace(`/login?redirect=${pathname}`);
+      return;
+    }
 
-    return () => unsubscribe();
-  }, [router, pathname, toast]);
+    setIsLoadingReports(true);
+    getReportsByUid(currentUser.uid)
+      .then(userReports => {
+        userReports.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        setReports(userReports);
+      })
+      .catch(error => {
+        console.error("Failed to load saved items data:", error);
+        toast({ title: "Error", description: "Could not load your saved items.", variant: "destructive" });
+      })
+      .finally(() => {
+        setIsLoadingReports(false);
+      });
+
+  }, [currentUser, isAuthLoading, router, pathname, toast]);
   
   const handleDeleteReport = async (reportId: string) => {
     try {
@@ -139,7 +141,7 @@ export default function SavedItemsPage() {
   };
 
 
-  if (isCheckingAuth) {
+  if (isAuthLoading) {
     return (
       <div className="container mx-auto py-8 flex flex-col items-center justify-center min-h-[calc(100vh-10rem)]">
         <LoaderCircle className="w-16 h-16 text-accent animate-spin mb-4" />
