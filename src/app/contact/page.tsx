@@ -10,8 +10,8 @@ import type { NextPage, Metadata } from 'next';
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
 export const metadata: Metadata = {
-  title: "Contact Us | EatWise India",
-  description: "Get in touch with the EatWise India team for support, feedback, or inquiries. We're here to help you on your journey to healthier eating.",
+  title: "Contact Us & Support",
+  description: "Get in touch with the EatWise India team. We're here to help with support, feedback, or any inquiries on your journey to healthier eating.",
   alternates: {
     canonical: `${BASE_URL}/contact`,
   },

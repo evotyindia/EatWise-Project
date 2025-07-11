@@ -9,6 +9,8 @@ import { Poppins, Inter } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { BottomNavbar } from '@/components/layout/bottom-navbar';
 import { AuthProvider } from '@/components/common/AuthManager';
+import Script from 'next/script';
+import type { Organization, WebSite } from 'schema-dts';
 
 const fontPoppins = Poppins({
   subsets: ['latin'],
@@ -21,11 +23,79 @@ const fontInter = Inter({
   variable: '--font-inter',
 });
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://eatwise.evotyindia.me';
+
 export const metadata: Metadata = {
-  title: 'EatWise India - AI Nutrition Guide',
-  description: 'Understand food labels, get health ratings, recipe suggestions, and nutrition analysis with AI. For a healthier India with EatWise India.',
+  title: {
+    default: "EatWise India - AI Nutrition Guide for Healthier Indian Food Choices",
+    template: "%s | EatWise India",
+  },
+  description: 'Your AI-powered guide to understanding Indian food labels. Get instant health ratings, ingredient analysis, and healthy recipe suggestions to make smarter food choices.',
+  applicationName: 'EatWise India',
+  authors: [{ name: 'EatWise India Team', url: BASE_URL }],
+  keywords: ['Indian food', 'nutrition', 'AI health coach', 'food label scanner', 'healthy recipes', 'Swasth Bharat'],
+  creator: 'EatWise India',
+  publisher: 'EatWise India',
+  metadataBase: new URL(BASE_URL),
+  openGraph: {
+    type: 'website',
+    url: BASE_URL,
+    title: 'EatWise India - AI Nutrition Guide',
+    description: 'Understand food labels, get health ratings, and discover healthy Indian recipes with AI.',
+    siteName: 'EatWise India',
+    images: [{
+      url: `${BASE_URL}/og-image.png`, // Recommended: create a 1200x630 image
+      width: 1200,
+      height: 630,
+      alt: 'EatWise India AI Nutrition Guide',
+    }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'EatWise India - AI Nutrition Guide',
+    description: 'Understand food labels, get health ratings, and discover healthy Indian recipes with AI.',
+    images: [`${BASE_URL}/og-image.png`], // Needs a specific Twitter card image
+  },
   icons: {
     icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png', // Recommended: add an apple touch icon
+  },
+};
+
+const organizationSchema: Organization = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "EatWise India",
+  url: BASE_URL,
+  logo: `${BASE_URL}/img/logo_200x60.png`,
+  contactPoint: {
+    "@type": "ContactPoint",
+    telephone: "+91-123-456-7890",
+    contactType: "Customer Support",
+    areaServed: "IN",
+    availableLanguage: ["en", "hi"],
+  },
+  sameAs: [
+    "https://facebook.com/eatwiseindia",
+    "https://twitter.com/eatwiseindia",
+    "https://instagram.com/eatwiseindia",
+    "https://linkedin.com/company/eatwiseindia",
+    "https://youtube.com/c/eatwiseindia",
+  ],
+};
+
+const websiteSchema: WebSite = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "EatWise India",
+  url: BASE_URL,
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      "urlTemplate": `${BASE_URL}/saved?q={search_term_string}`,
+    },
+    "query-input": "required name=search_term_string",
   },
 };
 
@@ -38,6 +108,18 @@ export default function RootLayout({
 }: Readonly<RootLayoutProps>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <Script
+          id="organization-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <Script
+          id="website-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+      </head>
       <body className={cn(
           "min-h-screen bg-background font-body antialiased flex flex-col pb-24 md:pb-0",
           fontPoppins.variable,

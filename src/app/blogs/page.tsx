@@ -6,8 +6,8 @@ import type { NextPage, Metadata } from 'next';
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
 export const metadata: Metadata = {
-  title: "Nutrition & Wellness Blogs | EatWise India",
-  description: "Explore articles and insights on healthy eating, understanding food labels, and Indian nutrition with the EatWise India Blogs.",
+  title: "Nutrition & Healthy Eating Blogs",
+  description: "Explore articles on Indian nutrition, decoding food labels, healthy recipes, and wellness tips from the EatWise India experts.",
   alternates: {
     canonical: `${BASE_URL}/blogs`,
   },
