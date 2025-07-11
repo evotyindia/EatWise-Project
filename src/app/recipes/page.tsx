@@ -5,13 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { RecipeForm } from "./recipe-form";
 import { CookingPot, LoaderCircle } from "lucide-react";
-import type { NextPage, Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: "AI Recipe Suggestions",
-  description: "Find healthy Indian recipes with the ingredients you have. Our AI chef suggests meals based on your pantry, dietary needs, and household size.",
-};
-
+import type { NextPage } from 'next';
 
 const RecipesPage: NextPage = () => {
   const router = useRouter();

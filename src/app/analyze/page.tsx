@@ -5,14 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { AnalyzerForm } from "@/app/analyze/analyzer-form";
 import { ScanLine, LoaderCircle } from "lucide-react";
-import type { NextPage, Metadata } from 'next';
-
-// Note: Metadata export is for static analysis and won't be dynamic here.
-// For dynamic metadata, you'd use the generateMetadata function.
-export const metadata: Metadata = {
-  title: "AI Food Label Analyzer",
-  description: "Upload a food label image or enter ingredients to get an instant AI health report. Understand what's in your food, get a health rating, and find healthier Indian alternatives.",
-};
+import type { NextPage } from 'next';
 
 const AnalyzePage: NextPage = () => {
   const router = useRouter();
