@@ -1,11 +1,16 @@
-"use client";
+
+"use "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { NutritionForm } from "./nutrition-form";
 import { BarChart3, LoaderCircle } from "lucide-react";
-import type { NextPage } from 'next';
+import type { NextPage, Metadata } from 'next';
 
+export const metadata: Metadata = {
+  title: "AI Nutrition Calculator & Analyzer",
+  description: "Analyze the nutritional balance of your food. Input values from a nutrition table to get an AI-powered analysis on macronutrients, dietary suitability, and nutrient density.",
+};
 
 const NutritionCheckPage: NextPage = () => {
   const router = useRouter();

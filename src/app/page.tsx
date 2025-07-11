@@ -162,11 +162,11 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="features" className="w-full py-12 md:py-24 lg:py-32">
+      <section id="features" aria-labelledby="features-heading" className="w-full py-12 md:py-24 lg:py-32">
         <div className="container px-4 md:px-6 animate-fade-in-up opacity-0" style={{animationDelay: '0.2s', animationFillMode: 'forwards'}}>
           <div className="text-center mb-12">
             <Lightbulb className="mx-auto h-12 w-12 text-accent mb-4" />
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+            <h2 id="features-heading" className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Unlock a Healthier You
             </h2>
             <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
@@ -194,12 +194,12 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="our-mission" className="w-full py-12 md:py-24 lg:py-32 bg-muted/20">
+      <section id="our-mission" aria-labelledby="mission-heading" className="w-full py-12 md:py-24 lg:py-32 bg-muted/20">
         <div className="container px-4 md:px-6">
             <div className="grid items-center gap-8">
                 <div className="space-y-4 animate-in fade-in duration-500 ease-out text-center">
                     <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">Our Mission</div>
-                    <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Empowering Healthier Choices, Together</h2>
+                    <h2 id="mission-heading" className="text-3xl font-bold tracking-tighter sm:text-4xl">Empowering Healthier Choices, Together</h2>
                     <p className="max-w-[700px] text-muted-foreground md:text-lg/relaxed mx-auto">
                         At EatWise India, our mission is to bridge the gap between complex nutritional science and everyday food choices. We believe that everyone deserves to understand what's in their food. By harnessing the power of AI, we provide clear, culturally relevant, and actionable insights, helping you navigate your health journey with confidence and ease.
                     </p>
@@ -208,11 +208,11 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="why-choose-us" className="w-full py-12 md:py-24 lg:py-32 bg-muted/40 overflow-hidden">
+      <section id="why-choose-us" aria-labelledby="why-choose-us-heading" className="w-full py-12 md:py-24 lg:py-32 bg-muted/40 overflow-hidden">
         <div className="container px-4 md:px-6">
           <div className="text-center mb-16 animate-in fade-in slide-in-from-bottom-8 duration-500 ease-out">
             <ShieldCheck className="mx-auto h-12 w-12 text-primary mb-4" />
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+            <h2 id="why-choose-us-heading" className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Why Choose EatWise India?
             </h2>
             <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
@@ -233,10 +233,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/50">
+      <section id="how-it-works" aria-labelledby="how-it-works-heading" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/50">
         <div className="container px-4 md:px-6 animate-fade-in-up opacity-0" style={{animationDelay: '0.4s', animationFillMode: 'forwards'}}>
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+            <h2 id="how-it-works-heading" className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               How It Works
             </h2>
             <p className="mt-4 mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed">
@@ -259,11 +259,11 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32">
+      <section id="testimonials" aria-labelledby="testimonials-heading" className="w-full py-12 md:py-24 lg:py-32">
         <div className="container px-4 md:px-6 animate-fade-in-up opacity-0" style={{animationDelay: '0.6s', animationFillMode: 'forwards'}}>
           <div className="text-center mb-12">
             <Users className="mx-auto h-12 w-12 text-accent mb-4" />
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+            <h2 id="testimonials-heading" className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Loved by Users Across India
             </h2>
           </div>
@@ -290,11 +290,11 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="from-the-blog" className="w-full py-12 md:py-24 lg:py-32 bg-muted/20">
+      <section id="from-the-blog" aria-labelledby="blog-heading" className="w-full py-12 md:py-24 lg:py-32 bg-muted/20">
         <div className="container px-4 md:px-6">
             <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-8 duration-500 ease-out">
                 <BookOpen className="mx-auto h-12 w-12 text-accent mb-4" />
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                <h2 id="blog-heading" className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                     From Our Blog
                 </h2>
                 <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
@@ -331,9 +331,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="call-to-action" className="w-full py-16 md:py-24 bg-primary text-primary-foreground">
+      <section id="call-to-action" aria-labelledby="cta-heading" className="w-full py-16 md:py-24 bg-primary text-primary-foreground">
         <div className="container px-4 md:px-6 text-center animate-fade-in-up opacity-0" style={{animationDelay: '0.8s', animationFillMode: 'forwards'}}>
-          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-6">
+          <h2 id="cta-heading" className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-6">
             Ready to Make Healthier Choices?
           </h2>
           <p className="mx-auto max-w-[600px] text-primary-foreground/80 md:text-xl mb-8">
