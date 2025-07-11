@@ -133,12 +133,12 @@
     background-color: hsl(var(--muted));
     border-radius: 10px;
     border: 3px solid hsl(var(--background));
-    transition: background-color 0.3s ease;
-    animation: smokey-glow 4s ease-in-out infinite;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
   }
 
   ::-webkit-scrollbar-thumb:hover {
     background-color: hsl(var(--secondary-foreground) / 0.6);
+    box-shadow: 0 0 10px 2px hsl(var(--accent) / 0.4);
   }
 
   ::-webkit-scrollbar-corner {
@@ -154,7 +154,6 @@
   }
 }
 
-
 @keyframes pulse {
   0%, 100% {
     transform: scale(1);
@@ -163,17 +162,5 @@
   50% {
     transform: scale(1.05);
     opacity: 1;
-  }
-}
-
-@keyframes smokey-glow {
-  0% {
-    box-shadow: 0 0 5px 0 hsl(var(--accent) / 0.3);
-  }
-  50% {
-    box-shadow: 0 0 12px 3px hsl(var(--accent) / 0.1);
-  }
-  100% {
-    box-shadow: 0 0 5px 0 hsl(var(--accent) / 0.3);
   }
 }
