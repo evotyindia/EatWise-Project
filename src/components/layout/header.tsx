@@ -5,7 +5,7 @@
 import { Leaf, Home, ScanLine, CookingPot, BarChart3, BookOpen, Mail, User, LogOut, UserCog, Menu, Save } from "lucide-react"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 import { ThemeToggleButton } from "@/components/common/theme-toggle-button"
 import { cn } from "@/lib/utils";
@@ -20,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useAuth } from "../common/AuthManager";
 
 const navItems = [
   { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
@@ -33,21 +34,7 @@ const navItems = [
 
 export function Header() {
   const pathname = usePathname();
-  const [mounted, setMounted] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    // This code runs only on the client, after the component has mounted.
-    setMounted(true);
-    const user = localStorage.getItem("loggedInUser");
-    setIsLoggedIn(!!user);
-  }, [pathname]); // Re-check on path change to update login status if needed.
-
-  const handleLogout = () => {
-    localStorage.removeItem("loggedInUser");
-    setIsLoggedIn(false);
-    window.location.href = "/";
-  };
+  const { isLoggedIn, isLoading, logout } = useAuth();
 
   return (
     <header className={cn(
@@ -69,7 +56,7 @@ export function Header() {
             {/* Desktop nav */}
             <nav className="flex items-center gap-1 flex-wrap">
                 {navItems.map((item) => {
-                const isActive = mounted && ((item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href)));
+                const isActive = !isLoading && ((item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href)));
                 return (
                     <Link
                     key={item.href}
@@ -89,7 +76,7 @@ export function Header() {
             
             {/* Account and theme buttons */}
             <div className="flex items-center gap-2">
-                {mounted && (
+                {!isLoading && (
                   isLoggedIn ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -108,7 +95,7 @@ export function Header() {
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer focus:bg-destructive/10 focus:text-destructive">
+                        <DropdownMenuItem onClick={logout} className="text-destructive cursor-pointer focus:bg-destructive/10 focus:text-destructive">
                           <LogOut className="mr-2 h-4 w-4" />
                           <span>Logout</span>
                         </DropdownMenuItem>
@@ -151,7 +138,7 @@ export function Header() {
                         </div>
                         <nav className="flex flex-col gap-2 flex-grow">
                             {navItems.map((item) => {
-                                const isActive = mounted && ((item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href)));
+                                const isActive = !isLoading && ((item.href === "/" && pathname === "/") || (item.href !== "/" && pathname.startsWith(item.href)));
                                 return (
                                 <SheetClose asChild key={item.href}>
                                     <Link
@@ -169,7 +156,7 @@ export function Header() {
                             })}
                         </nav>
                         <div className="border-t pt-4 mt-4 space-y-3">
-                           {mounted && (
+                           {!isLoading && (
                              isLoggedIn ? (
                                 <>
                                 <SheetClose asChild>
@@ -178,7 +165,7 @@ export function Header() {
                                     </Link>
                                 </SheetClose>
                                 <SheetClose asChild>
-                                    <Button variant="ghost" onClick={handleLogout} className="w-full justify-start flex items-center gap-3 rounded-md p-3 text-base font-medium text-destructive hover:bg-destructive/10 hover:text-destructive">
+                                    <Button variant="ghost" onClick={logout} className="w-full justify-start flex items-center gap-3 rounded-md p-3 text-base font-medium text-destructive hover:bg-destructive/10 hover:text-destructive">
                                         <LogOut /> Logout
                                     </Button>
                                 </SheetClose>
