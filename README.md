@@ -29,8 +29,8 @@ Follow these steps to get the project running locally:
 
 1.  **Clone the repository:**
     ```bash
-    git clone <your-repository-url>/eatwise-india.git
-    cd eatwise-india
+    git clone https://github.com/evotyindia/EatWise-Project
+    cd EatWise-Project
     ```
 
 2.  **Install dependencies:**
@@ -143,4 +143,4 @@ Contributions are welcome! Please follow the existing code style and ensure your
 
 ## License
 
-This project is licensed under the MIT License. (Or specify your chosen license).
+This project is licensed under the MIT License. 
