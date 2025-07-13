@@ -27,10 +27,10 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://eatwise.evotyindia
 
 export const metadata: Metadata = {
   title: {
-    default: "EatWise India - AI Nutrition Guide for Healthier Indian Food Choices",
+    default: "EatWise India: Your AI-Powered Nutrition Coach",
     template: "%s | EatWise India",
   },
-  description: 'Your AI-powered guide to understanding Indian food labels. Get instant health ratings, ingredient analysis, and healthy recipe suggestions to make smarter food choices.',
+  description: 'Instantly analyze Indian food labels, get AI health reports, and discover personalized recipes to make healthier food choices. Your smart guide to nutrition.',
   applicationName: 'EatWise India',
   authors: [{ name: 'EatWise India Team', url: BASE_URL }],
   keywords: ['Indian food', 'nutrition', 'AI health coach', 'food label scanner', 'healthy recipes', 'Swasth Bharat'],
@@ -40,20 +40,20 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     url: BASE_URL,
-    title: 'EatWise India - AI Nutrition Guide',
-    description: 'Understand food labels, get health ratings, and discover healthy Indian recipes with AI.',
+    title: 'EatWise India: Your AI-Powered Nutrition Coach',
+    description: 'Instantly analyze Indian food labels, get AI health reports, and discover personalized recipes to make healthier food choices.',
     siteName: 'EatWise India',
     images: [{
       url: `${BASE_URL}/og-image.png`, // Recommended: create a 1200x630 image
       width: 1200,
       height: 630,
-      alt: 'EatWise India AI Nutrition Guide',
+      alt: 'EatWise India AI Nutrition Coach',
     }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'EatWise India - AI Nutrition Guide',
-    description: 'Understand food labels, get health ratings, and discover healthy Indian recipes with AI.',
+    title: 'EatWise India: Your AI-Powered Nutrition Coach',
+    description: 'Instantly analyze Indian food labels, get AI health reports, and discover personalized recipes to make healthier food choices.',
     images: [`${BASE_URL}/og-image.png`], // Needs a specific Twitter card image
   },
   icons: {
