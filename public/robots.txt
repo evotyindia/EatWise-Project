@@ -8,4 +8,4 @@ Allow: /
 Disallow: /_next/
 Disallow: /api/
 
-Sitemap: https://www.example.com/sitemap.xml
+Sitemap: https://eatwise.evotyindia.me/sitemap.xml
