@@ -30,9 +30,9 @@ export default function IndividualSavedItemPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
-  
+
   const [report, setReport] = useState<Report<any> | null>(null);
-  const [currentUser, setCurrentUser] = useState<{uid: string, username: string} | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ uid: string, username: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
@@ -87,7 +87,7 @@ export default function IndividualSavedItemPage() {
         setSlugStatus("invalid");
         return;
       }
-      
+
       setIsCheckingSlug(true);
       const available = await isSlugAvailableForUser(currentUser.uid, debouncedSlug, report.id);
       setSlugStatus(available ? "available" : "taken");
@@ -124,7 +124,7 @@ export default function IndividualSavedItemPage() {
       setReport(prev => prev ? { ...prev, publicSlug: debouncedSlug } : null);
       toast({ title: "Link Updated!", description: "Your custom share link has been saved." });
       setSlugStatus("idle");
-    } catch(error: any) {
+    } catch (error: any) {
       toast({ title: "Error", description: error.message || "Could not update the link.", variant: "destructive" });
     }
     setIsSavingSlug(false);
@@ -150,33 +150,81 @@ export default function IndividualSavedItemPage() {
     return `${window.location.origin}/${currentUser.username}/${report.publicSlug}`;
   };
 
-  const handleCopyLink = () => {
+  const handleCopyLink = async () => {
     const url = getPublicUrl();
     if (!url) return;
-    navigator.clipboard.writeText(url).then(() => {
-      setIsCopied(true);
-      toast({ title: "Link Copied!", description: "The public link has been copied to your clipboard." });
-      setTimeout(() => setIsCopied(false), 2000);
-    });
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+        setIsCopied(true);
+        toast({ title: "Link Copied!", description: "The public link has been copied to your clipboard." });
+        setTimeout(() => setIsCopied(false), 2000);
+      } else {
+        // Fallback for when Clipboard API is not available
+        const textArea = document.createElement("textarea");
+        textArea.value = url;
+        textArea.style.position = "fixed"; // Avoid scrolling to bottom
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+          const successful = document.execCommand('copy');
+          if (successful) {
+            setIsCopied(true);
+            toast({ title: "Link Copied!", description: "The public link has been copied to your clipboard." });
+            setTimeout(() => setIsCopied(false), 2000);
+          } else {
+            throw new Error("Fallback copy failed.");
+          }
+        } catch (err) {
+          throw new Error("Copy failed.");
+        } finally {
+          document.body.removeChild(textArea);
+        }
+      }
+    } catch (err) {
+      console.error("Copy failed:", err);
+      toast({ title: "Copy Failed", description: "Could not copy link. Please copy it manually.", variant: "destructive" });
+    }
   };
 
   const handleShare = async () => {
     const url = getPublicUrl();
     if (!url) return;
+
+    // Ensure text isn't too long for some share targets
+    const summaryText = report?.summary ? report.summary.slice(0, 300) + (report.summary.length > 300 ? "..." : "") : "";
+
     const shareData = {
-      title: `EatWise Report: ${report?.title}`,
-      text: `Check out this health report I generated with EatWise India: ${report?.summary}`,
+      title: `EatWise Report: ${report?.title || 'Health Analysis'}`,
+      text: `Check out this health report I generated with EatWise India: ${summaryText}`,
       url: url,
     };
+
     try {
-      if (navigator.share) {
+      // Check for support and ensure we are in a secure context (HTTPS) or localhost
+      if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare && navigator.canShare(shareData)) {
         await navigator.share(shareData);
       } else {
-        handleCopyLink();
+        // Fallback for when Web Share API is not available (e.g. non-HTTPS mobile dev)
+        await handleCopyLink();
+        toast({
+          title: "Sharing Unavailable",
+          description: "Optimized sharing requires HTTPS. Link copied to clipboard instead.",
+          duration: 3000
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
+      // Ignore user cancellation
+      if (error.name === 'AbortError') {
+        return;
+      }
+
       console.error("Share failed:", error);
-      handleCopyLink();
+      // Only fallback to copy if it wasn't a cancellation
+      await handleCopyLink();
     }
   };
 
@@ -235,7 +283,7 @@ export default function IndividualSavedItemPage() {
     }
     setIsChatLoading(false);
   };
-  
+
   const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatInput.trim() || !report) return;
@@ -265,49 +313,49 @@ export default function IndividualSavedItemPage() {
 
   useEffect(() => {
     if (!id) return;
-    
+
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
-        if (authUser) {
-            try {
-                const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
-                if (loggedInUser.uid !== authUser.uid) {
-                    setError("Authentication mismatch.");
-                    setIsLoading(false);
-                    return;
-                }
-                setCurrentUser({ uid: authUser.uid, username: loggedInUser.username });
-                
-                const foundReport = await getReportById(id);
-                if (foundReport) {
-                    if (foundReport.uid === authUser.uid) {
-                         setReport(foundReport);
-                         initiateChatWithWelcome(foundReport);
-                    } else {
-                         setError("You do not have permission to view this item.");
-                    }
-                } else {
-                    setError("Saved item not found. It may have been deleted or the link is incorrect.");
-                }
-            } catch (e) {
-                console.error("Failed to load report from Firestore:", e);
-                setError("An error occurred while trying to load the saved item.");
-            } finally {
-                setIsLoading(false);
+      if (authUser) {
+        try {
+          const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+          if (loggedInUser.uid !== authUser.uid) {
+            setError("Authentication mismatch.");
+            setIsLoading(false);
+            return;
+          }
+          setCurrentUser({ uid: authUser.uid, username: loggedInUser.username });
+
+          const foundReport = await getReportById(id);
+          if (foundReport) {
+            if (foundReport.uid === authUser.uid) {
+              setReport(foundReport);
+              initiateChatWithWelcome(foundReport);
+            } else {
+              setError("You do not have permission to view this item.");
             }
-        } else {
-            router.replace('/login');
+          } else {
+            setError("Saved item not found. It may have been deleted or the link is incorrect.");
+          }
+        } catch (e) {
+          console.error("Failed to load report from Firestore:", e);
+          setError("An error occurred while trying to load the saved item.");
+        } finally {
+          setIsLoading(false);
         }
+      } else {
+        router.replace('/login');
+      }
     });
 
     return () => unsubscribe();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, router]);
-  
+
   const scrollToBottom = () => {
     if (scrollAreaViewportRef.current) {
       requestAnimationFrame(() => {
         const scrollContainer = scrollAreaViewportRef.current;
-        if(scrollContainer) {
+        if (scrollContainer) {
           scrollContainer.scrollTop = scrollContainer.scrollHeight;
         }
       });
@@ -322,7 +370,7 @@ export default function IndividualSavedItemPage() {
 
   const renderReport = () => {
     if (!report) return null;
-    
+
     switch (report.type) {
       case 'label':
         return <LabelReportDisplay report={report.data as GenerateHealthReportOutput} />;
@@ -342,7 +390,7 @@ export default function IndividualSavedItemPage() {
     if (slugStatus === 'taken' || slugStatus === 'invalid') return <AlertTriangle className="h-5 w-5 text-destructive" />;
     return null;
   };
-  
+
   const getSlugStatusMessage = () => {
     if (debouncedSlug === report?.publicSlug) return null;
     if (slugStatus === 'invalid') return <p className="text-xs text-destructive mt-1">Use 3-15 characters: letters, numbers, and hyphens only.</p>;
@@ -379,45 +427,45 @@ export default function IndividualSavedItemPage() {
     <div className="bg-background min-h-screen p-4 sm:p-6 md:p-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <Button asChild variant="outline">
-                <Link href="/saved">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to All Saved Items
-                </Link>
-            </Button>
+          <Button asChild variant="outline">
+            <Link href="/saved">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to All Saved Items
+            </Link>
+          </Button>
         </div>
-        
+
         {report && (
           <Card className="bg-secondary/50 border-primary/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Pencil className="h-5 w-5 text-primary"/> Report Details</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Pencil className="h-5 w-5 text-primary" /> Report Details</CardTitle>
               <CardDescription>You can edit the title and product name for this report.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-               <div>
-                  <Label htmlFor="report-title">Report Title</Label>
-                  <Input 
-                    id="report-title"
-                    value={editableTitle}
-                    onChange={(e) => setEditableTitle(e.target.value)}
+              <div>
+                <Label htmlFor="report-title">Report Title</Label>
+                <Input
+                  id="report-title"
+                  value={editableTitle}
+                  onChange={(e) => setEditableTitle(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              {report.type !== 'recipe' && (
+                <div>
+                  <Label htmlFor="product-name">Product Name</Label>
+                  <Input
+                    id="product-name"
+                    value={editableProductName}
+                    onChange={(e) => setEditableProductName(e.target.value)}
                     className="mt-1"
                   />
-               </div>
-               {report.type !== 'recipe' && (
-                 <div>
-                    <Label htmlFor="product-name">Product Name</Label>
-                    <Input
-                      id="product-name"
-                      value={editableProductName}
-                      onChange={(e) => setEditableProductName(e.target.value)}
-                      className="mt-1"
-                    />
-                 </div>
-               )}
-               <Button onClick={handleDetailsSave} disabled={!isDetailsDirty || isSavingDetails}>
-                 {isSavingDetails ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <SaveIcon className="mr-2 h-4 w-4" />}
-                 Save Changes
-               </Button>
+                </div>
+              )}
+              <Button onClick={handleDetailsSave} disabled={!isDetailsDirty || isSavingDetails}>
+                {isSavingDetails ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <SaveIcon className="mr-2 h-4 w-4" />}
+                Save Changes
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -425,28 +473,28 @@ export default function IndividualSavedItemPage() {
         {report && (
           <Card className="bg-secondary/50 border-primary/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Globe className="h-5 w-5 text-primary"/> Sharing Settings</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Globe className="h-5 w-5 text-primary" /> Sharing Settings</CardTitle>
               <CardDescription>Manage the visibility and sharing options for this report.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                   <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-3">
                     <Switch
-                        id="public-toggle-switch"
-                        checked={report.isPublic}
-                        onCheckedChange={() => {}} 
-                      />
-                      <Label htmlFor="public-toggle-switch" className="cursor-pointer">
-                        {report.isPublic ? 'Report is Public' : 'Report is Private'}
-                      </Label>
-                    </div>
+                      id="public-toggle-switch"
+                      checked={report.isPublic}
+                      onCheckedChange={() => { }}
+                    />
+                    <Label htmlFor="public-toggle-switch" className="cursor-pointer">
+                      {report.isPublic ? 'Report is Public' : 'Report is Private'}
+                    </Label>
+                  </div>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Change Report Visibility?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      {report.isPublic 
+                      {report.isPublic
                         ? "Making this report private will disable the public link. Anyone who has the link will no longer be able to view it."
                         : "Making this report public will generate a shareable link. Anyone with this link will be able to view the report and its chat history, without needing to log in."
                       }
@@ -460,26 +508,26 @@ export default function IndividualSavedItemPage() {
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-              
+
               {report.isPublic && currentUser?.username && (
                 <div className="space-y-3 pt-2 animate-fade-in-up">
                   <div>
                     <Label htmlFor="public-link">Your public link</Label>
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="flex w-full flex-wrap items-center rounded-md border border-input bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-background p-2">
-                          <span className="text-sm text-muted-foreground break-all">{typeof window !== 'undefined' ? `${window.location.origin}/${currentUser.username}/` : `.../${currentUser.username}/`}</span>
-                          <div className="flex-1 relative min-w-[150px]">
-                              <Input 
-                                id="public-link"
-                                value={editableSlug}
-                                onChange={(e) => setEditableSlug(e.target.value)}
-                                maxLength={15}
-                                className="border-0 bg-transparent h-auto p-0 focus-visible:ring-0 focus-visible:ring-offset-0 w-full"
-                              />
-                              <div className="absolute inset-y-0 right-0 flex items-center pr-1">
-                                 {getSlugStatusIndicator()}
-                              </div>
+                      <div className="flex w-full flex-wrap items-center rounded-md border border-input bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-background px-4 py-2">
+                        <span className="text-sm text-muted-foreground break-all">{typeof window !== 'undefined' ? `${window.location.origin}/${currentUser.username}/` : `.../${currentUser.username}/`}</span>
+                        <div className="flex-1 relative min-w-[150px]">
+                          <Input
+                            id="public-link"
+                            value={editableSlug}
+                            onChange={(e) => setEditableSlug(e.target.value)}
+                            maxLength={15}
+                            className="border-0 bg-transparent h-auto p-0 pr-8 focus-visible:ring-0 focus-visible:ring-offset-0 w-full"
+                          />
+                          <div className="absolute inset-y-0 right-0 flex items-center pr-1">
+                            {getSlugStatusIndicator()}
                           </div>
+                        </div>
                       </div>
 
                       <Button onClick={handleSlugChange} disabled={slugStatus !== 'available' || isSavingSlug} size="icon">
@@ -508,28 +556,28 @@ export default function IndividualSavedItemPage() {
         {renderReport()}
 
         {report && (
-           <Card>
-              <CardHeader>
-                  <CardTitle className="font-semibold text-xl flex items-center"><MessageCircle className="mr-2 h-5 w-5" /> Chat with AI Advisor</CardTitle>
-                  <CardDescription className="text-sm text-muted-foreground pt-1">Ask follow-up questions about this saved report.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[250px] w-full" viewportRef={scrollAreaViewportRef}>
-                  <div className="space-y-3 p-3">
-                    {chatHistory.map((msg, index) => (
-                      <div key={index} className={`p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
-                        <span className="font-semibold capitalize">{msg.role === 'user' ? 'You' : 'AI Advisor'}: </span>{msg.content}
-                      </div>
-                    ))}
-                    {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Advisor is typing...</div>}
-                  </div>
-                </ScrollArea>
-                <form onSubmit={handleChatSubmit} className="w-full flex gap-2 mt-4">
-                  <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background/50" />
-                  <Button type="submit" disabled={isChatLoading || !chatInput.trim()}><Send className="h-4 w-4" /></Button>
-                </form>
-              </CardContent>
-            </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-semibold text-xl flex items-center"><MessageCircle className="mr-2 h-5 w-5" /> Chat with AI Advisor</CardTitle>
+              <CardDescription className="text-sm text-muted-foreground pt-1">Ask follow-up questions about this saved report.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[250px] w-full" viewportRef={scrollAreaViewportRef}>
+                <div className="space-y-3 p-3">
+                  {chatHistory.map((msg, index) => (
+                    <div key={index} className={`p-2.5 rounded-lg text-sm shadow-sm max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary text-secondary-foreground mr-auto'}`}>
+                      <span className="font-semibold capitalize">{msg.role === 'user' ? 'You' : 'AI Advisor'}: </span>{msg.content}
+                    </div>
+                  ))}
+                  {isChatLoading && <div className="text-sm text-muted-foreground p-2">AI Advisor is typing...</div>}
+                </div>
+              </ScrollArea>
+              <form onSubmit={handleChatSubmit} className="w-full flex gap-2 mt-4">
+                <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask a question..." disabled={isChatLoading} className="bg-background/50" />
+                <Button type="submit" disabled={isChatLoading || !chatInput.trim()}><Send className="h-4 w-4" /></Button>
+              </form>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
