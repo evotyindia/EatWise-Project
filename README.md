@@ -25,7 +25,7 @@ Tailored for Indian kitchens. Enter your available ingredients, and our AI const
 
 ### 3. 📝 Dynamic Blog & Admin Panel
 A fully featured CMS built into the platform:
-- **Secure Admin Access:** Protected via email allowlist (`aryan@evotyindia.me`) and Firestore Security Rules.
+- **Secure Admin Access:** Protected via email allowlist (`admin@evotyindia.me`) and Firestore Security Rules.
 - **AI Auto-Writer:** Generate complete, SEO-friendly articles with one click.
 - **Image Prompts:** Automatically generates high-quality prompts for Midjourney/DALL-E for blog covers.
 - **Rich Text Editor:** Full formatting support for engaging content.
@@ -42,7 +42,7 @@ A fully featured CMS built into the platform:
 - **Frontend:** Next.js 15 (App Router), React 19, Tailwind CSS, ShadCN UI
 - **AI:** Google Gemini 1.5 Flash, Firebase Genkit
 - **Backend:** Next.js Server Actions, Firebase Firestore (NoSQL)
-- **Auth:** Firebase Authentication (Google Sign-In)
+- **Auth:** Firebase Authentication 
 - **Storage:** Cloudflare R2 (S3 Compatible)
 - **Language:** TypeScript
 
@@ -76,7 +76,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=...
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 
 # Security (Comma-separated emails)
-NEXT_PUBLIC_ADMIN_EMAILS=aryan@evotyindia.me
+NEXT_PUBLIC_ADMIN_EMAILS=admin@eatwise.evotyindia.me
 
 # Cloudflare R2 (Image Storage)
 R2_ACCOUNT_ID=...
