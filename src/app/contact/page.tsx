@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 const ContactPage: NextPage = () => {
-  const contactEmail = "support@eatwise.evotyindia.me";
+  const contactEmail = "support@evotyindia.me";
   const contactPhone = "+91-8290610907";
 
   const socialLinks = [
