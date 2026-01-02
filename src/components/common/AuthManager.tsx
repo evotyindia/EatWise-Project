@@ -9,10 +9,10 @@ import { UsernameSetupDialog } from "./UsernameSetupDialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface AuthContextType {
-  currentUser: User | null;
-  isLoggedIn: boolean;
-  isLoading: boolean;
-  logout: () => void;
+    currentUser: User | null;
+    isLoggedIn: boolean;
+    isLoading: boolean;
+    logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,13 +37,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         }
                     } else {
                         // Edge case: Auth user exists but no profile in DB
-                        await signOut(auth);
+                        // Do NOT sign out. Allow Firebase Auth user to persist (e.g. for Admin).
+                        console.warn("AuthManager: User authenticated but no profile found in DB.");
+                        // await signOut(auth); 
                         setCurrentUser(null);
-                        setIsLoggedIn(false);
+                        setIsLoggedIn(false); // Valid Auth, but not "App Logged In"
                     }
-                } catch(e) {
+                } catch (e) {
                     console.error("AuthManager: Failed to get user profile", e);
-                    await signOut(auth); // Log out on error
+                    // await signOut(auth); // Log out on error
                     setCurrentUser(null);
                     setIsLoggedIn(false);
                 }

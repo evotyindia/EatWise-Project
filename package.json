@@ -12,6 +12,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.958.0",
+    "@aws-sdk/s3-request-presigner": "^3.958.0",
     "@genkit-ai/firebase": "^1.14.0",
     "@genkit-ai/googleai": "^1.14.0",
     "@genkit-ai/next": "^1.14.0",
@@ -43,6 +45,7 @@
     "date-fns": "^3.6.0",
     "dotenv": "^16.5.0",
     "firebase": "^10.12.3",
+    "framer-motion": "^12.23.26",
     "genkit": "^1.14.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
@@ -51,7 +54,9 @@
     "react": "^19.2.3",
     "react-day-picker": "^8.10.1",
     "react-dom": "^19.2.3",
+    "react-easy-crop": "^5.5.6",
     "react-hook-form": "^7.54.2",
+    "react-quill-new": "^3.7.0",
     "recharts": "^2.15.1",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
@@ -64,6 +69,7 @@
     "@types/react-dom": "^18",
     "genkit-cli": "^1.14.0",
     "postcss": "^8",
+    "schema-dts": "^1.1.5",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }

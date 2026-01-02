@@ -3,16 +3,51 @@
 
 import { blogPosts, getBlogCategories, type BlogPost } from "@/lib/blog-data";
 import Link from "next/link";
-import React, { useState, useMemo } from "react";
+import Image from "next/image";
+import React, { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Filter } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function BlogList() {
-  const allPosts = blogPosts;
-  const allCategories = getBlogCategories();
+  const [allPosts, setAllPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+
+  const allCategories = useMemo(() => {
+    const cats = new Set(allPosts.map(p => p.category).filter(Boolean));
+    return ["All", ...Array.from(cats)];
+  }, [allPosts]);
+
+  useEffect(() => {
+    async function fetchPosts() {
+      try {
+        const { getAllDynamicPosts } = await import("@/lib/dynamic-blog");
+        const dynamicPosts = await getAllDynamicPosts();
+
+        // Convert to BlogPost format
+        const formattedDynamicPosts: BlogPost[] = dynamicPosts.map(p => ({
+          slug: p.slug,
+          title: p.title,
+          preview: p.excerpt,
+          content: p.content,
+          category: p.category,
+          date: p.date,
+          featuredImage: p.coverImage || "",
+          dataAiHint: ""
+        }));
+
+        setAllPosts(formattedDynamicPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+      } catch (error) {
+        console.error("Failed to load blogs", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchPosts();
+  }, []);
 
   const filteredPosts = useMemo(() => {
     if (selectedCategory === "All") {
@@ -49,6 +84,16 @@ export function BlogList() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredPosts.map((post) => (
           <Card key={post.slug} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            {post.featuredImage && (
+              <div className="relative w-full h-48">
+                <Image
+                  src={post.featuredImage}
+                  alt={post.title}
+                  fill
+                  className="object-cover transition-transform duration-300 hover:scale-105"
+                />
+              </div>
+            )}
             <CardContent className="p-6 flex-grow">
               <p className="text-sm text-accent font-medium mb-1">{post.category}</p>
               <Link href={`/blogs/${post.slug}`}>

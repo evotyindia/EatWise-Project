@@ -7,8 +7,8 @@
  * - GetDetailedRecipeOutput - The return type for the getDetailedRecipe function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 import { DiseaseEnum, HouseholdCompositionSchema } from '@/ai/types/recipe-shared-types';
 
 const GetDetailedRecipeInputSchema = z.object({
@@ -31,26 +31,36 @@ const IngredientDetailSchema = z.object({
   notes: z.string().describe("Specific preparation notes, e.g., 'finely chopped', 'soaked overnight', 'optional', or 'Essential staple: add if available'.")
 });
 
-const NutrientValueSchema = z.object({
-    calories: z.string().describe("Estimated calories (e.g., '150-200 kcal')."),
-    protein: z.string().describe("Estimated protein (e.g., '8-10g')."),
-    carbs: z.string().describe("Estimated carbohydrates (e.g., '20-25g')."),
-    fat: z.string().describe("Estimated fat (e.g., '5-7g').")
-});
+
 
 const NutritionalBreakdownSchema = z.object({
-    kid: z.object({
-        servingSize: z.string().describe("A typical serving size for a child (e.g., '1 small bowl, approx 150g')."),
-        nutrients: NutrientValueSchema
-    }).describe("Nutritional estimates for a child's serving."),
-    adult: z.object({
-        servingSize: z.string().describe("A typical serving size for an adult (e.g., '1 medium bowl, approx 250g')."),
-        nutrients: NutrientValueSchema
-    }).describe("Nutritional estimates for an adult's serving."),
-    average: z.object({
-        servingSize: z.string().describe("The average serving size across all household members (e.g., 'Approx 220g')."),
-        nutrients: NutrientValueSchema
-    }).describe("Average nutritional estimates per serving for this recipe."),
+  kid: z.object({
+    servingSize: z.string().describe("A typical serving size for a child (e.g., '1 small bowl, approx 150g')."),
+    nutrients: z.object({
+      calories: z.string().describe("Estimated calories (e.g., '150-200 kcal')."),
+      protein: z.string().describe("Estimated protein (e.g., '8-10g')."),
+      carbs: z.string().describe("Estimated carbohydrates (e.g., '20-25g')."),
+      fat: z.string().describe("Estimated fat (e.g., '5-7g').")
+    })
+  }).describe("Nutritional estimates for a child's serving."),
+  adult: z.object({
+    servingSize: z.string().describe("A typical serving size for an adult (e.g., '1 medium bowl, approx 250g')."),
+    nutrients: z.object({
+      calories: z.string().describe("Estimated calories (e.g., '150-200 kcal')."),
+      protein: z.string().describe("Estimated protein (e.g., '8-10g')."),
+      carbs: z.string().describe("Estimated carbohydrates (e.g., '20-25g')."),
+      fat: z.string().describe("Estimated fat (e.g., '5-7g').")
+    })
+  }).describe("Nutritional estimates for an adult's serving."),
+  average: z.object({
+    servingSize: z.string().describe("The average serving size across all household members (e.g., 'Approx 220g')."),
+    nutrients: z.object({
+      calories: z.string().describe("Estimated calories (e.g., '150-200 kcal')."),
+      protein: z.string().describe("Estimated protein (e.g., '8-10g')."),
+      carbs: z.string().describe("Estimated carbohydrates (e.g., '20-25g')."),
+      fat: z.string().describe("Estimated fat (e.g., '5-7g').")
+    })
+  }).describe("Average nutritional estimates per serving for this recipe."),
 });
 
 const GetDetailedRecipeOutputSchema = z.object({
@@ -73,7 +83,7 @@ export async function getDetailedRecipe(input: GetDetailedRecipeInput): Promise<
 
 const prompt = ai.definePrompt({
   name: 'getDetailedRecipePrompt',
-  input: {schema: InternalGetDetailedRecipeInputSchema}, // Use internal schema
+  input: { schema: InternalGetDetailedRecipeInputSchema }, // Use internal schema
   output: {
     schema: GetDetailedRecipeOutputSchema,
     format: 'json',
@@ -141,27 +151,27 @@ const getDetailedRecipeFlow = ai.defineFlow(
     // Calculate total people before calling the prompt
     const totalPeople = input.householdComposition.adults + input.householdComposition.seniors + input.householdComposition.kids;
 
-    const processedInput: InternalGetDetailedRecipeInputSchema = {...input, totalPeople};
+    const processedInput: z.infer<typeof InternalGetDetailedRecipeInputSchema> = { ...input, totalPeople };
     if (processedInput.diseaseConcerns && processedInput.diseaseConcerns.length === 1 && processedInput.diseaseConcerns[0] === 'none') {
       processedInput.diseaseConcerns = [];
     }
 
     try {
-        const {output} = await prompt(processedInput);
-        if (!output) {
-          throw new Error("The AI returned an empty or invalid recipe. Please try again.");
-        }
-        return output;
+      const { output } = await prompt(processedInput);
+      if (!output) {
+        throw new Error("The AI returned an empty or invalid recipe. Please try again.");
+      }
+      return output;
     } catch (error: any) {
-        console.error(`An error occurred in getDetailedRecipeFlow:`, error);
-        const errorMessage = error.message || 'An unexpected error occurred.';
-        if (errorMessage.toLowerCase().includes('api key')) {
-            throw new Error('The AI service is not configured. This is likely because the GOOGLE_API_KEY is missing from your .env file.');
-        }
-        if (errorMessage.toLowerCase().includes('safety')) {
-            throw new Error('The AI response was blocked due to safety settings. Please modify your request and try again.');
-        }
-        throw new Error(errorMessage);
+      console.error(`An error occurred in getDetailedRecipeFlow:`, error);
+      const errorMessage = error.message || 'An unexpected error occurred.';
+      if (errorMessage.toLowerCase().includes('api key')) {
+        throw new Error('The AI service is not configured. This is likely because the GOOGLE_API_KEY is missing from your .env file.');
+      }
+      if (errorMessage.toLowerCase().includes('safety')) {
+        throw new Error('The AI response was blocked due to safety settings. Please modify your request and try again.');
+      }
+      throw new Error(errorMessage);
     }
   }
 );

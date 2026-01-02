@@ -44,7 +44,7 @@ function LoginContent() {
     setRedirectUrl(searchRedirect || localRedirect || "/");
 
     const isVerified = searchParams.get("verified");
-    if(isVerified) {
+    if (isVerified) {
       toast({
         title: "Email Verified!",
         description: "You can now log in to your account.",
@@ -84,38 +84,28 @@ function LoginContent() {
           variant: "destructive",
           action: (
             <Button variant="secondary" size="sm" asChild>
-                <Link href="/signup">Sign Up</Link>
+              <Link href="/signup">Sign Up</Link>
             </Button>
           ),
         });
         return;
       }
-      
+
       // Step 3: Attempt to sign in with the found email and password
       const userCredential = await signInWithEmailAndPassword(auth, userEmail, values.password);
       const authUser = userCredential.user;
 
       // Step 4: Handle email verification
       if (!authUser.emailVerified) {
-        try {
-            await sendEmailVerification(authUser);
-            toast({
-                title: "Email Not Verified",
-                description: "We've sent another verification link to your inbox. Please check your email (and spam folder) to continue.",
-                variant: "destructive",
-            });
-        } catch (resendError: any) {
-            console.error("Failed to resend verification email:", resendError);
-            toast({
-                title: "Email Not Verified",
-                description: "Your email is not verified. We tried to send a new link, but it failed. Please try logging in again in a few minutes.",
-                variant: "destructive",
-            });
-        }
         await auth.signOut();
+        toast({
+          title: "Email Not Verified",
+          description: "Please check your inbox and verify your email address before logging in.",
+          variant: "destructive",
+        });
         return;
       }
-      
+
       // Step 5: Sync user data and finalize login
       const userProfile = await getAndSyncUser(authUser.uid);
 
@@ -135,22 +125,22 @@ function LoginContent() {
 
     } catch (error: any) {
       console.error("Login process error:", error);
-      
+
       if (error.code === 'auth/invalid-credential') {
         toast({
           title: "Incorrect Credentials",
           description: "The email/username or password you entered was incorrect. Please try again.",
           variant: "destructive",
-           action: (
-              <Button variant="secondary" size="sm" asChild>
-                  <Link href="/forgot-password">Forgot Password?</Link>
-              </Button>
-            ),
+          action: (
+            <Button variant="secondary" size="sm" asChild>
+              <Link href="/forgot-password">Forgot Password?</Link>
+            </Button>
+          ),
         });
       } else if (error.message.includes("Your user profile could not be found")) {
-         toast({ title: "Login Failed", description: error.message, variant: "destructive" });
+        toast({ title: "Login Failed", description: error.message, variant: "destructive" });
       } else {
-         toast({
+        toast({
           title: "Login Failed",
           description: "An unexpected error occurred. Please try again.",
           variant: "destructive",
@@ -163,7 +153,7 @@ function LoginContent() {
     <div className="container mx-auto flex items-center justify-center min-h-[calc(100vh-8rem)] py-12">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-           <div className="flex justify-center mb-4">
+          <div className="flex justify-center mb-4">
             <LogIn className="h-12 w-12 text-primary" />
           </div>
           <CardTitle>Welcome Back!</CardTitle>
@@ -178,12 +168,12 @@ function LoginContent() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Email or Username</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="you@example.com or your_username" 
-                          {...field}
-                        />
-                      </FormControl>
+                    <FormControl>
+                      <Input
+                        placeholder="you@example.com or your_username"
+                        {...field}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -227,18 +217,18 @@ function LoginContent() {
                 )}
               />
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                 {form.formState.isSubmitting ? "Logging in..." : "Log In"}
+                {form.formState.isSubmitting ? "Logging in..." : "Log In"}
               </Button>
             </form>
           </Form>
         </CardContent>
         <CardFooter className="mt-6 text-center text-sm">
-            <p className="mx-auto">
-                Don't have an account?{" "}
-                <Link href="/signup" className="underline text-primary font-semibold">
-                Sign up
-                </Link>
-            </p>
+          <p className="mx-auto">
+            Don't have an account?{" "}
+            <Link href="/signup" className="underline text-primary font-semibold">
+              Sign up
+            </Link>
+          </p>
         </CardFooter>
       </Card>
     </div>
@@ -247,13 +237,13 @@ function LoginContent() {
 
 
 export default function LoginPage() {
-    return (
-        <Suspense fallback={
-            <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
-                <LogIn className="w-12 h-12 animate-pulse text-primary" />
-            </div>
-        }>
-            <LoginContent />
-        </Suspense>
-    )
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
+        <LogIn className="w-12 h-12 animate-pulse text-primary" />
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
+  )
 }

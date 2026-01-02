@@ -23,7 +23,7 @@ export function StarRating({
   const partialStarPercentage = Math.round((rating - fullStars) * 100);
   const emptyStars = maxRating - Math.ceil(rating);
 
-  const starColor = variant === 'good' ? 'fill-star' : 'fill-star-bad';
+
 
   return (
     <div className={cn('flex items-center space-x-1', className)}>
@@ -32,17 +32,17 @@ export function StarRating({
         <Star
           key={`full-${i}`}
           size={size}
-          className={cn('text-transparent', starColor, iconClassName)}
+          className={cn('fill-current', variant === 'good' ? 'text-star' : 'text-star-bad', iconClassName)}
         />
       ))}
 
       {/* Partial Star */}
       {partialStarPercentage > 0 && (
         <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
-          {/* Background star (unfilled part) */}
+          {/* Background star (outline) */}
           <Star
             size={size}
-            className={cn('text-transparent fill-gray-300 dark:fill-gray-600', iconClassName)}
+            className={cn('text-muted-foreground', iconClassName)}
           />
           {/* Foreground star (filled part), clipped to the percentage */}
           <div
@@ -51,7 +51,7 @@ export function StarRating({
           >
             <Star
               size={size}
-              className={cn('text-transparent', starColor, iconClassName)}
+              className={cn('fill-current', variant === 'good' ? 'text-star' : 'text-star-bad', iconClassName)}
             />
           </div>
         </div>
@@ -62,7 +62,7 @@ export function StarRating({
         <Star
           key={`empty-${i}`}
           size={size}
-          className={cn('text-transparent fill-gray-300 dark:fill-gray-600', iconClassName)}
+          className={cn('text-muted-foreground', iconClassName)}
         />
       ))}
     </div>

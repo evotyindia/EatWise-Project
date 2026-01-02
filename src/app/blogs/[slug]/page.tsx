@@ -1,84 +1,87 @@
 
-import { getBlogPostBySlug, blogPosts } from "@/lib/blog-data";
-import Link from "next/link"; 
+import { getDynamicPostBySlug } from "@/lib/dynamic-blog";
+import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { CalendarDays, Tag, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import type { Article, BreadcrumbList } from 'schema-dts';
+import type { Article, BreadcrumbList, WithContext } from 'schema-dts';
 import Script from 'next/script';
+
+export const dynamic = "force-dynamic";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
 interface BlogPostPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
-}
-
-export async function generateStaticParams() {
-  return blogPosts.map((post) => ({
-    slug: post.slug,
-  }));
+  }>;
 }
 
 export async function generateMetadata({ params }: BlogPostPageProps) {
-  const post = getBlogPostBySlug(params.slug);
+  const resolvedParams = await params;
+  const { slug } = resolvedParams;
+  const post = await getDynamicPostBySlug(slug);
+
   if (!post) {
-    return { 
+    return {
       title: "Post Not Found",
-      description: "The blog post you are looking for could not be found." 
+      description: "The blog post you are looking for could not be found."
     };
   }
 
-  const imageUrl = post.featuredImage && (post.featuredImage.startsWith('http')
-    ? post.featuredImage
-    : `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : `/${post.featuredImage}`}`);
+  const imageUrl = post.coverImage && (post.coverImage.startsWith('http')
+    ? post.coverImage
+    : `${BASE_URL}${post.coverImage.startsWith('/') ? post.coverImage : `/${post.coverImage}`}`);
 
   return {
     title: `${post.title} | EatWise India Blogs`,
-    description: post.preview,
+    description: post.excerpt,
     alternates: {
       canonical: `${BASE_URL}/blogs/${post.slug}`,
     },
-    openGraph: { 
+    openGraph: {
       type: 'article',
       title: post.title,
-      description: post.preview,
+      description: post.excerpt,
       url: `${BASE_URL}/blogs/${post.slug}`,
-      publishedTime: new Date(post.date).toISOString(),
-      authors: [`${BASE_URL}/#organization`], 
+      publishedTime: post.date ? new Date(post.date).toISOString() : new Date().toISOString(),
+      authors: [`${BASE_URL}/#organization`],
       images: imageUrl ? [
         {
           url: imageUrl,
-          width: 1200, 
+          width: 1200,
           height: 675,
           alt: post.title,
         }
       ] : [],
     },
-    twitter: { 
-        card: 'summary_large_image',
-        title: post.title,
-        description: post.preview,
-        images: imageUrl ? [imageUrl] : [],
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.excerpt,
+      images: imageUrl ? [imageUrl] : [],
     }
   };
 }
 
-export default function BlogPostPage({ params }: BlogPostPageProps) {
-  const post = getBlogPostBySlug(params.slug);
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
+  const resolvedParams = await params;
+  const { slug } = resolvedParams;
+
+  const post = await getDynamicPostBySlug(slug);
 
   if (!post) {
     notFound();
   }
 
-  const imageUrl = post.featuredImage && (post.featuredImage.startsWith('http')
-    ? post.featuredImage
-    : `${BASE_URL}${post.featuredImage.startsWith('/') ? post.featuredImage : `/${post.featuredImage}`}`);
+  const imageUrl = post.coverImage && (post.coverImage.startsWith('http')
+    ? post.coverImage
+    : `${BASE_URL}${post.coverImage.startsWith('/') ? post.coverImage : `/${post.coverImage}`}`);
 
-  const articleStructuredData: Article = {
+  const articleStructuredData: WithContext<Article> = {
     "@context": "https://schema.org",
     "@type": "Article",
     mainEntityOfPage: {
@@ -86,14 +89,14 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
       "@id": `${BASE_URL}/blogs/${post.slug}`,
     },
     headline: post.title,
-    description: post.preview,
+    description: post.excerpt,
     image: imageUrl || `${BASE_URL}/img/logo_512x512.png`,
-    datePublished: new Date(post.date).toISOString(),
-    dateModified: new Date(post.date).toISOString(), 
+    datePublished: post.date ? new Date(post.date).toISOString() : new Date().toISOString(),
+    dateModified: post.date ? new Date(post.date).toISOString() : new Date().toISOString(),
     author: {
-      "@type": "Organization", 
+      "@type": "Organization",
       name: "EatWise India Team",
-      url: BASE_URL, 
+      url: BASE_URL,
     },
     publisher: {
       "@type": "Organization",
@@ -107,7 +110,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
     },
   };
 
-  const breadcrumbStructuredData: BreadcrumbList = {
+  const breadcrumbStructuredData: WithContext<BreadcrumbList> = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
@@ -120,14 +123,14 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
       {
         "@type": "ListItem",
         "position": 2,
-        "name": "Blogs", 
+        "name": "Blogs",
         "item": `${BASE_URL}/blogs`
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": post.title
-        
+
       }
     ]
   };
@@ -164,20 +167,26 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             </div>
           </div>
         </div>
-        
+
         <Separator className="my-8" />
 
+        {post.coverImage && (
+          <div className="mb-8 relative w-full h-[400px] rounded-lg overflow-hidden shadow-md">
+            <Image
+              src={post.coverImage}
+              alt={post.title}
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+        )}
+
         <div
-          className="prose prose-lg dark:prose-invert max-w-none 
-                     prose-headings:font-headline prose-headings:text-primary dark:prose-headings:text-primary
-                     prose-p:text-foreground/90 dark:prose-p:text-foreground/80
-                     prose-a:text-accent hover:prose-a:text-accent/80 dark:prose-a:text-accent dark:hover:prose-a:text-accent/80
-                     prose-strong:text-foreground dark:prose-strong:text-foreground
-                     prose-ul:list-disc prose-ul:pl-6 prose-li:marker:text-accent
-                     prose-ol:list-decimal prose-ol:pl-6 prose-li:marker:text-accent"
+          className="prose prose-lg dark:prose-invert max-w-none break-words overflow-hidden"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
-        
+
         <Separator className="my-12" />
 
         <div className="text-center">

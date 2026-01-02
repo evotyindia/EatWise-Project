@@ -1,18 +1,20 @@
+"use client";
 
 import React from 'react';
 import Link from 'next/link';
 import { Facebook, Twitter, Instagram, Linkedin, Youtube } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
   const socialLinks = [
-    { name: "Facebook", icon: <Facebook className="h-5 w-5" />, url: "https://facebook.com/eatwiseindia" }, 
-    { name: "Twitter", icon: <Twitter className="h-5 w-5" />, url: "https://twitter.com/eatwiseindia" },   
-    { name: "Instagram", icon: <Instagram className="h-5 w-5" />, url: "https://instagram.com/eatwiseindia" }, 
-    { name: "LinkedIn", icon: <Linkedin className="h-5 w-5" />, url: "https://linkedin.com/company/eatwiseindia" }, 
-    { name: "YouTube", icon: <Youtube className="h-5 w-5" />, url: "https://youtube.com/c/eatwiseindia" }, 
+    { name: "Facebook", icon: <Facebook className="h-5 w-5" />, url: "https://facebook.com/eatwiseindia" },
+    { name: "Twitter", icon: <Twitter className="h-5 w-5" />, url: "https://twitter.com/eatwiseindia" },
+    { name: "Instagram", icon: <Instagram className="h-5 w-5" />, url: "https://instagram.com/eatwiseindia" },
+    { name: "LinkedIn", icon: <Linkedin className="h-5 w-5" />, url: "https://linkedin.com/company/eatwiseindia" },
+    { name: "YouTube", icon: <Youtube className="h-5 w-5" />, url: "https://youtube.com/c/eatwiseindia" },
   ];
 
   return (
@@ -39,21 +41,31 @@ export function Footer() {
             <h3 className="text-lg font-semibold mb-2 font-headline text-primary">Connect With Us</h3>
             <div className="flex space-x-3">
               {socialLinks.map((social) => (
-                <Button
-                  key={social.name}
-                  variant="outline"
-                  size="icon"
-                  asChild
-                  className="rounded-full hover:bg-primary/10 hover:border-primary group transition-all duration-300 ease-in-out hover:scale-110"
-                  title={social.name}
-                >
-                  <Link href={social.url} target="_blank" rel="noopener noreferrer">
-                    {React.cloneElement(social.icon, { className: "h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" })}
-                  </Link>
-                </Button>
+                <TooltipProvider key={social.name}>
+                  <Tooltip delayDuration={0}>
+                    <TooltipTrigger asChild>
+                      <div className="cursor-not-allowed inline-block">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="rounded-full hover:bg-transparent group transition-all duration-300 ease-in-out opacity-70 cursor-not-allowed"
+                          title={social.name}
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          <span className="pointer-events-none">
+                            {React.cloneElement(social.icon, { className: "h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" })}
+                          </span>
+                        </Button>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Coming Soon</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               ))}
             </div>
-             <p className="text-xs text-muted-foreground mt-4">
+            <p className="text-xs text-muted-foreground mt-4">
               Follow us on social media for tips, updates, and community discussions.
             </p>
           </div>

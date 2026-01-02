@@ -11,6 +11,7 @@ import { BottomNavbar } from '@/components/layout/bottom-navbar';
 import { AuthProvider } from '@/components/common/AuthManager';
 import Script from 'next/script';
 import type { Organization, WebSite } from 'schema-dts';
+import { LeafCursor } from '@/components/ui/leaf-cursor';
 
 const fontPoppins = Poppins({
   subsets: ['latin'],
@@ -121,9 +122,9 @@ export default function RootLayout({
         />
       </head>
       <body className={cn(
-          "min-h-screen bg-background font-body antialiased flex flex-col pb-24 md:pb-0",
-          fontPoppins.variable,
-          fontInter.variable
+        "min-h-screen bg-background font-body antialiased flex flex-col pb-24 md:pb-0",
+        fontPoppins.variable,
+        fontInter.variable
       )}>
         <svg display="none" style={{ position: 'absolute', width: 0, height: 0 }}>
           <symbol id="light" viewBox="0 0 24 24">
@@ -162,6 +163,7 @@ export default function RootLayout({
           }}
         />
         <CustomThemeProvider>
+          <LeafCursor />
           <AuthProvider>
             <Header />
             <main className="flex-grow">

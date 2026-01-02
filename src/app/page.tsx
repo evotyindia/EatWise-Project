@@ -1,15 +1,17 @@
 
 import Link from 'next/link';
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import { ScanLine, MessageCircle, CookingPot, BarChart3, Users, Lightbulb, User, UploadCloud, Cpu, ClipboardCheck, ArrowRight, Leaf, ShieldCheck, Smile, Target, Utensils, BookOpen } from "lucide-react";
-import type { WebApplication } from 'schema-dts';
+import type { WebApplication, WithContext } from 'schema-dts';
 import Script from 'next/script';
-import { blogPosts } from "@/lib/blog-data";
+import LatestBlogs from "@/components/home/latest-blogs";
+
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
-const WebAppStructuredData: WebApplication = {
+const WebAppStructuredData: WithContext<WebApplication> = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   name: "EatWise India",
@@ -22,7 +24,7 @@ const WebAppStructuredData: WebApplication = {
     price: "0",
     priceCurrency: "INR"
   },
-  publisher: { 
+  publisher: {
     "@type": "Organization",
     name: "EatWise India",
     logo: {
@@ -54,7 +56,7 @@ export default function Home() {
       description: "Input nutrition values to get a detailed AI analysis of the food's balance, nutrient density, and dietary suitability.",
       link: "/nutrition-check",
     },
-     {
+    {
       icon: <MessageCircle className="h-10 w-10 text-accent" />,
       title: "Contextual AI Chat",
       description: "After analyzing a product or recipe, ask specific questions and get personalized advice from our AI nutrition assistant.",
@@ -98,17 +100,17 @@ export default function Home() {
   const testimonials = [
     {
       quote: "This app has changed how my family eats! Understanding labels is so much easier now, and the Indian alternatives are fantastic.",
-      name: "Priya S.",
-      location: "Mumbai, MH",
+      name: "Aryan Y.",
+      location: "Delhi, DLI",
     },
     {
       quote: "As a busy professional, planning healthy meals was tough. The recipe suggestions based on my ingredients are a lifesaver!",
-      name: "Rahul K.",
-      location: "Bengaluru, KA",
+      name: "Jeevandeep s.",
+      location: "Gurgaon, GGN",
     },
     {
       quote: "I finally understand what's in packaged foods. The AI chat helps clarify any doubts I have. Highly recommended!",
-      name: "Aisha B.",
+      name: "Tarushi",
       location: "Delhi, DL",
     }
   ];
@@ -131,17 +133,17 @@ export default function Home() {
     }
   ];
 
-  const latestPosts = blogPosts.slice(0, 3);
+
 
   return (
     <div className="flex flex-col min-h-screen">
-       <Script
+      <Script
         id="webapplication-structured-data"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(WebAppStructuredData) }}
       />
       <section className="hero-section w-full">
-        <div className="relative z-10 container px-4 md:px-6 text-center animate-fade-in-up opacity-0 backdrop-blur-md py-24 md:py-32 lg:py-40" style={{animationFillMode: 'forwards'}}>
+        <div className="relative z-10 container px-4 md:px-6 text-center animate-fade-in-up opacity-0 backdrop-blur-md py-24 md:py-32 lg:py-40" style={{ animationFillMode: 'forwards' }}>
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-foreground">
             Welcome to <span className="text-primary">EatWise</span><span className="text-accent"> India</span>
           </h1>
@@ -163,7 +165,7 @@ export default function Home() {
       </section>
 
       <section id="features" aria-labelledby="features-heading" className="w-full py-12 md:py-24 lg:py-32">
-        <div className="container px-4 md:px-6 animate-fade-in-up opacity-0" style={{animationDelay: '0.2s', animationFillMode: 'forwards'}}>
+        <div className="container px-4 md:px-6 animate-fade-in-up opacity-0" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
           <div className="text-center mb-12">
             <Lightbulb className="mx-auto h-12 w-12 text-accent mb-4" />
             <h2 id="features-heading" className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
@@ -196,15 +198,15 @@ export default function Home() {
 
       <section id="our-mission" aria-labelledby="mission-heading" className="w-full py-12 md:py-24 lg:py-32 bg-muted/20">
         <div className="container px-4 md:px-6">
-            <div className="grid items-center gap-8">
-                <div className="space-y-4 animate-in fade-in duration-500 ease-out text-center">
-                    <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">Our Mission</div>
-                    <h2 id="mission-heading" className="text-3xl font-bold tracking-tighter sm:text-4xl">Empowering Healthier Choices, Together</h2>
-                    <p className="max-w-[700px] text-muted-foreground md:text-lg/relaxed mx-auto">
-                        At EatWise India, our mission is to bridge the gap between complex nutritional science and everyday food choices. We believe that everyone deserves to understand what's in their food. By harnessing the power of AI, we provide clear, culturally relevant, and actionable insights, helping you navigate your health journey with confidence and ease.
-                    </p>
-                </div>
+          <div className="grid items-center gap-8">
+            <div className="space-y-4 animate-in fade-in duration-500 ease-out text-center">
+              <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">Our Mission</div>
+              <h2 id="mission-heading" className="text-3xl font-bold tracking-tighter sm:text-4xl">Empowering Healthier Choices, Together</h2>
+              <p className="max-w-[700px] text-muted-foreground md:text-lg/relaxed mx-auto">
+                At EatWise India, our mission is to bridge the gap between complex nutritional science and everyday food choices. We believe that everyone deserves to understand what's in their food. By harnessing the power of AI, we provide clear, culturally relevant, and actionable insights, helping you navigate your health journey with confidence and ease.
+              </p>
             </div>
+          </div>
         </div>
       </section>
 
@@ -234,7 +236,7 @@ export default function Home() {
       </section>
 
       <section id="how-it-works" aria-labelledby="how-it-works-heading" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/50">
-        <div className="container px-4 md:px-6 animate-fade-in-up opacity-0" style={{animationDelay: '0.4s', animationFillMode: 'forwards'}}>
+        <div className="container px-4 md:px-6 animate-fade-in-up opacity-0" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>
           <div className="text-center mb-12">
             <h2 id="how-it-works-heading" className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               How It Works
@@ -260,7 +262,7 @@ export default function Home() {
       </section>
 
       <section id="testimonials" aria-labelledby="testimonials-heading" className="w-full py-12 md:py-24 lg:py-32">
-        <div className="container px-4 md:px-6 animate-fade-in-up opacity-0" style={{animationDelay: '0.6s', animationFillMode: 'forwards'}}>
+        <div className="container px-4 md:px-6 animate-fade-in-up opacity-0" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
           <div className="text-center mb-12">
             <Users className="mx-auto h-12 w-12 text-accent mb-4" />
             <h2 id="testimonials-heading" className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
@@ -276,7 +278,7 @@ export default function Home() {
                   </blockquote>
                 </CardContent>
                 <CardFooter className="flex items-center gap-4 pt-0 pb-6 px-6">
-                   <div className="flex items-center justify-center w-12 h-12 rounded-full bg-muted text-muted-foreground">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-muted text-muted-foreground">
                     <User className="w-6 h-6" />
                   </div>
                   <div>
@@ -290,49 +292,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="from-the-blog" aria-labelledby="blog-heading" className="w-full py-12 md:py-24 lg:py-32 bg-muted/20">
-        <div className="container px-4 md:px-6">
-            <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-8 duration-500 ease-out">
-                <BookOpen className="mx-auto h-12 w-12 text-accent mb-4" />
-                <h2 id="blog-heading" className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                    From Our Blog
-                </h2>
-                <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl mt-4">
-                    Get the latest insights on nutrition, healthy recipes, and wellness tips.
-                </p>
-            </div>
-            <div className="grid gap-8 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-12 duration-500 ease-out">
-                {latestPosts.map((post) => (
-                    <Card key={post.slug} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                        <CardContent className="p-6 flex-grow">
-                            <p className="text-sm text-accent font-medium mb-1">{post.category}</p>
-                            <Link href={`/blogs/${post.slug}`}>
-                                <CardTitle className="text-xl font-semibold hover:text-primary transition-colors line-clamp-2">
-                                    {post.title}
-                                </CardTitle>
-                            </Link>
-                            <CardDescription className="mt-2 text-sm line-clamp-3">{post.preview}</CardDescription>
-                        </CardContent>
-                        <CardFooter className="p-6 pt-0">
-                            <Button variant="link" asChild className="px-0 text-primary group transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
-                                <Link href={`/blogs/${post.slug}`}>
-                                    Read More <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                                </Link>
-                            </Button>
-                        </CardFooter>
-                    </Card>
-                ))}
-            </div>
-            <div className="mt-12 text-center animate-in fade-in slide-in-from-bottom-16 duration-500 ease-out">
-                <Button asChild size="lg" variant="outline" className="transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
-                    <Link href="/blogs">View All Articles</Link>
-                </Button>
-            </div>
-        </div>
-      </section>
+      <LatestBlogs />
 
       <section id="call-to-action" aria-labelledby="cta-heading" className="w-full py-16 md:py-24 bg-primary text-primary-foreground">
-        <div className="container px-4 md:px-6 text-center animate-fade-in-up opacity-0" style={{animationDelay: '0.8s', animationFillMode: 'forwards'}}>
+        <div className="container px-4 md:px-6 text-center animate-fade-in-up opacity-0" style={{ animationDelay: '0.8s', animationFillMode: 'forwards' }}>
           <h2 id="cta-heading" className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-6">
             Ready to Make Healthier Choices?
           </h2>

@@ -8,8 +8,8 @@
  * - GenerateHealthReportOutput - The return type for the generateHealthReport function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 const GenerateHealthReportInputSchema = z.object({
   ingredients: z
@@ -27,10 +27,7 @@ const GenerateHealthReportInputSchema = z.object({
 });
 export type GenerateHealthReportInput = z.infer<typeof GenerateHealthReportInputSchema>;
 
-const RatingObjectSchema = z.object({
-  rating: z.number().min(1).max(5).describe('The numerical rating from 1 to 5 stars.'),
-  justification: z.string().describe('A short justification for the rating.'),
-});
+
 
 const IngredientDeepDiveItemSchema = z.object({
   ingredientName: z.string().describe("The name of the ingredient."),
@@ -49,25 +46,34 @@ const GenerateHealthReportOutputSchema = z.object({
 
   greenFlags: z.string().describe("A detailed bullet-point list of all significant positive aspects, with a brief explanation for each. Be specific and encouraging. If none, state 'No significant positive aspects were identified.'"),
   redFlags: z.string().describe("A detailed bullet-point list of all significant health concerns. Explain why each is a concern in simple terms. If none, state 'No significant health concerns were identified.'"),
-  
+
   detailedAnalysis: z.object({
     processingLevel: z.string().describe("Assessment of the food's processing level (e.g., 'Unprocessed', 'Minimally Processed', 'Ultra-Processed') and a detailed but simple explanation of why, referencing the ingredients if possible."),
     macronutrientProfile: z.string().describe("Detailed analysis of the balance and quality of protein, carbs, and fats (e.g., source of protein, refined vs complex carbs). Explain the implications for energy and satiety."),
     micronutrientHighlights: z.string().describe("Detailed bullet-point comments on noteworthy vitamins or minerals, explaining their benefits. If none, state 'No significant micronutrients to highlight.'"),
     sugarAnalysis: z.string().describe("A very specific and detailed analysis of the sugar content, distinguishing between natural and added sugars if possible. Comment on its level relative to daily recommendations."),
   }).describe("A deeper dive into specific nutritional components."),
-  
+
   bestSuitedFor: z.string().describe("Provides specific recommendations for consumer types or occasions for this product (e.g., 'Best as an occasional treat for children', 'Not recommended for individuals with diabetes due to high sugar content.')."),
   consumptionTips: z.string().describe("Actionable bullet-point tips for healthier consumption. E.g., '* Pair with a source of protein like yogurt to balance the meal.', '* Limit portion size to two biscuits.'. If none, state 'No specific consumption tips.'"),
   indianDietContext: z.string().describe("A detailed explanation of how this product fits into a typical balanced Indian diet. E.g., 'This can be a convenient alternative to a traditional fried snack like samosa, but it lacks the fiber and nutrients of a meal like dal-roti and should not replace it.'"),
-  
+
   healthierAlternatives: z.string().describe('A detailed bullet-point list of 2-3 healthier Indian alternatives, with clear reasons why they are better options.'),
   ingredientDeepDive: z.array(IngredientDeepDiveItemSchema).describe("An extremely detailed analysis of the top 5-7 most impactful ingredients, both good and bad. Provide a clear description, risk level, and justification for each."),
 
   productType: z.string().describe('The product type (e.g., Snack, Beverage, Ready-to-eat meal).'),
-  processingLevelRating: RatingObjectSchema.describe('Rating (1-5) and justification for food processing level (1=unprocessed, 5=ultra-processed).'),
-  sugarContentRating: RatingObjectSchema.describe('Rating (1-5) and justification for sugar content (1=low, 5=high).'),
-  nutrientDensityRating: RatingObjectSchema.describe('Rating (1-5) and justification for nutrient density (1=low, 5=high).')
+  processingLevelRating: z.object({
+    rating: z.number().min(1).max(5).describe('The numerical rating from 1 to 5 stars.'),
+    justification: z.string().describe('A short justification for the rating.'),
+  }).describe('Rating (1-5) and justification for food processing level (1=unprocessed, 5=ultra-processed).'),
+  sugarContentRating: z.object({
+    rating: z.number().min(1).max(5).describe('The numerical rating from 1 to 5 stars.'),
+    justification: z.string().describe('A short justification for the rating.'),
+  }).describe('Rating (1-5) and justification for sugar content (1=low, 5=high).'),
+  nutrientDensityRating: z.object({
+    rating: z.number().min(1).max(5).describe('The numerical rating from 1 to 5 stars.'),
+    justification: z.string().describe('A short justification for the rating.'),
+  }).describe('Rating (1-5) and justification for nutrient density (1=low, 5=high).')
 });
 export type GenerateHealthReportOutput = z.infer<typeof GenerateHealthReportOutputSchema>;
 
@@ -79,7 +85,7 @@ export async function generateHealthReport(
 
 const prompt = ai.definePrompt({
   name: 'generateHealthReportPrompt',
-  input: {schema: GenerateHealthReportInputSchema},
+  input: { schema: GenerateHealthReportInputSchema },
   output: {
     schema: GenerateHealthReportOutputSchema,
     format: 'json',
@@ -138,21 +144,21 @@ const generateHealthReportFlow = ai.defineFlow(
   },
   async (input) => {
     try {
-      const {output} = await prompt(input);
+      const { output } = await prompt(input);
       if (!output) {
         throw new Error("The AI returned an empty or invalid report. Please try again.");
       }
       return output;
     } catch (error: any) {
-        console.error(`An error occurred in generateHealthReportFlow:`, error);
-        const errorMessage = error.message || 'An unexpected error occurred.';
-        if (errorMessage.toLowerCase().includes('api key')) {
-            throw new Error('The AI service is not configured. This is likely because the GOOGLE_API_KEY is missing from your .env file.');
-        }
-        if (errorMessage.toLowerCase().includes('safety')) {
-            throw new Error('The AI response was blocked due to safety settings. Please modify your input and try again.');
-        }
-        throw new Error(errorMessage);
+      console.error(`An error occurred in generateHealthReportFlow:`, error);
+      const errorMessage = error.message || 'An unexpected error occurred.';
+      if (errorMessage.toLowerCase().includes('api key')) {
+        throw new Error('The AI service is not configured. This is likely because the GOOGLE_API_KEY is missing from your .env file.');
+      }
+      if (errorMessage.toLowerCase().includes('safety')) {
+        throw new Error('The AI response was blocked due to safety settings. Please modify your input and try again.');
+      }
+      throw new Error(errorMessage);
     }
   }
 );

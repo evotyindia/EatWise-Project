@@ -164,3 +164,48 @@
     opacity: 1;
   }
 }
+
+/* Blog Content Styling Overrides */
+.prose img {
+  @apply rounded-lg shadow-md mx-auto my-6 max-w-full h-auto;
+}
+
+.prose iframe {
+  @apply rounded-lg shadow-md mx-auto my-6 w-full aspect-video;
+}
+
+.prose a {
+  @apply text-accent hover:text-accent/80 no-underline hover:underline transition-colors;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-accent pl-4 italic text-muted-foreground my-6;
+}
+
+.prose ul {
+  @apply list-disc pl-6 my-4 space-y-2;
+}
+
+.prose ol {
+  @apply list-decimal pl-6 my-4 space-y-2;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  @apply text-foreground font-headline font-bold mt-8 mb-4;
+}
+
+.prose p {
+  @apply mb-4 leading-relaxed;
+}
+
+/* Fix for Quill alignment classes if they exist */
+.ql-align-center {
+  text-align: center;
+}
+.ql-align-right {
+  text-align: right;
+}
+.ql-align-justify {
+  text-align: justify;
+}
+
