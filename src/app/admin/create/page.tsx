@@ -9,8 +9,18 @@ import { Textarea } from "@/components/ui/textarea"; // Keep for excerpt
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ArrowLeft, Loader2, Save, Upload, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Loader2, Save, Upload, Image as ImageIcon, Sparkles, Wand2, Copy, Check } from "lucide-react";
 import Link from "next/link";
+import { generateBlogAction } from "@/app/actions/generate-blog";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 // import { storage } from "@/lib/firebase";
 // import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import dynamic from 'next/dynamic';
@@ -140,6 +150,53 @@ export default function CreateBlogPage() {
         ],
     }), []);
 
+    // AI Generation State
+    const [isAiDialogOpen, setIsAiDialogOpen] = useState(false);
+    const [aiLink, setAiLink] = useState(""); // Not used, maybe topic
+    const [aiTopic, setAiTopic] = useState("");
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [generatedImagePrompt, setGeneratedImagePrompt] = useState("");
+    const [hasCopiedPrompt, setHasCopiedPrompt] = useState(false);
+
+    const handleGenerateContent = async () => {
+        if (!aiTopic.trim()) return;
+        setIsGenerating(true);
+        try {
+            const result = await generateBlogAction(aiTopic);
+            if (result.success && result.data) {
+                const data = result.data;
+                setFormData(prev => ({
+                    ...prev,
+                    title: data.title,
+                    slug: data.slug,
+                    excerpt: data.excerpt,
+                    content: data.content,
+                    category: data.category,
+                    readTime: data.readTime,
+                    tags: data.tags.join(", "),
+                }));
+                setGeneratedImagePrompt(data.imagePrompt);
+                setIsAiDialogOpen(false);
+                setAiTopic("");
+                alert("AI Content Generated! Review the fields and generate your image using the prompt provided.");
+            } else {
+                alert("Failed to generate content: " + result.error);
+            }
+        } catch (error) {
+            console.error("AI Gen Error:", error);
+            alert("An unknown error occurred.");
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+    const copyImagePrompt = () => {
+        if (!generatedImagePrompt) return;
+        navigator.clipboard.writeText(generatedImagePrompt);
+        setHasCopiedPrompt(true);
+        setTimeout(() => setHasCopiedPrompt(false), 2000);
+    };
+
     // Helper to trigger file input click
     const triggerFileInput = () => {
         fileInputRef.current?.click();
@@ -154,15 +211,66 @@ export default function CreateBlogPage() {
                 onCropComplete={handleCropComplete}
             />
 
-            <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" asChild>
-                    <Link href="/admin"><ArrowLeft className="h-4 w-4" /></Link>
-                </Button>
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Create New Post</h1>
-                    <p className="text-muted-foreground">Draft and publish a new article.</p>
+            <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <Button variant="ghost" size="icon" asChild>
+                        <Link href="/admin"><ArrowLeft className="h-4 w-4" /></Link>
+                    </Button>
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">Create New Post</h1>
+                        <p className="text-muted-foreground">Draft and publish a new article.</p>
+                    </div>
                 </div>
+
+                <Dialog open={isAiDialogOpen} onOpenChange={setIsAiDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                            <Sparkles className="mr-2 h-4 w-4" /> Generate with AI
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>AI Blog Generator</DialogTitle>
+                            <DialogDescription>
+                                Enter a topic, and our AI will write the full article, metadata, and provide an image generation prompt for you.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="py-4 space-y-4">
+                            <div className="space-y-2">
+                                <Label>Blog Topic</Label>
+                                <Input
+                                    placeholder="e.g. Benefits of Turmeric Milk at night"
+                                    value={aiTopic}
+                                    onChange={(e) => setAiTopic(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setIsAiDialogOpen(false)}>Cancel</Button>
+                            <Button onClick={handleGenerateContent} disabled={!aiTopic.trim() || isGenerating}>
+                                {isGenerating ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Writing...</> : <><Wand2 className="mr-2 h-4 w-4" /> Generate</>}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
+
+            {/* AI Image Prompt Display Area */}
+            {generatedImagePrompt && (
+                <div className="bg-muted/50 border border-purple-200 rounded-lg p-4 animate-in fade-in slide-in-from-top-4">
+                    <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-sm font-semibold flex items-center text-purple-700">
+                            <ImageIcon className="mr-2 h-4 w-4" /> AI Image Prompt (For Midjourney/DALL-E)
+                        </h3>
+                        <Button variant="outline" size="sm" onClick={copyImagePrompt}>
+                            {hasCopiedPrompt ? <><Check className="mr-2 h-3 w-3" /> Copied</> : <><Copy className="mr-2 h-3 w-3" /> Copy Prompt</>}
+                        </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground bg-background p-3 rounded border font-mono whitespace-pre-wrap break-words">
+                        {generatedImagePrompt}
+                    </p>
+                </div>
+            )}
 
             <div className="grid gap-6 md:grid-cols-[2fr,1fr]">
                 <div className="space-y-6">
