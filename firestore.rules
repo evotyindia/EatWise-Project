@@ -12,9 +12,9 @@ service cloud.firestore {
       return isOwner(uid) && request.auth.token.email_verified == true;
     }
     
-    // REPLACE 'YOUR_ADMIN_UID_HERE' WITH YOUR ACTUAL UID AFTER SIGNING UP
+    // Check for specific admin email for security
     function isAdmin() {
-       return request.auth.uid == "43kKa0OSNySADEVcIKWucnAiHPo1"; 
+       return request.auth.token.email == "aryan@evotyindia.me";
     }
 
     // --- NEW: Blog Posts Collection ---

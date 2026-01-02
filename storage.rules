@@ -2,9 +2,9 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     
-    // Your Admin UID
+    // Check for specific admin email
     function isAdmin() {
-       return request.auth.uid == "43kKa0OSNySADEVcIKWucnAiHPo1"; 
+       return request.auth.token.email == "aryan@evotyindia.me";
     }
 
     match /blog-images/{allPaths=**} {

@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { BottomNavbar } from '@/components/layout/bottom-navbar';
 import { AuthProvider } from '@/components/common/AuthManager';
 import Script from 'next/script';
-import type { Organization, WebSite } from 'schema-dts';
+import type { Organization, WebSite, WithContext, SearchAction } from 'schema-dts';
 import { LeafCursor } from '@/components/ui/leaf-cursor';
 
 const fontPoppins = Poppins({
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
   },
 };
 
-const organizationSchema: Organization = {
+const organizationSchema: WithContext<Organization> = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "EatWise India",
@@ -85,7 +85,7 @@ const organizationSchema: Organization = {
   ],
 };
 
-const websiteSchema: WebSite = {
+const websiteSchema: WithContext<WebSite> = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "EatWise India",
@@ -97,7 +97,7 @@ const websiteSchema: WebSite = {
       "urlTemplate": `${BASE_URL}/saved?q={search_term_string}`,
     },
     "query-input": "required name=search_term_string",
-  },
+  } as SearchAction & { "query-input": string },
 };
 
 interface RootLayoutProps {

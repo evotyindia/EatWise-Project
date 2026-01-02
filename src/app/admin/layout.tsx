@@ -32,9 +32,21 @@ export default function AdminLayout({
         // If not logged in and not on login page, redirect to login
         if (!user && pathname !== "/admin/login") {
             router.push("/admin/login");
+            return;
         }
 
-        // If logged in and on login page, redirect to dashboard
+        // Check if user is allowed
+        const allowedEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "").split(",").map(e => e.trim());
+        if (user && !allowedEmails.includes(user.email || "")) {
+            // Unauthorized
+            console.warn(`Unauthorized access attempt by: ${user.email}`);
+            auth.signOut();
+            alert("Access Denied: You are not authorized to view the Admin Panel.");
+            router.push("/");
+            return;
+        }
+
+        // If logged in (and authorized) and on login page, redirect to dashboard
         if (user && pathname === "/admin/login") {
             router.push("/admin");
         }
