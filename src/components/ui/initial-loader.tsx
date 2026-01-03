@@ -62,11 +62,20 @@ export function InitialLoader() {
             delay: Math.random() * 2
         })));
 
-        const timer = setTimeout(() => {
-            setShow(false);
-        }, 5000); // 5 seconds for full effect
+        // Logic: Minimum 3 seconds OR Window Load, whichever is later.
+        const minDurationPromise = new Promise((resolve) => setTimeout(resolve, 3000));
 
-        return () => clearTimeout(timer);
+        const loadPromise = new Promise((resolve) => {
+            if (document.readyState === "complete") {
+                resolve(true);
+            } else {
+                window.addEventListener("load", () => resolve(true));
+            }
+        });
+
+        Promise.all([minDurationPromise, loadPromise]).then(() => {
+            setShow(false);
+        });
     }, []);
 
     return (
