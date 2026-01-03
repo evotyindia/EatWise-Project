@@ -2,16 +2,15 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { CustomThemeProvider } from '@/contexts/theme-context';
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
 import { Toaster } from "@/components/ui/toaster";
 import { Poppins, Inter } from 'next/font/google';
 import { cn } from '@/lib/utils';
-import { BottomNavbar } from '@/components/layout/bottom-navbar';
 import { AuthProvider } from '@/components/common/AuthManager';
+import { AppShell } from '@/components/layout/app-shell';
 import Script from 'next/script';
 import type { Organization, WebSite, WithContext, SearchAction } from 'schema-dts';
 import { LeafCursor } from '@/components/ui/leaf-cursor';
+import { InitialLoader } from '@/components/ui/initial-loader';
 
 const fontPoppins = Poppins({
   subsets: ['latin'],
@@ -163,15 +162,13 @@ export default function RootLayout({
           }}
         />
         <CustomThemeProvider>
+          <InitialLoader />
           <LeafCursor />
           <AuthProvider>
-            <Header />
-            <main className="flex-grow">
+            <AppShell>
               {children}
-            </main>
-            <Footer />
+            </AppShell>
             <Toaster />
-            <BottomNavbar />
           </AuthProvider>
         </CustomThemeProvider>
       </body>

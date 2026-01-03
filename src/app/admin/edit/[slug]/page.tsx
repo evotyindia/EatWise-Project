@@ -8,11 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Loader2, Save, Upload, Trash2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Loader2, Save, Upload, Trash2, Eye, CalendarDays, Tag } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-// import { storage } from "@/lib/firebase";
-// import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import dynamic from 'next/dynamic';
 import ImageCropper from "@/components/admin/image-cropper";
 
@@ -44,7 +45,10 @@ export default function EditBlogPage() {
         category: "Nutrition",
         readTime: "5 min read",
         author: "EatWise Team",
-        tags: ""
+        tags: "",
+        metaTitle: "",
+        metaDescription: "",
+        canonicalUrl: ""
     });
 
     useEffect(() => {
@@ -63,7 +67,10 @@ export default function EditBlogPage() {
                         category: post.category,
                         readTime: post.readTime,
                         author: post.author,
-                        tags: post.tags.join(', ')
+                        tags: post.tags.join(', '),
+                        metaTitle: post.metaTitle || "",
+                        metaDescription: post.metaDescription || "",
+                        canonicalUrl: post.canonicalUrl || ""
                     });
                 } else {
                     alert("Post not found");
@@ -166,7 +173,8 @@ export default function EditBlogPage() {
 
             alert("Blog post updated successfully!");
             router.refresh();
-            router.push("/admin");
+            // router.push("/admin"); // Optional: stay on page to keep editing
+            setSaving(false);
         } catch (error) {
             console.error("Failed to update:", error);
             alert("Failed to update blog post.");
@@ -181,6 +189,7 @@ export default function EditBlogPage() {
             [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
             ['link', 'image'],
             ['clean']
+            // Advanced Video/HTML embeds would require custom handlers
         ],
     }), []);
 
@@ -217,78 +226,185 @@ export default function EditBlogPage() {
                         <p className="text-muted-foreground">Editing: {formData.title}</p>
                     </div>
                 </div>
-                <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleting}>
-                    {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Trash2 className="h-4 w-4 mr-2" /> Delete Post</>}
-                </Button>
+                <div className="flex gap-2">
+                    <Link href={`/blogs/${formData.slug}`} target="_blank">
+                        <Button variant="outline" size="sm">
+                            <Eye className="h-4 w-4 mr-2" /> Live View
+                        </Button>
+                    </Link>
+                    <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleting}>
+                        {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Trash2 className="h-4 w-4 mr-2" /> Delete Post</>}
+                    </Button>
+                    <Button onClick={handleSubmit} size="sm" disabled={saving || uploading}>
+                        {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : <><Save className="mr-2 h-4 w-4" /> Update Post</>}
+                    </Button>
+                </div>
             </div>
 
             <div className="grid gap-6 md:grid-cols-[2fr,1fr]">
                 <div className="space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Content</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="title">Post Title</Label>
-                                <Input
-                                    id="title"
-                                    value={formData.title}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="slug">Slug (URL)</Label>
-                                <Input
-                                    id="slug"
-                                    value={formData.slug}
-                                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                                    required
-                                />
-                                <p className="text-xs text-muted-foreground">URL: /blogs/{formData.slug}</p>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="excerpt">Excerpt</Label>
-                                <Textarea
-                                    id="excerpt"
-                                    className="h-20"
-                                    value={formData.excerpt}
-                                    onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="content">Full Content</Label>
-                                <div className="min-h-[400px] mb-12">
-                                    <ReactQuill
-                                        theme="snow"
-                                        value={formData.content}
-                                        onChange={(content: string) => setFormData(prev => ({ ...prev, content }))}
-                                        modules={modules}
-                                        className="h-[350px]"
-                                    />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <Tabs defaultValue="content" className="w-full">
+                        <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="content">Content</TabsTrigger>
+                            <TabsTrigger value="seo">SEO & Metadata</TabsTrigger>
+                            <TabsTrigger value="preview">Preview</TabsTrigger>
+                        </TabsList>
+
+                        <TabsContent value="content" className="space-y-6 pt-4">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Main Content</CardTitle>
+                                    <CardDescription>Write your blog post content here.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="title">Post Title</Label>
+                                        <Input
+                                            id="title"
+                                            value={formData.title}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="slug">Slug (URL)</Label>
+                                        <Input
+                                            id="slug"
+                                            value={formData.slug}
+                                            onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                                            required
+                                        />
+                                        <p className="text-xs text-muted-foreground">URL: /blogs/{formData.slug}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="excerpt">Excerpt / Summary</Label>
+                                        <Textarea
+                                            id="excerpt"
+                                            className="h-20"
+                                            value={formData.excerpt}
+                                            onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="content">Full Body</Label>
+                                        <div className="min-h-[500px] mb-12">
+                                            <ReactQuill
+                                                theme="snow"
+                                                value={formData.content}
+                                                onChange={(content: string) => setFormData(prev => ({ ...prev, content }))}
+                                                modules={modules}
+                                                className="h-[450px]"
+                                            />
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        <TabsContent value="seo" className="space-y-6 pt-4">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>SEO Optimization</CardTitle>
+                                    <CardDescription>Configure how this post appears in search results.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="metaTitle">Meta Title (Optional)</Label>
+                                        <Input
+                                            id="metaTitle"
+                                            placeholder="Defaults to Post Title"
+                                            value={formData.metaTitle}
+                                            onChange={(e) => setFormData({ ...formData, metaTitle: e.target.value })}
+                                        />
+                                        <p className="text-xs text-muted-foreground">Recommend 50-60 characters.</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="metaDescription">Meta Description (Optional)</Label>
+                                        <Textarea
+                                            id="metaDescription"
+                                            placeholder="Defaults to Excerpt"
+                                            value={formData.metaDescription}
+                                            onChange={(e) => setFormData({ ...formData, metaDescription: e.target.value })}
+                                            className="h-24"
+                                        />
+                                        <p className="text-xs text-muted-foreground">Recommend 150-160 characters.</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="canonicalUrl">Canonical URL (Optional)</Label>
+                                        <Input
+                                            id="canonicalUrl"
+                                            placeholder="https://..."
+                                            value={formData.canonicalUrl}
+                                            onChange={(e) => setFormData({ ...formData, canonicalUrl: e.target.value })}
+                                        />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        <TabsContent value="preview" className="pt-4">
+                            <Card className="bg-background border shadow-sm">
+                                <CardContent className="p-0">
+                                    {/* Simulated Blog Post Container - Adjusted padding to match live site exactly */}
+                                    <div className="mx-auto max-w-3xl py-8 px-4 md:px-6">
+                                        <div className="mb-8">
+                                            {/* Header Mockup */}
+                                            <Button variant="outline" size="sm" className="mb-6 pointer-events-none opacity-50">
+                                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                                Back to Blogs
+                                            </Button>
+
+                                            <h1 className="text-4xl font-bold tracking-tight mb-3">{formData.title || "Untitled Post"}</h1>
+
+                                            <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-4">
+                                                <div className="flex items-center">
+                                                    <CalendarDays className="mr-1.5 h-4 w-4" />
+                                                    <span>{new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                                                </div>
+                                                <div className="flex items-center">
+                                                    <Tag className="mr-1.5 h-4 w-4" />
+                                                    <Badge variant="secondary">{formData.category}</Badge>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <Separator className="my-8" />
+
+                                        {formData.coverImage && (
+                                            <div className="mb-8 relative w-full h-[400px] rounded-lg overflow-hidden shadow-md">
+                                                {/* Use img for preview to avoid Next/Image config issues with blob/base64 */}
+                                                <img
+                                                    src={formData.coverImage}
+                                                    alt="Cover Preview"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                        )}
+
+                                        <div
+                                            className="prose prose-lg dark:prose-invert max-w-none break-words overflow-hidden"
+                                            dangerouslySetInnerHTML={{ __html: formData.content || "<p>Start writing...</p>" }}
+                                        />
+
+                                        <Separator className="my-12" />
+
+                                        <div className="text-center">
+                                            <Button className="pointer-events-none">
+                                                Analyze Your Food Label Now
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                    </Tabs>
                 </div>
 
                 <div className="space-y-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Publishing</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <Button onClick={handleSubmit} className="w-full" disabled={saving || uploading}>
-                                {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : <><Save className="mr-2 h-4 w-4" /> Update Post</>}
-                            </Button>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Details</CardTitle>
+                            <CardTitle>Post Details</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">

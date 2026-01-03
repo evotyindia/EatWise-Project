@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { UserPlus, LoaderCircle, Eye, EyeOff } from "lucide-react";
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { createUserInFirestore } from "@/services/userService";
@@ -62,9 +62,9 @@ function SignupContent() {
       const user = userCredential.user;
 
       await createUserInFirestore(user.uid, values.name, values.email, values.phone);
-      
+
       await sendEmailVerification(user);
-      
+
       if (redirectUrl) {
         localStorage.setItem("loginRedirect", redirectUrl);
       }
@@ -80,7 +80,7 @@ function SignupContent() {
           variant: "destructive",
           action: (
             <Button variant="secondary" size="sm" asChild>
-                <Link href="/login">Log In</Link>
+              <Link href="/login">Log In</Link>
             </Button>
           ),
         });
@@ -108,7 +108,7 @@ function SignupContent() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-               <FormField
+              <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
@@ -210,14 +210,17 @@ function SignupContent() {
               </Button>
             </form>
           </Form>
+
+          {/* Google Sign Up UI removed */}
+
         </CardContent>
-         <CardFooter className="mt-6 text-center text-sm">
-            <p className="mx-auto">
-              Already have an account?{" "}
-              <Link href="/login" className="underline text-primary font-semibold">
-                Log in
-              </Link>
-            </p>
+        <CardFooter className="mt-6 text-center text-sm">
+          <p className="mx-auto">
+            Already have an account?{" "}
+            <Link href="/login" className="underline text-primary font-semibold">
+              Log in
+            </Link>
+          </p>
         </CardFooter>
       </Card>
     </div>
@@ -226,13 +229,13 @@ function SignupContent() {
 
 
 export default function SignupPage() {
-    return (
-        <Suspense fallback={
-            <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
-                <LoaderCircle className="w-12 h-12 animate-spin text-primary" />
-            </div>
-        }>
-            <SignupContent />
-        </Suspense>
-    )
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
+        <LoaderCircle className="w-12 h-12 animate-spin text-primary" />
+      </div>
+    }>
+      <SignupContent />
+    </Suspense>
+  )
 }

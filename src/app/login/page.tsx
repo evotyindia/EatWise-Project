@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { LogIn, Eye, EyeOff } from "lucide-react";
 import { useEffect, Suspense, useState } from "react";
-import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getAndSyncUser, getUserByUsername } from "@/services/userService";
 
@@ -36,12 +36,13 @@ function LoginContent() {
 
   const [redirectUrl, setRedirectUrl] = useState("/");
   const [showPassword, setShowPassword] = useState(false);
-  const isEmail = (str: string) => /\S+@\S+\.\S+/.test(str);
+  const isEmail = (str: string) => /\S+@\S+\.\S/.test(str);
 
   useEffect(() => {
     const searchRedirect = searchParams.get("redirect");
     const localRedirect = localStorage.getItem("loginRedirect");
-    setRedirectUrl(searchRedirect || localRedirect || "/");
+    const finalRedirect = searchRedirect || localRedirect || "/";
+    setRedirectUrl(finalRedirect);
 
     const isVerified = searchParams.get("verified");
     if (isVerified) {
@@ -221,6 +222,8 @@ function LoginContent() {
               </Button>
             </form>
           </Form>
+
+          {/* Spacer replaced or just empty since Google Login is removed */}
         </CardContent>
         <CardFooter className="mt-6 text-center text-sm">
           <p className="mx-auto">

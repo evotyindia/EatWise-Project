@@ -12,13 +12,16 @@ import Script from 'next/script';
 
 export const dynamic = "force-dynamic";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+// ... existing imports ...
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://eatwise.evotyindia.me';
 
 interface BlogPostPageProps {
   params: Promise<{
     slug: string;
   }>;
 }
+
 
 export async function generateMetadata({ params }: BlogPostPageProps) {
   const resolvedParams = await params;
@@ -183,7 +186,16 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         )}
 
         <div
-          className="prose prose-lg dark:prose-invert max-w-none break-words overflow-hidden"
+          className="prose prose-lg dark:prose-invert max-w-none break-words overflow-hidden 
+          prose-headings:font-bold prose-headings:tracking-tight 
+          prose-h1:text-4xl prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-6 
+          prose-h3:text-2xl 
+          prose-p:leading-7 prose-p:text-muted-foreground/90
+          prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-a:font-medium
+          prose-img:rounded-xl prose-img:shadow-lg prose-img:my-10 prose-img:border
+          prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-muted/30 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:my-8 prose-blockquote:rounded-r-lg prose-blockquote:italic
+          prose-ul:my-6 prose-li:my-2
+          "
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 

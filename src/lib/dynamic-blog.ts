@@ -13,6 +13,10 @@ export interface DynamicBlogPost {
     category: string;
     tags: string[];
     readTime: string;
+    // SEO Fields
+    metaTitle?: string;
+    metaDescription?: string;
+    canonicalUrl?: string;
 }
 
 const POSTS_COLLECTION = "posts";

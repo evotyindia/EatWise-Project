@@ -42,14 +42,14 @@ export async function createUserInFirestore(uid: string, name: string, email: st
         });
         return { success: true };
     } catch (error: any) {
-       console.error("Error creating user profile in Firestore: ", error);
-       if (error.code === 'permission-denied') {
+        console.error("Error creating user profile in Firestore: ", error);
+        if (error.code === 'permission-denied') {
             return { success: false, message: "Permission denied. Please check Firestore rules for user creation." };
-       }
-       if (error.code === 'auth/email-already-in-use') {
-           return { success: false, message: "An account with this email already exists." };
-       }
-       return { success: false, message: "Could not create user profile in database." };
+        }
+        if (error.code === 'auth/email-already-in-use') {
+            return { success: false, message: "An account with this email already exists." };
+        }
+        return { success: false, message: "Could not create user profile in database." };
     }
 }
 
@@ -58,18 +58,18 @@ export async function createUserInFirestore(uid: string, name: string, email: st
 export async function getAndSyncUser(uid: string): Promise<User | null> {
     try {
         const userProfile = await getUserByUid(uid);
-    
+
         if (userProfile && !userProfile.emailVerified) {
             try {
                 const userDocRef = doc(db, 'users', userProfile.id);
                 await updateDoc(userDocRef, { emailVerified: true });
-                userProfile.emailVerified = true; 
+                userProfile.emailVerified = true;
             } catch (error) {
                 console.error("Error syncing verification status:", error);
-                 // Don't rethrow, just log. The main goal is to get the user profile.
+                // Don't rethrow, just log. The main goal is to get the user profile.
             }
         }
-        
+
         return userProfile;
     } catch (error: any) {
         if (error.code === 'permission-denied') {
@@ -116,7 +116,7 @@ export async function getUserByUsername(username: string): Promise<User | null> 
 }
 
 // This function securely sets the username using a transaction.
-export async function setUsername(uid: string, userId: string, newUsername: string): Promise<{success: boolean, message?: string}> {
+export async function setUsername(uid: string, userId: string, newUsername: string): Promise<{ success: boolean, message?: string }> {
     const sanitizedUsername = newUsername.toLowerCase();
     const userDocRef = doc(db, "users", userId);
     const usernameDocRef = doc(db, "usernames", sanitizedUsername);
@@ -135,7 +135,7 @@ export async function setUsername(uid: string, userId: string, newUsername: stri
     } catch (error: any) {
         console.error("Error in setUsername transaction:", error);
         if (error.code === 'permission-denied') {
-             return { success: false, message: "Permission denied while setting username. Please check Firestore rules." };
+            return { success: false, message: "Permission denied while setting username. Please check Firestore rules." };
         }
         return { success: false, message: error.message || "Could not set your username due to a server error." };
     }
@@ -149,8 +149,8 @@ export async function updateUser(userId: string, dataToUpdate: Partial<Omit<User
         await updateDoc(userDocRef, dataToUpdate);
     } catch (error: any) {
         if (error.code === 'permission-denied') {
-             console.error("Firestore Permission Denied on updateUser:", error.message);
-             throw new Error("You do not have permission to update this profile.");
+            console.error("Firestore Permission Denied on updateUser:", error.message);
+            throw new Error("You do not have permission to update this profile.");
         }
         console.error("Error updating user details:", error);
         throw new Error("Could not update your profile details.");
@@ -196,10 +196,10 @@ export async function getUserById(userId: string): Promise<User | null> {
             return { id: userDoc.id, ...userDoc.data() } as User;
         }
         return null;
-    } catch(error: any) {
+    } catch (error: any) {
         if (error.code === 'permission-denied') {
-             console.error("Firestore Permission Denied on getUserById:", error.message);
-             throw new Error("You do not have permission to get this user's data.");
+            console.error("Firestore Permission Denied on getUserById:", error.message);
+            throw new Error("You do not have permission to get this user's data.");
         }
         console.error("Error getting user by ID:", error);
         throw new Error("Could not retrieve user by ID.");

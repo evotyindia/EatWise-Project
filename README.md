@@ -40,7 +40,7 @@ A fully featured CMS built into the platform:
 ## 🛠️ Tech Stack
 
 - **Frontend:** Next.js 15 (App Router), React 19, Tailwind CSS, ShadCN UI
-- **AI:** Google Gemini 1.5 Flash, Firebase Genkit
+- **AI:** Google Gemini 2.5 Flash, Firebase Genkit
 - **Backend:** Next.js Server Actions, Firebase Firestore (NoSQL)
 - **Auth:** Firebase Authentication 
 - **Storage:** Cloudflare R2 (S3 Compatible)
