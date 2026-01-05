@@ -6,12 +6,30 @@ import React, { createContext, useContext, useEffect, useState } from "react"
 
 type Theme = "light" | "dark"
 
+declare global {
+  interface Window {
+    Android?: {
+      onThemeChanged: (theme: string) => void
+    }
+  }
+}
+
 interface ThemeContextProps {
   theme: Theme
   setTheme: Dispatch<SetStateAction<Theme>>
 }
 
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined)
+
+function sendThemeToAndroid(theme: string) {
+  console.log("Attempting to send theme to Android: " + theme)
+  if (typeof window !== "undefined" && window.Android && typeof window.Android.onThemeChanged === "function") {
+    window.Android.onThemeChanged(theme)
+    console.log("Successfully called Android.onThemeChanged.")
+  } else {
+    console.error("The Android interface is not available on the window object.")
+  }
+}
 
 export function CustomThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>("dark")
@@ -32,6 +50,7 @@ export function CustomThemeProvider({ children }: { children: ReactNode }) {
       document.documentElement.classList.remove("dark")
     }
     localStorage.setItem("theme", theme)
+    sendThemeToAndroid(theme)
   }, [theme])
 
   return (
