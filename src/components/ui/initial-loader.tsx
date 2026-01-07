@@ -161,7 +161,7 @@ export function InitialLoader() {
                         <div className="text-center space-y-2">
                             <div className="text-5xl md:text-7xl font-bold tracking-tight flex flex-col md:block items-center justify-center leading-tight">
                                 <DecryptText
-                                    text="EAT WISE"
+                                    text="EATWISE"
                                     startDelay={0.5}
                                     className="text-white drop-shadow-2xl mr-0 md:mr-4 inline-block"
                                 />
