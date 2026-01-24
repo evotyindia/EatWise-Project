@@ -11,7 +11,7 @@ EatWise India is an AI-powered nutritional assistant tailored for the Indian mar
 ## 🚀 Key Features
 
 ### 1. 🔍 AI Label Scanner
-Upload a photo of any packaged food label. Our **Gemini 1.5 Flash** powered engine utilizes OCR to read the ingredients and nutrients, helping to:
+Upload a photo of any packaged food label. Our **Gemini 2.5 Flash** powered engine utilizes OCR to read the ingredients and nutrients, helping to:
 - **Decode Additives:** Explain what "E450" or "Maltodextrin" actually does.
 - **Hidden Sugars:** Identify over 50+ aliases for sugar.
 - **Health Score:** Assign a simple RAG (Red-Amber-Green) rating.
